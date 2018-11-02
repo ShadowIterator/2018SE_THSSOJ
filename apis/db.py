@@ -1,7 +1,7 @@
 import aiopg
 import bcrypt
 import os.path
-import psycopg2
+# import psycopg2
 import re
 import json
 import base64
@@ -12,10 +12,10 @@ import tornado.ioloop
 import tornado.locks
 import tornado.options
 import tornado.web
-import unicodedata
+# import unicodedata
 import asyncio
 
-from utils.noresulterror import NoResultError
+# from utils.noresulterror import NoResultError
 
 ## to create primarykey: id
 # CREATE SEQUENCE gys.mytable_myid_seq
@@ -60,7 +60,8 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         results = await self.query(stmt, *args)
         if len(results) == 0:
-            raise NoResultError()
+            # raise NoResultError()
+            pass
         elif len(results) > 1:
             raise ValueError("Expected 1 result, got %d" % len(results))
         return results[0]
