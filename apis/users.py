@@ -1,18 +1,3 @@
-#!/usr/bin/env python3
-#
-# Copyright 2009 Facebook
-#
-# Licensed under the Apache License, Version 2.0 (the "License"); you may
-# not use this file except in compliance with the License. You may obtain
-# a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-# License for the specific language governing permissions and limitations
-# under the License.
 import json
 import aiopg
 import bcrypt
@@ -42,13 +27,35 @@ class NoResultError(Exception):
     pass
 
 
+# class DatabaseRowObject(tornado.util.ObjectDict):
+#     def __init__(self, db, *args, **kw):
+#         self.db = db
+#         super(DatabaseRowObject, self).__init__(*args, **kw)
+#
+#     async def execute(self, stmt, *args):
+#         """Execute a SQL statement.
+#
+#         Must be called with ``await self.execute(...)``
+#         """
+#         with (await self.application.db.cursor()) as cur:
+#             await cur.execute(stmt, args)
+#
+#     async def save(self):
+#         properties = []
+#         for key, value in self:
+#             if key != 'db' and key != 'id':
+#                 properties.append(str(key) + ' = ' + str(value))
+#                 print(key)
+#         # self.execute('''UPDATE ''')
+
+
 async def maybe_create_tables(db):
-    try:
-        with (await db.cursor()) as cur:
-            await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
-            await cur.fetchone()
-        print("in create")
-    except psycopg2.ProgrammingError:
+    # try:
+    #     with (await db.cursor()) as cur:
+    #         await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
+    #         await cur.fetchone()
+    #     print("in create")
+    # except psycopg2.ProgrammingError:
         print('create tables')
         with open('schema.sql') as f:
             schema = f.read()
@@ -60,35 +67,15 @@ async def maybe_create_tables(db):
     #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
-    def __init__(self, db):
+    def __init__(self, db, *args, **kw):
         self.db = db
-        handlers = [
-            # (r"/", HomeHandler),
-            # (r"/archive", ArchiveHandler),
-            (r"/api/user/(.*)/", APIUserHandler),
-            # (r"/feed", FeedHandler),
-            # (r"/entry/([^/]+)", EntryHandler),
-            # (r"/compose", ComposeHandler),
-            # (r"/auth/create", AuthCreateHandler),
-            # (r"/auth/login", AuthLoginHandler),
-            # (r"/auth/logout", AuthLogoutHandler),
-        ]
-        settings = dict(
-            # blog_title=u"Tornado Blog",
-            # template_path=os.path.join(os.path.dirname(__file__), "templates"),
-            # static_path=os.path.join(os.path.dirname(__file__), "static"),
-            # ui_modules={"Entry": EntryModule},
-            # xsrf_cookies=True,
-            # cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
-            # login_url="/auth/login",
-            debug=True,
-        )
-        super(Application, self).__init__(handlers, **settings)
+        super(Application, self).__init__(*args, **kw)
 
 
 class BaseHandler(tornado.web.RequestHandler):
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
+        # obj = tornado.util.ObjectDict()
         obj = tornado.util.ObjectDict()
         for val, desc in zip(row, cur.description):
             obj[desc.name] = val
@@ -99,6 +86,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
         Must be called with ``await self.execute(...)``
         """
+        print('execute: ', stmt, args)
         with (await self.application.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
@@ -115,9 +103,15 @@ class BaseHandler(tornado.web.RequestHandler):
         """
         with (await self.application.db.cursor()) as cur:
             await cur.execute(stmt, args)
-            return [self.row_to_obj(row, cur)
+            res = [self.row_to_obj(row, cur)
                     for row in await cur.fetchall()]
-
+            # for item in res:
+            #     print(item)
+            # for xx in res:
+            #     xx.save()
+            # res[0].name = 'ycdfwzy'
+            # self.saveObject('users', res[0])
+            return res
     async def queryone(self, stmt, *args):
         """Query for exactly one result.
 
@@ -129,6 +123,7 @@ class BaseHandler(tornado.web.RequestHandler):
             raise NoResultError()
         elif len(results) > 1:
             raise ValueError("Expected 1 result, got %d" % len(results))
+        print(results[0])
         return results[0]
 
     async def prepare(self):
@@ -144,6 +139,47 @@ class BaseHandler(tornado.web.RequestHandler):
     async def any_author_exists(self):
         return bool(await self.query("SELECT * FROM authors LIMIT 1"))
 
+    async def dropTable(self, si_table_name):
+        await self.execute('''DROP TABLE IF EXISTS {table_name};'''.format(table_name = si_table_name))
+
+
+
+    async def createTable(self, si_table_name, **kw):
+        await self.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
+
+    async def saveObject(self, si_table_name, object):
+        plst = []
+        for key, value in object.items():
+            if key != 'id':
+                plst.append(str(key) + ' = ' + str(value))
+            slst = ','.join(plst)
+        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = slst, oid = object['id']))
+
+    async def all(self, si_table_name):
+        return await self.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
+
+    async def getObject(self, si_table_name, **kw):
+        plst = []
+        valuelist = []
+        for key, value in kw.items():
+            # if key != 'id':
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        slst = ','.join(plst)
+        return await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+
+    async def createObject(self, si_table_name, **kw):
+        propfmt = ['%s'] * len(kw)
+        spropfmt = ','.join(propfmt)
+        propkeys = []
+        propvalues = []
+        for key, value in kw.items():
+            propkeys.append(str(key))
+            propvalues.append(value)
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
+        print('fmt = ', str_fmt, propvalues)
+        await self.execute(str_fmt, *propvalues)
+
 class APIUserHandler(BaseHandler):
     def __init__(self, *args, **kw):
         super(APIUserHandler, self).__init__(*args, **kw)
@@ -158,25 +194,29 @@ class APIUserHandler(BaseHandler):
         if(type == 'query'):
             print('get query')
             # s_ids = '(' + ','.join(map(str, self.args['idList'])) + ')'
-            res = await self.query('SELECT * FROM users;')
+            # res = await self.query('SELECT * FROM users;')
+            # await self.saveObject('users', res[0])
+            res = await self.getObject('users', name = 'zjl')
             self.write(json.dumps(res).encode())
         elif(type == 'create'):
             await self.execute(
                 "INSERT INTO users (username,encodepass,name,studentid)"
                 "VALUES (%s,%s,%s,%s)",
                 'hongfz16', 'hfztql', 'hfz', '12345678')
-            # print('get create')
-            # with self.application.db.cursor() as cur:
-            #     cur.execute('INSERT INTO users (username, encodepass, name, studentid) VALUES (\'hongfz16\', \'123456789\', \'great hfz\', \'2016013123\');')
-            # await self.execute('INSERT INTO users (username, encodepass, name, studentid) VALUES (\"hongfz16\", \"123456789\", \"great hfz\", \"2016013123\");')
-            # INSERT INTO users(username, encodepass, name, studentid) VALUES("hongfz16", "123456789", "great hfz", "2016013123");
+            await self.createObject('users', username = 'wzsxzjl', encodepass = 'tqlzjl', name = 'zjl', studentid = '124567')
         elif(type == 'delete'):
             print('get delete')
-            await self.execute("DROP TABLE users")
-
+            # await self.execute("DROP TABLE users")
+            await self.dropTable('siusers')
         elif(type == 'newtable'):
             print('newtable')
-            await self.execute("CREATE TABLE users ( id SERIAL PRIMARY KEY, username VARCHAR(186) UNIQUE, encodepass VARCHAR(180), name VARCHAR(181), studentid VARCHAR(181));", None)
+            # await self.execute("CREATE TABLE users ( id SERIAL PRIMARY KEY, username VARCHAR(186) UNIQUE, encodepass VARCHAR(180), name VARCHAR(181), studentid VARCHAR(181));", None)
+            await self.createTable('siusers',
+                                   id = 'SERIAL PRIMARY KEY',
+                                   username = 'VARCHAR(1244) UNIQUE',
+                                   encodepass = 'VARCHAR(180)',
+                                   name = 'VARCHAR(181)',
+                                   studentid = 'VARCHAR(181)')
         elif(type == 'modify'):
             print('get modify')
 
@@ -186,150 +226,10 @@ class APIUserHandler(BaseHandler):
 
         if(type == 'create'):
             print('post create')
-            # self.execute("INSERT INTO users (username, encodepass, name, studentid) VALUES (%s, %s, %s, %s)",
-            #              self.args['username'], self.args['encodepass'], self.args['name'], self.args['studentid'])
-
-            sqlstr = 'INSERT INTO users (username, encodepass, name, studentid) VALUES ({s1}, {s2}, {s3}, {s4})'.format(s1='xxxx', s2=12323434, s3='ss',s4='12232432')
-            dbconn.exe(sqlstr)
         elif(type == 'delete'):
             print('post delete')
-            self.execute('DELETE FROM users where id = %d', self.args['id'])
         elif(type == 'modify'):
             print('post modify')
-            # get attrs
-            s_attrs = ''
-            for key, value in self.args:
-                s_attrs += key + ' = ' + str(value)
-            self.execute('UPDATE users SET % WHERE id = %d', s_attrs, self.args['id'])
-
-# class HomeHandler(BaseHandler):
-#     async def get(self):
-#         entries = await self.query("SELECT * FROM entries ORDER BY published DESC LIMIT 5")
-#         if not entries:
-#             self.redirect("/compose")
-#             return
-#         self.render("home.html", entries=entries)
-#
-#
-# class EntryHandler(BaseHandler):
-#     async def get(self, slug):
-#         entry = await self.queryone("SELECT * FROM entries WHERE slug = %s", slug)
-#         if not entry:
-#             raise tornado.web.HTTPError(404)
-#         self.render("entry.html", entry=entry)
-#
-#
-# class ArchiveHandler(BaseHandler):
-#     async def get(self):
-#         entries = await self.query("SELECT * FROM entries ORDER BY published DESC")
-#         self.render("archive.html", entries=entries)
-#
-#
-# class FeedHandler(BaseHandler):
-#     async def get(self):
-#         entries = await self.query("SELECT * FROM entries ORDER BY published DESC LIMIT 10")
-#         self.set_header("Content-Type", "application/atom+xml")
-#         self.render("feed.xml", entries=entries)
-#
-#
-# class ComposeHandler(BaseHandler):
-#     @tornado.web.authenticated
-#     async def get(self):
-#         id = self.get_argument("id", None)
-#         entry = None
-#         if id:
-#             entry = await self.queryone("SELECT * FROM entries WHERE id = %s", int(id))
-#         self.render("compose.html", entry=entry)
-#
-#     @tornado.web.authenticated
-#     async def post(self):
-#         id = self.get_argument("id", None)
-#         title = self.get_argument("title")
-#         text = self.get_argument("markdown")
-#         html = markdown.markdown(text)
-#         if id:
-#             try:
-#                 entry = await self.queryone("SELECT * FROM entries WHERE id = %s", int(id))
-#             except NoResultError:
-#                 raise tornado.web.HTTPError(404)
-#             slug = entry.slug
-#             await self.execute(
-#                 "UPDATE entries SET title = %s, markdown = %s, html = %s "
-#                 "WHERE id = %s", title, text, html, int(id))
-#         else:
-#             slug = unicodedata.normalize("NFKD", title)
-#             slug = re.sub(r"[^\w]+", " ", slug)
-#             slug = "-".join(slug.lower().strip().split())
-#             slug = slug.encode("ascii", "ignore").decode("ascii")
-#             if not slug:
-#                 slug = "entry"
-#             while True:
-#                 e = await self.query("SELECT * FROM entries WHERE slug = %s", slug)
-#                 if not e:
-#                     break
-#                 slug += "-2"
-#             await self.execute(
-#                 "INSERT INTO entries (author_id,title,slug,markdown,html,published,updated)"
-#                 "VALUES (%s,%s,%s,%s,%s,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)",
-#                 self.current_user.id, title, slug, text, html)
-#         self.redirect("/entry/" + slug)
-#
-#
-# class AuthCreateHandler(BaseHandler):
-#     def get(self):
-#         self.render("create_author.html")
-#
-#     async def post(self):
-#         print('in post authcreate')
-#         if await self.any_author_exists():
-#             raise tornado.web.HTTPError(400, "author already created")
-#         hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#             None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("password")),
-#             bcrypt.gensalt())
-#         author = await self.queryone(
-#             "INSERT INTO authors (email, name, hashed_password) "
-#             "VALUES (%s, %s, %s) RETURNING id",
-#             self.get_argument("email"), self.get_argument("name"),
-#             tornado.escape.to_unicode(hashed_password))
-#         self.set_secure_cookie("blogdemo_user", str(author.id))
-#         self.redirect(self.get_argument("next", "/"))
-#
-#
-# class AuthLoginHandler(BaseHandler):
-#     async def get(self):
-#         # If there are no authors, redirect to the account creation page.
-#         if not await self.any_author_exists():
-#             self.redirect("/auth/create")
-#         else:
-#             self.render("login.html", error=None)
-#
-#     async def post(self):
-#         try:
-#             author = await self.queryone("SELECT * FROM authors WHERE email = %s",
-#                                          self.get_argument("email"))
-#         except NoResultError:
-#             self.render("login.html", error="email not found")
-#             return
-#         hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#             None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("password")),
-#             tornado.escape.utf8(author.hashed_password))
-#         hashed_password = tornado.escape.to_unicode(hashed_password)
-#         if hashed_password == author.hashed_password:
-#             self.set_secure_cookie("blogdemo_user", str(author.id))
-#             self.redirect(self.get_argument("next", "/"))
-#         else:
-#             self.render("login.html", error="incorrect password")
-#
-#
-# class AuthLogoutHandler(BaseHandler):
-#     def get(self):
-#         self.clear_cookie("blogdemo_user")
-#         self.redirect(self.get_argument("next", "/"))
-#
-#
-# class EntryModule(tornado.web.UIModule):
-#     def render(self, entry):
-#         return self.render_string("modules/entry.html", entry=entry)
 
 
 async def main():
@@ -343,7 +243,11 @@ async def main():
             password=options.db_password,
             dbname=options.db_database) as db:
         await maybe_create_tables(db)
-        app = Application(db)
+        app = Application(db,
+                          [
+                              (r"/api/user/(.*)/", APIUserHandler)
+                          ],
+                          debug = True)
         app.listen(options.port)
 
         # In this demo the server will simply run until interrupted
