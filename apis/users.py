@@ -16,11 +16,11 @@ import unicodedata
 from tornado.options import define, options
 
 define("port", default=8000, help="run on the given port", type=int)
-define("db_host", default="127.0.0.1", help="blog database host")
-define("db_port", default=5432, help="blog database port")
-define("db_database", default="thssoj", help="blog database name")
-define("db_user", default="postgres", help="blog database user")
-define("db_password", default="zUY3Z2N2ul", help="blog database password")
+define("db_host", default="127.0.0.1", help="oj database host")
+define("db_port", default=5432, help="oj database port")
+define("db_database", default="thssoj", help="oj database name")
+define("db_user", default="sherlockcooper", help="oj database user")
+define("db_password", default="qse356ft", help="oj database password")
 
 
 class NoResultError(Exception):
@@ -73,6 +73,13 @@ class Application(tornado.web.Application):
 
 
 class BaseHandler(tornado.web.RequestHandler):
+    def __init__(self, *args, **kw):
+        super(APIUserHandler, self).__init__(*args, **kw)
+        self.getargs()
+
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
         # obj = tornado.util.ObjectDict()
@@ -181,14 +188,8 @@ class BaseHandler(tornado.web.RequestHandler):
         await self.execute(str_fmt, *propvalues)
 
 class APIUserHandler(BaseHandler):
-    def __init__(self, *args, **kw):
-        super(APIUserHandler, self).__init__(*args, **kw)
-        self.getargs()
-
-
-    def getargs(self):
-        self.args = json.loads(self.request.body.decode() or '{}')
-
+    # def __init__(self, *args, **kw):
+    #     super(APIUserHandler, self).__init__(*args, **kw)
     async def get(self, type): #detail
         # self.getargs()
         if(type == 'query'):
@@ -230,6 +231,11 @@ class APIUserHandler(BaseHandler):
             print('post delete')
         elif(type == 'modify'):
             print('post modify')
+
+class LoginHandler(BaseHandler):
+    async def post(self):
+        user_id = self.args['username']
+        user_psd = self.args['password']
 
 
 async def main():
