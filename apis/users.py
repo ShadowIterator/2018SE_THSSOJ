@@ -143,7 +143,6 @@ class BaseHandler(tornado.web.RequestHandler):
         await self.execute('''DROP TABLE IF EXISTS {table_name};'''.format(table_name = si_table_name))
 
 
-
     async def createTable(self, si_table_name, **kw):
         await self.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
 
@@ -184,9 +183,11 @@ class APIUserHandler(BaseHandler):
     def __init__(self, *args, **kw):
         super(APIUserHandler, self).__init__(*args, **kw)
         self.getargs()
+        print(self.args)
 
 
     def getargs(self):
+        print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
 
     async def get(self, type): #detail
