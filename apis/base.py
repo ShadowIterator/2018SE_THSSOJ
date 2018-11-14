@@ -25,6 +25,9 @@ import unicodedata
 class NoResultError(Exception):
     pass
 
+class NoMethodError(Exception):
+    pass
+
 
 # class DatabaseRowObject(tornado.util.ObjectDict):
 #     def __init__(self, db, *args, **kw):
@@ -166,23 +169,59 @@ class BaseHandler(tornado.web.RequestHandler):
         valuelist = []
         for key, value in kw.items():
             # if key != 'id':
+            # fmt = '%s'
+            # if(isinstance(value, int)):
+            #     fmt = '%d'
+            # plst.append(str(key) + ' = ' + fmt)
             plst.append(str(key) + ' = %s')
             valuelist.append(value)
-        slst = ','.join(plst)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
         return await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        # return await self.query(
+        #     '''SELECT * FROM users WHERE username=%s and status=%s ''',
+        #     'ZJL' , 'VALID')
+
+    async def deleteObject(self, si_table_name, **kw):
+        plst = []
+        valuelist = []
+        for key, value in kw.items():
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
+        return await self.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        # return await self.execute('''DELETE FROM {table_name} WHERE id = %s'''.format(table_name = si_table_name, conditions = slst), 2)
+
+
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(
+            table_name=si_table_name, property_keys=','.join(propkeys), property_fmt=spropfmt)
+        print('fmt = ', str_fmt, propvalues)
+        await self.execute(str_fmt, *propvalues)
 
     async def createObject(self, si_table_name, **kw):
+        print('createObject: kw = ', kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
+        # propfmt = []
         propkeys = []
         propvalues = []
         for key, value in kw.items():
             propkeys.append(str(key))
             propvalues.append(value)
+
         str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
         await self.execute(str_fmt, *propvalues)
 
     def getargs(self):
-        print('getargs: ', self.request.body.decode() or '{}')
+        # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
+
+    async def _call_method(self, method, *args, **kw):
+        print(method)
+        func = getattr(self, method, None)
+        if(not callable(func)):
+            raise NoMethodError
+            return
+        await func(*args, **kw)
