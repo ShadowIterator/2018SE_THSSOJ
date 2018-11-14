@@ -12,6 +12,7 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import unicodedata
+import site
 
 from tornado.options import define, options
 
@@ -74,11 +75,8 @@ class Application(tornado.web.Application):
 
 class BaseHandler(tornado.web.RequestHandler):
     def __init__(self, *args, **kw):
-        super(APIUserHandler, self).__init__(*args, **kw)
+        super(BaseHandler, self).__init__(*args, **kw)
         self.getargs()
-
-    def getargs(self):
-        self.args = json.loads(self.request.body.decode() or '{}')
 
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
@@ -187,9 +185,12 @@ class BaseHandler(tornado.web.RequestHandler):
         print('fmt = ', str_fmt, propvalues)
         await self.execute(str_fmt, *propvalues)
 
+
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+
 class APIUserHandler(BaseHandler):
-    # def __init__(self, *args, **kw):
-    #     super(APIUserHandler, self).__init__(*args, **kw)
+
     async def get(self, type): #detail
         # self.getargs()
         if(type == 'query'):
