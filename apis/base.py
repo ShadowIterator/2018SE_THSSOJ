@@ -12,6 +12,8 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import unicodedata
+import site
+from tornado.options import define, options
 
 # from tornado.options import define, options
 # define("port", default=8000, help="run on the given port", type=int)
@@ -20,7 +22,6 @@ import unicodedata
 # define("db_database", default="thssoj", help="blog database name")
 # define("db_user", default="postgres", help="blog database user")
 # define("db_password", default="zUY3Z2N2ul", help="blog database password")
-
 
 class NoResultError(Exception):
     pass
@@ -79,7 +80,6 @@ class BaseHandler(tornado.web.RequestHandler):
         super(BaseHandler, self).__init__(*args, **kw)
         self.getargs()
 
-
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
         # obj = tornado.util.ObjectDict()
@@ -87,6 +87,9 @@ class BaseHandler(tornado.web.RequestHandler):
         for val, desc in zip(row, cur.description):
             obj[desc.name] = val
         return obj
+
+    def get_current_user(self):
+        return self.get_secure_cookie('username')
 
     async def execute(self, stmt, *args):
         """Execute a SQL statement.
@@ -119,6 +122,7 @@ class BaseHandler(tornado.web.RequestHandler):
             # res[0].name = 'ycdfwzy'
             # self.saveObject('users', res[0])
             return res
+
     async def queryone(self, stmt, *args):
         """Query for exactly one result.
 
@@ -191,13 +195,7 @@ class BaseHandler(tornado.web.RequestHandler):
         slst = ' AND '.join(plst)
         print("slst = ", slst)
         return await self.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
-        # return await self.execute('''DELETE FROM {table_name} WHERE id = %s'''.format(table_name = si_table_name, conditions = slst), 2)
 
-
-        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(
-            table_name=si_table_name, property_keys=','.join(propkeys), property_fmt=spropfmt)
-        print('fmt = ', str_fmt, propvalues)
-        await self.execute(str_fmt, *propvalues)
 
     async def createObject(self, si_table_name, **kw):
         print('createObject: kw = ', kw)
@@ -214,9 +212,11 @@ class BaseHandler(tornado.web.RequestHandler):
         print('fmt = ', str_fmt, propvalues)
         await self.execute(str_fmt, *propvalues)
 
+
     def getargs(self):
         # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
+
 
     async def _call_method(self, method, *args, **kw):
         print(method)
@@ -225,3 +225,4 @@ class BaseHandler(tornado.web.RequestHandler):
             raise NoMethodError
             return
         await func(*args, **kw)
+

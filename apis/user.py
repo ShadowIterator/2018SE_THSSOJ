@@ -1,5 +1,7 @@
 import json
+import hashlib
 from . import base
+from .base import *
 
 
 
@@ -76,4 +78,21 @@ class APIUserHandler(base.BaseHandler):
         # elif(type == 'modify'):
         #     print('post modify')
 
+class UserLoginHandler(base.BaseHandler):
+    async def post(self):
+        username = self.args['username']
+        password = self.args['password']
+        md = hashlib.md5()
+        md.update(password.encode('utf8'))
+        encrypted = md.hexdigest()
+        users_qualified = self.getObject('users', {'username':username, 'encodepass':encrypted})
+        if len(users_qualified)==1:
+            self.set_secure_cookie('username', username)
+        else:
+            #raise error
+            pass
 
+class UserLogoutHandler(base.BaseHandler):
+    @tornado.web.authenticated
+    def post(self):
+        self.clear_cookie('username')

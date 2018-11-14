@@ -1,31 +1,5 @@
-
-import json
-import aiopg
-import bcrypt
-# import markdown
-import os.path
-import psycopg2
-import re
-import tornado.escape
-import tornado.httpserver
-import tornado.ioloop
-import tornado.locks
-import tornado.options
-import tornado.web
-import unicodedata
-from apis.base import maybe_create_tables, Application
-from apis.user import *
-
-from tornado.options import define, options
-
-define("port", default=8000, help="run on the given port")
-define("db_host", default="127.0.0.1", help="blog database host")
-define("db_port", default=5432, help="blog database port")
-define("db_database", default="thssoj", help="blog database name")
-define("db_user", default="postgres", help="blog database user")
-define("db_password", default="zUY3Z2N2ul", help="blog database password")
-
-
+from .base import *
+from .user import *
 async def main():
     tornado.options.parse_command_line()
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
@@ -36,7 +10,7 @@ async def main():
             user=options.db_user,
             password=options.db_password,
             dbname=options.db_database) as db:
-        await maybe_create_tables(db, 'sql/schema.sql')
+        await maybe_create_tables(db)
         app = Application(db,
                           [
                               (r"/api/user/(.*)/", APIUserHandler)
