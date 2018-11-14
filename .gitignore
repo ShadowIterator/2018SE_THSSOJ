@@ -3,5 +3,6 @@
 *.xml
 *.pyc
 .idea/
-database.sconfig
+*.sconfig
 venv/
+temp/

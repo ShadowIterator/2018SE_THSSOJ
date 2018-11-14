@@ -13,14 +13,13 @@ import tornado.options
 import tornado.web
 import unicodedata
 
-from tornado.options import define, options
-
-define("port", default=8000, help="run on the given port", type=int)
-define("db_host", default="127.0.0.1", help="blog database host")
-define("db_port", default=5432, help="blog database port")
-define("db_database", default="thssoj", help="blog database name")
-define("db_user", default="postgres", help="blog database user")
-define("db_password", default="zUY3Z2N2ul", help="blog database password")
+# from tornado.options import define, options
+# define("port", default=8000, help="run on the given port", type=int)
+# define("db_host", default="127.0.0.1", help="blog database host")
+# define("db_port", default=5432, help="blog database port")
+# define("db_database", default="thssoj", help="blog database name")
+# define("db_user", default="postgres", help="blog database user")
+# define("db_password", default="zUY3Z2N2ul", help="blog database password")
 
 
 class NoResultError(Exception):
@@ -49,7 +48,7 @@ class NoResultError(Exception):
 #         # self.execute('''UPDATE ''')
 
 
-async def maybe_create_tables(db):
+async def maybe_create_tables(db, filename):
     # try:
     #     with (await db.cursor()) as cur:
     #         await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
@@ -57,7 +56,7 @@ async def maybe_create_tables(db):
     #     print("in create")
     # except psycopg2.ProgrammingError:
         print('create tables')
-        with open('schema.sql') as f:
+        with open(filename) as f:
             schema = f.read()
         with (await db.cursor()) as cur:
             await cur.execute(schema)
@@ -187,77 +186,3 @@ class BaseHandler(tornado.web.RequestHandler):
     def getargs(self):
         print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
-
-class APIUserHandler(BaseHandler):
-
-    async def get(self, type): #detail
-        # self.getargs()
-        print('args = ', self.args)
-        if(type == 'query'):
-            print('get query')
-            # s_ids = '(' + ','.join(map(str, self.args['idList'])) + ')'
-            # res = await self.query('SELECT * FROM users;')
-            # await self.saveObject('users', res[0])
-            res = await self.getObject('users', name = 'zjl')
-            self.write(json.dumps(res).encode())
-        elif(type == 'create'):
-            await self.execute(
-                "INSERT INTO users (username,encodepass,name,studentid)"
-                "VALUES (%s,%s,%s,%s)",
-                'hongfz16', 'hfztql', 'hfz', '12345678')
-            await self.createObject('users', username = 'wzsxzjl', encodepass = 'tqlzjl', name = 'zjl', studentid = '124567')
-        elif(type == 'delete'):
-            print('get delete')
-            # await self.execute("DROP TABLE users")
-            await self.dropTable('siusers')
-        elif(type == 'newtable'):
-            print('newtable')
-            # await self.execute("CREATE TABLE users ( id SERIAL PRIMARY KEY, username VARCHAR(186) UNIQUE, encodepass VARCHAR(180), name VARCHAR(181), studentid VARCHAR(181));", None)
-            await self.createTable('siusers',
-                                   id = 'SERIAL PRIMARY KEY',
-                                   username = 'VARCHAR(1244) UNIQUE',
-                                   encodepass = 'VARCHAR(180)',
-                                   name = 'VARCHAR(181)',
-                                   studentid = 'VARCHAR(181)')
-        elif(type == 'modify'):
-            print('get modify')
-
-
-
-    def post(self, type):
-
-        if(type == 'create'):
-            print('post create')
-        elif(type == 'delete'):
-            print('post delete')
-        elif(type == 'modify'):
-            print('post modify')
-
-
-async def main():
-    tornado.options.parse_command_line()
-    print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
-    # Create the global connection pool.
-    async with aiopg.create_pool(
-            host=options.db_host,
-            port=options.db_port,
-            user=options.db_user,
-            password=options.db_password,
-            dbname=options.db_database) as db:
-        await maybe_create_tables(db)
-        app = Application(db,
-                          [
-                              (r"/api/user/(.*)/", APIUserHandler)
-                          ],
-                          debug = True)
-        app.listen(options.port)
-
-        # In this demo the server will simply run until interrupted
-        # with Ctrl-C, but if you want to shut down more gracefully,
-        # call shutdown_event.set().
-        shutdown_event = tornado.locks.Event()
-        await shutdown_event.wait()
-
-
-if __name__ == "__main__":
-    tornado.ioloop.IOLoop.current().run_sync(main)
