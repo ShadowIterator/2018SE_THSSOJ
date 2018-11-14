@@ -192,6 +192,7 @@ class APIUserHandler(BaseHandler):
 
     async def get(self, type): #detail
         # self.getargs()
+        print('args = ', self.args)
         if(type == 'query'):
             print('get query')
             # s_ids = '(' + ','.join(map(str, self.args['idList'])) + ')'
