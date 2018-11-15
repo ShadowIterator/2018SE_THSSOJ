@@ -1,8 +1,8 @@
 *.txt
 *.iml
 *.xml
-*.pyc
-.idea/
+*.pcyc
+backend/.idea/
 *.sconfig
-venv/
-temp/
+backend/venv/
+backend/temp/
