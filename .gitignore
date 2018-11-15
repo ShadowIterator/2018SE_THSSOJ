@@ -1,7 +1,7 @@
 *.txt
 *.iml
 *.xml
-*.pcyc
+*.pcy
 backend/.idea/
 *.sconfig
 backend/venv/
