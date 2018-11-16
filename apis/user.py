@@ -1,5 +1,8 @@
 import json
 import hashlib
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
 from . import base
 from .base import *
 
@@ -56,7 +59,7 @@ class UserLoginHandler(base.BaseHandler):
         md = hashlib.md5()
         md.update(password.encode('utf8'))
         encrypted = md.hexdigest()
-        users_qualified = self.getObject('users', {'username':username, 'encodepass':encrypted})
+        users_qualified = self.getObject('users', username = username, encodepass = encrypted)
         if len(users_qualified)==1:
             self.set_secure_cookie('username', username)
         else:
@@ -67,3 +70,43 @@ class UserLogoutHandler(base.BaseHandler):
     @tornado.web.authenticated
     def post(self):
         self.clear_cookie('username')
+
+class UserValidateHandler(base.BaseHandler):
+    def post(self):
+        username = self.args['username']
+        email = self.args['email']
+        users_qualified = self.getObject('users', username=username)
+        if len(users_qualified) == 1:
+            target_user = users_qualified[0]
+            target_user['email'] = email
+            self.saveObject('users', target_user)
+        else:
+            # raise error
+            pass
+        receiver = [email,]
+        msg_content = '<p><a href="'+\
+                      self.request.url.replace('validate', 'activate')+\
+                      '/?username='+username +\
+                      '">激活链接</p>'
+        message = MIMEText(msg_content,'html', 'utf8')
+        message['From'] = Header("THSSOJ", 'utf-8')
+        message['To'] = Header("待激活用户", 'utf-8')
+        message['Subject'] = Header('用户身份激活', 'utf-8')
+
+        sender = '1747310410@qq.com'
+        smtpObj = smtplib.SMTP('smtp.qq.com')
+        smtpObj.login(sender, 'vwwiwzsdkzvbbcdb')
+        smtpObj.sendmail(sender, receiver, message.as_string())
+        print("邮件发送成功")
+
+class UserActivateHandler(base.BaseHandler):
+    def get(self):
+        username = self.args['username']
+        users_qualified = self.getObject('users', username = username)
+        if len(users_qualified) == 1:
+            target_user = users_qualified[0]
+            target_user['status']='activated'
+            self.saveObject('users', target_user)
+        else:
+            # raise error
+            pass
