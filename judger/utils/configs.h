@@ -34,6 +34,9 @@ enum JudgeResult{
 };
 
 std::string JudgeResult2string(JudgeResult jr);
+void StringFormat(std::string&);
+
+const std::string default_checker_dir = "/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers";
 
 class runLimit{
 public:
@@ -77,6 +80,7 @@ public:
 	std::string outputPre;
 	std::string outputSuf;
 	std::string checker;
+	std::string checkerDir;
 	std::string Lang;
 	std::string dataDir;
 	std::string sourceDir;
@@ -85,6 +89,18 @@ public:
 	int memory;
 	int output;
 	int ntests;
+};
+
+class ScriptConfig{
+public:
+	std::string outputpath;		//result output error files' full path
+	std::string resultFileName;
+	std::string outputFileName;
+	std::string errorFileName;
+	std::string workpath;
+	runLimit lim;
+
+	std::vector<std::string> argArr;
 };
 
 const runLimit defaultLimit(1, 128, 64, 1024);
@@ -160,7 +176,7 @@ public:
 	
 	CompileResult(JudgeResult _jr, int _time = -1, int _memory = -1, bool _success=false)
 					: jr(_jr), time(_time), memory(_memory), success(_success){
-						this->info = "";
+						this->info = "No Comment";
 					}
 	void getInfo(const char* file){
 		char buf[512];
@@ -190,7 +206,7 @@ public:
 
 	CheckerResult(JudgeResult _jr, int _time = -1, int _memory = -1, bool _success=false)
 				: jr(_jr), time(_time), memory(_memory), success(_success){
-		this->info = "";
+		this->info = "No Comment";
 	}
 
 	void getInfo(const char* file){
@@ -218,8 +234,78 @@ public:
 	int memory;	// kb
 	std::string info;
 
-	JudgerResult(const std::string &res = "Accept", int _time = -1, int _memory = -1, const std::string& _info = "")
+	JudgerResult(const std::string &res = "Accept", int _time = -1, int _memory = -1, const std::string& _info = "No Comment")
 				: result(res), time(_time), memory(_memory), info(_info){}
+};
+
+class ScriptJudgerResult{
+public:
+	int score;
+	int time;	// ms
+	int memory;	// kb
+	std::string info;
+
+	ScriptJudgerResult(int _score = 0, int _time = -1, int _memory = -1, const std::string& _info = "No Comment")
+						: score(_score), time(_time), memory(_memory), info(_info){}
+
+	void load_Score_Info(const std::string& filename){
+		char buf[512];
+		int fd = open(filename.c_str(), O_RDONLY);
+		if (fd < 0){
+			std::cout << "open file failed when getInfo" << std::endl;
+			return;
+		}
+		info = "";
+		ssize_t len;
+		do{
+			len = read(fd, buf, 512);
+			for (int i = 0 ; i < len; ++i)
+				info += buf[i];
+		} while(len > 0);
+		if (info.back() == '\n')
+			info = info.substr(0, info.length()-1);
+
+		int t = info.rfind('\n'), l = 0;
+		// std::cout << "t=" << t << std::endl;
+		// std::cout << "npos=" << std::string::npos << std::endl;
+		// std::cout << "length=" << info.length() << std::endl;
+		if (t++ == std::string::npos)
+			return;
+		bool flag = true;
+		while (t+l < info.length()){
+			// std::cout << info[t+l] << std::endl;
+			if (info[t+l] < '0' || info[t+l] > '9') {
+				flag = false;
+				break;
+			}
+			l++;
+		}
+		if (flag){
+			score = atoi(info.substr(t, l).c_str());
+			info = info.substr(0, t);
+		}
+		if (info.length() > 500){
+			info = info.substr(0, 500);
+			info += std::string("...");
+		}
+	}
+
+	void load_Info(const std::string& filename){
+		char buf[512];
+		int fd = open(filename.c_str(), O_RDONLY);
+		if (fd < 0){
+			std::cout << "open file failed when getInfo" << std::endl;
+			return;
+		}
+		info = "";
+		ssize_t len = read(fd, buf, 512);
+		for (int i = 0 ; i < len; ++i)
+			info += buf[i];
+		if (info.length() > 500){
+			info = info.substr(0, 500);
+			info += std::string("...");
+		}
+	}
 };
 
 #endif
