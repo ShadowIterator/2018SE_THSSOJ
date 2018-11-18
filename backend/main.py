@@ -26,6 +26,7 @@ define("db_user", default="postgres", help="blog database user")
 define("db_password", default="zUY3Z2N2ul", help="blog database password")
 
 
+
 async def main():
     tornado.options.parse_command_line()
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
@@ -39,7 +40,7 @@ async def main():
         await maybe_create_tables(db, 'sql/schema.sql')
         app = Application(db,
                           [
-                              (r"/api/user/(.*)/", APIUserHandler)
+                              (r"/api/user/(.*)", APIUserHandler)
                           ],
                           debug = True)
         app.listen(options.port)
