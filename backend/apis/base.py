@@ -29,6 +29,157 @@ class NoResultError(Exception):
 class NoMethodError(Exception):
     pass
 
+# permLevel = {
+#     'NORMAL' : 0,
+#     'STUDENT' : 1,
+#     'TA': 2,
+#     'ADMIN': 3,
+#     'EVERYONE': 0,
+#     'ONESELF': 1
+# }
+
+class PERMISSIONLEVEL(object):
+    NORMAL = 0
+    STUDENT = 1
+    TA = 2
+    ADMIN = 3
+    EVERYONE = 0
+    ONESELF = 1
+
+permissions = {
+    'users': {
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
+            'realname': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'courses': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'notices': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'notices': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'homeworks': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'deadline': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problems': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'deadline': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problems': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'problems': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'time_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'memory_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'judge_method': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'time_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'memory_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'judge_method': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'records': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'submit_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'submit_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'notices': {
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'course_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'content': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'course_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'content': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    }
+}
 
 # class DatabaseRowObject(tornado.util.ObjectDict):
 #     def __init__(self, db, *args, **kw):
@@ -83,7 +234,6 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
-
         self.root_dir='root'
 
     async def get(self, type): #detail
@@ -94,6 +244,7 @@ class BaseHandler(tornado.web.RequestHandler):
         print('post: ', type)
         await self._call_method('''_{action_name}_post'''.format(action_name = type))
 
+
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
         # obj = tornado.util.ObjectDict()
@@ -102,8 +253,27 @@ class BaseHandler(tornado.web.RequestHandler):
             obj[desc.name] = val
         return obj
 
+    async def get_current_user_object(self):
+        # user_id = self.get_secure_cookie('user_id')
+        # print('get_usr: ', user_id)
+        # users = self.getObject('users', id = user_id)
+        # if(len(users) < 1):
+        #     # raise Exception("no such user")
+        #     return None
+        # else:
+        #     return users[0]
+        try:
+            user_id = self.get_secure_cookie('user_id')
+            print('user_id:', int(user_id))
+            users = await self.getObject('users', id = int(user_id))
+            print('users: ', users)
+            return users[0]
+        except:
+            print('get_user: not loged in')
+            return None
+
     def get_current_user(self):
-        return self.get_secure_cookie('username')
+        return self.get_secure_cookie('user_id')
 
     async def execute(self, stmt, *args):
         """Execute a SQL statement.
@@ -171,34 +341,52 @@ class BaseHandler(tornado.web.RequestHandler):
     async def createTable(self, si_table_name, **kw):
         await self.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
 
-    async def saveObject(self, si_table_name, object):
-        plst = []
-        for key, value in object.items():
+    async def saveObject(self, si_table_name, object, secure = 0):
+        if(secure):
+            object = await self.objectFilter(si_table_name, 'write', object)
+        fmtList = []
+        valueList = []
+        for key,value in object.items():
             if key != 'id':
-                plst.append(str(key) + ' = ' + str(value))
-            slst = ','.join(plst)
-        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = slst, oid = object['id']))
+                fmtList.append(str(key) + ' = %s')
+                valueList.append(value)
+        sfmt = ' , '.join(fmtList)
+        print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
+        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
+        # plst = []
+        # for key, value in object.items():
+        #     if key != 'id':
+        #         plst.append(str(key) + ' = ' + str(value))
+        #     slst = ','.join(plst)
+        # await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = slst, oid = object['id']))
 
-    async def all(self, si_table_name):
-        return await self.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
+    async def all(self, si_table_name, secure = 0):
+        res = await self.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
+        if(secure):
+            rtn = []
+            for item in res:
+                rtn.append(await self.objectFilter(si_table_name, 'read', item))
+            return rtn
+        else:
+            return res
 
-    async def getObject(self, si_table_name, **kw):
+    async def getObject(self, si_table_name, secure = 0, **kw):
         plst = []
         valuelist = []
         for key, value in kw.items():
-            # if key != 'id':
-            # fmt = '%s'
-            # if(isinstance(value, int)):
-            #     fmt = '%d'
-            # plst.append(str(key) + ' = ' + fmt)
             plst.append(str(key) + ' = %s')
             valuelist.append(value)
         slst = ' AND '.join(plst)
         print("slst = ", slst)
-        return await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
-        # return await self.query(
-        #     '''SELECT * FROM users WHERE username=%s and status=%s ''',
-        #     'ZJL' , 'VALID')
+        res = await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        if(secure):
+            rtn = []
+            for item in res:
+                rtn.append(await self.objectFilter(si_table_name, 'read', item))
+            return rtn
+        else:
+            return res
+
 
     async def deleteObject(self, si_table_name, **kw):
         plst = []
@@ -226,11 +414,36 @@ class BaseHandler(tornado.web.RequestHandler):
         print('fmt = ', str_fmt, propvalues)
         await self.execute(str_fmt, *propvalues)
 
+    async def objectFilter(self, table_name, method, dic):
+        user = await self.get_current_user_object()
+        per_owner = 0
+        per_role = 0
+        try:
+            if (table_name == 'users' and 'id' in dic.keys()):
+                if (dic['id'] == user['id']):
+                    per_owner = 1
+            per_role = user['role']
+        except:
+            print('object filter: user not loged in')
+        print('permission: ', per_role, per_owner)
+        return self.jsonFilter(table_name, method, dic, per_role, per_owner)
+
+    def jsonFilter(self, table_name, method, dic, per_role, per_owner):
+        rtn = {}
+        permissionList = permissions[table_name][method]
+        for key,value in dic.items():
+            if(key in permissionList.keys()):
+                permission = permissionList[key]
+                if(permission[0] <= per_role and permission[1] <= per_owner):
+                    rtn[key] = value
+        return rtn
+
 
     def getargs(self):
         # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
-        print('getargs\n', self.request)
+        # self.argFilter()
+        print('getargs\n', self.request, '\n', self.args)
         print(self.request.method)
 
 
