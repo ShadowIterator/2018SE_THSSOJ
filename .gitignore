@@ -1,11 +1,15 @@
+data
+.env
 __pycache__
 .idea
 .DS_Store
 *.txt
 *.iml
 *.xml
-*.pcy
 *.sconfig
 backend/venv/
 backend/temp/
 DS_Store
+*.pyc
+app_config.py
+
