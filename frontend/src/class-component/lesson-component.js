@@ -34,6 +34,7 @@ class LessonList extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
     handleClick(event) {
+        event.preventDefault()
         // event.persist();
         let id = event.target.id;
         id = id>=0? id:-id;
