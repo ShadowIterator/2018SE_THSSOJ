@@ -27,10 +27,8 @@ define('settings', default=None, help='tornado settings file', type=str)
 
 async def main():
     tornado.options.parse_command_line()
-    if options.settings:
-        options.parse_config_file('settings/app_config.py')# % (options.settings))
-    else:
-        raise Exception("You must add a xxx.py at settings/ folder, then run: 'python app.py --settings=user'")
+    options.parse_config_file('settings/app_config.py')# % (options.settings))
+
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
     # Create the global connection pool.

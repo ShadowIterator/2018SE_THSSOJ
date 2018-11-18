@@ -14,13 +14,8 @@ class APIUserHandler(base.BaseHandler):
 
     @tornado.web.authenticated
     async def _query_post(self):
-        # res = await self.getObject('users', name = 'zjl')
-        rtn = []
-        # for query in self.args:
         print('query = ', self.args)
-        res = await self.getObject('users', **self.args)
-        # rtn.append(res)
-        # print('coockie:',self.get_current_user())
+        res = await self.getObject('users', secure = 1, **self.args)
         self.write(json.dumps(res).encode())
 
 
@@ -32,10 +27,6 @@ class APIUserHandler(base.BaseHandler):
         pass
 
     async def _create_post(self):
-        # pass
-        # await self.createObject('users', username = 'wzsxzjl', encodepass = 'tqlzjl', name = 'zjl', studentid = '124567')
-        # for row in self.args:
-        #     await self.createObject('users', **row)
         await self.createObject('users', **self.args)
         self.write(json.dumps({'code': 0}).encode())
 
@@ -50,10 +41,12 @@ class APIUserHandler(base.BaseHandler):
             self.write(tornado.escape.json_encode(res_dict))
             return 
         if len(users_qualified) == 1:
-            self.set_secure_cookie('username', username)
+            userObj = users_qualified[0]
+            print(userObj)
+            self.set_secure_cookie('user_id', str(userObj.id))
             res_dict['code'] = 0
-            res_dict['role'] = 1
-            res_dict['id'] = users_qualified[0].id
+            res_dict['role'] = userObj.role
+            res_dict['id'] = userObj.id
         else:
             res_dict['code'] = 1
         self.write(tornado.escape.json_encode(res_dict))
@@ -62,7 +55,7 @@ class APIUserHandler(base.BaseHandler):
     async def _logout_post(self):
         res_dict = {}
         try:
-            self.clear_cookie('username')
+            self.clear_cookie('user_id')
             res_dict['code'] = 0
         except:
             res_dict['code'] = 1

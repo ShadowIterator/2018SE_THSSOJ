@@ -20,6 +20,16 @@
 -- To reload the tables:
 --   psql -U blog -d blog < schema.sql
 
+-- (x, y)
+-- x:
+    -- 0 : normal 
+    -- 1 : student
+    -- 2 : ta
+    -- 3 : admin
+-- y:
+    -- 0 : avalibal for every one
+    -- 1 : avalibal for oneself and admin
+
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
