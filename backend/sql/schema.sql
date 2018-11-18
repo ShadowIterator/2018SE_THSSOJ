@@ -22,12 +22,76 @@
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    username VARCHAR(32) UNIQUE,
-    password VARCHAR(512),
-    status VARCHAR(10),
-    email VARCHAR(512)
-
+    id SERIAL PRIMARY KEY,          --
+    username VARCHAR(32) UNIQUE,    --
+    password VARCHAR(512),          --
+    status INTEGER,                 --
+    email VARCHAR(512),             --
+    realname VARCHAR(32),           --
+    student_id VARCHAR(32),         --
+    validate_time INTEGER,          --
+    create_time TIMESTAMP,          --
+    role INTEGER,                   --
+    validate_code INTEGER,          --
+    gender INTEGER,                 --
+    student_courses INTEGER[],      --
+    TA_courses INTEGER[]            --
 );
 
+DROP TABLE IF EXISTS courses;
+CREATE TABLE courses (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    description TEXT,
+    TAs INTEGER[],
+    students INTEGER[],
+    status INTEGER,
+    homeworks INTEGER[],
+    notices INTEGER[],
+);
 
+DROP TABLE IF EXISTS homeworks;
+CREATE TABLE homeworks (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(128),
+    deadline TIMESTAMP,
+    problems INTEGER[],
+    records INTEGER[],
+);
+
+DROP TABLE IF EXISTS problems;
+CREATE TABLE problems (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(128),
+--    description_path VARCHAR(256),
+    time_limit INTEGER, -- MS
+    memory_limit INTEGER,  -- KB
+    judge_method INTEGER, 
+    records INTEGER[],
+    openness INTEGER,
+);
+
+DROP TABLE IF EXISTS records;
+CREATE TABLE records (
+    id SERIAL PRIMARY KEY,
+    description TEXT,
+    submit_time TIMESTAMP,
+    user_id INTEGER,
+    problem_id INTEGER,
+    homework_id INTEGER,
+    result INTEGER,
+    consume_time INTEGER, --ms
+    consume_memory INTEGER, --KB
+    src_size INTEGER, --Byte
+--    src_path, VARCHAR(512),
+);
+
+DROP TABLE IF EXISTS notices;
+CREATE TABLE notices (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER,
+    course_id INTEGER,
+    title VARCHAR(128),
+    content TEXT,
+    
+)
