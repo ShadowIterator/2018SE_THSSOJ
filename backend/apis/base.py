@@ -84,6 +84,8 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
+        self.root_dir='root'
+
     async def get(self, type): #detail
         print('get: ', type)
         await self._call_method('''_{action_name}_get'''.format(action_name = type))
@@ -251,3 +253,17 @@ class BaseHandler(tornado.web.RequestHandler):
     def set_res_dict(self, res_dict, **contents):
         for key in contents.keys():
             res_dict[key] = contents[key]
+
+    def check_input(self, *keys):
+        for key in keys:
+            if key not in self.args:
+                return False
+        return True
+
+    def str_to_bytes(self, src, tgt):
+        for each_char in src:
+            tgt.append(ord(each_char))
+
+    def bytes_to_str(self, src, tgt):
+        for each_char in src:
+            tgt.append(chr(each_char))

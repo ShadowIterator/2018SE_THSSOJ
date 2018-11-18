@@ -2,6 +2,9 @@ from . import base
 from .base import *
 
 class APICourseHandler(base.BaseHandler):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.root_dir = self.root_dir+'/courses'
 
     @tornado.web.authenticated
     async def _create_post(self):
@@ -58,3 +61,76 @@ class APICourseHandler(base.BaseHandler):
         # print('query = ', self.args)
         res = await self.getObject('courses', **self.args)
         self.return_json(res)
+
+    @tornado.web.authenticated
+    async def _addStudent_post(self):
+        res_dict = {}
+        if not self.check_input('course_id', 'stu_id'):
+            self.set_res_dict(res_dict, code=1, msg='unexpected parameters')
+            self.return_json(res_dict)
+            return
+        course_id = int(self.args['course_id'])
+        stu_id = int(self.args['stu_id'])
+        try:
+            course = await self.getObject('courses', id=course_id)[0]
+            if stu_id not in course['students']:
+                course['students'].append(stu_id)
+            await self.saveObject('courses', course)
+            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+        except:
+            self.set_res_dict(res_dict, code=1, msg='add student failed')
+        self.return_json(res_dict)
+
+    async def _addTA_post(self):
+        res_dict = {}
+        if not self.check_input('course_id', 'ta_id'):
+            self.set_res_dict(res_dict, code=1, msg='unexpected parameters')
+            self.return_json(res_dict)
+            return
+        course_id = int(self.args['course_id'])
+        ta_id = int(self.args['ta_id'])
+        try:
+            course = await self.getObject('courses', id=course_id)[0]
+            if ta_id not in course['TAs']:
+                course['TAs'].append(ta_id)
+            await self.saveObject('courses', course)
+            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+        except:
+            self.set_res_dict(res_dict, code=1, msg='add student failed')
+        self.return_json(res_dict)
+
+    async def _deleteStudent_post(self):
+        res_dict = {}
+        if not self.check_input('course_id', 'stu_id'):
+            self.set_res_dict(res_dict, code=1, msg='unexpected parameters')
+            self.return_json(res_dict)
+            return
+        course_id = int(self.args['course_id'])
+        stu_id = int(self.args['stu_id'])
+        try:
+            course = await self.getObject('courses', id=course_id)[0]
+            if stu_id in course['students']:
+                course['students'].remove(stu_id)
+            await self.saveObject('courses', course)
+            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+        except:
+            self.set_res_dict(res_dict, code=1, msg='add student failed')
+        self.return_json(res_dict)
+
+    async def _deleteTA_post(self):
+        res_dict = {}
+        if not self.check_input('course_id', 'ta_id'):
+            self.set_res_dict(res_dict, code=1, msg='unexpected parameters')
+            self.return_json(res_dict)
+            return
+        course_id = int(self.args['course_id'])
+        ta_id = int(self.args['ta_id'])
+        try:
+            course = await self.getObject('courses', id=course_id)[0]
+            if ta_id in course['TAs']:
+                course['TAs'].remove(ta_id)
+            await self.saveObject('courses', course)
+            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+        except:
+            self.set_res_dict(res_dict, code=1, msg='add student failed')
+        self.return_json(res_dict)

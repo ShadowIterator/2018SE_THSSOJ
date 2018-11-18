@@ -2,6 +2,9 @@ from . import base
 from .base import *
 
 class APIHomeworkHandler(base.BaseHandler):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.root_dir = self.root_dir+'/homeworks'
 
     @tornado.web.authenticated
     async def _create_post(self):

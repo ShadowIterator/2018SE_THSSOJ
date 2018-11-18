@@ -54,6 +54,7 @@ DROP TABLE IF EXISTS homeworks;
 CREATE TABLE homeworks (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
+    description TEXT,
     deadline TIMESTAMP,
     problems INTEGER[],
     records INTEGER[]
