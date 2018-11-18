@@ -33,6 +33,7 @@ class LessonList extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
     handleClick(event) {
+        event.preventDefault()
         // event.persist();
         // console.log(event.target.id);
         alert("You choose course no."+ event.target.id);
@@ -43,7 +44,8 @@ class LessonList extends Component {
                <h4>{this.props.listname}</h4>
                 <Menu>
                     {this.props.lessonlist.map((lesson)=><Menu.Item id={lesson.id.toString()} key={lesson.id.toString()}
-                                                                    icon="book" text={lesson.name} onClick={this.handleClick}/>)}
+                                                                    icon="book" text={lesson.name} onClick={this.handleClick}
+                                                                    shouldDismissPopover={false}/>)}
                 </Menu>
             </div>
         )
