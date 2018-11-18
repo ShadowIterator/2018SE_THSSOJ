@@ -51,12 +51,12 @@ permissions = {
         'read': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
-            'status': (PERMISSIONLEVEL.ADMIN, PERMISSIONLEVEL.EVERYONE),
-            'realname': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
-            'student_id': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
-            'validate_time': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
-            'create_time': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
+            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -67,11 +67,11 @@ permissions = {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
+            'realname': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
             'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -339,13 +339,21 @@ class BaseHandler(tornado.web.RequestHandler):
     async def saveObject(self, si_table_name, object, secure = 0):
         if(secure):
             object = await self.objectFilter(si_table_name, 'write', object)
-
-        plst = []
-        for key, value in object.items():
+        fmtList = []
+        valueList = []
+        for key,value in object.items():
             if key != 'id':
-                plst.append(str(key) + ' = ' + str(value))
-            slst = ','.join(plst)
-        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = slst, oid = object['id']))
+                fmtList.append(str(key) + ' = %s')
+                valueList.append(value)
+        sfmt = ' , '.join(fmtList)
+        print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
+        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
+        # plst = []
+        # for key, value in object.items():
+        #     if key != 'id':
+        #         plst.append(str(key) + ' = ' + str(value))
+        #     slst = ','.join(plst)
+        # await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = slst, oid = object['id']))
 
     async def all(self, si_table_name, secure = 0):
         res = await self.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))

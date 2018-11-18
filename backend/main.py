@@ -14,6 +14,8 @@ import tornado.web
 import unicodedata
 from apis.base import maybe_create_tables, Application
 from apis.user import *
+from apis.record import *
+from apis.notice import *
 
 from tornado.options import define, options
 
@@ -41,7 +43,9 @@ async def main():
         await maybe_create_tables(db, 'sql/schema.sql')
         app = Application(db,
                           [
-                              (r"/api/user/(.*)", APIUserHandler)
+                              (r'/api/user/(.*)', APIUserHandler),
+                              (r'/api/record/(.*)', APIRecordHandler),
+                              (r'/api/notice/(.*)', APINoticeHandler)
                           ],
                           **{
                           'debug': True,

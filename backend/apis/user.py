@@ -7,7 +7,7 @@ from email.header import Header
 from . import base
 from .base import *
 
-
+# TODO: to return code in every request
 
 
 class APIUserHandler(base.BaseHandler):
@@ -20,11 +20,22 @@ class APIUserHandler(base.BaseHandler):
 
 
     async def _delete_post(self):
-        for condition in self.args:
-            await self.deleteObject('users', **condition)
+        # for condition in self.args:
+        await self.deleteObject('users', **self.args)
 
     async def _update_post(self):
-        pass
+        print('update')
+        rtn = {
+            'code': 1
+        }
+        try:
+            await self.saveObject('users', secure = 1, object = self.args)
+            rtn['code'] = 0
+        except:
+            print('update failed')
+        print('update: ', rtn)
+        self.write(json.dumps(rtn).encode())
+
 
     async def _create_post(self):
         await self.createObject('users', **self.args)
