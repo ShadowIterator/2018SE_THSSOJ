@@ -1,9 +1,9 @@
+.idea
 .DS_Store
 *.txt
 *.iml
 *.xml
 *.pcy
-backend/.idea/
 *.sconfig
 backend/venv/
 backend/temp/
