@@ -47,7 +47,7 @@ CREATE TABLE courses (
     students INTEGER[],
     status INTEGER,
     homeworks INTEGER[],
-    notices INTEGER[],
+    notices INTEGER[]
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -56,7 +56,7 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     deadline TIMESTAMP,
     problems INTEGER[],
-    records INTEGER[],
+    records INTEGER[]
 );
 
 DROP TABLE IF EXISTS problems;
@@ -68,7 +68,7 @@ CREATE TABLE problems (
     memory_limit INTEGER,  -- KB
     judge_method INTEGER, 
     records INTEGER[],
-    openness INTEGER,
+    openness INTEGER
 );
 
 DROP TABLE IF EXISTS records;
@@ -82,7 +82,7 @@ CREATE TABLE records (
     result INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
-    src_size INTEGER, --Byte
+    src_size INTEGER --Byte
 --    src_path, VARCHAR(512),
 );
 
@@ -92,6 +92,5 @@ CREATE TABLE notices (
     user_id INTEGER,
     course_id INTEGER,
     title VARCHAR(128),
-    content TEXT,
-    
-)
+    content TEXT
+);
