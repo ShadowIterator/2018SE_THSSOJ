@@ -12,14 +12,16 @@ from .base import *
 
 class APIUserHandler(base.BaseHandler):
 
-    async def _query_get(self):
+    @tornado.web.authenticated
+    async def _query_post(self):
         # res = await self.getObject('users', name = 'zjl')
         rtn = []
-        for query in self.args:
-            print('query = ', query)
-            res = await self.getObject('users', **query)
-            rtn.append(res)
-        self.write(json.dumps(rtn).encode())
+        # for query in self.args:
+        print('query = ', self.args)
+        res = await self.getObject('users', **self.args)
+        # rtn.append(res)
+        # print('coockie:',self.get_current_user())
+        self.write(json.dumps(res).encode())
 
 
     async def _delete_post(self):
@@ -32,21 +34,26 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         # pass
         # await self.createObject('users', username = 'wzsxzjl', encodepass = 'tqlzjl', name = 'zjl', studentid = '124567')
-        for row in self.args:
-            await self.createObject('users', **row)
+        # for row in self.args:
+        #     await self.createObject('users', **row)
+        await self.createObject('users', **self.args)
+        self.write(json.dumps({'code': 0}).encode())
 
     async def _login_post(self):
         res_dict = {}
         username = self.args['username']
         password = self.args['password']
         try:
-            users_qualified = self.getObject('users', {'username': username, 'encodepass': password})
+            users_qualified = await self.getObject('users', **{'username': username, 'password': password})
         except:
             res_dict['code'] = 1
             self.write(tornado.escape.json_encode(res_dict))
+            return 
         if len(users_qualified) == 1:
             self.set_secure_cookie('username', username)
             res_dict['code'] = 0
+            res_dict['role'] = 1
+            res_dict['id'] = users_qualified[0].id
         else:
             res_dict['code'] = 1
         self.write(tornado.escape.json_encode(res_dict))

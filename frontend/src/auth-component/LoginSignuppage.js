@@ -48,6 +48,7 @@ class Login extends Component
         if(code===0) {
             const id = result.data.id;
             const role = result.data.role;
+            console.log(id, role)
             auth_state.id = id;
             auth_state.role = role;
             auth_state.state = true;

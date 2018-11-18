@@ -1,4 +1,4 @@
-const URL = '127.0.0.1:8000';
+const URL = 'http://127.0.0.1:8000';
 
 const api_list = {
     'login': '/api/user/login',
