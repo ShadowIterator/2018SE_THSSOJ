@@ -3,6 +3,7 @@ import {
     Card,
     Menu,
     Tag,
+    Button
 } from "@blueprintjs/core";
 import {AuthContext} from "../basic-component/auth-context";
 import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
@@ -34,16 +35,21 @@ class LessonList extends Component {
     }
     handleClick(event) {
         // event.persist();
-        // console.log(event.target.id);
-        alert("You choose course no."+ event.target.id);
+        let id = event.target.id;
+        id = id>=0? id:-id;
+        console.log(id);
+        // alert("You choose course no."+ id);
     }
     render() {
         return (
             <div style={Spacing}>
                <h4>{this.props.listname}</h4>
                 <Menu>
-                    {this.props.lessonlist.map((lesson)=><Menu.Item id={lesson.id.toString()} key={lesson.id.toString()}
-                                                                    icon="book" text={lesson.name} onClick={this.handleClick}/>)}
+                    {this.props.lessonlist.map((lesson)=>(<li>
+                        <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
+                            <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                        </a>
+                    </li>))}
                 </Menu>
             </div>
         )
