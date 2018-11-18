@@ -15,24 +15,17 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import "../mock/course-mock";
 import "../mock/auth-mock";
 import "../mock/notice-mock";
+import "../mock/homework-mock";
+import "../mock/problem-mock";
 
 class StudentHomeworkCard extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            name: '第一次作业',
-            questions: [
-                '两数求和','数组排序'
-            ]
-        }
-    }
     render() {
         return (
             <Card style={Spacing}>
-                <h5>{this.state.name}</h5>
+                <h5>{this.props.name}</h5>
                 <Menu>
-                    {this.state.questions.map(
-                        (name)=><Menu.Item icon="code" text={name} />
+                    {this.props.questions.map(
+                        (q)=><Menu.Item icon="code" text={q.title} />
                     )}
                 </Menu>
             </Card>
@@ -45,14 +38,24 @@ class StudentHomeworkPanel extends Component {
         super(props);
     }
     render() {
+        let homework2prob = {};
+        for(let hw of this.props.homeworkitems) {
+            homework2prob[hw.id.toString()] = [];
+            const prob_ids = hw.problem_ids;
+            for(let prob of this.props.problemitems) {
+                if(prob_ids.includes(prob.id)) {
+                    homework2prob[hw.id.toString()].push({
+                        id:prob.id,
+                        title:prob.title
+                    });
+                }
+            }
+        }
         return (
             <Card>
-                <StudentHomeworkCard />
-                <StudentHomeworkCard />
-                <StudentHomeworkCard />
-                <StudentHomeworkCard />
-                <StudentHomeworkCard />
-                <StudentHomeworkCard />
+                {this.props.homeworkitems.map((hw)=>(
+                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} />
+                ))}
             </Card>
         )
     }
@@ -87,14 +90,14 @@ class StudentHomework extends Component {
         const tabid = this.state.tabid;
         const tabnum = this.state.tabnum;
         const tabs = tabnum.map(
-            (i) => <Tab eventKey={tabid[i]} title={tabname[i]}><StudentHomeworkPanel/></Tab>
+            (i) => <Tab eventKey={tabid[i]} title={tabname[i]}><StudentHomeworkPanel
+                homeworkitems={this.props.homeworkitems} problemitems={this.props.problemitems}/></Tab>
         );
         return (
             <Tabs defaultActiveKey={tabid[0]} id="homework-tab">
                 {tabs}
             </Tabs>
         )
-        // return null;
     }
 }
 
@@ -104,9 +107,11 @@ class StudentLessonMiddle extends Component {
         this.state = {
             infoitems: [],
             homeworkitems: [],
+            problemitems: [],
         };
         this.infoitems = [];
         this.homeworkitems = [];
+        this.problemitems = [];
     }
     componentDidMount() {
         const course_id = parseInt(this.props.course_id);
@@ -129,6 +134,19 @@ class StudentLessonMiddle extends Component {
             return;
         const hw = result.data[0];
         const id = hw.id;
+        const name = hw.name;
+        const deadline = hw.deadline;
+        const problem_ids = hw.problems;
+        that.homeworkitems.push({
+            id:id,
+            name:name,
+            deadline:deadline,
+            problem_ids:problem_ids,
+        });
+        that.setState({homeworkitems:that.homeworkitems});
+        for(let prob_id of problem_ids) {
+            ajax_post(api_list['query_problem'], {id:prob_id}, that, StudentLessonMiddle.query_problem_callback);
+        }
     }
     static query_notice_callback(that, result) {
         if(result.data.length===0)
@@ -139,12 +157,20 @@ class StudentLessonMiddle extends Component {
         that.infoitems.push({id:id, title:title, content:content});
         that.setState({infoitems:that.infoitems});
     }
+    static query_problem_callback(that, result) {
+        if(result.data.length===0)
+            return;
+        const title = result.data[0].title;
+        const id = result.data[0].id;
+        that.problemitems.push({id:id, title:title});
+        that.setState({problemitems:that.problemitems});
+    }
     render() {
         return (
             <Container fluid>
                 <Row>
                     <Col lg={9} style={ZeroPadding}>
-                        <StudentHomework/>
+                        <StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.state.problemitems}/>
                     </Col>
                     <Col lg={3} style={ZeroPadding}>
                         <Info infoitems={this.state.infoitems}/>

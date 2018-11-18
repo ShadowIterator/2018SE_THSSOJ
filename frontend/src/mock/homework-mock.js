@@ -9,7 +9,7 @@ let homeworks = [{
     'problems': [0,1]
 },{
     'id': 1,
-    'name': 'homework 0',
+    'name': 'homework 1',
     'description': 'description 0',
     'deadline': 1545550218,
     'problems': [2,3]

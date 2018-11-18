@@ -7,7 +7,7 @@ let courses = [{
     description: "this is course no.1",
     TAs: [0],
     students: [1],
-    homeworks: [],
+    homeworks: [0, 1],
     status: 1,
     notices: [0, 1]
 },{
