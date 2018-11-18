@@ -57,123 +57,22 @@ class LessonList extends Component {
 }
 
 class StudentLessonList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            lessonlist: [],
-        };
-        this.lessonlist = [];
-    }
-    componentDidMount() {
-        if(!this.context.state)
-            return;
-        const id = this.context.id;
-        ajax_post(api_list['query_user'], {id:id}, this, StudentLessonList.query_user_callback);
-    }
-    static query_user_callback(that, result) {
-        if(result.data.length === 0) {
-            console.log("Query failed. No such user.");
-            return;
-        }
-        const user = result.data[0];
-        const lesson_ids = user.student_courses;
-        console.log(lesson_ids);
-        for(let lesson_id of lesson_ids) {
-            ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentLessonList.query_course_callback);
-        }
-    }
-    static query_course_callback(that, result) {
-        if(result.data.length === 0) {
-            console.log("Query failed. No such course.");
-            return;
-        }
-        const course = result.data[0];
-        const name = course.name;
-        const id = course.id;
-        that.lessonlist.push({id:id, name:name});
-        that.setState({lessonlist:that.lessonlist});
-    }
     render() {
         return (
             <Card interactive={false} style={FullHeight}>
-                <LessonList listname="课程" lessonlist={this.state.lessonlist} />
+                <LessonList listname="课程" lessonlist={this.props.lessonlist} />
             </Card>
         )
     }
 }
-StudentLessonList.contextType = AuthContext;
 
 class TALessonList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            lessonlist: [
-                "课程", "管理的课程", "未发布课程"
-            ],
-            stulesson: [],
-            talesson: [],
-            uplesson: [],
-        };
-        this.stulesson = [];
-        this.talesson = [];
-        this.uplesson = [];
-    }
-    componentDidMount() {
-        if(!this.context.state) {
-            return;
-        }
-        const id = this.context.id;
-        ajax_post(api_list['query_user'], {id:id}, this, TALessonList.query_user_callback);
-    }
-    static query_user_callback(that, result) {
-        if(result.data.length === 0) {
-            alert("Query failed. No such user.");
-            return;
-        }
-        const user = result.data[0];
-        const student_courses = user.student_courses;
-        const TA_courses = user.TA_courses;
-        for(let id of student_courses) {
-            ajax_post(api_list['query_course'], {id:id}, that, TALessonList.query_stu_course_callback);
-        }
-        for(let id of TA_courses) {
-            ajax_post(api_list['query_course'], {id:id}, that, TALessonList.query_ta_course_callback);
-        }
-    }
-    static query_stu_course_callback(that, result) {
-        if(result.data.length===0) {
-            console.log("Cannot find course.");
-            return;
-        }
-        const course = result.data[0];
-        const name = course.name;
-        const id = course.id;
-        that.stulesson.push({id:id, name:name});
-        that.setState({stulesson:that.stulesson});
-    }
-    static query_ta_course_callback(that, result) {
-        if(result.data.length===0) {
-            console.log("Cannot find course.");
-            return;
-        }
-        const course = result.data[0];
-        const name = course.name;
-        const id = course.id;
-        const status = course.status;
-        if(status) {
-            that.talesson.push({id:id, name:name});
-            that.setState({talesson:that.talesson});
-        } else {
-            that.uplesson.push({id:id, name:name});
-            that.setState({uplesson:that.uplesson});
-        }
-    }
     render() {
         const lists = (
             <>
-                <LessonList listname={this.state.lessonlist[0]} lessonlist={this.state.stulesson} />
-                <LessonList listname={this.state.lessonlist[1]} lessonlist={this.state.talesson} />
-                <LessonList listname={this.state.lessonlist[2]} lessonlist={this.state.uplesson} />
+                <LessonList listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
+                <LessonList listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
+                <LessonList listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
             </>
         );
         console.log(this.state);
@@ -184,7 +83,6 @@ class TALessonList extends Component {
         )
     }
 }
-TALessonList.contextType = AuthContext;
 
 const InfoItemStyle = {
     "margin-top": "10px",
@@ -192,35 +90,42 @@ const InfoItemStyle = {
 };
 
 class InfoItem extends Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            lessonname: "2018夏前端",
-            type: "新作业",
-            content: "新作业已发布请及时查看"
-        }
-    }
     render() {
         return (
             <Card interactive={true} style={InfoItemStyle}>
-                <h5>{this.state.lessonname} <Tag key={this.state.type}>{this.state.type}</Tag></h5>
-                <p>{this.state.content}</p>
+                <h5>{this.props.lessonname} <Tag key={this.props.type}>{this.props.type}</Tag></h5>
+                <p>{this.props.content}</p>
             </Card>
         )
     }
 }
 
 class Info extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            infoitems: [],
+        };
+        this.infoitems = [];
+    }
+    componentDidMount() {
+        for(let id of this.props.noticelist) {
+            ajax_get(api_list['query_notice'], {id:id}, this, Info.query_notice_callback);
+        }
+    }
+    static query_notice_callback(that, result) {
+        const title = result.data.title;
+        const content = result.data.content;
+        that.infoitems.push({title:title,content:content});
+        that.setState({infoitems:that.infoitems});
+    }
     render() {
         return (
             <Card interactive={false}>
                 <h4>通知</h4>
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
+                {this.state.infoitems.map((item)=>(
+                    <InfoItem title={item.title} content={item.content} type="通知" />
+                ))}
             </Card>
         )
     }

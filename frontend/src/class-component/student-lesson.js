@@ -11,6 +11,8 @@ import {Container, Col, Row} from 'react-bootstrap';
 import {Info} from "./lesson-component";
 
 import {ZeroPadding, Spacing} from "./lesson-component";
+import {api_list} from "../ajax-utils/api-manager";
+import {ajax_post} from "../ajax-utils/ajax-method";
 
 class StudentHomeworkCard extends Component {
     constructor(props) {
@@ -107,6 +109,26 @@ class StudentHomework extends Component {
 class StudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            noticelist: [],
+        };
+        this.noticelist = [];
+    }
+    componentDidMount() {
+        const course_id = this.props.location.course_id;
+        ajax_post(api_list['query_course'], {id:course_id}, this, StudentLessonMiddle.query_course_callback);
+    }
+    static query_course_callback(that, result) {
+        const notice_ids = result.data.notices;
+        for(let notice_id of notice_ids) {
+            ajax_post(api_list['query_notice'], {id:notice_id}, that, StudentLessonMiddle.query_notice_callback);
+        }
+    }
+    static query_notice_callback(that, result) {
+        const title = result.data.title;
+        const content = result.data.content;
+        that.noticelist.push({title:title, content:content});
+        that.setState({noticelist:that.noticelist});
     }
     render() {
         return (
@@ -116,7 +138,7 @@ class StudentLessonMiddle extends Component {
                         <StudentHomework/>
                     </Col>
                     <Col lg={3} style={ZeroPadding}>
-                        <Info />
+                        <Info noticelist={this.state.noticelist}/>
                     </Col>
                 </Row>
             </Container>
