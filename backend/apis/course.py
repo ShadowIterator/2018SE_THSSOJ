@@ -3,7 +3,6 @@ from .base import *
 
 class APICourseHandler(base.BaseHandler):
 
-
     async def _create_post(self):
         res_dict={}
         try:
