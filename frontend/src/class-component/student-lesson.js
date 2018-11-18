@@ -1,18 +1,20 @@
 import React, { Component } from 'react';
 import {
-    Tab,
-    Tabs,
     Card,
     Menu
 } from "@blueprintjs/core";
 
-import {Container, Col, Row} from 'react-bootstrap';
+import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
 
 import {Info} from "./lesson-component";
 
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
+
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
 
 class StudentHomeworkCard extends Component {
     constructor(props) {
@@ -61,7 +63,7 @@ class StudentHomework extends Component {
         super(props);
         this.state= {
             tabname: [
-                "未提交作业", "已提交但为批改作业", "已批改作业", "全部作业"
+                "未完成作业", "已完成但未批改作业", "已批改作业", "全部作业"
             ],
             tabid: [
                 'uh', 'su', 'sp', 'al'
@@ -85,20 +87,10 @@ class StudentHomework extends Component {
         const tabid = this.state.tabid;
         const tabnum = this.state.tabnum;
         const tabs = tabnum.map(
-            (i) => <Tab id={tabid[i]} title={tabname[i]} panel={<StudentHomeworkPanel />} />
+            (i) => <Tab eventKey={tabid[i]} title={tabname[i]}><StudentHomeworkPanel/></Tab>
         );
-        // var tabs = <Tab id={tabid[0]} title={tabname[0]} />;
-        // for(var i=0;i<tabname.length;i=i+1) {
-        //     tabs.push(<Tab id={tabid[i]} title={tabname[i]} panel={<StudentHomeworkPanel />} />);
-        // }
         return (
-            <Tabs
-                animate={true}
-                large={true}
-                id="StudentHomework"
-                selectedTabId={this.state.selectedId}
-                onChange={this.handleChooseTab}
-            >
+            <Tabs defaultActiveKey={tabid[0]} id="homework-tab">
                 {tabs}
             </Tabs>
         )
@@ -110,25 +102,42 @@ class StudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            noticelist: [],
+            infoitems: [],
+            homeworkitems: [],
         };
-        this.noticelist = [];
+        this.infoitems = [];
+        this.homeworkitems = [];
     }
     componentDidMount() {
-        const course_id = this.props.location.course_id;
+        const course_id = parseInt(this.props.course_id);
         ajax_post(api_list['query_course'], {id:course_id}, this, StudentLessonMiddle.query_course_callback);
     }
     static query_course_callback(that, result) {
-        const notice_ids = result.data.notices;
+        if(result.data.length===0)
+            return;
+        const notice_ids = result.data[0].notices;
+        const homework_ids = result.data[0].homeworks;
         for(let notice_id of notice_ids) {
             ajax_post(api_list['query_notice'], {id:notice_id}, that, StudentLessonMiddle.query_notice_callback);
         }
+        for(let homework_id of homework_ids) {
+            ajax_post(api_list['query_homework'], {id:homework_id}, that, StudentLessonMiddle.query_homework_callback);
+        }
+    }
+    static query_homework_callback(that, result) {
+        if(result.data.length===0)
+            return;
+        const hw = result.data[0];
+        const id = hw.id;
     }
     static query_notice_callback(that, result) {
-        const title = result.data.title;
-        const content = result.data.content;
-        that.noticelist.push({title:title, content:content});
-        that.setState({noticelist:that.noticelist});
+        if(result.data.length===0)
+            return;
+        const title = result.data[0].title;
+        const content = result.data[0].content;
+        const id = result.data[0].id;
+        that.infoitems.push({id:id, title:title, content:content});
+        that.setState({infoitems:that.infoitems});
     }
     render() {
         return (
@@ -138,7 +147,7 @@ class StudentLessonMiddle extends Component {
                         <StudentHomework/>
                     </Col>
                     <Col lg={3} style={ZeroPadding}>
-                        <Info noticelist={this.state.noticelist}/>
+                        <Info infoitems={this.state.infoitems}/>
                     </Col>
                 </Row>
             </Container>
@@ -153,7 +162,7 @@ export class StudentLesson extends Component {
     render() {
         return (
             <>
-                <StudentLessonMiddle />
+                <StudentLessonMiddle course_id={this.props.location.course_id} />
             </>
         )
     }

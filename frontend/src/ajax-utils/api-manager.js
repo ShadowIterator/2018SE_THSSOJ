@@ -16,7 +16,7 @@ const api_list = {
     'create_notice': '/api/notice/create',
     'delete_notice': '/api/notice/delete',
     'update_notice': '/api/notice/update',
-    'query_notice': '/api/notice/query'
+    'query_notice': '/api/notice/query',
 };
 
 export {URL, api_list}

@@ -9,13 +9,18 @@ import {AuthContext} from "../basic-component/auth-context";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
+
 class StudentHomepageMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
             lessonlist: [],
-            noticelist: [],
-        }
+            infoitems: [],
+        };
+        this.infoitems = [];
         this.lessonlist = [];
         this.noticelist = [];
     }
@@ -32,7 +37,7 @@ class StudentHomepageMiddle extends Component {
         }
         const user = result.data[0];
         const lesson_ids = user.student_courses;
-        console.log(lesson_ids);
+        // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
             ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentHomepageMiddle.query_course_callback);
         }
@@ -48,10 +53,22 @@ class StudentHomepageMiddle extends Component {
         const notices = course.notices;
         that.lessonlist.push({id:id, name:name});
         for(let notice_id of notices) {
-            that.noticelist.push(notice_id);
+            ajax_post(api_list['query_notice'],{id:notice_id}, that, StudentHomepageMiddle.query_notice_callback);
         }
-        that.setState({noticelist:that.noticelist});
         that.setState({lessonlist:that.lessonlist});
+    }
+    static query_notice_callback(that, result) {
+        if(result.data.length===0)
+            return;
+        const title = result.data[0].title;
+        const content = result.data[0].content;
+        const id = result.data[0].id;
+        that.infoitems.push({
+            id:id,
+            title:title,
+            content:content,
+        });
+        that.setState({infoitems:that.infoitems});
     }
     render() {
         return (
@@ -62,7 +79,7 @@ class StudentHomepageMiddle extends Component {
                         <StudentLessonList lessonlist={this.lessonlist} />
                     </Col>
                     <Col style={ZeroPadding}>
-                        <Info noticelist={this.state.noticelist}/>
+                        <Info infoitems={this.state.infoitems}/>
                     </Col>
                 </Row>
             </Container>

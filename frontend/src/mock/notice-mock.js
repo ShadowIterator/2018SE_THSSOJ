@@ -1,5 +1,5 @@
 import {URL, api_list} from "../ajax-utils/api-manager";
-import Mock from 'mockjs'
+import Mock from 'mockjs';
 
 let notices = [{
     'id': 0,
@@ -19,15 +19,14 @@ let notice_counter = 2;
 
 Mock.mock(URL+api_list['create_notice'], function(options) {
     const data = JSON.parse(options.body);
-    notice_counter += 1;
     const notice = {
-      'id': notice_counter
+      'id': notice_counter,
       'title': data.title,
       'content': data.content,
       'user_id': data.user_id,
       'course_id': data.course_id
     };
-
+    notice_counter += 1;
     notices.push(notice);
     return {code:0};
 });
@@ -72,6 +71,6 @@ Mock.mock(URL+api_list['query_notice'], function(options){
           // return {code:0};
         }
     }
-    return {res}
+    return res
     // return {code:1};
 });

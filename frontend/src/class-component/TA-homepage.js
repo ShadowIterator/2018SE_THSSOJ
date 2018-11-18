@@ -5,6 +5,10 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "../basic-component/auth-context";
 
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
+
 const ZeroPadding = {
     "padding-left": 0,
     "padding-right": 0
@@ -20,12 +24,12 @@ class TAHomepageMiddle extends Component {
             stulesson: [],
             talesson: [],
             uplesson: [],
-            noticelist: [],
+            infoitems: [],
         };
         this.stulesson = [];
         this.talesson = [];
         this.uplesson = [];
-        this.noticelist = [];
+        this.infoitems = [];
     }
     componentDidMount() {
         if(!this.context.state) {
@@ -60,9 +64,8 @@ class TAHomepageMiddle extends Component {
         const notice_ids = course.notices;
         that.stulesson.push({id:id, name:name});
         for(let notice_id of notice_ids) {
-            that.noticelist.push(notice_id);
+            ajax_post(api_list['query_notice'], {id:notice_id}, that, TAHomepageMiddle.query_notice_callback);
         }
-        that.setState({noticelist:that.noticelist});
         that.setState({stulesson:that.stulesson});
     }
     static query_ta_course_callback(that, result) {
@@ -76,9 +79,8 @@ class TAHomepageMiddle extends Component {
         const status = course.status;
         const notice_ids = course.notices;
         for(let notice_id of notice_ids) {
-            that.noticelist.push(notice_id);
+            ajax_post(api_list['query_notice'], {id:notice_id}, that, TAHomepageMiddle.query_notice_callback);
         }
-        that.setState({noticelist:that.noticelist});
         if(status) {
             that.talesson.push({id:id, name:name});
             that.setState({talesson:that.talesson});
@@ -86,6 +88,19 @@ class TAHomepageMiddle extends Component {
             that.uplesson.push({id:id, name:name});
             that.setState({uplesson:that.uplesson});
         }
+    }
+    static query_notice_callback(that, result) {
+        if(result.data.length===0)
+            return;
+        const title = result.data[0].title;
+        const content = result.data[0].content;
+        const id = result.data[0].id;
+        that.infoitems.push({
+            id:id,
+            title:title,
+            content:content,
+        });
+        that.setState({infoitems:that.infoitems});
     }
     render() {
         return (
@@ -98,7 +113,7 @@ class TAHomepageMiddle extends Component {
                                         uplesson={this.state.uplesson}/>
                     </Col>
                     <Col lg={9} style={ZeroPadding}>
-                        <Info noticelist={this.state.noticelist}/>
+                        <Info infoitems={this.state.infoitems}/>
                     </Col>
                 </Row>
             </Container>

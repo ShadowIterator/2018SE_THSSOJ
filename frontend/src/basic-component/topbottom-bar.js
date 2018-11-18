@@ -9,7 +9,6 @@ import {Alignment,
     Position
 } from "@blueprintjs/core";
 import {AuthContext} from './auth-context';
-import PropTypes from "prop-types";
 import {withRouter} from "react-router";
 
 class mDropdown extends Component {

@@ -9,7 +9,7 @@ let courses = [{
     students: [1],
     homeworks: [],
     status: 1,
-    notices: []
+    notices: [0, 1]
 },{
     id: 1,
     name: "course no.2",

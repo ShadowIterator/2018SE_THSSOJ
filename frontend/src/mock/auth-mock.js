@@ -15,7 +15,7 @@ let users = [{
     'role':2,
 },{
     'id': 1,
-    'username':'student',
+    'username':'st',
     'password':'1234',
     'email':'student@123.com',
     'status':0,
@@ -43,7 +43,7 @@ Mock.mock(URL+api_list['login'],function(options) {
     return {code:1};
 });
 
-Mock.mock(URL+api_list['create'],function(options) {
+Mock.mock(URL+api_list['signup'],function(options) {
     const data = JSON.parse(options.body);
     const username = data.username;
     for(let index in users) {
