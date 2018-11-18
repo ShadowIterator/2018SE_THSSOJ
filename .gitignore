@@ -4,7 +4,7 @@ __pycache__
 *.txt
 *.iml
 *.xml
-*.pcy
 *.sconfig
 backend/venv/
 backend/temp/
+*.pyc
