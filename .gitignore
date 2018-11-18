@@ -6,3 +6,4 @@ backend/.idea/
 *.sconfig
 backend/venv/
 backend/temp/
+DS_Store
