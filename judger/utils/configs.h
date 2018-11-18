@@ -8,6 +8,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+
+using namespace std;
 
 enum ErrorCode{
 	NoError = 0,
@@ -262,7 +266,8 @@ public:
 			for (int i = 0 ; i < len; ++i)
 				info += buf[i];
 		} while(len > 0);
-		if (info.back() == '\n')
+//		if (info.back() == '\n')
+		if (info.length() > 0 && info[info.length() - 1] == '\n')
 			info = info.substr(0, info.length()-1);
 
 		int t = info.rfind('\n'), l = 0;
