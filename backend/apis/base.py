@@ -216,6 +216,7 @@ class BaseHandler(tornado.web.RequestHandler):
     def getargs(self):
         # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
+        print('getargs\n', self.args)
 
 
     async def _call_method(self, method, *args, **kw):

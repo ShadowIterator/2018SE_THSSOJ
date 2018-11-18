@@ -9,7 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import {auth_state, AuthContext} from "../basic-component/auth-context";
 
-import "../mock/auth-mock"
+// import "../mock/auth-mock"
 
 class Login extends Component
 {

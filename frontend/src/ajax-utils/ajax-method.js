@@ -16,6 +16,7 @@ function ajax_post(url,data,that,callback){
     }).catch(function(error){
         alert('post失败');
         console.log(error);
+        console.log(URL+url);
     });
 }
 function ajax_get(url,data,that,callback){
