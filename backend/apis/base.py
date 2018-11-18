@@ -15,13 +15,6 @@ import unicodedata
 import site
 from tornado.options import define, options
 
-define("port", default=8000, help="run on the given port", type=int)
-define("db_host", default="127.0.0.1", help="oj database host")
-define("db_port", default=5432, help="oj database port")
-define("db_database", default="thssoj", help="oj database name")
-define("db_user", default="sherlockcooper", help="oj database user")
-define("db_password", default="qse356ft", help="oj database password")
-
 # from tornado.options import define, options
 # define("port", default=8000, help="run on the given port", type=int)
 # define("db_host", default="127.0.0.1", help="blog database host")
@@ -31,6 +24,9 @@ define("db_password", default="qse356ft", help="oj database password")
 # define("db_password", default="zUY3Z2N2ul", help="blog database password")
 
 class NoResultError(Exception):
+    pass
+
+class NoMethodError(Exception):
     pass
 
 
@@ -158,7 +154,6 @@ class BaseHandler(tornado.web.RequestHandler):
         await self.execute('''DROP TABLE IF EXISTS {table_name};'''.format(table_name = si_table_name))
 
 
-
     async def createTable(self, si_table_name, **kw):
         await self.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
 
@@ -178,27 +173,56 @@ class BaseHandler(tornado.web.RequestHandler):
         valuelist = []
         for key, value in kw.items():
             # if key != 'id':
+            # fmt = '%s'
+            # if(isinstance(value, int)):
+            #     fmt = '%d'
+            # plst.append(str(key) + ' = ' + fmt)
             plst.append(str(key) + ' = %s')
             valuelist.append(value)
-        slst = ','.join(plst)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
         return await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        # return await self.query(
+        #     '''SELECT * FROM users WHERE username=%s and status=%s ''',
+        #     'ZJL' , 'VALID')
+
+    async def deleteObject(self, si_table_name, **kw):
+        plst = []
+        valuelist = []
+        for key, value in kw.items():
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
+        return await self.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+
 
     async def createObject(self, si_table_name, **kw):
+        print('createObject: kw = ', kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
+        # propfmt = []
         propkeys = []
         propvalues = []
         for key, value in kw.items():
             propkeys.append(str(key))
             propvalues.append(value)
+
         str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
         await self.execute(str_fmt, *propvalues)
 
 
     def getargs(self):
+        # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
 
 
-
+    async def _call_method(self, method, *args, **kw):
+        print(method)
+        func = getattr(self, method, None)
+        if(not callable(func)):
+            raise NoMethodError
+            return
+        await func(*args, **kw)
 

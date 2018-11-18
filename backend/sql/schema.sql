@@ -23,10 +23,11 @@
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(186) UNIQUE,
-    encodepass VARCHAR(180) ,
-    name VARCHAR(181),
-    studentid VARCHAR(181)
+    username VARCHAR(32) UNIQUE,
+    password VARCHAR(512),
+    status VARCHAR(10),
+    email VARCHAR(512)
+
 );
 
 
