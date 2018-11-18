@@ -245,3 +245,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_status(204)
         self.finish()
 
+    def return_json(self, res_dict):
+        self.write(tornado.escape.json_encode(res_dict))
+
+    def set_res_dict(self, res_dict, **contents):
+        for key in contents.keys():
+            res_dict[key] = contents[key]
