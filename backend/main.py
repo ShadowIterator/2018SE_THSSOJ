@@ -18,17 +18,21 @@ from apis.user import *
 from tornado.options import define, options
 
 define("port", default=8000, help="run on the given port")
-define("db_host", default="127.0.0.1", help="blog database host")
+define("db_host", default="postgres", help="blog database host")
 define("db_port", default=5432, help="blog database port")
-define("db_database", default="tornado_dev", help="blog database name")
-define("db_user", default="tornado", help="blog database user")
-define("db_password", default="TtAsW1234", help="blog database password")
-
-
+define("db_database", default="thssoj", help="blog database name")
+define("db_user", default="postgres", help="blog database user")
+define("db_password", default="zUY3Z2N2ul", help="blog database password")
+define('settings', default=None, help='tornado settings file', type=str)
 
 async def main():
     tornado.options.parse_command_line()
+    if options.settings:
+        options.parse_config_file('settings/app_config.py')# % (options.settings))
+    else:
+        raise Exception("You must add a xxx.py at settings/ folder, then run: 'python app.py --settings=user'")
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
+
     # Create the global connection pool.
     async with aiopg.create_pool(
             host=options.db_host,

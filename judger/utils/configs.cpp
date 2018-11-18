@@ -35,3 +35,21 @@ std::string JudgeResult2string(JudgeResult jr) {
 	}
 	return ret;
 }
+
+void StringFormat(std::string& str){
+	int t = 0;
+	while ((t = str.find('"', t)) != std::string::npos){
+		str.replace(t, 1, "\\\"");
+		t += 2;
+	}
+	t = 0;
+	while ((t = str.find("\\n", t)) != std::string::npos){
+		str.replace(t, 2, "\\\\n");
+		t += 3;
+	}
+	t = 0;
+	while ((t = str.find('\n', t)) != std::string::npos){
+		str.replace(t, 1, "\\n");
+		t += 2;
+	}
+}
