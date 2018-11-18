@@ -12,6 +12,7 @@ from .base import *
 
 class APIUserHandler(base.BaseHandler):
 
+    @tornado.web.authenticated
     async def _query_post(self):
         # res = await self.getObject('users', name = 'zjl')
         rtn = []
@@ -19,6 +20,7 @@ class APIUserHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.getObject('users', **self.args)
         # rtn.append(res)
+        # print('coockie:',self.get_current_user())
         self.write(json.dumps(res).encode())
 
 
