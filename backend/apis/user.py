@@ -37,18 +37,22 @@ class APIUserHandler(base.BaseHandler):
 
     async def _login_post(self):
         res_dict = {}
-        username = self.args['username']
+        id = self.args['id']
         password = self.args['password']
         try:
-            users_qualified = self.getObject('users', {'username': username, 'encodepass': password})
+            users_list = self.getObject('users', {'id': id, 'encodepass': password})[0]
         except:
             res_dict['code'] = 1
+            res_dict['msg'] = 'no such user'
             self.write(tornado.escape.json_encode(res_dict))
-        if len(users_qualified) == 1:
-            self.set_secure_cookie('username', username)
+        if len(users_list) == 1:
+            user_qualified = users_list[0]
+            self.set_secure_cookie('username', user_qualified['username'])
             res_dict['code'] = 0
+            res_dict['msg'] = 'login succeed'
         else:
             res_dict['code'] = 1
+            res_dict['msg'] = 'login error'
         self.write(tornado.escape.json_encode(res_dict))
 
     @tornado.web.authenticated
