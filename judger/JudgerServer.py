@@ -13,7 +13,6 @@ import tornado.web
 import tornado.websocket
 from urllib.parse import urlencode, unquote
 from tornado.options import define, options
-from base import BaseHandler
 
 define("port", default=12345, help="run on the given port", type=int)
 
@@ -24,21 +23,43 @@ class traditionalJudger(tornado.web.RequestHandler):
 	def post(self):
 		data = json.loads(self.request.body.decode())
 		# print(data)
-		judger = subprocess.Popen( ['./tradiJudger', \
-									'--tl=%d' % data['TIME_LIMIT'],
-									'--ml=%d' % data['MEMORY_LIMIT'],\
-									'--ol=%d' % data['OUTPUT_LIMIT'],\
-									'--in-pre=%s' % data['INPRE'],\
-									'--in-suf=%s' % data['INSUF'],\
-									'--out-pre=%s' % data['OUTPRE'],\
-									'--out-suf=%s' % data['OUTSUF'],\
-									'--Lang=%s' % data['Language'],\
-									'--data-dir=%s' % data['DATA_DIR'],\
-									'--checker=%s' % data['CHECKER'],\
-									'--n-tests=%d' % data['NTESTS'],\
-									'--source-name=%s' % data['SOURCE_FILE'],\
-									'--source-dir=%s' % data['SOURCE_DIR']
-									], stdout=subprocess.PIPE)
+		params = ['./tradiJudger', \
+					'--tl=%d' % data['TIME_LIMIT'],
+					'--ml=%d' % data['MEMORY_LIMIT'],\
+					'--ol=%d' % data['OUTPUT_LIMIT'],\
+					'--in-pre=%s' % data['INPRE'],\
+					'--in-suf=%s' % data['INSUF'],\
+					'--out-pre=%s' % data['OUTPRE'],\
+					'--out-suf=%s' % data['OUTSUF'],\
+					'--Lang=%s' % data['Language'],\
+					'--data-dir=%s' % data['DATA_DIR'],\
+					'--checker=%s' % data['CHECKER'],\
+					'--n-tests=%d' % data['NTESTS'],\
+					'--source-name=%s' % data['SOURCE_FILE'],\
+					'--source-dir=%s' % data['SOURCE_DIR']
+					]
+		if 'CHECKER_DIR' in data:
+			params.append('--checker-dir=%s' % data['CHECKER_DIR'])
+		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
+		judger.wait()
+		with open("result.json", "r", encoding='utf-8') as f:
+			judgerResult = json.dumps(json.load(f))
+			# print(judgerResult)
+			self.write(judgerResult)
+
+class scriptJudger(tornado.web.RequestHandler):
+	def post(self):
+		data = json.loads(self.request.body.decode())
+		# print(data)
+		params = ['./scriptJudger', \
+					'--tl=%d' % data['TIME_LIMIT'],
+					'--ml=%d' % data['MEMORY_LIMIT'],\
+					'--ol=%d' % data['OUTPUT_LIMIT'],\
+					'--work-path=%s' % data['WORK_PATH'],\
+					'--outputpath=%s' % data['OUTPUT_PATH'], \
+					data['OTHERS']
+					]
+		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
 		judger.wait()
 		with open("result.json", "r", encoding='utf-8') as f:
 			judgerResult = json.dumps(json.load(f))
@@ -50,6 +71,7 @@ class Application(tornado.web.Application):
 	def __init__(self):
 		handlers = [
 			(r"/traditionaljudger", traditionalJudger),
+			(r"/scriptjudger", scriptJudger)
 		]
 		settings = dict(
 			ui_modules = {},

@@ -53,11 +53,39 @@ RunResult runExecutor(
 		return RunResult::fail_execute();
 	}
 
-	char curdir[2048];
-	getcwd(curdir, 2048);
-	chdir(rc.path.c_str());
+	// char curdir[2048];
+	// getcwd(curdir, 2048);
+	// chdir(rc.path.c_str());
 	RunResult ret = RunResult::load(rc.resultFileName.c_str());
-	chdir(curdir);
+	// chdir(curdir);
+	return ret;
+}
+
+ScriptJudgerResult runScript(const ScriptConfig& scriptConfig){
+	RunConfig runConfig;
+	runConfig.lim = scriptConfig.lim;
+	runConfig.resultFileName = Pathjoin(scriptConfig.outputpath, scriptConfig.resultFileName);
+	runConfig.outputFileName = Pathjoin(scriptConfig.outputpath, scriptConfig.outputFileName);
+	runConfig.errorFileName = Pathjoin(scriptConfig.outputpath, scriptConfig.errorFileName);
+	runConfig.inputFileName = "stdin";
+	runConfig.Lang = "Script";
+	runConfig.path = scriptConfig.workpath;
+	runConfig.safe = true;
+	runConfig.argArr.assign(scriptConfig.argArr.begin(), scriptConfig.argArr.end());
+
+	RunResult res = runExecutor(runConfig);
+	ScriptJudgerResult ret;
+	ret.time = res.time;
+	ret.memory = res.memory;
+	if (res.jr == Accept && res.ec == NoError){
+		ret.load_Score_Info(runConfig.outputFileName);
+	} else
+	{
+		ret.load_Score_Info(runConfig.outputFileName);
+		if (res.ec != NoError){
+			ret.load_Info(runConfig.errorFileName);
+		}
+	}
 	return ret;
 }
 

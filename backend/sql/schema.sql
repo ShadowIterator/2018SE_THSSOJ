@@ -20,6 +20,16 @@
 -- To reload the tables:
 --   psql -U blog -d blog < schema.sql
 
+-- (x, y)
+-- x:
+    -- 0 : normal 
+    -- 1 : student
+    -- 2 : ta
+    -- 3 : admin
+-- y:
+    -- 0 : avalibal for every one
+    -- 1 : avalibal for oneself and admin
+
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
@@ -66,7 +76,7 @@ CREATE TABLE problems (
 --    description_path VARCHAR(256),
     time_limit INTEGER, -- MS
     memory_limit INTEGER,  -- KB
-    judge_method INTEGER, 
+    judge_method INTEGER,
     records INTEGER[],
     openness INTEGER
 );
@@ -80,6 +90,7 @@ CREATE TABLE records (
     problem_id INTEGER,
     homework_id INTEGER,
     result INTEGER,
+    submit_status INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte

@@ -3,7 +3,6 @@
 #include <fstream>
 
 using namespace std;
-const string checker_dir = "/home/ycdfwzy/myworkspace/tinyjudger/checkers";
 const string resSuf = ".res";
 const string errSuf = ".err";
 const string rptSuf = ".rpt";
@@ -50,7 +49,7 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 
 			if (rr.jr == Accept && rr.ec == NoError){
 				CheckerResult cr = runChecker(judgerConfig.dataDir.c_str(),
-												Pathjoin(checker_dir, judgerConfig.checker).c_str(),
+												Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
 												(judgerConfig.outputPre+resSuf).c_str(),
 												(judgerConfig.outputPre+errSuf).c_str(),
 												Pathjoin(judgerConfig.dataDir, inputfile).c_str(),
@@ -126,7 +125,7 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 
 		if (rr.jr == Accept && rr.ec == NoError){
 			CheckerResult cr = runChecker(judgerConfig.dataDir.c_str(),
-											Pathjoin(checker_dir, judgerConfig.checker).c_str(),
+											Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
 											(judgerConfig.outputPre+resSuf).c_str(),
 											(judgerConfig.outputPre+errSuf).c_str(),
 											Pathjoin(judgerConfig.dataDir, inputfile).c_str(),
@@ -208,6 +207,7 @@ int main(int argc, char** argv){
 	JudgerConfig judgerConfig;
 	tradi_judger_parse_args(argc, argv, judgerConfig);
 	JudgerResult judgerResult = main_test(judgerConfig);
+	StringFormat(judgerResult.info);
 	ofstream fout("result.json");
 	fout << "{" << endl;
 	fout << "    \"Result\" : \"" << judgerResult.result << "\"," << endl;
