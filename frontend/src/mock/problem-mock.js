@@ -1,10 +1,12 @@
 import {URL, api_list} from "../ajax-utils/api-manager";
 import Mock from 'mockjs'
+// import {Base64} from "../basic-component/base64";
+import { Base64 } from 'js-base64';
 
 let problems = [{
     'id': 0,
     'title': 'A+B',
-    'description': '这是一个简单的a+b问题',
+    'description': '# A+B\n\n## 这是一个简单的a+b问题',
     'time_limit': 1000,
     'memery_limit': 128*1024,
     'judge_method': 0,
@@ -94,7 +96,8 @@ Mock.mock(URL+api_list['query_problem'], function(options){
     for (let index in problems) {
         let problem = problems[index];
         if (problem.id === id){
-          res.push(problem);
+            // problem.description = Base64.encode(problem.description);
+            res.push(problem);
         }
     }
     return res;

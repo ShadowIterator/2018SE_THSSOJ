@@ -11,6 +11,8 @@ import {Info} from "./lesson-component";
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
+import {AuthContext} from "../basic-component/auth-context";
+import {withRouter} from "react-router";
 
 import "../mock/course-mock";
 import "../mock/auth-mock";
@@ -18,20 +20,38 @@ import "../mock/notice-mock";
 import "../mock/homework-mock";
 import "../mock/problem-mock";
 
-class StudentHomeworkCard extends Component {
+
+class mStudentHomeworkCard extends Component {
+    constructor(props) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+    handleClick(event) {
+        event.preventDefault();
+        let id = event.target.id;
+        id = id>=0? id:-id;
+        const pathname = '/problemdetail';
+        this.props.history.push({
+            pathname: pathname,
+            problem_id: id,
+        });
+    }
     render() {
         return (
             <Card style={Spacing}>
                 <h5>{this.props.name}</h5>
                 <Menu>
-                    {this.props.questions.map(
-                        (q)=><Menu.Item icon="code" text={q.title} />
-                    )}
+                    {this.props.questions.map((q)=>(<li>
+                        <a id={(-q.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
+                            <div id={q.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{q.title}</div>
+                        </a>
+                    </li>))}
                 </Menu>
             </Card>
         )
     }
 }
+const StudentHomeworkCard = withRouter(mStudentHomeworkCard);
 
 class StudentHomeworkPanel extends Component {
     constructor(props) {
