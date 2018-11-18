@@ -66,7 +66,7 @@ class APIUserHandler(base.BaseHandler):
         username = self.args['username']
         res_dict={}
         try:
-            user_qualified = self.getObject('users', {'username': username})[1]
+            user_qualified = self.getObject('users', {'username': username})[0]
             email = user_qualified['email']
             sender = '1747310410@qq.com'
             receivers = [email,]
@@ -88,6 +88,21 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code']=1
         self.write(tornado.escape.json_encode(res_dict))
 
+    async def _activate_post(self):
+        res_dict = {}
+        try:
+            username = self.args['username']
+            validate_code = self.args['validate_code']
+            user_qualified = self.getObject('users', {'username': username})[0]
+            if user_qualified['validate_code']==validate_code:
+                user_qualified.status=1
+                self.saveObject('users',user_qualified)
+                res_dict['code']=0
+            else:
+                res_dict['code']=1
+        except:
+            res_dict['code']=1
+        self.write(tornado.escape.json_encode(res_dict))
 
     async def get(self, type): #detail
         # self.getargs()
