@@ -148,10 +148,11 @@ argp_option tradi_judger_argp_options[] = {
 	{"out-suf"            , 'S', "OUTSUF"      , 0, "Set output file suffix name"                           ,  7},
 	{"Lang"               , 'L', "Language"    , 0, "Set the Language"                                      ,  8},
 	{"data-dir"           , 'd', "DATA_DIR"    , 0, "Set the data directory"                                ,  9},
-	{"checker"            , 'c', "CHECKER"     , 0, "Set the program type (for some program such as python)", 10},
-	{"n-tests"            , 'n', "NTESTS"      , 0, "Set the number of tests"                               , 11},
-	{"source-name"        , 'f', "SOURCE_FILE" , 0, "Set the source file name"                              , 12},
-	{"source-dir"         , 'D', "SOURCE_DIR"  , 0, "Set the source file directory"                         , 13},
+	{"checker"            , 'c', "CHECKER"     , 0, "Set the checker type"                                  , 10},
+	{"checker-dir"        , 'C', "CHECKER_DIR" , 0, "Set the checker directory"                             , 11},
+	{"n-tests"            , 'n', "NTESTS"      , 0, "Set the number of tests"                               , 12},
+	{"source-name"        , 'f', "SOURCE_FILE" , 0, "Set the source file name"                              , 13},
+	{"source-dir"         , 'D', "SOURCE_DIR"  , 0, "Set the source file directory"                         , 14},
 	{0}
 };
 
@@ -189,6 +190,9 @@ error_t tradi_judger_argp_parse_opt (int key, char *arg, struct argp_state *stat
 		case 'c':
 			config->checker = arg;
 			break;
+		case 'C':
+			config->checkerDir = arg;
+			break;
 		case 'n':
 			config->ntests = atoi(arg);
 			break;
@@ -221,6 +225,7 @@ void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
 	judgerConfig.outputPre = "test";
 	judgerConfig.outputSuf = "ans";
 	judgerConfig.checker = "ncmp";
+	judgerConfig.checkerDir = default_checker_dir;
 	judgerConfig.Lang = "C";
 	judgerConfig.dataDir = "/tmp";
 	judgerConfig.ntests = 10;
@@ -235,11 +240,15 @@ argp_option script_judger_argp_options[] = {
 	{"ml"                 , 'M', "MEMORY_LIMIT", 0, "Set memory limit (in mb)"                              ,  2},
 	{"ol"                 , 'O', "OUTPUT_LIMIT", 0, "Set output limit (in mb)"                              ,  3},
 	{"work-path"          , 'w', "WORK_PATH"   , 0, "Set work path"                                         ,  4},
+	{"outputpath"         , 'x', "OUTPUT_PATH" , 0, "Set all output-files' directory"                       ,  5},
+	{"out"                , 'o', "OUTPUT_FILE" , 0, "Set output file name"                                  ,  6},
+	{"err"                , 'e', "ERROR_FILE"  , 0, "Set error file name"                                   ,  7},
+	{"res"                , 'r', "RESULT_FILE" , 0, "Set result file name"                                  ,  8},
 	{0}
 };
 
 error_t script_judger_argp_parse_opt (int key, char *arg, struct argp_state *state){
-	RunConfig *config = (RunConfig*)state->input;
+	ScriptConfig *config = (ScriptConfig*)state->input;
 	char rp[PATH_MAX+1];
 
 	switch (key){
@@ -253,14 +262,27 @@ error_t script_judger_argp_parse_opt (int key, char *arg, struct argp_state *sta
 			config->lim.output = atoi(arg);
 			break;
 		case 'w':
-			if (realpath(arg, rp) == NULL){
-				std::cout << "error in realpath; path = " << arg << std::endl;
-				config->path = "";
-			} else
-				config->path = std::string(rp);
-			if (config->path.empty()) {
-				argp_usage(state);
-			}
+			// if (realpath(arg, rp) == NULL){
+			// 	std::cout << "error in realpath; path = " << arg << std::endl;
+			// 	config->workpath = "";
+			// } else
+			// 	config->workpath = std::string(rp);
+			// if (config->workpath.empty()) {
+			// 	argp_usage(state);
+			// }
+			config->workpath = arg;
+			break;
+		case 'x':
+			config->outputpath = arg;
+			break;
+		case 'o':
+			config->outputFileName = arg;
+			break;
+		case 'e':
+			config->errorFileName = arg;
+			break;
+		case 'r':
+			config->resultFileName = arg;
 			break;
 		case ARGP_KEY_ARG:
 			config->argArr.push_back(arg);
@@ -288,15 +310,13 @@ argp script_judger_margs = {
 	script_judger_argp_doc
 };
 
-void script_judger_parse_args(int argc ,char **argv, RunConfig &runConfig){
-	runConfig.lim = defaultLimit;
-	runConfig.resultFileName = "stdout";
-	runConfig.inputFileName = "stdin";
-	runConfig.outputFileName = "stdout";
-	runConfig.errorFileName = "stderr";
-	runConfig.Lang = "script";
-	runConfig.path = getCurDir();
-	runConfig.safe = true;
+void script_judger_parse_args(int argc ,char **argv, ScriptConfig &scriptConfig){
+	scriptConfig.lim = defaultLimit;
+	scriptConfig.outputpath = "/tmp";
+	scriptConfig.resultFileName = "result.txt";
+	scriptConfig.outputFileName = "output.txt";
+	scriptConfig.errorFileName = "error.txt";
+	scriptConfig.workpath = getCurDir();
 
-	argp_parse(&script_judger_margs, argc, argv, ARGP_NO_ARGS | ARGP_IN_ORDER, 0, &runConfig);
+	argp_parse(&script_judger_margs, argc, argv, ARGP_NO_ARGS | ARGP_IN_ORDER, 0, &scriptConfig);
 }
