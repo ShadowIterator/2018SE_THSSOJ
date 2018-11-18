@@ -14,7 +14,7 @@ let courses = [{
     id: 1,
     name: "course no.2",
     description: "this is course no.2",
-    TAs: [],
+    TAs: [0],
     students: [],
     homeworks: [],
     status: 0,

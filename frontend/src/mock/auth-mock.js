@@ -10,8 +10,8 @@ let users = [{
     'gender':0,
     'realname':'teaching assistant',
     'student_id':2016011111,
-    'student_course':[],
-    'TA_course':[0],
+    'student_courses':[],
+    'TA_courses':[0, 1],
     'role':2,
 },{
     'id': 1,
@@ -24,7 +24,7 @@ let users = [{
     'realname':'',
     'validate_code':-1,
     'role':1,
-    'student_course':[0],
+    'student_courses':[0],
 }];
 
 let user_counter = 2;

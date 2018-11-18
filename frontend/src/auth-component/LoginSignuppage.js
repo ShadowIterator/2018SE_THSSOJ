@@ -9,7 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import {auth_state, AuthContext} from "../basic-component/auth-context";
 
-// import "../mock/auth-mock"
+import "../mock/auth-mock"
 
 class Login extends Component
 {
@@ -40,7 +40,6 @@ class Login extends Component
             username: this.state.username,
             password: pwd_encrypt(this.state.password)
         };
-        console.log(login_data);
         ajax_post(api_list['login'], login_data, this, Login.login_callback);
     }
     static login_callback(that, result) {
@@ -48,7 +47,6 @@ class Login extends Component
         if(code===0) {
             const id = result.data.id;
             const role = result.data.role;
-            console.log(id, role)
             auth_state.id = id;
             auth_state.role = role;
             auth_state.state = true;
