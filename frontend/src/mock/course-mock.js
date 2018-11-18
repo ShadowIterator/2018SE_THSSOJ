@@ -70,10 +70,71 @@ Mock.mock(URL+api_list['query_course'], function(options) {
     const id = data.id;
     for(let index in courses) {
         const course = courses[index];
-        if(course.id === id) {
+        if (course.id === id) {
             return [course];
         }
     }
     return [];
 });
 
+Mock.mock(URL+api_list['addStudent_course'], function(options) {
+    const data = JSON.parse(options.body);
+    const course_id = data.course_id;
+    const stu_id = data.stu_id;
+    for (let index in courses) {
+        const course = courses[index];
+        if (course.id === course_id){
+            courses[index].students.push(stu_id);
+            return {code:0};
+        }
+    }
+    return {code:1};
+});
+
+Mock.mock(URL+api_list['addTA_course'], function(options) {
+    const data = JSON.parse(options.body);
+    const course_id = data.course_id;
+    const ta_id = data.ta_id;
+    for (let index in courses) {
+        const course = courses[index];
+        if (course.id === course_id){
+            courses[index].TAs.push(ta_id);
+            return {code:0};
+        }
+    }
+    return {code:1};
+});
+
+Mock.mock(URL+api_list['deleteStudent_course'], function(options) {
+    const data = JSON.parse(options.body);
+    const course_id = data.course_id;
+    const stu_id = data.stu_id;
+    for (let index in courses) {
+        const course = courses[index];
+        if (course.id === course_id){
+            for (let idx in course.students)
+                if (course.students[idx] === stu_id){
+                    courses[index].students.splice(idx, 1);
+                    return {code:0};
+                }
+        }
+    }
+    return {code:1};
+});
+
+Mock.mock(URL+api_list['deleteTA_course'], function(options) {
+    const data = JSON.parse(options.body);
+    const course_id = data.course_id;
+    const ta_id = data.ta_id;
+    for (let index in courses) {
+        const course = courses[index];
+        if (course.id === course_id){
+            for (let idx in course.TAs)
+                if (course.TAs[idx] === ta_id){
+                    courses[index].TAs.splice(idx, 1);
+                    return {code:0};
+                }
+        }
+    }
+    return {code:1};
+});
