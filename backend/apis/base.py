@@ -79,6 +79,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def __init__(self, *args, **kw):
         super(BaseHandler, self).__init__(*args, **kw)
         self.getargs()
+        self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header("Access-Control-Allow-Credentials", 'true')
+
 
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
@@ -216,7 +221,8 @@ class BaseHandler(tornado.web.RequestHandler):
     def getargs(self):
         # print('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
-        print('getargs\n', self.args)
+        print('getargs\n', self.request)
+        print(self.request.method)
 
 
     async def _call_method(self, method, *args, **kw):
@@ -226,4 +232,9 @@ class BaseHandler(tornado.web.RequestHandler):
             raise NoMethodError
             return
         await func(*args, **kw)
+
+    def options(self, *args, **kw):
+        # no body
+        self.set_status(204)
+        self.finish()
 

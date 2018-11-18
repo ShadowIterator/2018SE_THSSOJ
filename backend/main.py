@@ -41,7 +41,11 @@ async def main():
                           [
                               (r"/api/user/(.*)", APIUserHandler)
                           ],
-                          debug = True)
+                          **{
+                          'debug': True,
+                          'cookie_secret':'ahsdfhksadjfhksjahfkashdf',
+                          # 'xsrf_cookies':True,
+                          })
         app.listen(options.port)
 
         # In this demo the server will simply run until interrupted
