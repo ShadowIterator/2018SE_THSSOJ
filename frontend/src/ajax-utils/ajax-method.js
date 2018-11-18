@@ -5,7 +5,7 @@ import {URL} from './api-manager';
 function ajax_post(url,data,that,callback){
     axios({
         method:"POST",
-        headers:{'Content-type':'application/json',},
+        headers:{'Content-type':'application/json'},
         url:URL+url,
         data:data,
         withCredentials:true
@@ -17,6 +17,7 @@ function ajax_post(url,data,that,callback){
         alert('post失败');
         console.log(error);
         console.log(URL+url);
+        console.log(data);
     });
 }
 function ajax_get(url,data,that,callback){
@@ -24,7 +25,6 @@ function ajax_get(url,data,that,callback){
         method:"GET",
         headers:{'Content-type':'application/json',},
         url:URL+url,
-        data:data,
         withCredentials:true
     }).then(function(res){
         console.log('Get请求到:\t'+url);

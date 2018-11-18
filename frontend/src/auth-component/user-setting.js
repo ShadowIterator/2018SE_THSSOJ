@@ -34,7 +34,8 @@ class UserSettingsForm extends Component {
     fillInfo() {
         const id = this.context.id;
         const query_data = {id: id};
-        ajax_get(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
+        console.log(query_data);
+        ajax_post(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
     }
     componentDidMount() {
         if(this.context.state) {
@@ -43,14 +44,15 @@ class UserSettingsForm extends Component {
     }
     static mount_callback(that, result) {
         const data = result.data[0];
+        console.log(data);
         that.setState({
             username: data.username,
             email: data.email,
-            status: data.status,
-            gender: data.gender,
-            realname: data.realname,
-            student_id: data.student_id>0 ? data.student_id.toString() : '' ,
-            role: data.role
+            status: data.status? data.status:0,
+            gender: data.gender? data.gender:2,
+            realname: data.realname? data.realname:'',
+            student_id: data.student_id? (data.student_id>0 ? data.student_id.toString() : '') : '' ,
+            role: data.role? data.role:0
         });
     }
     handleChange(event) {
