@@ -72,5 +72,4 @@ Mock.mock(URL+api_list['query_notice'], function(options){
         }
     }
     return res
-    // return {code:1};
 });

@@ -9,6 +9,7 @@ import {LoginPage, SignupPage, LogoutPage} from './auth-component/LoginSignuppag
 import {StudentHomepage} from './class-component/student-homepage';
 import {TAHomepage} from "./class-component/TA-homepage";
 import {StudentLesson} from "./class-component/student-lesson";
+import {TALesson} from "./class-component/TA-lesson"
 
 import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
@@ -42,6 +43,7 @@ class App extends Component {
                         <Route path="/ta" component={TAHomepage} />
                         <Route path="/studentlesson" component={StudentLesson} />
                         <Route path="/usersettings" component={UserSettings} />
+                        <Route path="/talesson" component={TALesson}/>
                     </div>
                 </Router>
                 <Bottombar/>
