@@ -55,11 +55,11 @@ class APIUserHandler(base.BaseHandler):
         if len(users_list) == 1:
             userObj = users_list[0]
             print(userObj)
-            self.set_secure_cookie('user_id', str(userObj.id))
+            self.set_secure_cookie('user_id', str(userObj.id), expires_days = None)
+            # self.set_cookie('id', str(userObj.id), expires_days = None)
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
-
         else:
             res_dict['code'] = 1
             res_dict['msg'] = 'login error'

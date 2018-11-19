@@ -8,6 +8,7 @@ import {ajax_post, ajax_get} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import {auth_state, AuthContext} from "../basic-component/auth-context";
+import Cookies from "js-cookie";
 
 // import "../mock/auth-mock"
 
@@ -50,6 +51,7 @@ class Login extends Component
             auth_state.id = id;
             auth_state.role = role;
             auth_state.state = true;
+            Cookies.set('mid', id.toString());
             if (role === 1) {
                 that.context.router.history.push("/student");
             }

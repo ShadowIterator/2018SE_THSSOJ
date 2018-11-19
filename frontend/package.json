@@ -11,6 +11,7 @@
     "create-react-class": "^15.6.0",
     "holderjs": "^2.9.6",
     "js-base64": "^2.4.9",
+    "js-cookie": "^2.2.0",
     "mockjs": "^1.0.1-beta3",
     "prop-types": "^15.6.2",
     "react": "^16.6.0",
@@ -21,7 +22,8 @@
     "react-holder": "^1.0.0",
     "react-markdown": "^4.0.0",
     "react-router-dom": "^4.3.1",
-    "react-scripts": "2.1.0"
+    "react-scripts": "2.1.0",
+    "universal-cookie": "^3.0.4"
   },
   "scripts": {
     "start": "react-scripts start",

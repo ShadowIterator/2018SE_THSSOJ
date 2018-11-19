@@ -8,8 +8,14 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
-import {AuthContext} from './auth-context';
+import {AuthContext, auth_state} from './auth-context';
 import {withRouter} from "react-router";
+// import Cookies from 'universal-cookie';
+import Cookies from 'js-cookie';
+import {ajax_post} from "../ajax-utils/ajax-method";
+import {api_list} from "../ajax-utils/api-manager";
+
+// const cookies = new Cookies();
 
 class mDropdown extends Component {
     render() {
@@ -49,9 +55,27 @@ class mTopbar extends Component {
         this.handlePublicClick = this.handlePublicClick.bind(this);
     }
     componentDidMount() {
+        console.log(Cookies.get('mid'))
         if(this.context.state === false) {
-            this.props.history.push('/login');
+            const id_cookie = Cookies.get('mid');
+            console.log('cookie: ', id_cookie);
+            if (!id_cookie) {
+                this.props.history.push('/login');
+            } else {
+                ajax_post(api_list['query_user'], {id: parseInt(id_cookie)}, this, mTopbar.query_user_callback);
+            }
         }
+        // if(this.context.state === false) {
+        //     this.props.history.push('/login');
+        // }
+    }
+    static query_user_callback(that, result) {
+        if(result.data.length===0)
+            return;
+        const data = result.data[0];
+        auth_state.id = data.id;
+        auth_state.role = data.role;
+        auth_state.state = true;
     }
     handleHomeClick() {
         if(this.context.state) {

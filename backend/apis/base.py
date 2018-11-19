@@ -62,6 +62,7 @@ permissions = {
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email':(PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'write': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -77,6 +78,7 @@ permissions = {
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email':(PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'courses': {
