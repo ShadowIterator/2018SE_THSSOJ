@@ -14,6 +14,7 @@ import {ProblemDetail} from "./problem-component/problem-detail";
 
 import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
+import {CreateLesson} from "./class-component/TA-create-lesson";
 
 import Cookies from 'js-cookie';
 
@@ -91,6 +92,7 @@ class App extends Component {
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
                         <Route path="/talesson" render={()=><TALesson />} />
                         <Route path="/problemdetail/:id" render={(props) => <ProblemDetail problem_id={props.match.params.id} />} />
+                        <Route path="/createlesson" component={CreateLesson}/>
                     </div>
                 </Router>
                 <Bottombar/>

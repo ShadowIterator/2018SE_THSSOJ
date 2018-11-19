@@ -76,11 +76,22 @@ Mock.mock(URL+api_list['logout'],{code:0});
 
 Mock.mock(URL+api_list['query_user'],function(options) {
    const data = JSON.parse(options.body);
-   const id = data.id;
-   for(let index in users) {
-       const user = users[index];
-       if(user['id']===id) {
-           return [user];
+   if (data.username) {
+       const username = data.username;
+       for(let index in users) {
+           const user = users[index];
+           if(user['username']===username) {
+               return [user];
+           }
+       }
+   } else
+   {
+       const id = data.id;
+       for(let index in users) {
+           const user = users[index];
+           if(user['id']===id) {
+               return [user];
+           }
        }
    }
    return [];
@@ -130,3 +141,5 @@ Mock.mock(URL+api_list['update_user'],function(options) {
     }
     return {code:1};
 });
+
+export {users}
