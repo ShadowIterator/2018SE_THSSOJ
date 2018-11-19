@@ -43,17 +43,17 @@ class APIUserHandler(base.BaseHandler):
 
     async def _login_post(self):
         res_dict = {}
-        id = self.args['id']
+        username = self.args['username']
         password = self.args['password']
         try:
-            users_list = self.getObject('users', {'id': id, 'encodepass': password})
+            users_list = await self.getObject('users', **{'username': username, 'password': password})
         except:
             res_dict['code'] = 1
             res_dict['msg'] = 'no such user'
             self.write(tornado.escape.json_encode(res_dict))
             return 
-        if len(users_qualified) == 1:
-            userObj = users_qualified[0]
+        if len(users_list) == 1:
+            userObj = users_list[0]
             print(userObj)
             self.set_secure_cookie('user_id', str(userObj.id))
             res_dict['code'] = 0
@@ -77,10 +77,10 @@ class APIUserHandler(base.BaseHandler):
         self.write(tornado.escape.json_encode(res_dict))
 
     async def _validate_post(self):
-        username = self.args['username']
+        id = self.args['id']
         res_dict={}
         try:
-            user_qualified = await self.getObject('users', {'username': username})[0]
+            user_qualified = await self.getObject('users', id=id)[0]
             email = user_qualified['email']
             sender = '1747310410@qq.com'
             receivers = [email,]
@@ -105,10 +105,9 @@ class APIUserHandler(base.BaseHandler):
     async def _activate_post(self):
         res_dict = {}
         try:
-            username = self.args['username']
+            id = self.args['id']
             validate_code = self.args['validate_code']
-
-            user_qualified = await self.getObject('users', {'username': username})[0]
+            user_qualified = await self.getObject('users', id=id)[0]
             if user_qualified['validate_code'] == validate_code:
                 user_qualified.status = 1
                 await self.saveObject('users', user_qualified)

@@ -106,3 +106,5 @@ CREATE TABLE notices (
     title VARCHAR(128),
     content TEXT
 );
+
+INSERT INTO users (username, password, email) VALUES ('sherlockcooper','Y3Vycnk=','1747310410@qq.com');
