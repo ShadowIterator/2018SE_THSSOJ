@@ -43,17 +43,17 @@ class APIUserHandler(base.BaseHandler):
 
     async def _login_post(self):
         res_dict = {}
-        id = self.args['id']
+        username = self.args['username']
         password = self.args['password']
         try:
-            users_list = self.getObject('users', {'id': id, 'encodepass': password})
+            users_list = await self.getObject('users', **{'username': username, 'password': password})
         except:
             res_dict['code'] = 1
             res_dict['msg'] = 'no such user'
             self.write(tornado.escape.json_encode(res_dict))
             return 
-        if len(users_qualified) == 1:
-            userObj = users_qualified[0]
+        if len(users_list) == 1:
+            userObj = users_list[0]
             print(userObj)
             self.set_secure_cookie('user_id', str(userObj.id))
             res_dict['code'] = 0
