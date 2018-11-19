@@ -72,8 +72,8 @@ class CodeInput extends Component {
             <CodeMirror value={'// code'}
                         ref="editor"
                         options={{
-                            mode: {name: "text/x-csrc"},
-                            theme: 'ambiance',
+                            mode: {name: "text/x-c++src"},
+                            theme: 'neat',
                             lineNumbers: true,
                             extraKeys: {"Ctrl": "autocomplete"},
                         }}
