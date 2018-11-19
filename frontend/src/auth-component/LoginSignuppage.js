@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 import {ajax_post, ajax_get} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
-import {auth_state, AuthContext} from "../basic-component/auth-context";
 import Cookies from "js-cookie";
 
 // import "../mock/auth-mock"
@@ -48,11 +47,8 @@ class Login extends Component
         if(code===0) {
             const id = result.data.id;
             const role = result.data.role;
-            auth_state.id = id;
-            auth_state.role = role;
-            auth_state.state = true;
             Cookies.set('mid', id.toString());
-            that.props.callback();
+            that.props.callback(id, role);
             if (role === 1) {
                 that.context.router.history.push("/student");
             }
@@ -331,6 +327,7 @@ class mLogoutPage extends Component {
     static logout_callback(that, result) {
         const code = result.data.code;
         if(code===0) {
+            Cookies.remove('mid');
             alert("Logout succeed.");
         } else {
             alert("Logout failed.");

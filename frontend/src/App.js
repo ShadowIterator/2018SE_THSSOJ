@@ -89,7 +89,7 @@ class App extends Component {
                         <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
                         <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson" component={TALesson} />
+                        <Route path="/talesson" render={()=><TALesson />} />
                         <Route path="/problemdetail/:id" render={(props) => <ProblemDetail problem_id={props.match.params.id} />} />
                     </div>
                 </Router>
