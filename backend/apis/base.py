@@ -11,6 +11,7 @@ import tornado.ioloop
 import tornado.locks
 import tornado.options
 import tornado.web
+import traceback
 import unicodedata
 import site
 from tornado.options import define, options
@@ -27,6 +28,9 @@ class NoResultError(Exception):
     pass
 
 class NoMethodError(Exception):
+    pass
+
+class BaseError(Exception):
     pass
 
 # permLevel = {
@@ -181,6 +185,15 @@ permissions = {
     }
 }
 
+database_keys = {
+    'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'TA_courses'],
+    'courses': ['id', 'name', 'description', 'TAs', 'students', 'status', 'homeworks', 'notices'],
+    'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness'],
+    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
+    'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
+}
+
 # class DatabaseRowObject(tornado.util.ObjectDict):
 #     def __init__(self, db, *args, **kw):
 #         self.db = db
@@ -202,6 +215,39 @@ permissions = {
 #                 print(key)
 #         # self.execute('''UPDATE ''')
 
+def filterKeys(si_table_name, kw):
+    # print('filterKeys: ', kw)
+    rtn = {}
+    keyslist = database_keys[si_table_name]
+    for key,value in kw.items():
+        if(key in keyslist):
+            rtn[key] = value
+    return rtn
+
+
+def catch_exception_write(func):
+    async def wrapper(self, *args, **kw):
+        try:
+            return await func(self, *args, **kw)
+        except Exception as e:
+            print('catch_exception: return code = -1\n', repr(e))
+            print(traceback.print_exc())
+            self.write(json.dumps({'code': 1}).encode())
+    return wrapper
+
+def check_password(func):
+    async def wrapper(self, *args, **kw):
+        user = await self.get_current_user_object()
+        if(user['password'] == self.args['auth_password']):
+            return await func(self, *args, **kw)
+        raise BaseError('password incorrect')
+    return wrapper
+        # try:
+        #     if(self.user['password'] == self.args['auth_password']):
+        #         return
+        #
+        # except:
+        #     raise BaseError('check password failed')
 
 async def maybe_create_tables(db, filename):
     # try:
@@ -234,7 +280,9 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
+
         self.root_dir='root'
+        self.user = None
 
     async def get(self, type): #detail
         print('get: ', type)
@@ -243,6 +291,13 @@ class BaseHandler(tornado.web.RequestHandler):
     async def post(self, type):
         print('post: ', type)
         await self._call_method('''_{action_name}_post'''.format(action_name = type))
+
+
+
+        # if(not self.user):
+        #     self.user = {
+        #         'role':
+        #     }
 
 
     def row_to_obj(self, row, cur):
@@ -262,6 +317,8 @@ class BaseHandler(tornado.web.RequestHandler):
         #     return None
         # else:
         #     return users[0]
+        if(self.user != None):
+            return self.user
         try:
             user_id = self.get_secure_cookie('user_id')
             print('user_id:', int(user_id))
@@ -344,6 +401,7 @@ class BaseHandler(tornado.web.RequestHandler):
     async def saveObject(self, si_table_name, object, secure = 0):
         if(secure):
             object = await self.objectFilter(si_table_name, 'write', object)
+        object = filterKeys(si_table_name, object)
         fmtList = []
         valueList = []
         for key,value in object.items():
@@ -371,6 +429,7 @@ class BaseHandler(tornado.web.RequestHandler):
             return res
 
     async def getObject(self, si_table_name, secure = 0, **kw):
+        kw = filterKeys(si_table_name, kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
@@ -401,6 +460,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     async def createObject(self, si_table_name, **kw):
         print('createObject: kw = ', kw)
+        kw = filterKeys(si_table_name, kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
         # propfmt = []
@@ -452,8 +512,7 @@ class BaseHandler(tornado.web.RequestHandler):
         func = getattr(self, method, None)
         if(not callable(func)):
             raise NoMethodError
-            return
-        await func(*args, **kw)
+        return await func(*args, **kw)
 
     def options(self, *args, **kw):
         # no body
