@@ -8,7 +8,7 @@ class APIProblemHandler(base.BaseHandler):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/problems'
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
         description=bytearray()
@@ -24,7 +24,7 @@ class APIProblemHandler(base.BaseHandler):
             description = base64.b64decode(byte_content)
             del self.args['description']
             await self.createObject('problems', **self.args)
-            problem_in_db=await self.getObject('problems', **self.args)[0]
+            problem_in_db=await self.getObject('problems', secure=1, **self.args)[0]
             target_path = self.root_dir+'/'+str(problem_in_db['id'])
             os.makedirs(target_path)
             description_file = open(target_path+'/'+str(problem_in_db[0])+'.md', mode='wb')
@@ -35,7 +35,7 @@ class APIProblemHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='fail to create problem')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _delete_post(self):
         res_dict={}
         try:
@@ -49,13 +49,13 @@ class APIProblemHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='fail to delete any homework')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _update_post(self):
         res_dict = {}
         try:
             problem_id = self.args['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-            target_homework = await self.getObject('homeworks', id=self.args['id'])[0]
+            target_homework = await self.getObject('homeworks', secure=1, id=self.args['id'])[0]
             try:
                 if 'description' in self.args.keys():
                     description = bytearray()
@@ -70,7 +70,7 @@ class APIProblemHandler(base.BaseHandler):
                     if key == 'id':
                         continue
                     target_homework[key] = self.args[key]
-                self.saveObject('homeworks', target_homework)
+                self.saveObject('homeworks', secure=1, object= target_homework)
                 self.set_res_dict(res_dict, code=0, msg='homework updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')
@@ -80,13 +80,13 @@ class APIProblemHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='homework does not exist')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _query_post(self):
         res_dict={}
         if 'description' in self.args.keys():
             del self.args['description']
         try:
-            res = await self.getObject('homeworks', **self.args)
+            res = await self.getObject('homeworks', secure=1, **self.args)
             for problem in res:
                 problem_id = problem['id']
                 target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'

@@ -6,7 +6,7 @@ class APIHomeworkHandler(base.BaseHandler):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/homeworks'
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
         try:
@@ -16,7 +16,7 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='fail to create homework')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _delete_post(self):
         res_dict={}
         try:
@@ -26,17 +26,17 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='fail to delete any homework')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _update_post(self):
         res_dict = {}
         try:
-            target_homework = await self.getObject('homeworks', id=self.args['id'])[0]
+            target_homework = await self.getObject('homeworks', secure=1, id=self.args['id'])[0]
             try:
                 for key in self.args.keys():
                     if key == 'id':
                         continue
                     target_homework[key] = self.args[key]
-                self.saveObject('homeworks', target_homework)
+                self.saveObject('homeworks',secure=1, object=target_homework)
                 self.set_res_dict(res_dict, code=0, msg='homework updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')
@@ -46,7 +46,7 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='homework does not exist')
         self.return_json(res_dict)
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _query_post(self):
-        res = await self.getObject('homeworks', **self.args)
+        res = await self.getObject('homeworks', secure=1, **self.args)
         self.return_json(res)
