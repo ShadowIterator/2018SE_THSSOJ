@@ -5,7 +5,6 @@ import {Container, Col, Row} from 'react-bootstrap';
 import {Info, StudentLessonList} from "./lesson-component";
 
 import {ZeroPadding} from "./lesson-component";
-import {AuthContext} from "../basic-component/auth-context";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
@@ -24,10 +23,17 @@ class StudentHomepageMiddle extends Component {
         this.lessonlist = [];
     }
     componentDidMount() {
-        if(!this.context.state)
+        if(!this.props.state || this.props.id===undefined)
             return;
-        const id = this.context.id;
+        const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            ajax_post(api_list['query_user'], {id:nextProps.id}, this, StudentHomepageMiddle.query_user_callback);
+        }
     }
     static query_user_callback(that, result) {
         if(result.data.length === 0) {
@@ -96,13 +102,12 @@ class StudentHomepageMiddle extends Component {
         )
     }
 }
-StudentHomepageMiddle.contextType = AuthContext;
 
 class StudentHomepage extends Component {
     render() {
         return (
             <>
-                <StudentHomepageMiddle />
+                <StudentHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
             </>
         )
     }

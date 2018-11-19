@@ -217,13 +217,10 @@ class StudentLessonMiddle extends Component {
 }
 
 export class StudentLesson extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         return (
             <>
-                <StudentLessonMiddle course_id={this.props.id} />
+                <StudentLessonMiddle course_id={this.props.lesson_id} id={this.props.id} state={this.props.state} />
             </>
         )
     }

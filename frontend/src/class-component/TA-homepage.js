@@ -3,7 +3,6 @@ import {Row, Col, Container} from "react-bootstrap";
 import {TALessonList, Info} from "./lesson-component";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
-import {AuthContext} from "../basic-component/auth-context";
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -32,10 +31,10 @@ class TAHomepageMiddle extends Component {
         this.infoitems = [];
     }
     componentDidMount() {
-        if(!this.context.state) {
+        if(!this.props.state || !this.props.id) {
             return;
         }
-        const id = this.context.id;
+        const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, TAHomepageMiddle.query_user_callback);
     }
     static query_user_callback(that, result) {
@@ -121,13 +120,12 @@ class TAHomepageMiddle extends Component {
 
     }
 }
-TAHomepageMiddle.contextType = AuthContext;
 
 class TAHomepage extends Component {
     render() {
         return (
             <>
-                <TAHomepageMiddle />
+                <TAHomepageMiddle state={this.props.state} id={this.props.id} />
             </>
         )
     }

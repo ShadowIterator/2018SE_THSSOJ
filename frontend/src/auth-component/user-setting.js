@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip} from '@blueprintjs/core';
-import {AuthContext} from "../basic-component/auth-context";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
@@ -21,7 +20,7 @@ class UserSettingsForm extends Component {
             password: '',
             isOpen: false,
             validating: false,
-            validate_code: ''
+            validate_code: '',
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleGender = this.handleGender.bind(this);
@@ -30,16 +29,32 @@ class UserSettingsForm extends Component {
         this.fillInfo = this.fillInfo.bind(this);
         this.validate_account = this.validate_account.bind(this);
         this.activate_account = this.activate_account.bind(this);
+        this.prev_id = -1;
     }
-    fillInfo() {
-        const id = this.context.id;
+    fillInfo(id) {
+        if(id===undefined)
+            return;
         const query_data = {id: id};
-        // console.log(query_data);
         ajax_post(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
     }
     componentDidMount() {
-        if(this.context.state) {
-            this.fillInfo();
+        this.setState({
+            prev_props: {
+                id: this.props.id,
+                state: this.props.id,
+                role: this.props.role,
+            }
+        });
+        if(this.props.state && this.props.id!==undefined) {
+            this.fillInfo(this.props.id);
+        }
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined || nextProps.id===-1)
+            return;
+        if(nextProps.id !== this.prev_id) {
+            this.prev_id = nextProps.id;
+            this.fillInfo(nextProps.id);
         }
     }
     static mount_callback(that, result) {
@@ -51,7 +66,7 @@ class UserSettingsForm extends Component {
             status: data.status? data.status:0,
             gender: data.gender? data.gender:2,
             realname: data.realname? data.realname:'',
-            student_id: data.student_id? (data.student_id>0 ? data.student_id.toString() : '') : '' ,
+            student_id: data.student_id? data.student_id : '' ,
             role: data.role? data.role:0
         });
     }
@@ -82,14 +97,14 @@ class UserSettingsForm extends Component {
         event.stopPropagation();
         this.setState({isOpen:false});
         const update_data = {
-            id: this.context.id,
+            id: this.props.id,
             auth_password: pwd_encrypt(this.state.password),
             email: this.state.email,
             gender: this.state.gender,
             realname: this.state.realname,
-            student_id: parseInt(this.state.student_id),
+            student_id: this.state.student_id,
         };
-        // console.log(update_data);
+        console.log(update_data);
         ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
     }
     static save_callback(that, result) {
@@ -103,7 +118,7 @@ class UserSettingsForm extends Component {
         that.fillInfo();
     }
     validate_account() {
-        const id = this.context.id;
+        const id = this.props.id;
         const validate_data = {id:id};
         ajax_post(api_list['validate_user'], validate_data, this, UserSettingsForm.validate_callback);
     }
@@ -118,7 +133,7 @@ class UserSettingsForm extends Component {
         }
     }
     activate_account() {
-        const id = this.context.id;
+        const id = this.props.id;
         const validate_code = parseInt(this.state.validate_code);
         const activate_data = {
             id:id,
@@ -255,16 +270,16 @@ class UserSettingsForm extends Component {
         );
     }
 }
-UserSettingsForm.contextType = AuthContext;
 
 export class UserSettings extends Component {
     render() {
+        console.log(this.props);
         return(
           <Card className="text-center">
               <Card.Body>
                   <Card.Title>修改个人信息</Card.Title>
                   <Container>
-                      <UserSettingsForm/>
+                      <UserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
                   </Container>
               </Card.Body>
           </Card>

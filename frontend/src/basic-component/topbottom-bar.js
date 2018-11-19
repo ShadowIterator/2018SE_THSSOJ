@@ -20,7 +20,7 @@ import {api_list} from "../ajax-utils/api-manager";
 class mDropdown extends Component {
     render() {
         let menuItem;
-        if(this.context.state) {
+        if(this.props.state) {
             menuItem = (
                 <>
                     <Menu.Item text="全部课程" onClick={()=>{alert("Jump to all classes");}} />
@@ -44,7 +44,7 @@ class mDropdown extends Component {
         )
     }
 }
-mDropdown.contextType = AuthContext;
+// mDropdown.contextType = AuthContext;
 
 const Dropdown = withRouter(mDropdown);
 
@@ -54,34 +54,11 @@ class mTopbar extends Component {
         this.handleHomeClick = this.handleHomeClick.bind(this);
         this.handlePublicClick = this.handlePublicClick.bind(this);
     }
-    componentDidMount() {
-        console.log(Cookies.get('mid'))
-        if(this.context.state === false) {
-            const id_cookie = Cookies.get('mid');
-            console.log('cookie: ', id_cookie);
-            if (!id_cookie) {
-                this.props.history.push('/login');
-            } else {
-                ajax_post(api_list['query_user'], {id: parseInt(id_cookie)}, this, mTopbar.query_user_callback);
-            }
-        }
-        // if(this.context.state === false) {
-        //     this.props.history.push('/login');
-        // }
-    }
-    static query_user_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        const data = result.data[0];
-        auth_state.id = data.id;
-        auth_state.role = data.role;
-        auth_state.state = true;
-    }
     handleHomeClick() {
-        if(this.context.state) {
-            if (this.context.role === 1) {
+        if(this.props.state && this.props.role) {
+            if (this.props.role === 1) {
                 this.props.history.push('/student');
-            } else if (this.context.role === 2) {
+            } else if (this.props.role === 2) {
                 this.props.history.push('/ta');
             }
         } else {
@@ -102,7 +79,7 @@ class mTopbar extends Component {
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />
-                    <Popover content={<Dropdown></Dropdown>} position={Position.BOTTOM_LEFT}>
+                    <Popover content={<Dropdown {...this.props}/>} position={Position.BOTTOM_LEFT}>
                         <Button className={Classes.MINIMAL} icon="user" />
                     </Popover>
                     <Button className={Classes.MINIMAL} icon="cog" onClick={()=>{
@@ -112,7 +89,7 @@ class mTopbar extends Component {
         )
     }
 }
-mTopbar.contextType = AuthContext;
+// mTopbar.contextType = AuthContext;
 
 class Bottombar extends Component {
     render() {

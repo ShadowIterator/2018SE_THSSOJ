@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Form, Card, Row, Col, Navbar, Nav, Dropdown, Container } from "react-bootstrap";
 import {
-    Link, Redirect
+    Link, Redirect, withRouter
 } from "react-router-dom";
 import PropTypes from 'prop-types';
 import {ajax_post, ajax_get} from "../ajax-utils/ajax-method";
@@ -52,6 +52,7 @@ class Login extends Component
             auth_state.role = role;
             auth_state.state = true;
             Cookies.set('mid', id.toString());
+            that.props.callback();
             if (role === 1) {
                 that.context.router.history.push("/student");
             }
@@ -207,9 +208,6 @@ Signup.contextTypes = {
 };
 
 class LoginMiddlebody extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         return (
             <Card>
@@ -218,7 +216,7 @@ class LoginMiddlebody extends Component {
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">
                             <Col lg={{span:4, offset:8}}>
-                                <Login/>
+                                <Login callback={this.props.callback}/>
                             </Col>
                         </Row>
                     </Container>
@@ -229,9 +227,6 @@ class LoginMiddlebody extends Component {
 }
 
 class SignupMiddlebody extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         return (
             <Card>
@@ -250,22 +245,70 @@ class SignupMiddlebody extends Component {
     }
 }
 
-class LoginPage extends Component {
-    constructor(props) {
-        super(props);
+class mLoginPage extends Component {
+    componentDidMount() {
+        if(this.props.state && this.props.role!==undefined) {
+            if(this.props.role === 1) {
+                this.props.history.push('/student');
+            } else if(this.props.role===2) {
+                this.props.history.push('/ta');
+            } else {
+                alert("Bad role number.");
+            }
+        }
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            if(nextProps.state && nextProps.role!==undefined) {
+                if(nextProps.role === 1) {
+                    this.props.history.push('/student');
+                } else if(nextProps.role===2) {
+                    this.props.history.push('/ta');
+                } else {
+                    alert("Bad role number.");
+                }
+            }
+        }
     }
     render() {
         return (
             <>
-                <LoginMiddlebody location={this.props.location}/>
+                <LoginMiddlebody callback={this.props.callback} />
             </>
         )
     }
 }
 
-class SignupPage extends Component {
-    constructor(props) {
-        super(props);
+const LoginPage = withRouter(mLoginPage);
+
+class mSignupPage extends Component {
+    componentDidMount() {
+        if(this.props.state && this.props.role!==undefined) {
+            if(this.props.role === 1) {
+                this.props.history.push('/student');
+            } else if(this.props.role===2) {
+                this.props.history.push('/ta');
+            } else {
+                alert("Bad role number.");
+            }
+        }
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            if(nextProps.state && nextProps.role!==undefined) {
+                if(nextProps.role === 1) {
+                    this.props.history.push('/student');
+                } else if(nextProps.role===2) {
+                    this.props.history.push('/ta');
+                } else {
+                    alert("Bad role number.");
+                }
+            }
+        }
     }
     render() {
         return (
@@ -275,11 +318,12 @@ class SignupPage extends Component {
         )
     }
 }
+const SignupPage = withRouter(mSignupPage);
 
-class LogoutPage extends Component {
+class mLogoutPage extends Component {
     componentDidMount() {
-        if(this.context.state) {
-            const id = this.context.id;
+        if(this.props.state && this.props.id!==undefined) {
+            const id = this.props.id;
             const logout_data = {id:id};
             ajax_post(api_list['logout'], logout_data, this, LogoutPage.logout_callback);
         }
@@ -291,11 +335,13 @@ class LogoutPage extends Component {
         } else {
             alert("Logout failed.");
         }
+        that.props.callback();
+        that.props.history.push('/login');
     }
     render() {
-        return (<Redirect to="/login" />);
+        return null;
     }
 }
-LogoutPage.contextType = AuthContext;
+const LogoutPage = withRouter(mLogoutPage);
 
 export {LoginPage, SignupPage, LogoutPage};
