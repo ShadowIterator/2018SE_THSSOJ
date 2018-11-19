@@ -1,6 +1,11 @@
 import React, { Component } from 'react';
 import {UnControlled as CodeMirror} from 'react-codemirror2'
 
+import {Button} from '@blueprintjs/core';
+import {ajax_post} from "../ajax-utils/ajax-method";
+import {api_list} from "../ajax-utils/api-manager";
+import {AuthContext} from "./auth-context";
+
 require('codemirror/lib/codemirror.css');
 require('codemirror/theme/material.css');
 require('codemirror/theme/neat.css');
@@ -10,51 +15,14 @@ require('codemirror/mode/python/python.js')
 require('codemirror/addon/hint/show-hint.css')
 require('codemirror/addon/hint/show-hint.js')
 
-// class CodeInput extends Component {
-//     constructor(props) {
-//         super(props);
-//         this.state = {
-//             code: '// code',
-//             language: 'C'
-//         }
-//         this.updateCode = this.updateCode.bind(this);
-//     }
-//
-//     updateCode(editor, data, newCode) {
-//         this.setState({code: {newCode}});
-//     }
-//
-//     render() {
-//         const options = {
-//             lineNumbers: true,
-//             readOnly: false,
-//             mode: 'markdown'
-//         };
-//         const code = this.state.code;
-//         return (
-//             <div>
-//                 <CodeMirror detachOnMount={true} value={code} onChange={this.updateCode} options={options} />
-//                 {/*<div style={{ marginTop: 10 }}>*/}
-//                     {/*<select onChange={this.changeMode} value={this.state.mode}>*/}
-//                         {/*<option value="markdown">Markdown</option>*/}
-//                         {/*<option value="javascript">JavaScript</option>*/}
-//                     {/*</select>*/}
-//                     {/*<button onClick={this.toggleReadOnly}>Toggle read-only mode (currently {this.state.readOnly ? 'on' : 'off'})</button>*/}
-//                 {/*</div>*/}
-//             </div>
-//             // <CodeMirror value={code} onChange={this.updateCode} options={options} />
-//         );
-//     }
-// }
-
 class CodeInput extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            code: '// code'
+            code: '// code here'
         }
-        this.clickhandler = this.clickhandler.bind(this);
+        this.clickHandler = this.clickHandler.bind(this);
         this.codeChange = this.codeChange.bind(this);
     }
 
@@ -62,30 +30,44 @@ class CodeInput extends Component {
         this.setState({code: value});
     }
 
-    clickhandler(e){
-        console.log(this.state.code)
+    clickHandler(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const data = {
+            user_id: this.context.id,
+            problem_id: this.props.problem_id,
+            homeword_id: this.props.homeword_id,
+            src_code: this.state.code,
+        };
+        ajax_post(api_list['/api/problem/submit'], data, this, CodeInput.submit_callback);
+    }
+
+    static submit_callback(that, result) {
+        if(result.data.code===0) {
+            alert("Successfully submit your code.");
+        } else {
+            alert("Something wrong while submitting your code.");
+        }
     }
 
     render() {
         return (
             <div>
-            <CodeMirror value={'// code'}
+            <CodeMirror value={this.state.code}
                         ref="editor"
                         options={{
-                            mode: {name: "text/x-c++src"},
+                            mode: {name: "javascript"},
                             theme: 'neat',
                             lineNumbers: true,
                             extraKeys: {"Ctrl": "autocomplete"},
                         }}
                         onChange={this.codeChange}
-                        // onChange={(editor, data, value) => {
-                        //     // console.log(editor.getValue());
-                        // }}
             />
-                <button onClick={this.clickhandler}>123</button>
+                <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}}>提交</Button>
             </div>
         )
     }
 
 }
+CodeInput.contextType = AuthContext;
 export {CodeInput};

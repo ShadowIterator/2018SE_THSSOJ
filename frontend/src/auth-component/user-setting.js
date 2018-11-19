@@ -235,7 +235,8 @@ class UserSettingsForm extends Component {
                 isOpen={this.state.isOpen}
             >
                 <div className={Classes.DIALOG_BODY}>
-                    <Form>
+                    <Form onSubmit={(e)=>{e.preventDefault();
+                        e.stopPropagation();}}>
                     <Form.Group as={Row} controlId="password">
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" value={this.state.password} placeholder="Please enter your password to confirm."

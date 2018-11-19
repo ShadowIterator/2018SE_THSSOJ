@@ -11,7 +11,6 @@ import {Info} from "./lesson-component";
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
-import {AuthContext} from "../basic-component/auth-context";
 import {withRouter} from "react-router";
 
 import "../mock/course-mock";
@@ -30,9 +29,10 @@ class mStudentHomeworkCard extends Component {
         event.preventDefault();
         let id = event.target.id;
         id = id>=0? id:-id;
+        const id_param = '/' + id.toString();
         const pathname = '/problemdetail';
         this.props.history.push({
-            pathname: pathname,
+            pathname: pathname + id_param,
             problem_id: id,
         });
     }
@@ -186,14 +186,29 @@ class StudentLessonMiddle extends Component {
         that.setState({problemitems:that.problemitems});
     }
     render() {
+        this.infoitems.sort(function(a, b) {
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
+        this.problemitems.sort(function(a, b) {
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
+        this.homeworkitems.sort(function(a, b) {
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
         return (
             <Container fluid>
                 <Row>
                     <Col lg={9} style={ZeroPadding}>
-                        <StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.state.problemitems}/>
+                        <StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems}/>
                     </Col>
                     <Col lg={3} style={ZeroPadding}>
-                        <Info infoitems={this.state.infoitems}/>
+                        <Info infoitems={this.infoitems}/>
                     </Col>
                 </Row>
             </Container>
@@ -208,7 +223,7 @@ export class StudentLesson extends Component {
     render() {
         return (
             <>
-                <StudentLessonMiddle course_id={this.props.location.course_id} />
+                <StudentLessonMiddle course_id={this.props.id} />
             </>
         )
     }
