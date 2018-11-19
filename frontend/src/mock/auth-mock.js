@@ -10,12 +10,12 @@ let users = [{
     'gender':0,
     'realname':'teaching assistant',
     'student_id':2016011111,
-    'student_course':[],
-    'TA_course':[0],
+    'student_courses':[],
+    'TA_courses':[0, 1],
     'role':2,
 },{
     'id': 1,
-    'username':'student',
+    'username':'st',
     'password':'1234',
     'email':'student@123.com',
     'status':0,
@@ -24,7 +24,7 @@ let users = [{
     'realname':'',
     'validate_code':-1,
     'role':1,
-    'student_course':[0],
+    'student_courses':[0],
 }];
 
 let user_counter = 2;
@@ -43,7 +43,7 @@ Mock.mock(URL+api_list['login'],function(options) {
     return {code:1};
 });
 
-Mock.mock(URL+api_list['create'],function(options) {
+Mock.mock(URL+api_list['signup'],function(options) {
     const data = JSON.parse(options.body);
     const username = data.username;
     for(let index in users) {

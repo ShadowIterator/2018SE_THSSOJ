@@ -34,7 +34,7 @@ class UserSettingsForm extends Component {
     fillInfo() {
         const id = this.context.id;
         const query_data = {id: id};
-        console.log(query_data);
+        // console.log(query_data);
         ajax_post(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
     }
     componentDidMount() {
@@ -44,7 +44,7 @@ class UserSettingsForm extends Component {
     }
     static mount_callback(that, result) {
         const data = result.data[0];
-        console.log(data);
+        // console.log(data);
         that.setState({
             username: data.username,
             email: data.email,
@@ -89,7 +89,7 @@ class UserSettingsForm extends Component {
             realname: this.state.realname,
             student_id: parseInt(this.state.student_id),
         };
-        console.log(update_data);
+        // console.log(update_data);
         ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
     }
     static save_callback(that, result) {
@@ -235,7 +235,8 @@ class UserSettingsForm extends Component {
                 isOpen={this.state.isOpen}
             >
                 <div className={Classes.DIALOG_BODY}>
-                    <Form>
+                    <Form onSubmit={(e)=>{e.preventDefault();
+                        e.stopPropagation();}}>
                     <Form.Group as={Row} controlId="password">
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" value={this.state.password} placeholder="Please enter your password to confirm."
