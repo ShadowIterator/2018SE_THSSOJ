@@ -76,10 +76,10 @@ Mock.mock(URL+api_list['logout'],{code:0});
 
 Mock.mock(URL+api_list['query_user'],function(options) {
    const data = JSON.parse(options.body);
-   const id = data.id;
+   const username = data.username;
    for(let index in users) {
        const user = users[index];
-       if(user['id']===id) {
+       if(user['username']===username) {
            return [user];
        }
    }

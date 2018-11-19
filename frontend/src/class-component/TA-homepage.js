@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import {Row, Col, Container} from "react-bootstrap";
 import {TALessonList, Info} from "./lesson-component";
-import {ajax_post} from "../ajax-utils/ajax-method";
+import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "../basic-component/auth-context";
+import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
+import {withRouter} from "react-router-dom"
 
 import "../mock/course-mock";
 import "../mock/auth-mock";
@@ -14,7 +16,7 @@ const ZeroPadding = {
     "padding-right": 0
 };
 
-class TAHomepageMiddle extends Component {
+class mTAHomepageMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -30,6 +32,7 @@ class TAHomepageMiddle extends Component {
         this.talesson = [];
         this.uplesson = [];
         this.infoitems = [];
+        // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
         if(!this.context.state) {
@@ -102,6 +105,9 @@ class TAHomepageMiddle extends Component {
         });
         that.setState({infoitems:that.infoitems});
     }
+    // clickLesson(){
+    //     this.props.history.push("/createlesson");
+    // }
     render() {
         return (
             <Container fluid={true}>
@@ -116,12 +122,16 @@ class TAHomepageMiddle extends Component {
                         <Info infoitems={this.state.infoitems}/>
                     </Col>
                 </Row>
+                <Button onClick={()=>{
+                    this.props.history.push('/createlesson');
+                }} >创建课程</Button>
             </Container>
         )
 
     }
 }
-TAHomepageMiddle.contextType = AuthContext;
+mTAHomepageMiddle.contextType = AuthContext;
+const TAHomepageMiddle = withRouter(mTAHomepageMiddle)
 
 class TAHomepage extends Component {
     render() {

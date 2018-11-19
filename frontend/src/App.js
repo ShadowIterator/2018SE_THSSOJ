@@ -17,6 +17,7 @@ import {ProblemDetail} from "./problem-component/problem-detail";
 import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
 import {CodeInput} from "./basic-component/code-input";
+import {CreateLesson} from "./class-component/TA-create-lesson";
 
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
@@ -30,8 +31,8 @@ class Home extends Component {
     }
 }
 
-const input = '# This is a header\n\nAnd this is a paragraph'
-const ccode = '#include <stdio.h>\nint main() {\n    printf("Hello World");\n    return 0;\n}'
+// const input = '# This is a header\n\nAnd this is a paragraph'
+// const ccode = '#include <stdio.h>\nint main() {\n    printf("Hello World");\n    return 0;\n}'
 
 class App extends Component {
     constructor(props) {
@@ -72,6 +73,7 @@ class App extends Component {
                         <Route path="/usersettings" component={UserSettings} />
                         <Route path="/talesson" component={TALesson} />
                         <Route path="/problemdetail" component={ProblemDetail} />
+                        <Route path="/createlesson" component={CreateLesson}/>
                     </div>
                 </Router>
                 <Bottombar/>
