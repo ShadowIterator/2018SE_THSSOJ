@@ -66,6 +66,7 @@ permissions = {
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'write': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -81,6 +82,7 @@ permissions = {
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'courses': {
@@ -238,6 +240,7 @@ def catch_exception_write(func):
 def check_password(func):
     async def wrapper(self, *args, **kw):
         user = await self.get_current_user_object()
+        print('checkpassword: ', user['password'], self.args['auth_password'])
         if(user['password'] == self.args['auth_password']):
             return await func(self, *args, **kw)
         raise BaseError('password incorrect')
@@ -387,7 +390,9 @@ class BaseHandler(tornado.web.RequestHandler):
     async def saveObject(self, si_table_name, object, secure = 0):
         if(secure):
             object = await self.objectFilter(si_table_name, 'write', object)
+        print('saveObject-before: ', object)
         object = filterKeys(si_table_name, object)
+        print('saveObject: ', object)
         fmtList = []
         valueList = []
         for key,value in object.items():

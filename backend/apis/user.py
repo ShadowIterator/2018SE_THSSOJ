@@ -12,18 +12,21 @@ from .base import *
 class APIUserHandler(base.BaseHandler):
 
     @tornado.web.authenticated
-    @check_password
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.getObject('users', secure = 1, **self.args)
         # self.write(json.dumps(res).encode())
         return res
 
+    @tornado.web.authenticated
+    @check_password
     async def _delete_post(self):
         # for condition in self.args:
         await self.deleteObject('users', **self.args)
         return {'code': 0}
 
+    @tornado.web.authenticated
+    @check_password
     async def _update_post(self):
         print('update')
         rtn = {
@@ -38,6 +41,7 @@ class APIUserHandler(base.BaseHandler):
         # self.write(json.dumps(rtn).encode())
         return rtn
 
+    # @tornado.web.authenticated
     async def _create_post(self):
         await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
@@ -57,7 +61,8 @@ class APIUserHandler(base.BaseHandler):
         if len(users_qualified) == 1:
             userObj = users_qualified[0]
             print(userObj)
-            self.set_secure_cookie('user_id', str(userObj.id))
+            self.set_secure_cookie('user_id', str(userObj.id), expires_days = None)
+            self.set_cookie('id', str(userObj.id), expires_days = None)
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
@@ -77,6 +82,7 @@ class APIUserHandler(base.BaseHandler):
         return res_dict
         # self.write(tornado.escape.json_encode(res_dict))
 
+    @tornado.web.authenticated
     async def _validate_post(self):
         username = self.args['username']
         res_dict={}
@@ -104,6 +110,7 @@ class APIUserHandler(base.BaseHandler):
         # self.write(tornado.escape.json_encode(res_dict))
         return res_dict
 
+    @tornado.web.authenticated
     async def _activate_post(self):
         res_dict = {}
         try:
