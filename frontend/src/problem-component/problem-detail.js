@@ -43,7 +43,7 @@ class ProblemDetail extends Component {
         this.records = [];
     }
     componentDidMount() {
-        const id = parseInt(this.props.location.problem_id);
+        const id = parseInt(this.props.id);
         this.setState({id:id});
         ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
     }

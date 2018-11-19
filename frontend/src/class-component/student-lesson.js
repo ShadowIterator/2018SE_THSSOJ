@@ -29,9 +29,10 @@ class mStudentHomeworkCard extends Component {
         event.preventDefault();
         let id = event.target.id;
         id = id>=0? id:-id;
+        const id_param = '/' + id.toString();
         const pathname = '/problemdetail';
         this.props.history.push({
-            pathname: pathname,
+            pathname: pathname + id_param,
             problem_id: id,
         });
     }
@@ -222,7 +223,7 @@ export class StudentLesson extends Component {
     render() {
         return (
             <>
-                <StudentLessonMiddle course_id={this.props.location.course_id} />
+                <StudentLessonMiddle course_id={this.props.id} />
             </>
         )
     }

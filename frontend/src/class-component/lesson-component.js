@@ -37,13 +37,14 @@ class mLessonList extends Component {
         let id = event.target.id;
         id = id>=0? id:-id;
         let pathname;
+        const id_param = '/' + id.toString();
         if(this.context.role===1) {
             pathname = '/studentlesson';
         } else if(this.context.role === 2) {
             pathname = '/talesson';
         }
         this.props.history.push({
-            pathname: pathname,
+            pathname: pathname + id_param,
             course_id: id,
         });
     }
