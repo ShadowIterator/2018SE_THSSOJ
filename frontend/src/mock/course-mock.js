@@ -1,5 +1,6 @@
 import {URL, api_list} from "../ajax-utils/api-manager";
 import Mock from 'mockjs';
+import {users} from "./auth-mock";
 
 let courses = [{
     id: 0,
@@ -30,10 +31,44 @@ Mock.mock(URL+api_list['create_course'], function(options) {
         name: data.name,
         description: window.atob(data.description),
         TAs: data.TAs,
-        students: data.students
+        students: data.students,
+        homeworks: [],
+        status: 0,
+        notices: []
     };
     course_count += 1;
     courses.push(new_course);
+
+    for (let index in users){
+        const user = users[index];
+        if (user.role === 1) {
+            const val = (user, new_course)=>{
+                for (let idx in new_course.students)
+                    if (new_course.students[idx] === user.id)
+                        return true;
+                    return false;
+            }
+            if (val){
+                user.student_courses.push(new_course.id);
+            }
+        } else
+        if (user.role === 2){
+            const val = (user, new_course)=>{
+                for (let idx in new_course.TAs)
+                    if (new_course.TAs[idx] === user.id)
+                        return true;
+                return false;
+            }
+            if (val){
+                user.TA_courses.push(new_course.id);
+            }
+        }
+    }
+
+    // console.log('courses:');
+    // console.log(courses);
+    console.log('users');
+    console.log(users);
     return {code:0};
 });
 
