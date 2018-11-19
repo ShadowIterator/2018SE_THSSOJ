@@ -14,6 +14,11 @@ import tornado.web
 import unicodedata
 from apis.base import maybe_create_tables, Application
 from apis.user import *
+from apis.record import *
+from apis.notice import *
+from apis.course import *
+from apis.problem import *
+from apis.homework import *
 
 from tornado.options import define, options
 
@@ -27,10 +32,9 @@ define('settings', default=None, help='tornado settings file', type=str)
 
 async def main():
     tornado.options.parse_command_line()
-    if options.settings:
-        options.parse_config_file('settings/app_config.py')# % (options.settings))
-    else:
-        raise Exception("You must add a xxx.py at settings/ folder, then run: 'python app.py --settings=user'")
+
+    options.parse_config_file('settings/app_config.py')# % (options.settings))
+
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
     # Create the global connection pool.
@@ -43,7 +47,12 @@ async def main():
         await maybe_create_tables(db, 'sql/schema.sql')
         app = Application(db,
                           [
-                              (r"/api/user/(.*)", APIUserHandler)
+                              (r'/api/user/(.*)', APIUserHandler),
+                              (r'/api/record/(.*)', APIRecordHandler),
+                              (r'/api/notice/(.*)', APINoticeHandler),
+                              (r'/api/course/(.*)', APICourseHandler),
+                              (r'/api/problem/(.*)', APIProblemHandler),
+                              (r'/api/homework/(.*)', APIHomeworkHandler),
                           ],
                           **{
                           'debug': True,

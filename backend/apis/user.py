@@ -7,62 +7,69 @@ from email.header import Header
 from . import base
 from .base import *
 
-
+# TODO: to return code in every request
 
 
 class APIUserHandler(base.BaseHandler):
 
     @tornado.web.authenticated
     async def _query_post(self):
-        # res = await self.getObject('users', name = 'zjl')
-        rtn = []
-        # for query in self.args:
         print('query = ', self.args)
-        res = await self.getObject('users', **self.args)
-        # rtn.append(res)
-        # print('coockie:',self.get_current_user())
+        res = await self.getObject('users', secure = 1, **self.args)
         self.write(json.dumps(res).encode())
 
 
     async def _delete_post(self):
-        for condition in self.args:
-            await self.deleteObject('users', **condition)
+        # for condition in self.args:
+        await self.deleteObject('users', **self.args)
 
     async def _update_post(self):
-        pass
+        print('update')
+        rtn = {
+            'code': 1
+        }
+        try:
+            await self.saveObject('users', secure = 1, object = self.args)
+            rtn['code'] = 0
+        except:
+            print('update failed')
+        print('update: ', rtn)
+        self.write(json.dumps(rtn).encode())
+
 
     async def _create_post(self):
-        # pass
-        # await self.createObject('users', username = 'wzsxzjl', encodepass = 'tqlzjl', name = 'zjl', studentid = '124567')
-        # for row in self.args:
-        #     await self.createObject('users', **row)
         await self.createObject('users', **self.args)
         self.write(json.dumps({'code': 0}).encode())
 
     async def _login_post(self):
         res_dict = {}
-        username = self.args['username']
+        id = self.args['id']
         password = self.args['password']
         try:
-            users_qualified = await self.getObject('users', **{'username': username, 'password': password})
+            users_list = self.getObject('users', {'id': id, 'encodepass': password})
         except:
             res_dict['code'] = 1
+            res_dict['msg'] = 'no such user'
             self.write(tornado.escape.json_encode(res_dict))
             return 
         if len(users_qualified) == 1:
-            self.set_secure_cookie('username', username)
+            userObj = users_qualified[0]
+            print(userObj)
+            self.set_secure_cookie('user_id', str(userObj.id))
             res_dict['code'] = 0
-            res_dict['role'] = 1
-            res_dict['id'] = users_qualified[0].id
+            res_dict['role'] = userObj.role
+            res_dict['id'] = userObj.id
+
         else:
             res_dict['code'] = 1
+            res_dict['msg'] = 'login error'
         self.write(tornado.escape.json_encode(res_dict))
 
     @tornado.web.authenticated
     async def _logout_post(self):
         res_dict = {}
         try:
-            self.clear_cookie('username')
+            self.clear_cookie('user_id')
             res_dict['code'] = 0
         except:
             res_dict['code'] = 1
@@ -73,7 +80,7 @@ class APIUserHandler(base.BaseHandler):
         username = self.args['username']
         res_dict={}
         try:
-            user_qualified = self.getObject('users', {'username': username})[0]
+            user_qualified = await self.getObject('users', {'username': username})[0]
             email = user_qualified['email']
             sender = '1747310410@qq.com'
             receivers = [email,]
@@ -88,7 +95,7 @@ class APIUserHandler(base.BaseHandler):
                 smtpObj.sendmail(sender, receivers, message.as_string())
                 print("邮件发送成功")
                 user_qualified['validate_code']=activate_code
-                self.saveObject('users', user_qualified)
+                await self.saveObject('users', user_qualified)
                 res_dict['code']=0
             except:res_dict['code']=1
         except:
@@ -100,13 +107,30 @@ class APIUserHandler(base.BaseHandler):
         try:
             username = self.args['username']
             validate_code = self.args['validate_code']
-            user_qualified = self.getObject('users', {'username': username})[0]
-            if user_qualified['validate_code']==validate_code:
-                user_qualified.status=1
-                self.saveObject('users',user_qualified)
-                res_dict['code']=0
+
+            user_qualified = await self.getObject('users', {'username': username})[0]
+            if user_qualified['validate_code'] == validate_code:
+                user_qualified.status = 1
+                await self.saveObject('users', user_qualified)
+                res_dict['code'] = 0
             else:
-                res_dict['code']=1
+                res_dict['code'] = 1
+        except:
+            res_dict['code'] = 1
+        self.write(tornado.escape.json_encode(res_dict))
+
+    async def _update_post(self):
+        res_dict = {}
+        try:
+            username = self.args['username']
+            password = self.args['password']
+            user_qualified = await self.getObject('users', {'username':username, 'password':password})[0]
+            for key in self.args.keys():
+                if key!=username and key != password:
+                    if key in user_qualified:
+                        user_qualified[key]=self.args[key]
+            await self.saveObject('users', user_qualified)
+            res_dict['code']=0
         except:
             res_dict['code']=1
         self.write(tornado.escape.json_encode(res_dict))
