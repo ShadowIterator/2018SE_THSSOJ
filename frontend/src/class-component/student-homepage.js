@@ -22,7 +22,6 @@ class StudentHomepageMiddle extends Component {
         };
         this.infoitems = [];
         this.lessonlist = [];
-        this.noticelist = [];
     }
     componentDidMount() {
         if(!this.context.state)
@@ -71,6 +70,16 @@ class StudentHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
+        this.lessonlist.sort(function(a, b) {
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
+        this.infoitems.sort(function(a, b) {
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
         return (
             <>
             <Container fluid>
@@ -79,7 +88,7 @@ class StudentHomepageMiddle extends Component {
                         <StudentLessonList lessonlist={this.lessonlist} />
                     </Col>
                     <Col style={ZeroPadding}>
-                        <Info infoitems={this.state.infoitems}/>
+                        <Info infoitems={this.infoitems}/>
                     </Col>
                 </Row>
             </Container>
