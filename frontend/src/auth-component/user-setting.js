@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip} from '@blueprintjs/core';
 import {AuthContext} from "../basic-component/auth-context";
-import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 

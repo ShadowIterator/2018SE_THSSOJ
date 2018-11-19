@@ -13,11 +13,11 @@ import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {withRouter} from "react-router";
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
-import "../mock/homework-mock";
-import "../mock/problem-mock";
+// import "../mock/course-mock";
+// import "../mock/auth-mock";
+// import "../mock/notice-mock";
+// import "../mock/homework-mock";
+// import "../mock/problem-mock";
 
 
 class mStudentHomeworkCard extends Component {

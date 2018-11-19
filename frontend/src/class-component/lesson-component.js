@@ -7,10 +7,6 @@ import {
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
-
 const ZeroPadding = {
     "padding-left": 0,
     "padding-right": 0

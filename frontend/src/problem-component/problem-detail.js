@@ -11,11 +11,11 @@ import ReactMarkdown from 'react-markdown';
 import { Base64 } from 'js-base64';
 import {CodeInput} from "../basic-component/code-input";
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
-import "../mock/homework-mock";
-import "../mock/problem-mock";
+// import "../mock/course-mock";
+// import "../mock/auth-mock";
+// import "../mock/notice-mock";
+// import "../mock/homework-mock";
+// import "../mock/problem-mock";
 
 class ProblemDetailBody extends Component {
     render() {

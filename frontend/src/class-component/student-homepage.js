@@ -9,9 +9,9 @@ import {AuthContext} from "../basic-component/auth-context";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
+// import "../mock/course-mock";
+// import "../mock/auth-mock";
+// import "../mock/notice-mock";
 
 class StudentHomepageMiddle extends Component {
     constructor(props) {

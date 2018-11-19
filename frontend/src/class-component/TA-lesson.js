@@ -1,20 +1,8 @@
 import React, { Component } from 'react';
-import {
-    Card,
-    Menu
-} from "@blueprintjs/core";
 
 import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
 
-import {Info} from "./lesson-component";
-
 import {ZeroPadding, Spacing} from "./lesson-component";
-import {api_list} from "../ajax-utils/api-manager";
-import {ajax_post} from "../ajax-utils/ajax-method";
-
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
 
 class TALessonTabs extends Component {
     constructor(props) {

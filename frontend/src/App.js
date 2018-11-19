@@ -4,8 +4,6 @@ import {
     Route,
     Redirect,
 } from "react-router-dom";
-import ReactMarkdown from "react-markdown";
-
 
 import {LoginPage, SignupPage, LogoutPage} from './auth-component/LoginSignuppage';
 import {StudentHomepage} from './class-component/student-homepage';
@@ -16,7 +14,6 @@ import {ProblemDetail} from "./problem-component/problem-detail";
 
 import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
-import {CodeInput} from "./basic-component/code-input";
 
 import "@blueprintjs/core/lib/css/blueprint.css";
 import "@blueprintjs/icons/lib/css/blueprint-icons.css";
@@ -29,9 +26,6 @@ class Home extends Component {
 
     }
 }
-
-const input = '# This is a header\n\nAnd this is a paragraph'
-const ccode = '#include <stdio.h>\nint main() {\n    printf("Hello World");\n    return 0;\n}'
 
 class App extends Component {
     constructor(props) {
