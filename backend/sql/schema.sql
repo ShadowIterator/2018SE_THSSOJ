@@ -107,4 +107,4 @@ CREATE TABLE notices (
     content TEXT
 );
 
-INSERT INTO users (username, password, email) VALUES ('sherlockcooper','Y3Vycnk=','1747310410@qq.com');
+INSERT INTO users (username, password, email, role) VALUES ('sherlockcooper','Y3Vycnk=','1747310410@qq.com', 3);
