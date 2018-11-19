@@ -32,25 +32,6 @@ class App extends Component {
         super(props);
     }
     render() {
-        // return (
-        //     <>
-        //         <Router>
-        //             <div>
-        //                 <Topbar/>
-        //                 <Route exact path="/" component={Home} />
-        //                 <Route path="/login" component={LoginPage} />
-        //                 <Route path="/signup" component={SignupPage} />
-        //                 <Route path="/logout" component={LogoutPage} />
-        //                 <Route path="/student" component={StudentHomepage} />
-        //                 <Route path="/ta" component={TAHomepage} />
-        //                 <Route path="/studentlesson" component={StudentLesson} />
-        //                 <Route path="/usersettings" component={UserSettings} />
-        //                 <Route path="/talesson" component={TALesson}/>
-        //             </div>
-        //         </Router>
-        //         <Bottombar/>
-        //     </>
-        // )
         return (
             <>
                 <Router>
@@ -62,10 +43,12 @@ class App extends Component {
                         <Route path="/logout" component={LogoutPage} />
                         <Route path="/student" component={StudentHomepage} />
                         <Route path="/ta" component={TAHomepage} />
-                        <Route path="/studentlesson" component={StudentLesson} />
+                        {/*<Route path="/studentlesson" component={StudentLesson} />*/}
+                        <Route path="/studentlesson/:id" render={(props) => <StudentLesson id={props.match.params.id} />} />
                         <Route path="/usersettings" component={UserSettings} />
                         <Route path="/talesson" component={TALesson} />
-                        <Route path="/problemdetail" component={ProblemDetail} />
+                        {/*<Route path="/problemdetail" component={ProblemDetail} />*/}
+                        <Route path="/problemdetail/:id" render={(props) => <ProblemDetail id={props.match.params.id} />} />
                     </div>
                 </Router>
                 <Bottombar/>
