@@ -127,13 +127,14 @@ class Signup extends Component {
             return;
         }
         if(this.checkvalidation() === false) {
-            alert("Two password donot match.");
+            alert("Two password do not match.");
             return;
         }
         const signup_data = {
             username: this.state.username,
             password: pwd_encrypt(this.state.password),
-            email: this.state.email
+            email: this.state.email,
+            role: 1,
         };
         ajax_post(api_list['signup'], signup_data, this, Signup.signup_callback);
     }

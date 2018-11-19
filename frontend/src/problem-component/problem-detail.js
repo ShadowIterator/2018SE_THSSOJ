@@ -5,10 +5,8 @@ import {Container, Col, Row, Card,} from 'react-bootstrap';
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from '../../node_modules/react-markdown';
 
-// import {Base64} from "../basic-component/base64";
-import { Base64 } from 'js-base64';
 import {CodeInput} from "../basic-component/code-input";
 
 // import "../mock/course-mock";

@@ -1,19 +1,19 @@
 import React, { Component } from 'react';
-import {UnControlled as CodeMirror} from 'react-codemirror2'
+import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
 import {Button} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "./auth-context";
 
-require('codemirror/lib/codemirror.css');
-require('codemirror/theme/material.css');
-require('codemirror/theme/neat.css');
-require('codemirror/mode/javascript/javascript.js');
-require('codemirror/mode/clike/clike.js')
-require('codemirror/mode/python/python.js')
-require('codemirror/addon/hint/show-hint.css')
-require('codemirror/addon/hint/show-hint.js')
+import '../../node_modules/codemirror/lib/codemirror.css';
+import '../../node_modules/codemirror/theme/material.css';
+import '../../node_modules/codemirror/theme/neat.css';
+import '../../node_modules/codemirror/mode/javascript/javascript.js';
+import '../../node_modules/codemirror/mode/clike/clike.js';
+import '../../node_modules/codemirror/mode/python/python.js';
+import '../../node_modules/codemirror/addon/hint/show-hint.css';
+import '../../node_modules/codemirror/addon/hint/show-hint.js';
 
 class CodeInput extends Component {
 

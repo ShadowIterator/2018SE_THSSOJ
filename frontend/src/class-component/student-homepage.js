@@ -35,7 +35,7 @@ class StudentHomepageMiddle extends Component {
             return;
         }
         const user = result.data[0];
-        const lesson_ids = user.student_courses;
+        const lesson_ids = user.student_courses? user.student_courses:[];
         // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
             ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentHomepageMiddle.query_course_callback);
