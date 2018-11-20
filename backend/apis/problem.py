@@ -143,11 +143,11 @@ class APIProblemHandler(base.BaseHandler):
             if not os.path.exists(record_dir):
                 os.makedirs(record_dir)
             src_file_path = record_dir+'/'+str_id+'.code'
-            byte_content = bytearray()
-            self.str_to_bytes(self.args['src_code'], byte_content)
-            src_code = base64.b64decode(byte_content)
+            # byte_content = bytearray()
+            # self.str_to_bytes(self.args['src_code'], byte_content)
+            # src_code = base64.b64decode(byte_content)
             src_file = open(src_file_path, mode='wb')
-            src_file.write(src_code)
+            src_file.write(self.args['src_code'])
             src_file.close()
             #创建临时的测评文件夹，需要删除
             if not os.path.exists('test'):
