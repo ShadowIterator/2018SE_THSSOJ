@@ -1,0 +1,6 @@
+requests==2.19.1
+aiopg==0.15.0
+tornado==5.1
+psycopg2_binary==2.7.5
+python_bcrypt==0.3.2
+psycopg2==2.7.6.1
