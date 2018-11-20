@@ -32,6 +32,7 @@
 *.app
 exectuor
 tradiJudger
+scriptJudger
 test
 test1
 *.in
