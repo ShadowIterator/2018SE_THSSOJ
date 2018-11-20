@@ -21,7 +21,7 @@ class CodeInput extends Component {
         super(props);
         this.state = {
             code: '// code here'
-        }
+        };
         this.clickHandler = this.clickHandler.bind(this);
         this.codeChange = this.codeChange.bind(this);
     }
@@ -34,12 +34,12 @@ class CodeInput extends Component {
         e.preventDefault();
         e.stopPropagation();
         const data = {
-            user_id: this.context.id,
+            user_id: this.props.id,
             problem_id: this.props.problem_id,
-            homeword_id: this.props.homeword_id,
+            homework_id: this.props.homework_id,
             src_code: this.state.code,
         };
-        ajax_post(api_list['/api/problem/submit'], data, this, CodeInput.submit_callback);
+        ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
 
     static submit_callback(that, result) {
@@ -53,7 +53,7 @@ class CodeInput extends Component {
     render() {
         return (
             <div>
-            <CodeMirror value={this.state.code}
+            <CodeMirror
                         ref="editor"
                         options={{
                             mode: {name: "javascript"},

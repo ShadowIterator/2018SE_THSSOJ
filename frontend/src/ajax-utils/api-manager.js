@@ -32,7 +32,8 @@ const api_list = {
     'create_problem': '/api/problem/create',
     'delete_problem': '/api/problem/delete',
     'update_problem': '/api/problem/update',
-    'query_problem': '/api/problem/query'
+    'query_problem': '/api/problem/query',
+    'submit_problem': '/api/problem/submit',
 };
 
 export {URL, api_list}

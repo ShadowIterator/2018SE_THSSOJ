@@ -30,10 +30,10 @@ class mStudentHomeworkCard extends Component {
         let id = event.target.id;
         id = id>=0? id:-id;
         const id_param = '/' + id.toString();
+        const homework_id = '/' + this.props.homework_id.toString();
         const pathname = '/problemdetail';
         this.props.history.push({
-            pathname: pathname + id_param,
-            problem_id: id,
+            pathname: pathname + id_param + homework_id,
         });
     }
     render() {
@@ -74,7 +74,7 @@ class StudentHomeworkPanel extends Component {
         return (
             <Card>
                 {this.props.homeworkitems.map((hw)=>(
-                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} />
+                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} />
                 ))}
             </Card>
         )
