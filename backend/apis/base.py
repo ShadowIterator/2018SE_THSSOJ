@@ -414,7 +414,9 @@ class BaseHandler(tornado.web.RequestHandler):
             return res
 
     async def getObject(self, si_table_name, secure = 0, **kw):
+        print('getobject: ', kw)
         kw = filterKeys(si_table_name, kw)
+        print('getobject after filter: ', kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
