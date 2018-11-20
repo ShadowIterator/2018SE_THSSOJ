@@ -1,4 +1,5 @@
 import datetime
+import time
 from . import base
 from .base import *
 
@@ -59,5 +60,6 @@ class APIHomeworkHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _query_post(self):
-        res = await self.getObject('homeworks', secure=1, **self.args)
+        res = (await self.getObject('homeworks', secure=1, **self.args))[0]
+        res['deadline'] = int(time.mktime(res['deadline'].timetuple()))
         self.return_json(res)

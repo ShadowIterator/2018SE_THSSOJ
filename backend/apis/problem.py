@@ -93,6 +93,7 @@ class APIProblemHandler(base.BaseHandler):
             del self.args['description']
         try:
             res = await self.getObject('homeworks', secure=1, **self.args)
+
             for problem in res:
                 problem_id = problem['id']
                 target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
