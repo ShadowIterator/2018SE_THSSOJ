@@ -186,7 +186,7 @@ class mLessonList extends Component {
 
 const LessonList = withRouter(mLessonList);
 
-export class CreateLesson extends Component {
+class CreateLesson extends Component {
     render() {
         return (
             <Card className="text-center">
@@ -200,3 +200,22 @@ export class CreateLesson extends Component {
         )
     }
 }
+
+class EditLesson extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <Card className="text-center">
+                <Card.Body>
+                    <Card.Title>编辑课程{this.props.lesson_id}</Card.Title>
+
+                </Card.Body>
+            </Card>
+        )
+    }
+}
+
+export {CreateLesson, EditLesson};
