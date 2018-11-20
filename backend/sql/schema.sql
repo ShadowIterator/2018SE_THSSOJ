@@ -107,4 +107,10 @@ CREATE TABLE notices (
     content TEXT
 );
 
-INSERT INTO users (username, password, email, role) VALUES ('sherlockcooper','Y3Vycnk=','1747310410@qq.com', 3);
+-- create items
+INSERT INTO users (username, password, email, role) VALUES ('sherlockcooper','Y3Vycnk=','1747310410@qq.com', 0);
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('hfz','1234','siro@163.com', 0, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('lrj','1234','lrj@163.com', 0, '{1}');
+INSERT INTO users (username, password, email, role, TA_courses) VALUES ('wzzzzy','wzytql','zyw@wzy.com', 1, '{1}');
+
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}')
