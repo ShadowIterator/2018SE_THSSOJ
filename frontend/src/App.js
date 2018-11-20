@@ -51,7 +51,7 @@ class App extends Component {
         }
     }
     static query_user_callback(that, result) {
-        if(result.data['code']===1)
+        if(result.data.code===1)
             return;
         if(result.data.length===0)
             return;

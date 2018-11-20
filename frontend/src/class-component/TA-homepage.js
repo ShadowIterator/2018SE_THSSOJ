@@ -114,10 +114,11 @@ class mTAHomepageMiddle extends Component {
             <Container fluid={true}>
                 <Row>
                     <Col lg={3} style={ZeroPadding}>
-                        <TALessonList lessonlist={this.state.lessonlist}
-                                        stulesson={this.state.stulesson}
-                                        talesson={this.state.talesson}
-                                        uplesson={this.state.uplesson}/>
+                        <TALessonList state={this.props.state} id={this.props.id} role={this.props.role}
+                                      lessonlist={this.state.lessonlist}
+                                      stulesson={this.state.stulesson}
+                                      talesson={this.state.talesson}
+                                      uplesson={this.state.uplesson}/>
                     </Col>
                     <Col lg={9} style={ZeroPadding}>
                         <Info infoitems={this.state.infoitems}/>
@@ -138,7 +139,7 @@ class TAHomepage extends Component {
     render() {
         return (
             <>
-                <TAHomepageMiddle state={this.props.state} id={this.props.id} />
+                <TAHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
             </>
         )
     }
