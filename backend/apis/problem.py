@@ -123,19 +123,20 @@ class APIProblemHandler(base.BaseHandler):
             #                         problem_id=self.args['problem_id'],
             #                         homework_id=self.args['homework_id'],
             #                         submit_time = cur_timestamp)
-            
+
             # {
             #     "user_id":2,
             #     "problem_id":1,
             #     "homework_id":1,
-            #     "src_code":I2luY2x1ZGUgPGlvc3RyZWFtPgp1c2luZyBuYW1lc3BhY2Ugc3RkOwppbnQgbWFpbigpCnsKICAgIGludCBhPTA7CiAgICBpbnQgYj0wOwogICAgY2luPj5hPj5iOwogICAgY291dDw8YStiOwogICAgcmV0dXJuIDA7Cn0=
+            #     "src_code":"I2luY2x1ZGUgPGlvc3RyZWFtPgp1c2luZyBuYW1lc3BhY2Ugc3RkOwppbnQgbWFpbigpCnsKICAgIGludCBhPTA7CiAgICBpbnQgYj0wOwogICAgY2luPj5hPj5iOwogICAgY291dDw8YStiOwogICAgcmV0dXJuIDA7Cn0="
             # }
             record_created = (await self.getObject('records',
+                                                   secure=1,
                                                    user_id=self.args['user_id'],
                                                    problem_id=self.args['problem_id'],
                                                    homework_id=self.args['homework_id'],
                                                    # submit_time=cur_timestamp
-                                                   submit_time=10000
+                                                   submit_time=datetime.datetime.fromtimestamp(10000)
                                                    ))[0]
             str_id = str(record_created['id'])
             record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
