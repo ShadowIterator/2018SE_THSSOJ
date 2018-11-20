@@ -8,6 +8,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdio>
+#include <cstdlib>
+
+using namespace std;
 
 enum ErrorCode{
 	NoError = 0,
@@ -36,7 +40,7 @@ enum JudgeResult{
 std::string JudgeResult2string(JudgeResult jr);
 void StringFormat(std::string&);
 
-const std::string default_checker_dir = "/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers";
+const std::string default_checker_dir = "/Users/hongfz/Learn/2018Autumn/软件工程3/2018SE_THSSOJ/judger/checkers";
 
 class runLimit{
 public:
@@ -262,7 +266,8 @@ public:
 			for (int i = 0 ; i < len; ++i)
 				info += buf[i];
 		} while(len > 0);
-		if (info.back() == '\n')
+//		if (info.back() == '\n')
+		if (info.length() > 0 && info[info.length() - 1] == '\n')
 			info = info.substr(0, info.length()-1);
 
 		int t = info.rfind('\n'), l = 0;
