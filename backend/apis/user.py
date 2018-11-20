@@ -111,7 +111,7 @@ class APIUserHandler(base.BaseHandler):
                 smtpObj = smtplib.SMTP('smtp.qq.com')
                 smtpObj.login(sender, 'vwwiwzsdkzvbbcdb')
                 smtpObj.sendmail(sender, receivers, message.as_string())
-                print("邮件发送成功")
+                print("邮件发送成功", activate_code)
                 user_qualified['validate_code']=activate_code
                 await self.saveObject('users', user_qualified)
                 res_dict['code']=0

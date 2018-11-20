@@ -550,6 +550,8 @@ class BaseHandler(tornado.web.RequestHandler):
         for each_char in src:
             tgt.append(ord(each_char))
 
-    def bytes_to_str(self, src, tgt):
+    def bytes_to_str(self, src):
+        tgt = ''
         for each_char in src:
-            tgt.append(chr(each_char))
+            tgt+=chr(each_char)
+        return tgt

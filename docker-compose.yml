@@ -30,14 +30,16 @@ services:
     container_name: frontend
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    volumes:
-      - './frontend:/usr/src/app'
-      - '/usr/src/app/node_modules'
+      dockerfile: Dockerfile-prod
+    # volumes:
+    #   - './frontend:/usr/src/app'
+    #   # - '/usr/src/app/node_modules'
+    # ports:
+    #   - '3000:3000'
+    # environment:
+    #   - NODE_ENV=development
     ports:
-      - '3000:3000'
-    environment:
-      - NODE_ENV=development
+      - '80:80'
 
   judger:
     build: ./judger
