@@ -125,11 +125,11 @@ class APIProblemHandler(base.BaseHandler):
             current_time = datetime.datetime.now()
             cur_timestamp = int(time.mktime(current_time.timetuple()))
 
-            # await self.createObject('records',
-            #                         user_id=self.args['user_id'],
-            #                         problem_id=self.args['problem_id'],
-            #                         homework_id=self.args['homework_id'],
-            #                         submit_time = cur_timestamp)
+            await self.createObject('records',
+                                    user_id=self.args['user_id'],
+                                    problem_id=self.args['problem_id'],
+                                    homework_id=self.args['homework_id'],
+                                    submit_time = datetime.datetime.fromtimestamp(cur_timestamp))
 
             # {
             #     "user_id":2,
@@ -143,8 +143,11 @@ class APIProblemHandler(base.BaseHandler):
                                                    problem_id=self.args['problem_id'],
                                                    homework_id=self.args['homework_id'],
                                                    # submit_time=cur_timestamp
-                                                   submit_time=datetime.datetime.fromtimestamp(10000)
+                                                   submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
                                                    ))[0]
+            problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
+            problem_of_code['records'].append(record_created['id'])
+            await self.saveObject('problems', problem_of_code)
             str_id = str(record_created['id'])
             record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
             if not os.path.exists(record_dir):
@@ -154,7 +157,7 @@ class APIProblemHandler(base.BaseHandler):
             # self.str_to_bytes(self.args['src_code'], byte_content)
             # src_code = base64.b64decode(byte_content)
             src_file = open(src_file_path, mode='wb')
-            src_file.write(self.args['src_code'])
+            src_file.write(self.args['src_code'].encode(encoding='utf-8'))
             src_file.close()
             #创建临时的测评文件夹，需要删除
             if not os.path.exists('test'):
@@ -191,15 +194,18 @@ class APIProblemHandler(base.BaseHandler):
                          'unknown':9,
                          }
 
-            judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)))
+            response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            print(response.text)
+            judge_result = json.loads(response.text)
             record_created['src_size']=os.path.getsize(src_file_path)
             record_created['consume_time']=judge_result['time']
             record_created['consume_memory']=judge_result['memory']
             record_created['result']=result_dict[judge_result['Result']]
-            self.saveObject('records', record_created)
+            await self.saveObject('records', record_created)
 
             self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
-        except:
+        except Exception as e:
+            print(e)
             self.set_res_dict(res_dict, code=1, msg='fail to submit')
 
         self.return_json(res_dict)

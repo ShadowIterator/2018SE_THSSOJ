@@ -30,7 +30,7 @@ class ProblemDetailBody extends Component {
 }
 
 class ProblemDetailRecord extends Component {
-    result_arr = ['Accept',
+    result_arr = ['Accepted',
         'Wrong Answer',
         'Runtime Error',
         'Time Limit Exceed',
@@ -59,6 +59,9 @@ class ProblemDetailRecord extends Component {
             console.log('inside table render', this.props.records);
             let counter = 1;
             for (const re of this.props.records) {
+                if(re.consume_time===undefined)
+                    continue;
+                console.log("inside table render for loop", re)
                 const result_id = re.result;
                 const result = this.result_arr[result_id];
                 body.push(
