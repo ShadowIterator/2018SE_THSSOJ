@@ -46,7 +46,7 @@ class App extends Component {
     componentDidMount() {
         const id_cookie = Cookies.get('mid');
         console.log('cookie: ', id_cookie);
-        if (id_cookie) {
+        if (id_cookie && !this.state.state) {
             ajax_post(api_list['query_user'], {id: parseInt(id_cookie)}, this, App.query_user_callback);
         }
     }

@@ -283,11 +283,13 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
+        self.set_header("Access-Control-Max-Age", "3600")
         self.user = None
         # if(not self.user):
         #     self.user = {
         #         'role':
         #     }
+        self.root_dir = 'root'
 
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
