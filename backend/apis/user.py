@@ -28,19 +28,22 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     @check_password
     async def _update_post(self):
-        print('update')
-        rtn = {
-            'code': 1
-        }
-        try:
-            print('update: ', self.args)
-            await self.saveObject('users', secure = 1, object = self.args)
-            rtn['code'] = 0
-        except:
-            print('update failed')
-        print('update: ', rtn)
-        # self.write(json.dumps(rtn).encode())
-        return rtn
+        print('update: ', self.args)
+        await self.saveObject('users', secure = 1, object = self.args)
+        # rtn['code'] = 0
+        return {'code': 0}
+        # rtn = {
+        #     'code': 1
+        # }
+        # try:
+        #     print('update: ', self.args)
+        #     await self.saveObject('users', secure = 1, object = self.args)
+        #     rtn['code'] = 0
+        # except:
+        #     print('update failed')
+        # print('update: ', rtn)
+        # # self.write(json.dumps(rtn).encode())
+        # return rtn
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -136,7 +139,7 @@ class APIUserHandler(base.BaseHandler):
         res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
         self.write(json.dumps(res).encode())
 
-    @catch_exception_write
+    # @catch_exception_write
     async def post(self, type):
         print('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
