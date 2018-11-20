@@ -61,6 +61,7 @@ class APIHomeworkHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _query_post(self):
-        res = (await self.getObject('homeworks', secure=1, **self.args))[0]
-        res['deadline'] = int(time.mktime(res['deadline'].timetuple()))
-        self.return_json(res)
+        res_list = await self.getObject('homeworks', secure=1, **self.args)
+        for each_res in res_list:
+            each_res['deadline'] = int(time.mktime(each_res['deadline'].timetuple()))
+        self.return_json(res_list)

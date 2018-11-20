@@ -135,6 +135,7 @@ class APIUserHandler(base.BaseHandler):
                 res_dict['code'] = 0
             else:
                 res_dict['code'] = 1
+                return res_dict
         except:
             res_dict['code'] = 1
         return res_dict
