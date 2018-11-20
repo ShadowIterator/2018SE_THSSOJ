@@ -16,6 +16,9 @@ from apis.base import maybe_create_tables, Application
 from apis.user import *
 from apis.record import *
 from apis.notice import *
+from apis.course import *
+from apis.problem import *
+from apis.homework import *
 
 from tornado.options import define, options
 
@@ -29,6 +32,7 @@ define('settings', default=None, help='tornado settings file', type=str)
 
 async def main():
     tornado.options.parse_command_line()
+
     options.parse_config_file('settings/app_config.py')# % (options.settings))
 
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
@@ -45,7 +49,10 @@ async def main():
                           [
                               (r'/api/user/(.*)', APIUserHandler),
                               (r'/api/record/(.*)', APIRecordHandler),
-                              (r'/api/notice/(.*)', APINoticeHandler)
+                              (r'/api/notice/(.*)', APINoticeHandler),
+                              (r'/api/course/(.*)', APICourseHandler),
+                              (r'/api/problem/(.*)', APIProblemHandler),
+                              (r'/api/homework/(.*)', APIHomeworkHandler),
                           ],
                           **{
                           'debug': True,

@@ -283,11 +283,25 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
+
+        self.root_dir='root'
         self.user = None
+
+    async def get(self, type): #detail
+        print('get: ', type)
+        await self._call_method('''_{action_name}_get'''.format(action_name = type))
+
+    async def post(self, type):
+        print('post: ', type)
+        await self._call_method('''_{action_name}_post'''.format(action_name = type))
+
+
+
         # if(not self.user):
         #     self.user = {
         #         'role':
         #     }
+
 
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
@@ -420,7 +434,9 @@ class BaseHandler(tornado.web.RequestHandler):
             return res
 
     async def getObject(self, si_table_name, secure = 0, **kw):
+        print('getobject: ', kw)
         kw = filterKeys(si_table_name, kw)
+        print('getobject after filter: ', kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
@@ -504,11 +520,36 @@ class BaseHandler(tornado.web.RequestHandler):
         print(method)
         func = getattr(self, method, None)
         if(not callable(func)):
+            print('no method')
             raise NoMethodError
+        print('await to call function')
         return await func(*args, **kw)
+        # res = await func(*args, **kw)
+        # print('call method res = ', res)
+        # return res
 
     def options(self, *args, **kw):
         # no body
         self.set_status(204)
         self.finish()
 
+    def return_json(self, res_dict):
+        self.write(tornado.escape.json_encode(res_dict))
+
+    def set_res_dict(self, res_dict, **contents):
+        for key in contents.keys():
+            res_dict[key] = contents[key]
+
+    def check_input(self, *keys):
+        for key in keys:
+            if key not in self.args:
+                return False
+        return True
+
+    def str_to_bytes(self, src, tgt):
+        for each_char in src:
+            tgt.append(ord(each_char))
+
+    def bytes_to_str(self, src, tgt):
+        for each_char in src:
+            tgt.append(chr(each_char))
