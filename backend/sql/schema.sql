@@ -115,4 +115,4 @@ INSERT INTO users (username, password, email, role, TA_courses) VALUES ('ta','12
 
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{}', 1);
-INSERT INTO records (user_id, problem_id, homework_id, submit_time) VALUES (2, 1, 1, 10000)
+INSERT INTO records (user_id, problem_id, homework_id, submit_time) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38')
