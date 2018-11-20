@@ -1,3 +1,4 @@
+import datetime
 from . import base
 from .base import *
 
@@ -6,11 +7,21 @@ class APIHomeworkHandler(base.BaseHandler):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/homeworks'
 
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+        if 'deadline' in self.args.keys():
+            self.args['deadline'] = datetime.datetime.fromtimestamp(self.args['deadline'])
+
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
         try:
             await self.createObject('homeworks', **self.args)
+            # await self.createObject('homeworks',
+            #                         name=self.args['name'],
+            #                         description=self.args['description'],
+            #                         deadline=datetime.datetime.fromtimestamp(self.args['deadline']),
+            #                         problems=self.args['problems'])
             self.set_res_dict(res_dict, code=0, msg='homework created')
         except:
             self.set_res_dict(res_dict, code=1, msg='fail to create homework')

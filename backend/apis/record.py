@@ -2,6 +2,7 @@ import json
 import hashlib
 import smtplib
 import random
+import datetime
 from email.mime.text import MIMEText
 from email.header import Header
 from . import base
@@ -11,6 +12,10 @@ from .base import *
 
 
 class APIRecordHandler(base.BaseHandler):
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+        if 'submit_time' in self.args.keys():
+            self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     @tornado.web.authenticated
     async def _query_post(self):
