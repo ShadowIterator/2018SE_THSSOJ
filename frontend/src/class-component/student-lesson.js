@@ -178,6 +178,9 @@ class StudentLessonMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     static query_problem_callback(that, result) {
+        if(result.data.code===1) {
+            return;
+        }
         if(result.data.length===0)
             return;
         const title = result.data[0].title;

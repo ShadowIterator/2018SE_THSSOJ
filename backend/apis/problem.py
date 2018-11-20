@@ -93,7 +93,7 @@ class APIProblemHandler(base.BaseHandler):
         if 'description' in self.args.keys():
             del self.args['description']
         try:
-            res = await self.getObject('homeworks', secure=1, **self.args)
+            res = await self.getObject('problems', secure=1, **self.args)
 
             for problem in res:
                 problem_id = problem['id']
@@ -101,12 +101,17 @@ class APIProblemHandler(base.BaseHandler):
                 description_file = open(target_path, mode='rb')
                 description = description_file.read()
                 description_file.close()
-                encoded_content = base64.b64decode(description)
-                des_str = str()
-                self.bytes_to_str(encoded_content, des_str)
-                res['description'] = des_str
+                # encoded_content = base64.b64encode(description)
+                encoded_content = description
+                # des_str = self.bytes_to_str(encoded_content)
+                des_str = encoded_content.decode(encoding='utf-8')
+                problem['description'] = des_str
+                print('query_problem_loop', problem)
+                print('path', target_path)
+                print('description', description)
             self.return_json(res)
-        except:
+        except Exception as e:
+            print(e)
             self.set_res_dict(res_dict, code=1, msg='query failed')
             self.return_json(res_dict)
 
