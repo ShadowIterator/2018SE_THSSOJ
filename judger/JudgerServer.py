@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 import json
@@ -46,11 +47,24 @@ class traditionalJudger(tornado.web.RequestHandler):
 			judgerResult = json.dumps(json.load(f))
 			# print(judgerResult)
 			self.write(judgerResult)
+		self.write({'Result': 'Judgement Failed',
+					'time': 0,
+					'memory': 0,
+					'Info': "No comment"})
 
 class scriptJudger(tornado.web.RequestHandler):
 	def post(self):
 		data = json.loads(self.request.body.decode())
 		# print(data)
+		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
+		targetFile = os.path.join(data['WORK_PATH'], 'index.js')
+		if !os.path.isfile(resultsourceFile):
+			self.write({'Score': 0,
+						'time': 0,
+						'memory': 0,
+						'Info': "No comment"})
+		open(targetFile, "wb").write(open(sourceFile, "rb").read())
+
 		params = ['./scriptJudger', \
 					'--tl=%d' % data['TIME_LIMIT'],
 					'--ml=%d' % data['MEMORY_LIMIT'],\
@@ -65,6 +79,10 @@ class scriptJudger(tornado.web.RequestHandler):
 			judgerResult = json.dumps(json.load(f))
 			# print(judgerResult)
 			self.write(judgerResult)
+		self.write({'Score': 0,
+					'time': 0,
+					'memory': 0,
+					'Info': "No comment"})
 
 
 class Application(tornado.web.Application):
