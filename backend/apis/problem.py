@@ -93,7 +93,7 @@ class APIProblemHandler(base.BaseHandler):
         if 'description' in self.args.keys():
             del self.args['description']
         try:
-            res = await self.getObject('homeworks', secure=1, **self.args)
+            res = await self.getObject('problems', secure=1, **self.args)
 
             for problem in res:
                 problem_id = problem['id']
