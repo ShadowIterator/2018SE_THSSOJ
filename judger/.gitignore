@@ -37,7 +37,7 @@ test1
 *.in
 *.out
 *.err
-*.txt
+
 result.*
 *.res
 

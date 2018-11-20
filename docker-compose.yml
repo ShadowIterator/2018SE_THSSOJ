@@ -5,8 +5,8 @@ services:
     build: ./backend
     volumes:
       - ./backend:/usr/src/app
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
     expose:
       - "8000"
     depends_on:
@@ -45,3 +45,5 @@ services:
     build: ./judger
     expose:
       - "12345"
+    volumes:
+      - './backend/root:/usr/src/app/root'

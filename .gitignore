@@ -3,7 +3,7 @@ data
 __pycache__
 .idea
 .DS_Store
-*.txt
+
 *.iml
 *.xml
 *.sconfig

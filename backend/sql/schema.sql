@@ -111,7 +111,7 @@ CREATE TABLE notices (
 INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('lrj','1234','lrj@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, TA_courses) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}');
+INSERT INTO users (username, password, email, role, TA_courses, student_courses) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}');
 
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 1.', 'This is notice 1 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 2.', 'This is notice 2 content.');
@@ -119,5 +119,5 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 
 INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1}', '{1}');
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{1}', '{1,2,3}');
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{}', 1);
-INSERT INTO records (user_id, problem_id, homework_id, submit_time) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38');
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{1}', 1);
+INSERT INTO records (user_id, problem_id, homework_id, submit_time, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);

@@ -28,7 +28,6 @@ class Home extends Component {
         return (
             <Redirect to="/login" />
         )
-
     }
 }
 
@@ -92,7 +91,7 @@ class App extends Component {
         if(this.state.jumpToLogin) {
             this.setState({
                 jumpToLogin: false,
-            })
+            });
             return(
                 <Router>
                     <Redirect to="/login" />
@@ -112,8 +111,8 @@ class App extends Component {
                         <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
                         <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson" render={()=><TALesson />} />
-                        <Route path="/problemdetail/:id" render={(props) => <ProblemDetail problem_id={props.match.params.id} />} />
+                        <Route path="/talesson" render={()=><TALesson {...this.state} />} />
+                        <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                     </div>
                 </Router>

@@ -22,6 +22,9 @@ class APIRecordHandler(base.BaseHandler):
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.getObject('records', secure = 1, **self.args)
+        for js in res:
+            timepoint = int(js['submit_time'].timestamp())
+            js['submit_time'] = timepoint
         self.write(json.dumps(res).encode())
 
     async def _srcCode_post(self):
