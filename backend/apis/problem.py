@@ -118,16 +118,24 @@ class APIProblemHandler(base.BaseHandler):
             current_time = datetime.datetime.now()
             cur_timestamp = int(time.mktime(current_time.timetuple()))
 
-            await self.createObject('records',
-                                    user_id=self.args['user_id'],
-                                    problem_id=self.args['problem_id'],
-                                    homework_id=self.args['homework_id'],
-                                    submit_time = cur_timestamp)
+            # await self.createObject('records',
+            #                         user_id=self.args['user_id'],
+            #                         problem_id=self.args['problem_id'],
+            #                         homework_id=self.args['homework_id'],
+            #                         submit_time = cur_timestamp)
+            
+            # {
+            #     "user_id":2,
+            #     "problem_id":1,
+            #     "homework_id":1,
+            #     "src_code":I2luY2x1ZGUgPGlvc3RyZWFtPgp1c2luZyBuYW1lc3BhY2Ugc3RkOwppbnQgbWFpbigpCnsKICAgIGludCBhPTA7CiAgICBpbnQgYj0wOwogICAgY2luPj5hPj5iOwogICAgY291dDw8YStiOwogICAgcmV0dXJuIDA7Cn0=
+            # }
             record_created = (await self.getObject('records',
                                                    user_id=self.args['user_id'],
                                                    problem_id=self.args['problem_id'],
                                                    homework_id=self.args['homework_id'],
-                                                   submit_time=cur_timestamp
+                                                   # submit_time=cur_timestamp
+                                                   submit_time=10000
                                                    ))[0]
             str_id = str(record_created['id'])
             record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
@@ -143,8 +151,8 @@ class APIProblemHandler(base.BaseHandler):
             #创建临时的测评文件夹，需要删除
             if not os.path.exists('test'):
                 os.makedirs('test')
-            if not os.path.exists('checkers'):
-                os.makedirs('checkers')
+            # if not os.path.exists('checkers'):
+            #     os.makedirs('checkers')
 
             problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
             judge_req = dict()
@@ -157,13 +165,23 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['OUTSUF'] = 'out'
             judge_req['Language'] = 'C++'
             judge_req['DATA_DIR'] = os.getcwd()+'/test'
-            judge_req['CHECKER_DIR'] = os.getcwd()+'/checkers'
+            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = 'ncmp'
-            judge_req['NTESTS'] = 1
+            judge_req['NTESTS'] = 2
             judge_req['SOURCE_FILE'] = str_id
-            judge_req['SOURCE_DIR'] = os.getcwd()+record_dir
+            judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
 
-            result_dict={'Accept':0, 'Wrong Answer':1, 'Runtime Error':2}
+            result_dict={'Accept':0,
+                         'Wrong Answer':1,
+                         'Runtime Error':2,
+                         'Time Limit Exceed':3,
+                         'Memory Limit Exceed':4,
+                         'Output Limit Exceed':5,
+                         'Danger System Call':6,
+                         'Judgement Failed':7,
+                         'Compile Error':8,
+                         'unknown':9,
+                         }
 
             judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)))
             record_created['src_size']=os.path.getsize(src_file_path)
