@@ -96,7 +96,7 @@ class APIUserHandler(base.BaseHandler):
         id = self.args['id']
         res_dict={}
         try:
-            user_qualified = await self.getObject('users', id=id)[0]
+            user_qualified = (await self.getObject('users', id=id))[0]
             email = user_qualified['email']
             username = user_qualified['username']
             sender = '1747310410@qq.com'
@@ -114,7 +114,8 @@ class APIUserHandler(base.BaseHandler):
                 user_qualified['validate_code']=activate_code
                 await self.saveObject('users', user_qualified)
                 res_dict['code']=0
-            except:res_dict['code']=1
+            except:
+                res_dict['code']=1
         except:
             res_dict['code']=1
         # self.write(tornado.escape.json_encode(res_dict))
@@ -126,16 +127,17 @@ class APIUserHandler(base.BaseHandler):
         try:
             id = self.args['id']
             validate_code = self.args['validate_code']
-            user_qualified = await self.getObject('users', id=id)[0]
+            user_qualified = (await self.getObject('users', id=id))[0]
             if user_qualified['validate_code'] == validate_code:
                 user_qualified.status = 1
                 await self.saveObject('users', user_qualified)
                 res_dict['code'] = 0
             else:
                 res_dict['code'] = 1
+                return res_dict
         except:
             res_dict['code'] = 1
-        self.write(tornado.escape.json_encode(res_dict))
+        return res_dict
 
     @catch_exception_write
     async def get(self, type): #detail
