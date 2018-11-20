@@ -73,10 +73,10 @@ permissions = {
             'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
-            'realname': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
-            'student_id': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
-            'validate_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
-            'create_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -482,9 +482,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def jsonFilter(self, table_name, method, dic, per_role, per_owner):
         rtn = {}
         permissionList = permissions[table_name][method]
+        print('jsonFilter: ', dic)
         for key,value in dic.items():
             if(key in permissionList.keys()):
                 permission = permissionList[key]
+                print(permission)
                 if(permission[0] <= per_role and permission[1] <= per_owner):
                     rtn[key] = value
         return rtn

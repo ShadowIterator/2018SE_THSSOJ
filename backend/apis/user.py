@@ -33,6 +33,7 @@ class APIUserHandler(base.BaseHandler):
             'code': 1
         }
         try:
+            print('update: ', self.args)
             await self.saveObject('users', secure = 1, object = self.args)
             rtn['code'] = 0
         except:
