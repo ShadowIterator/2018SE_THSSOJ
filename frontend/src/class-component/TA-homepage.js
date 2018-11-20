@@ -36,13 +36,25 @@ class mTAHomepageMiddle extends Component {
         // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
-        if(!this.props.state || !this.props.id) {
+        console.log("componentDidMount");
+        if(!this.props.state || this.props.id===undefined) {
             return;
         }
         const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, TAHomepageMiddle.query_user_callback);
     }
+    componentWillUpdate(nextProps) {
+        console.log("componentWillUpdate");
+        console.log(nextProps);
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            console.log(nextProps.id);
+            ajax_post(api_list['query_user'], {id:nextProps.id}, this, mTAHomepageMiddle.query_user_callback);
+        }
+    }
     static query_user_callback(that, result) {
+        console.log("query_user_callback");
         if(result.data.length === 0) {
             console.log("Query failed. No such user.");
             return;
@@ -124,9 +136,6 @@ class mTAHomepageMiddle extends Component {
                         <Info infoitems={this.state.infoitems}/>
                     </Col>
                 </Row>
-                <Button onClick={()=>{
-                    this.props.history.push('/createlesson');
-                }} >创建课程</Button>
             </Container>
         )
 
