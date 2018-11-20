@@ -85,7 +85,7 @@ Mock.mock(URL+api_list['query_user'],function(options) {
            }
        }
    } else
-   {
+   if (data.id){
        const id = data.id;
        for(let index in users) {
            const user = users[index];
