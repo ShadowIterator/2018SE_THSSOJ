@@ -68,7 +68,10 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 
 			} else
 			{
-				judgerResult.result = JudgeResult2string(rr.jr);
+				if (rr.jr == Accept)
+					judgerResult.result = JudgeResult2string(JudgementFailed);
+				else
+					judgerResult.result = JudgeResult2string(rr.jr);
 				judgerResult.info = string("Failed at test case ")+oss.str();
 				break;
 			}
