@@ -28,18 +28,22 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     @check_password
     async def _update_post(self):
-        print('update')
-        rtn = {
-            'code': 1
-        }
-        try:
-            await self.saveObject('users', secure = 1, object = self.args)
-            rtn['code'] = 0
-        except:
-            print('update failed')
-        print('update: ', rtn)
-        # self.write(json.dumps(rtn).encode())
-        return rtn
+        print('si_update: ', self.args)
+        await self.saveObject('users', secure = 1, object = self.args)
+        # rtn['code'] = 0
+        return {'code': 0}
+        # rtn = {
+        #     'code': 1
+        # }
+        # try:
+        #     print('update: ', self.args)
+        #     await self.saveObject('users', secure = 1, object = self.args)
+        #     rtn['code'] = 0
+        # except:
+        #     print('update failed')
+        # print('update: ', rtn)
+        # # self.write(json.dumps(rtn).encode())
+        # return rtn
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -89,6 +93,7 @@ class APIUserHandler(base.BaseHandler):
         try:
             user_qualified = self.getObject('users', {'username': username})[0]
             email = user_qualified['email']
+            username = user_qualified['username']
             sender = '1747310410@qq.com'
             receivers = [email,]
             activate_code = random.randint(0,99999)
@@ -122,11 +127,11 @@ class APIUserHandler(base.BaseHandler):
                 self.saveObject('users',user_qualified)
                 res_dict['code']=0
             else:
-                res_dict['code']=1
+                res_dict['code'] = 1
         except:
-            res_dict['code']=1
-        return res_dict
-        # self.write(tornado.escape.json_encode(res_dict))
+            res_dict['code'] = 1
+        self.write(tornado.escape.json_encode(res_dict))
+
 
     @catch_exception_write
     async def get(self, type): #detail

@@ -65,7 +65,7 @@ permissions = {
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'write': {
@@ -75,13 +75,13 @@ permissions = {
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
             'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'validate_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
-            'create_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
@@ -90,7 +90,7 @@ permissions = {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -100,7 +100,7 @@ permissions = {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -188,8 +188,8 @@ permissions = {
 }
 
 database_keys = {
-    'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'TA_courses'],
-    'courses': ['id', 'name', 'description', 'TAs', 'students', 'status', 'homeworks', 'notices'],
+    'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
+    'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices'],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
     'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness'],
     'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
@@ -478,9 +478,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def jsonFilter(self, table_name, method, dic, per_role, per_owner):
         rtn = {}
         permissionList = permissions[table_name][method]
+        print('jsonFilter: ', dic)
         for key,value in dic.items():
             if(key in permissionList.keys()):
                 permission = permissionList[key]
+                print(permission)
                 if(permission[0] <= per_role and permission[1] <= per_owner):
                     rtn[key] = value
         return rtn
@@ -498,8 +500,13 @@ class BaseHandler(tornado.web.RequestHandler):
         print(method)
         func = getattr(self, method, None)
         if(not callable(func)):
+            print('no method')
             raise NoMethodError
+        print('await to call function')
         return await func(*args, **kw)
+        # res = await func(*args, **kw)
+        # print('call method res = ', res)
+        # return res
 
     def options(self, *args, **kw):
         # no body
