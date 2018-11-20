@@ -115,7 +115,7 @@ class UserSettingsForm extends Component {
         } else {
             alert("Update failed.");
         }
-        that.fillInfo();
+        that.fillInfo(that.props.id);
     }
     validate_account() {
         const id = this.props.id;
@@ -147,7 +147,7 @@ class UserSettingsForm extends Component {
             that.setState({
                 validating: false,
             });
-            that.fillInfo();
+            that.fillInfo(that.props.id);
         } else {
             alert("Validate code error.");
         }
