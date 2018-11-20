@@ -1,4 +1,3 @@
-
 import json
 import aiopg
 import bcrypt
