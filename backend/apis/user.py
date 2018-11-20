@@ -1,8 +1,9 @@
-
 import json
 import hashlib
 import smtplib
 import random
+import datetime
+import time
 from email.mime.text import MIMEText
 from email.header import Header
 from . import base
@@ -16,6 +17,9 @@ class APIUserHandler(base.BaseHandler):
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.getObject('users', secure = 1, **self.args)
+        for user in res:
+            user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
+            user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
         # self.write(json.dumps(res).encode())
         return res
 
@@ -48,7 +52,14 @@ class APIUserHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _create_post(self):
-        await self.createObject('users', **self.args)
+        current_time = datetime.datetime.now()
+        # cur_timestamp = int(time.mktime(current_time.timetuple()))
+        await self.createObject('users',
+                                username=self.args['username'],
+                                password=self.args['password'],
+                                email=self.args['email'],
+                                create_time=current_time)
+        # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
         return {'code': 0}
 

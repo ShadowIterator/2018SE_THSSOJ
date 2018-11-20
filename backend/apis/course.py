@@ -11,17 +11,32 @@ class APICourseHandler(base.BaseHandler):
     async def _create_post(self):
         res_dict={}
         try:
-            possible_course = await self.getObject('courses', secure=1, name=self.args['name'])
-            if len(possible_course)!=0:
-                self.set_res_dict(code=2, msg='course already exists')
+            # possible_course = await self.getObject('courses', secure=1, name=self.args['name'])
+            # if len(possible_course)!=0:
+            #     self.set_res_dict(code=2, msg='course already exists')
+            #     self.return_json(res_dict)
+            #     return
+            await self.createObject('courses',**self.args)
+                                    # name = self.args['name'],
+                                    # description = self.args['description'],
+                                    # students = self.args['students'],
+                                    # TAs = self.args['TAs'])
+            course_created = (await self.getObject('courses', **self.args))[0]
+            course_id = course_created['id']
+            try:
+                for stu_id in self.args['students']:
+                    student=(await self.getObject('users', id=stu_id))[0]
+                    student['student_courses'].append(course_id)
+                    await self.saveObject('users', student)
+                for TA_id in self.args[ 'TAs']:
+                    TA = (await self.getObject('users', id=TA_id))[0]
+                    TA['TA_courses'].append(course_id)
+                    await self.saveObject('users', TA)
+                self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
+            except Exception as e:
+                self.set_res_dict(res_dict, code=1, msg='can not add students and TAs to course')
                 self.return_json(res_dict)
                 return
-            await self.createObject('courses',
-                                    name = self.args['name'],
-                                    description = self.args['description'],
-                                    students = self.args['students'],
-                                    TAs = self.args['TAs'])
-            self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
         except:
             self.set_res_dict(res_dict, code=1, msg='course creation failed')
         self.return_json(res_dict)

@@ -39,7 +39,7 @@ CREATE TABLE users (
     email VARCHAR(512),             --
     realname VARCHAR(32),           --
     student_id VARCHAR(32),         --
-    validate_time INTEGER,          --
+    validate_time TIMESTAMP ,          --
     create_time TIMESTAMP,          --
     role INTEGER,                   --
     validate_code INTEGER,          --
