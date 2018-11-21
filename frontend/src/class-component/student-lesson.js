@@ -217,7 +217,7 @@ class StudentLessonMiddle extends Component {
             </Container>
         )
     }
-}``
+}
 
 export class StudentLesson extends Component {
     render() {
