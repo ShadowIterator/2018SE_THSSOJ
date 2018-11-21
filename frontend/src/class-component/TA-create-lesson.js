@@ -150,11 +150,26 @@ class mLessonList extends Component {
                 return;
             }
         }
-        stu_tags.push({username: result.data[0].username, id: result.data[0].id});
-        that.setState({stu_tags: stu_tags});
-        that.setState({newstu: ""});
-        // console.log(that.state.stu_tags);
+        // if(!that.state.isCreating) {
+        //     ajax_post(api_list['addStudent_course'], {stu_id: result.data[0].id, course_id: that.props.course_id},
+        //         that, that.add_stu_callback_not_create(result.data[0].username, result.data[0].id));
+        // } else {
+            stu_tags.push({username: result.data[0].username, id: result.data[0].id});
+            that.setState({stu_tags: stu_tags});
+            that.setState({newstu: ""});
+        // }
     }
+
+    // add_stu_callback_not_create(username, id) {
+    //     return function(that, result) {
+    //         if (result.data.code === 0) {
+    //             let stu_tags = that.state.stu_tags;
+    //             stu_tags.push({username: username, id: id});
+    //             that.setState({stu_tags: stu_tags});
+    //             that.setState({newstu: ""});
+    //         }
+    //     }
+    // }
 
     static add_ta_callback(that, result) {
         if (result.data.length===0) {
@@ -174,44 +189,59 @@ class mLessonList extends Component {
                 return;
             }
         }
-        ta_tags.push({username: result.data[0].username, id: result.data[0].id});
-        that.setState({ta_tags: ta_tags});
-        that.setState({newta: ""});
-        // console.log(that.state.ta_tags);
+        // if(!that.state.isCreating) {
+        //     ajax_post(api_list['addTA_course'], {ta_id: result.data[0].id, course_id: that.props.course_id},
+        //         that, that.add_ta_callback_not_create(result.data[0].username, result.data[0].id));
+        // } else {
+            ta_tags.push({username: result.data[0].username, id: result.data[0].id});
+            that.setState({ta_tags: ta_tags});
+            that.setState({newta: ""});
+        // }
     }
 
+    // add_ta_callback_not_create(username, id) {
+    //     return function(that, result) {
+    //         if(result.data.code === 0) {
+    //             let ta_tags = that.state.ta_tags;
+    //             ta_tags.push({username:username, id:id});
+    //             that.setState({ta_tags: ta_tags});
+    //             that.setState({newta: ""});
+    //         }
+    //     }
+    // }
 
-    static deleteStudent_callback_closure(tag) {
-        return function(that, result)
-        {
-            if (result.data.code === 0) {
-                that.setState({stu_tags: that.state.stu_tags.filter(t => t.username !== tag.username)});
-            } else {
-                alert("Something went wrong while deleting "+tag.username);
-            }
-        }
-    }
 
-    static deleteTA_callback_closure(tag) {
-        return function(that, result)
-        {
-            if (result.data.code === 0) {
-                that.setState({ta_tags: that.state.ta_tags.filter(t => t.username !== tag.username)});
-            } else {
-                alert("Something went wrong while deleting "+tag.username);
-            }
-        }
-    }
+    // deleteStudent_callback_closure(tag) {
+    //     return function(that, result)
+    //     {
+    //         if (result.data.code === 0) {
+    //             that.setState({stu_tags: that.state.stu_tags.filter(t => t.username !== tag.username)});
+    //         } else {
+    //             alert("Something went wrong while deleting "+tag.username);
+    //         }
+    //     }
+    // }
+
+    // deleteTA_callback_closure(tag) {
+    //     return function(that, result)
+    //     {
+    //         if (result.data.code === 0) {
+    //             that.setState({ta_tags: that.state.ta_tags.filter(t => t.username !== tag.username)});
+    //         } else {
+    //             alert("Something went wrong while deleting "+tag.username);
+    //         }
+    //     }
+    // }
 
     render() {
         const stutagElements = this.state.stu_tags.map(tag => {
             const onRemove = () => {
-                if(!this.props.isCreating) {
-                    ajax_post(api_list['deleteStudent_course'], {stu_id: tag.id, course_id: this.props.course_id},
-                        this, mLessonList.deleteStudent_callback_closure(tag));
-                } else {
+                // if(!this.props.isCreating) {
+                //     ajax_post(api_list['deleteStudent_course'], {stu_id: tag.id, course_id: this.props.course_id},
+                //         this, this.deleteStudent_callback_closure(tag));
+                // } else {
                     this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
-                }
+                // }
             };
             return (
                 <Tag
@@ -226,9 +256,12 @@ class mLessonList extends Component {
 
         const tatagElements = this.state.ta_tags.map(tag => {
             const onRemove = () => {
-                if(!this.props.isCreating) {
+                // if(!this.state.isCreating) {
+                //     ajax_post(api_list['deleteTA_course'], {ta_id: tag.id, course_id: this.props.course_id},
+                //         this, this.deleteTA_callback_closure(tag));
+                // } else {
                     this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
-                }
+                // }
             };
             return (
                 <Tag
