@@ -9,7 +9,7 @@ __pycache__
 *.sconfig
 backend/venv/
 backend/temp/
+node_modules
 DS_Store
 *.pyc
 app_config.py
-

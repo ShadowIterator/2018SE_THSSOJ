@@ -41,6 +41,6 @@ utils/parseArgs.o: utils/parseArgs.cpp utils/parseArgs.h utils/configs.h
 utils/configs.o: utils/configs.cpp utils/configs.h
 	g++ -c utils/configs.cpp -o utils/configs.o -std=c++11
 clean:
-	rm *.o scriptJudger tradiJudger executor
+	rm *.o utils/*.o scriptJudger tradiJudger executor
 clean_all:
-	rm *.o $(EXE)
+	rm *.o utils/*.o $(EXE)

@@ -47,6 +47,7 @@ class traditionalJudger(tornado.web.RequestHandler):
 			judgerResult = json.dumps(json.load(f))
 			# print(judgerResult)
 			self.write(judgerResult)
+			return
 		self.write({'Result': 'Judgement Failed',
 					'time': 0,
 					'memory': 0,
@@ -58,11 +59,12 @@ class scriptJudger(tornado.web.RequestHandler):
 		# print(data)
 		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
 		targetFile = os.path.join(data['WORK_PATH'], 'index.js')
-		if !os.path.isfile(resultsourceFile):
+		if not os.path.isfile(sourceFile):
 			self.write({'Score': 0,
 						'time': 0,
 						'memory': 0,
 						'Info': "No comment"})
+			return
 		open(targetFile, "wb").write(open(sourceFile, "rb").read())
 
 		params = ['./scriptJudger', \
@@ -75,10 +77,13 @@ class scriptJudger(tornado.web.RequestHandler):
 					]
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
 		judger.wait()
+
+		os.remove(targetFile)
 		with open("result.json", "r", encoding='utf-8') as f:
 			judgerResult = json.dumps(json.load(f))
 			# print(judgerResult)
 			self.write(judgerResult)
+			return
 		self.write({'Score': 0,
 					'time': 0,
 					'memory': 0,
