@@ -28,7 +28,6 @@ class Home extends Component {
         return (
             <Redirect to="/login" />
         )
-
     }
 }
 
@@ -38,7 +37,8 @@ class App extends Component {
         this.state = {
             state: false,
             id: -1,
-            role: -1
+            role: -1,
+            jumpToLogin: false,
         };
         this.logout_callback = this.logout_callback.bind(this);
         this.login_callback = this.login_callback.bind(this);
@@ -46,15 +46,26 @@ class App extends Component {
     componentDidMount() {
         const id_cookie = Cookies.get('mid');
         console.log('cookie: ', id_cookie);
-        if (id_cookie) {
+        if(!id_cookie) {
+            this.setState({
+                jumpToLogin: true,
+            });
+        }
+        if (id_cookie && !this.state.state) {
             ajax_post(api_list['query_user'], {id: parseInt(id_cookie)}, this, App.query_user_callback);
         }
     }
     static query_user_callback(that, result) {
-        if(result.data['code']===1)
-            return;
-        if(result.data.length===0)
-            return;
+        if(result.data.code===1) {
+            this.setState({
+                jumpToLogin: true,
+            });
+        }
+        if(result.data.length===0) {
+            this.setState({
+                jumpToLogin: true,
+            });
+        }
         const data = result.data[0];
         that.setState({
             state: true,
@@ -77,6 +88,16 @@ class App extends Component {
         });
     }
     render() {
+        if(this.state.jumpToLogin) {
+            this.setState({
+                jumpToLogin: false,
+            });
+            return(
+                <Router>
+                    <Redirect to="/login" />
+                </Router>
+            );
+        }
         return (
             <>
                 <Router>
@@ -90,8 +111,8 @@ class App extends Component {
                         <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
                         <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson" render={()=><TALesson />} />
-                        <Route path="/problemdetail/:id" render={(props) => <ProblemDetail problem_id={props.match.params.id} />} />
+                        <Route path="/talesson" render={()=><TALesson {...this.state} />} />
+                        <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                         <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
                     </div>

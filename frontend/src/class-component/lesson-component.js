@@ -37,9 +37,9 @@ class mLessonList extends Component {
         id = id>=0? id:-id;
         let pathname;
         const id_param = '/' + id.toString();
-        if(this.context.role===1) {
+        if(this.props.role===1) {
             pathname = '/studentlesson';
-        } else if(this.context.role === 2) {
+        } else if(this.props.role === 2) {
             pathname = '/talesson';
         }
         console.log(pathname);
@@ -77,7 +77,7 @@ class StudentLessonList extends Component {
     render() {
         return (
             <Card interactive={false} style={FullHeight}>
-                <LessonList listname="课程" lessonlist={this.props.lessonlist} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname="课程" lessonlist={this.props.lessonlist} />
             </Card>
         )
     }
@@ -87,9 +87,9 @@ class TALessonList extends Component {
     render() {
         const lists = (
             <>
-                <LessonList listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
-                <LessonList listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
-                <LessonList listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
             </>
         );
         // console.log(this.state);

@@ -1,3 +1,5 @@
+test
+
 # Prerequisites
 *.d
 
@@ -32,11 +34,13 @@
 *.app
 exectuor
 tradiJudger
+scriptJudger
 test
 test1
 *.in
 *.out
 *.err
+
 result.*
 *.res
 

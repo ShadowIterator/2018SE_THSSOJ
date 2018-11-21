@@ -1,3 +1,4 @@
+
 import json
 import hashlib
 import smtplib
@@ -28,18 +29,22 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     @check_password
     async def _update_post(self):
-        print('update')
-        rtn = {
-            'code': 1
-        }
-        try:
-            await self.saveObject('users', secure = 1, object = self.args)
-            rtn['code'] = 0
-        except:
-            print('update failed')
-        print('update: ', rtn)
-        # self.write(json.dumps(rtn).encode())
-        return rtn
+        print('si_update: ', self.args)
+        await self.saveObject('users', secure = 1, object = self.args)
+        # rtn['code'] = 0
+        return {'code': 0}
+        # rtn = {
+        #     'code': 1
+        # }
+        # try:
+        #     print('update: ', self.args)
+        #     await self.saveObject('users', secure = 1, object = self.args)
+        #     rtn['code'] = 0
+        # except:
+        #     print('update failed')
+        # print('update: ', rtn)
+        # # self.write(json.dumps(rtn).encode())
+        # return rtn
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -52,24 +57,29 @@ class APIUserHandler(base.BaseHandler):
         username = self.args['username']
         password = self.args['password']
         try:
-            users_qualified = await self.getObject('users', **{'username': username, 'password': password})
+            users_list = await self.getObject('users', **{'username': username, 'password': password})
         except:
             res_dict['code'] = 1
+
             # self.write(tornado.escape.json_encode(res_dict))
             return res_dict
+
             return 
-        if len(users_qualified) == 1:
-            userObj = users_qualified[0]
+        if len(users_list) == 1:
+            userObj = users_list[0]
             print(userObj)
             self.set_secure_cookie('user_id', str(userObj.id), expires_days = None)
             self.set_cookie('id', str(userObj.id), expires_days = None)
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
+
         else:
             res_dict['code'] = 1
+
         # self.write(tornado.escape.json_encode(res_dict))
         return res_dict
+
 
     @tornado.web.authenticated
     async def _logout_post(self):
@@ -84,11 +94,12 @@ class APIUserHandler(base.BaseHandler):
 
     @tornado.web.authenticated
     async def _validate_post(self):
-        username = self.args['username']
+        id = self.args['id']
         res_dict={}
         try:
-            user_qualified = self.getObject('users', {'username': username})[0]
+            user_qualified = (await self.getObject('users', id=id))[0]
             email = user_qualified['email']
+            username = user_qualified['username']
             sender = '1747310410@qq.com'
             receivers = [email,]
             activate_code = random.randint(0,99999)
@@ -100,11 +111,12 @@ class APIUserHandler(base.BaseHandler):
                 smtpObj = smtplib.SMTP('smtp.qq.com')
                 smtpObj.login(sender, 'vwwiwzsdkzvbbcdb')
                 smtpObj.sendmail(sender, receivers, message.as_string())
-                print("邮件发送成功")
+                print("邮件发送成功", activate_code)
                 user_qualified['validate_code']=activate_code
-                self.saveObject('users', user_qualified)
+                await self.saveObject('users', user_qualified)
                 res_dict['code']=0
-            except:res_dict['code']=1
+            except:
+                res_dict['code']=1
         except:
             res_dict['code']=1
         # self.write(tornado.escape.json_encode(res_dict))
@@ -114,19 +126,19 @@ class APIUserHandler(base.BaseHandler):
     async def _activate_post(self):
         res_dict = {}
         try:
-            username = self.args['username']
+            id = self.args['id']
             validate_code = self.args['validate_code']
-            user_qualified = self.getObject('users', {'username': username})[0]
-            if user_qualified['validate_code']==validate_code:
-                user_qualified.status=1
-                self.saveObject('users',user_qualified)
-                res_dict['code']=0
+            user_qualified = (await self.getObject('users', id=id))[0]
+            if user_qualified['validate_code'] == validate_code:
+                user_qualified.status = 1
+                await self.saveObject('users', user_qualified)
+                res_dict['code'] = 0
             else:
-                res_dict['code']=1
+                res_dict['code'] = 1
+                return res_dict
         except:
-            res_dict['code']=1
+            res_dict['code'] = 1
         return res_dict
-        # self.write(tornado.escape.json_encode(res_dict))
 
     @catch_exception_write
     async def get(self, type): #detail

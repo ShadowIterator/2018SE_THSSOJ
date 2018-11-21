@@ -207,7 +207,7 @@ class LoginMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://via.placeholder.com/1438x680.png" alt = "Card image" />
+                <Card.Img src="https://www.fillmurray.com/1438/680" alt = "Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">
@@ -226,7 +226,7 @@ class SignupMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://via.placeholder.com/1438x680.png" alt="Card image" />
+                <Card.Img src="https://www.fillmurray.com/1438/680" alt="Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">

@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 
-import {Container, Col, Row, Card,} from 'react-bootstrap';
+import {Card, Container, Table} from 'react-bootstrap';
 
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
@@ -20,8 +20,79 @@ class ProblemDetailBody extends Component {
         return (
             <>
                 <ReactMarkdown source={this.props.probleminfo.description} />
-                <CodeInput />
+                <CodeInput state={this.props.state} role={this.props.role}
+                           id={this.props.id} problem_id={this.props.probleminfo.id}
+                           homework_id={this.props.homework_id}/>
+                <ProblemDetailRecord records={this.props.records} />
             </>
+        );
+    }
+}
+
+class ProblemDetailRecord extends Component {
+    result_arr = ['Accepted',
+        'Wrong Answer',
+        'Runtime Error',
+        'Time Limit Exceed',
+        'Memory Limit Exceed',
+        'Output Limit Exceed',
+        'Danger System Call',
+        'Judgement Failed',
+        'Compile Error',
+        'unknown',
+    ];
+    static timeConverter(UNIX_timestamp){
+        let a = new Date(UNIX_timestamp * 1000);
+        let months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        let year = a.getFullYear();
+        let month = months[a.getMonth()];
+        let date = a.getDate();
+        let hour = a.getHours();
+        let min = a.getMinutes();
+        let sec = a.getSeconds();
+        return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
+    }
+    render() {
+        let body = [];
+        // console.log('outside table render', this.props.records, this.props.records.consume_time);
+        if(this.props.records[0]!==undefined && this.props.records[0].consume_time!==undefined) {
+            console.log('inside table render', this.props.records);
+            let counter = 1;
+            for (const re of this.props.records) {
+                if(re.consume_time===undefined)
+                    continue;
+                console.log("inside table render for loop", re)
+                const result_id = re.result;
+                const result = this.result_arr[result_id];
+                body.push(
+                    <tr>
+                        <td>{counter}</td>
+                        <td>{result}</td>
+                        <td>{re.consume_time.toString() + ' ms'}</td>
+                        <td>{re.consume_memory.toString() + ' kb'}</td>
+                        <td>{re.src_size.toString() + ' B'}</td>
+                        <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
+                    </tr>
+                );
+                counter += 1;
+            }
+        }
+        return (
+            <Table striped bordered hover style={{marginTop: '10px'}}>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>运行结果</th>
+                    <th>运行时间</th>
+                    <th>所占空间</th>
+                    <th>文件大小</th>
+                    <th>提交时间</th>
+                </tr>
+                </thead>
+                <tbody>
+                    {body}
+                </tbody>
+            </Table>
         );
     }
 }
@@ -71,15 +142,15 @@ class ProblemDetail extends Component {
         const id = rec.id;
         const submit_time = rec.submit_time;
         const rec_result = rec.result;
-        const consume_time = rec.comsume_time;
-        const comsume_memory = rec.comsume_memory;
+        const consume_time = rec.consume_time;
+        const consume_memory = rec.consume_memory;
         const src_size = rec.src_size;
         for(let rec of that.records) {
             if(rec.id===id) {
                 rec.submit_time = submit_time;
                 rec.result = rec_result;
                 rec.consume_time = consume_time;
-                rec.comsume_memory = comsume_memory;
+                rec.consume_memory = consume_memory;
                 rec.src_size = src_size;
                 that.setState({records:that.records});
             }
@@ -91,7 +162,10 @@ class ProblemDetail extends Component {
                 <Card.Body>
                     {/*<Card.Title>{this.state.title}</Card.Title>*/}
                     <Container>
-                        <ProblemDetailBody probleminfo={this.state}/>
+                        <ProblemDetailBody state={this.props.state} role={this.props.role}
+                                           id={this.props.id} probleminfo={this.state}
+                                           homework_id={parseInt(this.props.homework_id)}
+                                           records={this.state.records}/>
                     </Container>
                 </Card.Body>
             </Card>

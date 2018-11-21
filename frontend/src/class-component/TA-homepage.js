@@ -61,11 +61,12 @@ class mTAHomepageMiddle extends Component {
         }
         const user = result.data[0];
         const student_courses = user.student_courses;
-        const TA_courses = user.TA_courses;
+        const ta_courses = user.ta_courses;
         for(let id of student_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_stu_course_callback);
         }
-        for(let id of TA_courses) {
+        console.log(ta_courses);
+        for(let id of ta_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_ta_course_callback);
         }
     }
@@ -127,10 +128,11 @@ class mTAHomepageMiddle extends Component {
             <Container fluid={true}>
                 <Row>
                     <Col lg={3} style={ZeroPadding}>
-                        <TALessonList lessonlist={this.state.lessonlist}
-                                        stulesson={this.state.stulesson}
-                                        talesson={this.state.talesson}
-                                        uplesson={this.state.uplesson}/>
+                        <TALessonList state={this.props.state} id={this.props.id} role={this.props.role}
+                                      lessonlist={this.state.lessonlist}
+                                      stulesson={this.state.stulesson}
+                                      talesson={this.state.talesson}
+                                      uplesson={this.state.uplesson}/>
                     </Col>
                     <Col lg={9} style={ZeroPadding}>
                         <Info infoitems={this.state.infoitems}/>
@@ -148,7 +150,7 @@ class TAHomepage extends Component {
     render() {
         return (
             <>
-                <TAHomepageMiddle state={this.props.state} id={this.props.id} />
+                <TAHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
             </>
         )
     }

@@ -91,7 +91,7 @@ class StudentHomepageMiddle extends Component {
             <Container fluid>
                 <Row>
                     <Col lg={3} style={ZeroPadding}>
-                        <StudentLessonList lessonlist={this.lessonlist} />
+                        <StudentLessonList state={this.props.state} id={this.props.id} role={this.props.role} lessonlist={this.lessonlist} />
                     </Col>
                     <Col style={ZeroPadding}>
                         <Info infoitems={this.infoitems}/>
