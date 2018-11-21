@@ -275,7 +275,7 @@ class mLessonList extends Component {
         });
 
         return (
-            <>
+            <div>
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group as={Row} controlId="title">
                     <Form.Label column lg="2">课程名称</Form.Label>
@@ -326,7 +326,7 @@ class mLessonList extends Component {
                 </Container>
             </Form>
 
-            </>
+            </div>
         )
     }
 }

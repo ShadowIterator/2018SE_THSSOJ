@@ -99,7 +99,7 @@ class App extends Component {
             );
         }
         return (
-            <>
+            <div>
                 <Router>
                     <div>
                         <Topbar {...this.state}/>
@@ -118,7 +118,7 @@ class App extends Component {
                     </div>
                 </Router>
                 <Bottombar/>
-            </>
+            </div>
         )
     }
 }

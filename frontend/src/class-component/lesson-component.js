@@ -112,11 +112,11 @@ class StudentLessonList extends Component {
 class TALessonList extends Component {
     render() {
         const lists = (
-            <>
+            <div>
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
-            </>
+            </div>
         );
         // console.log(this.state);
         return (
