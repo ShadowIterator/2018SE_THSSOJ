@@ -11,7 +11,7 @@ import {CodeInput} from "../basic-component/code-input";
 
 // import {Tab, Tabs} from "@blueprintjs/core"
 
-// import "../mock/course-mock";
+// import "../mock//course-mock";
 // import "../mock/auth-mock";
 // import "../mock/notice-mock";
 // import "../mock/homework-mock";
