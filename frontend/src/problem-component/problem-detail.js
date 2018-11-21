@@ -9,6 +9,8 @@ import ReactMarkdown from '../../node_modules/react-markdown';
 
 import {CodeInput} from "../basic-component/code-input";
 
+import {mock_flag} from "../ajax-utils/api-manager";
+
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
 // import "../mock/notice-mock";

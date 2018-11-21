@@ -76,7 +76,7 @@ Mock.mock(URL+api_list['logout'],{code:0});
 
 Mock.mock(URL+api_list['query_user'],function(options) {
    const data = JSON.parse(options.body);
-   if (data.username) {
+   if (data.username!==undefined) {
        const username = data.username;
        for(let index in users) {
            const user = users[index];
@@ -85,7 +85,7 @@ Mock.mock(URL+api_list['query_user'],function(options) {
            }
        }
    } else
-   {
+   if (data.id!==undefined){
        const id = data.id;
        for(let index in users) {
            const user = users[index];

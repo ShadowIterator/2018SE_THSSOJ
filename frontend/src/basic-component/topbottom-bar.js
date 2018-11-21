@@ -8,14 +8,7 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
-import {AuthContext, auth_state} from './auth-context';
 import {withRouter} from "react-router";
-// import Cookies from 'universal-cookie';
-import Cookies from 'js-cookie';
-import {ajax_post} from "../ajax-utils/ajax-method";
-import {api_list} from "../ajax-utils/api-manager";
-
-// const cookies = new Cookies();
 
 class mDropdown extends Component {
     render() {
