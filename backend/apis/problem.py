@@ -200,6 +200,7 @@ class APIProblemHandler(base.BaseHandler):
             # print(response.text)
             # judge_result = json.loads(response.text)
 
+
             record_created['src_size']=os.path.getsize(src_file_path)
             record_created['consume_time']=judge_result['time']
             record_created['consume_memory']=judge_result['memory']
