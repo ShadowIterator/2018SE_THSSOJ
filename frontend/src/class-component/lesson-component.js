@@ -6,6 +6,8 @@ import {
 } from "@blueprintjs/core";
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
+import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
+import {Bottombar} from "../basic-component/topbottom-bar";
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -48,11 +50,18 @@ class mLessonList extends Component {
         return (
             <div style={Spacing}>
                <h4>{this.props.listname}</h4>
+                <Button onClick={() => {
+                    this.props.history.push('/createlesson');
+                }}>创建课程</Button>
                 <Menu>
                     {this.props.lessonlist.map((lesson)=>(<li>
                         <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
                             <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
                         </a>
+                        <Button onClick={() => {
+                            this.props.history.push('/editlesson/'+lesson.id.toString());
+                        }}>编辑</Button>
+                        <Button>发布</Button>
                     </li>))}
                 </Menu>
             </div>

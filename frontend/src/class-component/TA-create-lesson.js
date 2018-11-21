@@ -7,36 +7,96 @@ import {withRouter} from "react-router-dom"
 
 import {Card, Form, Container, Row, Col} from "react-bootstrap"
 
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
+import "../mock/homework-mock";
+import "../mock/problem-mock";
+
 class mLessonList extends Component {
     constructor(props) {
-        super(props)
-        this.state = {
-            title: "",
-            description: "",
-            newstu: "",
-            newta: "",
-            stu_tags: [],
-            ta_tags: []
-        }
-
+        super(props);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeDescription = this.changeDescription.bind(this);
         this.changeNewstu = this.changeNewstu.bind(this);
         this.changeNewta = this.changeNewta.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
+
+        if (this.props.course_id === undefined) {
+            this.state = {
+                isCreating: true,
+                title: "",
+                description: "",
+                newstu: "",
+                newta: "",
+                stu_tags: [],
+                ta_tags: []
+            }
+        } else
+        {
+            console.log(this.props.course_id);
+            this.state = {
+                isCreating: false,
+                title: "",
+                description: "",
+                newstu: "",
+                newta: "",
+                stu_tags: [],
+                ta_tags: []
+            }
+            ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
+        }
+    }
+
+    static editLesson_callback(that, result) {
+        if (result.data.length === 0) {
+            alert("未找到课程");
+            return;
+        }
+        that.setState({
+            title: result.data[0].name,
+            description: result.data[0].description,
+        })
+        for (let index in result.data[0].TAs){
+            ajax_post(api_list['query_user'], {id:result.data[0].TAs[index]}, that, LessonList.add_ta_callback);
+        }
+        for (let index in result.data[0].students){
+            ajax_post(api_list['query_user'], {id:result.data[0].students[index]}, that, LessonList.add_stu_callback)
+        }
     }
 
     handleSubmit(e) {
         e.preventDefault();
         e.stopPropagation();
-        const data = {
-            name: this.state.title,
-            description: this.state.description,
-            TAs: this.state.ta_tags.map(ta=>{return ta.id;}),
-            students: this.state.stu_tags.map(stu=>{return stu.id;})
+        if (this.state.isCreating) {
+            const data = {
+                name: this.state.title,
+                description: this.state.description,
+                TAs: this.state.ta_tags.map(ta => {
+                    return ta.id;
+                }),
+                students: this.state.stu_tags.map(stu => {
+                    return stu.id;
+                })
+            };
+            console.log(data);
+            ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
+        } else
+        {
+            const data = {
+                id: parseInt(this.props.course_id),
+                name: this.state.title,
+                description: this.state.description,
+                TAs: this.state.ta_tags.map(ta => {
+                    return ta.id;
+                }),
+                students: this.state.stu_tags.map(stu => {
+                    return stu.id;
+                })
+            };
+            console.log(data);
+            ajax_post(api_list['update_course'], data, this, LessonList.submit_callback);
         }
-        console.log(data);
-        ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
     }
 
     static submit_callback(that, result) {
@@ -82,7 +142,7 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let stu_tags = that.state.stu_tags;
-        stu_tags.push({username: that.state.newstu, id: result.data[0].id});
+        stu_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({stu_tags: stu_tags});
         that.setState({newstu: ""});
         // console.log(that.state.stu_tags);
@@ -99,7 +159,7 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let ta_tags = that.state.ta_tags;
-        ta_tags.push({username: that.state.newta, id: result.data[0].id});
+        ta_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({ta_tags: ta_tags});
         that.setState({newta: ""});
         // console.log(that.state.ta_tags);
@@ -131,6 +191,8 @@ class mLessonList extends Component {
                 </Tag>
             );
         });
+
+        const button = <Button variant="primary" type="submit">暂存</Button>;
 
         return (
             <>
@@ -174,9 +236,10 @@ class mLessonList extends Component {
                 </Form.Group>
                 {stutagElements}
                 <br/>
-                <Button variant="primary" type="submit">
-                    暂存
-                </Button>
+                {button}
+                <Button onClick={()=>{
+                    this.props.history.push('/ta');
+                }}> 放弃 </Button>
             </Form>
 
             </>
@@ -186,7 +249,7 @@ class mLessonList extends Component {
 
 const LessonList = withRouter(mLessonList);
 
-export class CreateLesson extends Component {
+class CreateLesson extends Component {
     render() {
         return (
             <Card className="text-center">
@@ -200,3 +263,24 @@ export class CreateLesson extends Component {
         )
     }
 }
+
+class EditLesson extends Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        return (
+            <Card className="text-center">
+                <Card.Body>
+                    <Card.Title>编辑课程信息{this.props.lesson_id}</Card.Title>
+                    <Container>
+                        <LessonList course_id={this.props.lesson_id}/>
+                    </Container>
+                </Card.Body>
+            </Card>
+        )
+    }
+}
+
+export {CreateLesson, EditLesson};

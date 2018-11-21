@@ -29,7 +29,7 @@ Mock.mock(URL+api_list['create_course'], function(options) {
     const new_course = {
         id: course_count,
         name: data.name,
-        description: window.atob(data.description),
+        description: data.description,
         TAs: data.TAs,
         students: data.students,
         homeworks: [],

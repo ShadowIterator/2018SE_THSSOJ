@@ -40,7 +40,6 @@ test1
 *.in
 *.out
 *.err
-
 result.*
 *.res
 
