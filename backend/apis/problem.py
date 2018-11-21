@@ -209,7 +209,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
                 judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
                 judge_req['SOURCE'] = str_id
-                judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
+                judge_req['OTHERS'] = os.getcwd()+'/judge_script/fake-node/fake-node-linux '+'test.js '+'index.js'
 
                 judge_result = json.loads(
                     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)

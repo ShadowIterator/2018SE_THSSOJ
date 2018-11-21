@@ -101,9 +101,7 @@ class CodeInput extends Component {
         return (
             <div>
             <Card>
-            <CodeMirror style={{width:'100px', height:'100px'}}
-                        options={{
-                            // mode: {name: "javascript"},
+            <CodeMirror options={{
                             mode: this.state.language,
                             theme: 'neat',
                             lineNumbers: true,
@@ -111,6 +109,7 @@ class CodeInput extends Component {
                             autofocus: true
                         }}
                         onChange={this.codeChange}
+                        value={this.state.code}
             />
             </Card>
             <select onChange={this.modeChange} value={this.state.mode}>
