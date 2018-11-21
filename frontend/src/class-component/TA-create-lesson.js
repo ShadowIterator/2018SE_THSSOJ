@@ -43,7 +43,7 @@ class mLessonList extends Component {
                 newta: "",
                 stu_tags: [],
                 ta_tags: []
-            }
+            };
             ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
         }
     }
@@ -56,7 +56,7 @@ class mLessonList extends Component {
         that.setState({
             title: result.data[0].name,
             description: result.data[0].description,
-        })
+        });
         for (let index in result.data[0].TAs){
             ajax_post(api_list['query_user'], {id:result.data[0].TAs[index]}, that, LessonList.add_ta_callback);
         }
@@ -142,6 +142,13 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let stu_tags = that.state.stu_tags;
+        const tmp_name = result.data[0].username;
+        for(let stu of stu_tags) {
+            if(tmp_name === stu.username) {
+                alert("You already added student "+tmp_name+".");
+                return;
+            }
+        }
         stu_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({stu_tags: stu_tags});
         that.setState({newstu: ""});
@@ -159,6 +166,13 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let ta_tags = that.state.ta_tags;
+        const tmp_name = result.data[0].username;
+        for(let stu of ta_tags) {
+            if(tmp_name === stu.username) {
+                alert("You already added TA "+tmp_name+".");
+                return;
+            }
+        }
         ta_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({ta_tags: ta_tags});
         that.setState({newta: ""});
@@ -192,8 +206,6 @@ class mLessonList extends Component {
             );
         });
 
-        const button = <Button variant="primary" type="submit">暂存</Button>;
-
         return (
             <>
             <Form onSubmit={this.handleSubmit}>
@@ -221,8 +233,9 @@ class mLessonList extends Component {
                         }}>提交</Button>
                     </Col>
                 </Form.Group>
-                {tatagElements}
-
+                <Container style={{paddingBottom: '10px'}}>
+                    {tatagElements}
+                </Container>
                 <Form.Group as={Row} controlId="students">
                     <Form.Label column lg="2">添加学生</Form.Label>
                     <Col lg="8">
@@ -234,12 +247,15 @@ class mLessonList extends Component {
                         }}>提交</Button>
                     </Col>
                 </Form.Group>
-                {stutagElements}
-                <br/>
-                {button}
-                <Button onClick={()=>{
-                    this.props.history.push('/ta');
-                }}> 放弃 </Button>
+                <Container style={{paddingBottom: '10px'}}>
+                    {stutagElements}
+                </Container>
+                <Container>
+                    <Button style={{margin: '10px'}} variant="primary" type="submit">暂存</Button>
+                    <Button style={{margin: '10px'}} onClick={()=>{
+                        this.props.history.push('/ta');
+                    }}> 放弃 </Button>
+                </Container>
             </Form>
 
             </>
