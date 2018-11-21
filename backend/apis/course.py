@@ -59,13 +59,41 @@ class APICourseHandler(base.BaseHandler):
         res_dict = {}
         try:
             target_course = (await self.getObject('courses', secure=1, id=self.args['id']))[0]
+
+            course_id = target_course['id']
             try:
                 for key in self.args.keys():
                     if key=='id':
                         continue
-                    target_course[key]=self.args[key]
+                    elif key=='tas':
+                        TA_added = set(self.args['tas'])-set(target_course['tas'])
+                        TA_exiled = set(target_course['tas'])-set(self.args['tas'])
+                        for TA_id in TA_added:
+                            invited_TA = (await self.getObject('users', secure=1, id=TA_id))[0]
+                            invited_TA['ta_courses'].append(course_id)
+                            await self.saveObject('users', invited_TA)
+                            target_course['tas'].append(TA_id)
+                        for TA_id in TA_exiled:
+                            deleted_TA = (await self.getObject('users', secure=1, id=TA_id))[0]
+                            deleted_TA['ta_courses'].remove(course_id)
+                            await self.saveObject('users', deleted_TA)
+                            target_course['tas'].remove(TA_id)
+                    elif key=='students':
+                        stu_added = set(self.args['students']) - set(target_course['students'])
+                        stu_exiled = set(target_course['students']) - set(self.args['students'])
+                        for stu_id in stu_added:
+                            invited_stu = (await self.getObject('users', secure=1, id=stu_id))[0]
+                            invited_stu['student_courses'].append(course_id)
+                            await self.saveObject('users', invited_stu)
+                            target_course['students'].append(stu_id)
+                        for stu_id in stu_exiled:
+                            deleted_stu = (await self.getObject('users', secure=1, id=stu_id))[0]
+                            deleted_stu['student_courses'].remove(course_id)
+                            await self.saveObject('users', deleted_stu)
+                            target_course['students'].remove(stu_id)
+                    else:
+                        target_course[key]=self.args[key]
                 await self.saveObject('courses', secure=1, object=target_course)
-
                 self.set_res_dict(res_dict, code=0, msg='course updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')

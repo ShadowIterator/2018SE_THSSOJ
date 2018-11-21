@@ -155,7 +155,9 @@ class APIProblemHandler(base.BaseHandler):
 
             src_file.close()
 
-            if self.args['src_language']==1 or self.args['src_language']==2:
+            language_dict={1:'C',2:'C++',3:'JavaScript',4:'Python'}
+
+            if self.args['src_language']==1 or self.args['src_language']==2 or self.args['src_language']==4:
                 if not os.path.exists('test'):
                     os.makedirs('test')
                 # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
@@ -167,7 +169,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['INSUF'] = 'in'
                 judge_req['OUTPRE'] = 'test'
                 judge_req['OUTSUF'] = 'out'
-                judge_req['Language'] = 'C++'
+                judge_req['Language'] = language_dict[self.args['src_language']]
                 judge_req['DATA_DIR'] = os.getcwd()+'/test'
                 judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
                 judge_req['CHECKER'] = 'ncmp'
@@ -207,7 +209,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
                 judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
                 judge_req['SOURCE'] = str_id
-                judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
+                judge_req['OTHERS'] = os.getcwd()+'/judge_script/fake-node/fake-node-linux '+'test.js '+'index.js'
 
                 judge_result = json.loads(
                     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
