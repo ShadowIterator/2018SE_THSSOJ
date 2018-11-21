@@ -87,7 +87,7 @@ class StudentHomepageMiddle extends Component {
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
         return (
-            <>
+            <div>
             <Container fluid>
                 <Row>
                     <Col lg={3} style={ZeroPadding}>
@@ -98,7 +98,7 @@ class StudentHomepageMiddle extends Component {
                     </Col>
                 </Row>
             </Container>
-            </>
+            </div>
         )
     }
 }
@@ -106,9 +106,9 @@ class StudentHomepageMiddle extends Component {
 class StudentHomepage extends Component {
     render() {
         return (
-            <>
+            <div>
                 <StudentHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
-            </>
+            </div>
         )
     }
 }

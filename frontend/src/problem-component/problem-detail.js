@@ -20,13 +20,13 @@ import {mock_flag} from "../ajax-utils/api-manager";
 class ProblemDetailBody extends Component {
     render() {
         return (
-            <>
+            <div>
                 <ReactMarkdown source={this.props.probleminfo.description} />
                 <CodeInput state={this.props.state} role={this.props.role}
                            id={this.props.id} problem_id={this.props.probleminfo.id}
                            homework_id={this.props.homework_id}/>
                 <ProblemDetailRecord records={this.props.records} />
-            </>
+            </div>
         );
     }
 }

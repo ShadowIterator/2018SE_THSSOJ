@@ -222,9 +222,9 @@ class StudentLessonMiddle extends Component {
 export class StudentLesson extends Component {
     render() {
         return (
-            <>
+            <div>
                 <StudentLessonMiddle course_id={this.props.lesson_id} id={this.props.id} state={this.props.state} />
-            </>
+            </div>
         )
     }
 }

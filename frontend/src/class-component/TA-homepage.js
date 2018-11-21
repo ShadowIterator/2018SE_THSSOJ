@@ -149,9 +149,9 @@ const TAHomepageMiddle = withRouter(mTAHomepageMiddle)
 class TAHomepage extends Component {
     render() {
         return (
-            <>
+            <div>
                 <TAHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
-            </>
+            </div>
         )
     }
 }
