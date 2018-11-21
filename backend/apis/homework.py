@@ -43,13 +43,13 @@ class APIHomeworkHandler(base.BaseHandler):
     async def _update_post(self):
         res_dict = {}
         try:
-            target_homework = await self.getObject('homeworks', secure=1, id=self.args['id'])[0]
+            target_homework = (await self.getObject('homeworks', secure=1, id=self.args['id']))[0]
             try:
                 for key in self.args.keys():
                     if key == 'id':
                         continue
                     target_homework[key] = self.args[key]
-                self.saveObject('homeworks',secure=1, object=target_homework)
+                await self.saveObject('homeworks',secure=1, object=target_homework)
                 self.set_res_dict(res_dict, code=0, msg='homework updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')

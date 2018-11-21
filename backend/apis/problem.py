@@ -50,7 +50,7 @@ class APIProblemHandler(base.BaseHandler):
             target_path = self.root_dir + '/' + str(problem_id)
             os.remove(target_path+'/'+str(problem_id)+'.md')
             os.removedirs(target_path)
-            await self.deleteObject('homeworks', **self.args)
+            await self.deleteObject('problems', **self.args)
             self.set_res_dict(res_dict, code=0, msg='homework deleted')
         except:
             self.set_res_dict(res_dict, code=1, msg='fail to delete any homework')
@@ -62,7 +62,7 @@ class APIProblemHandler(base.BaseHandler):
         try:
             problem_id = self.args['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-            target_homework = (await self.getObject('homeworks', secure=1, id=self.args['id']))[0]
+            target_homework = (await self.getObject('problems', secure=1, id=self.args['id']))[0]
             try:
                 if 'description' in self.args.keys():
                     description = bytearray()
@@ -77,7 +77,7 @@ class APIProblemHandler(base.BaseHandler):
                     if key == 'id':
                         continue
                     target_homework[key] = self.args[key]
-                self.saveObject('homeworks', secure=1, object= target_homework)
+                await self.saveObject('problems', secure=1, object= target_homework)
                 self.set_res_dict(res_dict, code=0, msg='homework updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')
