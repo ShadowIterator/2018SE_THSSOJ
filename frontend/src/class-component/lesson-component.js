@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import {
-    Card,
     Menu,
+    Card,
     Tag,
+    Button
 } from "@blueprintjs/core";
+import {Col, Row} from "react-bootstrap";
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
-import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
-import {Bottombar} from "../basic-component/topbottom-bar";
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -49,19 +49,35 @@ class mLessonList extends Component {
     render() {
         return (
             <div style={Spacing}>
-               <h4>{this.props.listname}</h4>
-                <Button onClick={() => {
-                    this.props.history.push('/createlesson');
-                }}>创建课程</Button>
+                <Row>
+                    <Col lg={8}>
+                        <h4>{this.props.listname}</h4>
+                    </Col>
+                    <Col lg={4}>
+                        {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                            <Button onClick={() => {
+                                this.props.history.push('/createlesson');
+                            }}>创建课程</Button>
+                        }
+                    </Col>
+                </Row>
                 <Menu>
                     {this.props.lessonlist.map((lesson)=>(<li>
-                        <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
-                            <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
-                        </a>
-                        <Button onClick={() => {
-                            this.props.history.push('/editlesson/'+lesson.id.toString());
-                        }}>编辑</Button>
-                        <Button>发布</Button>
+                        <Row style={{width: '100%'}}>
+                            <Col lg={6}>
+                                <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
+                                    <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                                </a>
+                            </Col>
+                            {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                                <Col lg={6}>
+                                    <Button onClick={() => {
+                                        this.props.history.push('/editlesson/' + lesson.id.toString());
+                                    }}>编辑</Button>
+                                    <Button>发布</Button>
+                                </Col>
+                            }
+                        </Row>
                     </li>))}
                 </Menu>
             </div>
