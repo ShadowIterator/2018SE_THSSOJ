@@ -28,12 +28,13 @@ class APICourseHandler(base.BaseHandler):
                     student=(await self.getObject('users', id=stu_id))[0]
                     student['student_courses'].append(course_id)
                     await self.saveObject('users', student)
-                for TA_id in self.args[ 'TAs']:
+                for TA_id in self.args['TAs']:
                     TA = (await self.getObject('users', id=TA_id))[0]
-                    TA['TA_courses'].append(course_id)
+                    TA['ta_courses'].append(course_id)
                     await self.saveObject('users', TA)
                 self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
             except Exception as e:
+                print("create course err: ", e)
                 self.set_res_dict(res_dict, code=1, msg='can not add students and TAs to course')
                 self.return_json(res_dict)
                 return
