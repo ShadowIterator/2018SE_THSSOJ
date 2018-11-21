@@ -198,6 +198,7 @@ class APIProblemHandler(base.BaseHandler):
                 record_created['consume_time']=judge_result['time']
                 record_created['consume_memory']=judge_result['memory']
                 record_created['result']=result_dict[judge_result['Result']]
+                record_created['score'] = None
                 await self.saveObject('records', record_created)
             elif self.args['src_language']==3:
                 if not os.path.exists('judge_script'):
@@ -209,12 +210,13 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
                 judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
                 judge_req['SOURCE'] = str_id
-                judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
+                judge_req['OTHERS'] = os.getcwd()+'/judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
 
                 judge_result = json.loads(
                     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
                 record_created['src_size'] = os.path.getsize(src_file_path)
-                record_created['result'] = judge_result['Score']
+                record_created['score'] = judge_result['Score']
+                record_created['result'] = None
                 record_created['consume_time'] = judge_result['time']
                 record_created['consume_memory'] = judge_result['memory']
                 await self.saveObject('records', record_created)

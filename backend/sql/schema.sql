@@ -91,6 +91,7 @@ CREATE TABLE records (
     problem_id INTEGER,
     homework_id INTEGER,
     result INTEGER,
+    score INTEGER,
     submit_status INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
