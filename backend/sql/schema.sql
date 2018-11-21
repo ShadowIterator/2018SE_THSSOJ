@@ -45,7 +45,7 @@ CREATE TABLE users (
     validate_code INTEGER,          --
     gender INTEGER,                 --
     student_courses INTEGER[],      --
-    TA_courses INTEGER[]            --
+    ta_courses INTEGER[]            --
 );
 
 DROP TABLE IF EXISTS courses;
@@ -53,7 +53,7 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
-    TAs INTEGER[],
+    tas INTEGER[],
     students INTEGER[],
     status INTEGER,
     homeworks INTEGER[],

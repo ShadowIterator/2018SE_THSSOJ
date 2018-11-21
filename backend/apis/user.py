@@ -25,10 +25,10 @@ class APIUserHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.getObject('users', secure = 1, **self.args)
         for user in res:
-            if 'create_time' in user.keys():
+            if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
-            # if 'validate_time' in user.keys():
-            #     user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
+            if 'validate_time' in user.keys() and user['validate_time'] is not None:
+                user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
         # self.write(json.dumps(res).encode())
         return res
 
