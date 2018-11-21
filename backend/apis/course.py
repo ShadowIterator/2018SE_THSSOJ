@@ -28,9 +28,9 @@ class APICourseHandler(base.BaseHandler):
                     student=(await self.getObject('users', id=stu_id))[0]
                     student['student_courses'].append(course_id)
                     await self.saveObject('users', student)
-                for TA_id in self.args[ 'TAs']:
+                for TA_id in self.args['tas']:
                     TA = (await self.getObject('users', id=TA_id))[0]
-                    TA['TA_courses'].append(course_id)
+                    TA['ta_courses'].append(course_id)
                     await self.saveObject('users', TA)
                 self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
             except Exception as e:
@@ -45,7 +45,7 @@ class APICourseHandler(base.BaseHandler):
     async def _delete_post(self):
         res_dict = {}
         try:
-            self.deleteObject('courses', id = self.args['id'])
+            await self.deleteObject('courses', id = self.args['id'])
             self.set_res_dict(res_dict, code=0, msg='course deleted')
         except:
             self.set_res_dict(res_dict, code=1, msg='course delete failed')
@@ -56,13 +56,13 @@ class APICourseHandler(base.BaseHandler):
     async def _update_post(self):
         res_dict = {}
         try:
-            target_course = await self.getObject('courses', secure=1, id=self.args['id'])[0]
+            target_course = (await self.getObject('courses', secure=1, id=self.args['id']))[0]
             try:
                 for key in self.args.keys():
                     if key=='id':
                         continue
                     target_course[key]=self.args[key]
-                self.saveObject('courses', secure=1, object=target_course)
+                await self.saveObject('courses', secure=1, object=target_course)
 
                 self.set_res_dict(res_dict, code=0, msg='course updated')
             except:
@@ -89,10 +89,13 @@ class APICourseHandler(base.BaseHandler):
         course_id = int(self.args['course_id'])
         stu_id = int(self.args['stu_id'])
         try:
-            course = await self.getObject('courses', secure=1, id=course_id)[0]
+            course = (await self.getObject('courses', secure=1, id=course_id))[0]
             if stu_id not in course['students']:
                 course['students'].append(stu_id)
-            await self.saveObject('courses', course)
+                await self.saveObject('courses', course)
+                student_invited = (await self.getObject('users', secure=1, id=stu_id))[0]
+                student_invited['student_courses'].append(course_id)
+                await self.saveObject('users', student_invited)
             self.set_res_dict(res_dict, code=0, msg='add student succeed')
         except:
             self.set_res_dict(res_dict, code=1, msg='add student failed')
@@ -107,13 +110,16 @@ class APICourseHandler(base.BaseHandler):
         course_id = int(self.args['course_id'])
         ta_id = int(self.args['ta_id'])
         try:
-            course = await self.getObject('courses', secure=1, id=course_id)[0]
-            if ta_id not in course['TAs']:
-                course['TAs'].append(ta_id)
-            await self.saveObject('courses', course)
-            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+            course = (await self.getObject('courses', secure=1, id=course_id))[0]
+            if ta_id not in course['tas']:
+                course['tas'].append(ta_id)
+                await self.saveObject('courses', course)
+                TA_invited = (await self.getObject('users', secure=1, id=ta_id))[0]
+                TA_invited['ta_courses'].append(course_id)
+                await self.saveObject('users', TA_invited)
+            self.set_res_dict(res_dict, code=0, msg='add TA succeed')
         except:
-            self.set_res_dict(res_dict, code=1, msg='add student failed')
+            self.set_res_dict(res_dict, code=1, msg='add TA failed')
         self.return_json(res_dict)
 
     async def _deleteStudent_post(self):
@@ -125,13 +131,16 @@ class APICourseHandler(base.BaseHandler):
         course_id = int(self.args['course_id'])
         stu_id = int(self.args['stu_id'])
         try:
-            course = await self.getObject('courses', secure=1, id=course_id)[0]
+            course = (await self.getObject('courses', secure=1, id=course_id))[0]
             if stu_id in course['students']:
                 course['students'].remove(stu_id)
-            await self.saveObject('courses', course)
-            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+                await self.saveObject('courses', course)
+                student_exiled = (await self.getObject('users', secure=1, id=stu_id))[0]
+                student_exiled['student_courses'].remove(course_id)
+                await self.saveObject('users', student_exiled)
+            self.set_res_dict(res_dict, code=0, msg='delete student succeed')
         except:
-            self.set_res_dict(res_dict, code=1, msg='add student failed')
+            self.set_res_dict(res_dict, code=1, msg='delete student failed')
         self.return_json(res_dict)
 
     async def _deleteTA_post(self):
@@ -143,11 +152,14 @@ class APICourseHandler(base.BaseHandler):
         course_id = int(self.args['course_id'])
         ta_id = int(self.args['ta_id'])
         try:
-            course = await self.getObject('courses', secure=1, id=course_id)[0]
-            if ta_id in course['TAs']:
-                course['TAs'].remove(ta_id)
-            await self.saveObject('courses', course)
-            self.set_res_dict(res_dict, code=0, msg='add student succeed')
+            course = (await self.getObject('courses', secure=1, id=course_id))[0]
+            if ta_id in course['tas']:
+                course['tas'].remove(ta_id)
+                await self.saveObject('courses', course)
+                TA_exiled = (await self.getObject('users', secure=1, id=ta_id))[0]
+                TA_exiled['ta_courses'].remove(course_id)
+                await self.saveObject('users', TA_exiled)
+            self.set_res_dict(res_dict, code=0, msg='delete TA succeed')
         except:
-            self.set_res_dict(res_dict, code=1, msg='add student failed')
+            self.set_res_dict(res_dict, code=1, msg='delete TA failed')
         self.return_json(res_dict)
