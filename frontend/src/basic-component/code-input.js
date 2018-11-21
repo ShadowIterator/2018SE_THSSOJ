@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
-import {Button} from '@blueprintjs/core';
+import {Button, Card} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "./auth-context";
@@ -25,7 +25,6 @@ class CodeInput extends Component {
         this.clickHandler = this.clickHandler.bind(this);
         this.codeChange = this.codeChange.bind(this);
     }
-
     codeChange(editor, data, value){
         this.setState({code: value});
     }
@@ -53,17 +52,19 @@ class CodeInput extends Component {
     render() {
         return (
             <div>
-            <CodeMirror
-                        ref="editor"
+            <Card>
+            <CodeMirror style={{width:'100px', height:'100px'}}
                         options={{
                             mode: {name: "javascript"},
                             theme: 'neat',
                             lineNumbers: true,
                             extraKeys: {"Ctrl": "autocomplete"},
+                            autofocus: true
                         }}
                         onChange={this.codeChange}
             />
-                <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}}>提交</Button>
+            </Card>
+            <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}}>提交</Button>
             </div>
         )
     }

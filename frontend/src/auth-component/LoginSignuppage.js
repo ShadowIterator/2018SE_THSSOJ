@@ -270,9 +270,9 @@ class mLoginPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <LoginMiddlebody callback={this.props.callback} />
-            </>
+            </div>
         )
     }
 }
@@ -308,9 +308,9 @@ class mSignupPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <SignupMiddlebody/>
-            </>
+            </div>
         )
     }
 }

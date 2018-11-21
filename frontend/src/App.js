@@ -99,7 +99,7 @@ class App extends Component {
             );
         }
         return (
-            <>
+            <div>
                 <Router>
                     <div>
                         <Topbar {...this.state}/>
@@ -111,14 +111,14 @@ class App extends Component {
                         <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
                         <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson" render={()=><TALesson {...this.state} />} />
+                        <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
                         <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                         <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
                     </div>
                 </Router>
                 <Bottombar/>
-            </>
+            </div>
         )
     }
 }
