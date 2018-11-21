@@ -1,0 +1,8 @@
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/6/6.code: In function ‘int main()’:
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/6/6.code:3:5: error: ‘printf’ was not declared in this scope
+     printf("%d\n", i);
+     ^~~~~~
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/6/6.code:3:5: note: suggested alternative: ‘int’
+     printf("%d\n", i);
+     ^~~~~~
+     int

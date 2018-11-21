@@ -1,0 +1,3 @@
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/2/2.code:1:1: error: ‘asdsafer’ does not name a type
+ asdsafer
+ ^~~~~~~~

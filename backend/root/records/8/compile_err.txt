@@ -1,0 +1,4 @@
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/8/8.code: In function ‘int main()’:
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/8/8.code:2:3: error: ‘a’ was not declared in this scope
+   a[100000000];
+   ^
