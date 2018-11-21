@@ -11,6 +11,8 @@ import "../mock/auth-mock";
 import "../mock/notice-mock";
 import "../mock/homework-mock";
 import "../mock/problem-mock";
+import {ajax_post} from "../ajax-utils/ajax-method";
+import {api_list} from "../ajax-utils/api-manager";
 
 class AddNewNotice extends Component {
     constructor(props) {
@@ -23,10 +25,32 @@ class AddNewNotice extends Component {
         this.submitHandler = this.submitHandler.bind(this);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeContent = this.changeContent.bind(this);
+        this.submitCallback = this.submitCallback.bind(this);
     }
 
-    submitHandler(){
-        const callback = this.props.newnotice_callback;
+    submitHandler(e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        console.log("submitHandler");
+        const data = {
+            title: this.state.title,
+            content: this.state.content,
+            course_id: this.props.course_id,
+            stu_id: this.props.stu_id
+        };
+        console.log(data);
+        ajax_post(api_list['create_notice'], data, this, this.submitCallback);
+    }
+
+    submitCallback(that, result){
+        console.log("submitCallback");
+        if (result.data.code !== 0) {
+            alert("Creating new notice failed!");
+            return;
+        }
+
+        const callback = that.props.newnotice_callback;
         callback();
     }
 

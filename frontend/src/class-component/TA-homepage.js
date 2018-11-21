@@ -36,7 +36,6 @@ class mTAHomepageMiddle extends Component {
         // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
-        console.log("componentDidMount");
         if(!this.props.state || this.props.id===undefined) {
             return;
         }
@@ -44,7 +43,7 @@ class mTAHomepageMiddle extends Component {
         ajax_post(api_list['query_user'], {id:id}, this, mTAHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        console.log("componentWillUpdate");
+        // console.log("componentWillUpdate");
         console.log(nextProps);
         if(nextProps.id===undefined)
             return;
@@ -54,7 +53,7 @@ class mTAHomepageMiddle extends Component {
         }
     }
     static query_user_callback(that, result) {
-        console.log("query_user_callback");
+        // console.log("query_user_callback");
         if(result.data.length === 0) {
             console.log("Query failed. No such user.");
             return;

@@ -174,3 +174,5 @@ Mock.mock(URL+api_list['deleteTA_course'], function(options) {
     }
     return {code:1};
 });
+
+export {courses}
