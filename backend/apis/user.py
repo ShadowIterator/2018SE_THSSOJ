@@ -12,14 +12,23 @@ from .base import *
 # TODO: to return code in every request
 
 class APIUserHandler(base.BaseHandler):
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+        if 'create_time' in self.args.keys():
+            self.args['create_time'] = datetime.datetime.fromtimestamp(self.args['create_time'])
+        if 'validate_time' in self.args.keys():
+            self.args['validate_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
+
 
     @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.getObject('users', secure = 1, **self.args)
         for user in res:
-            user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
-            user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
+            if 'create_time' in user.keys():
+                user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
+            if 'validate_time' in user.keys():
+                user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
         # self.write(json.dumps(res).encode())
         return res
 
