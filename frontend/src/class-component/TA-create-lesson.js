@@ -43,7 +43,7 @@ class mLessonList extends Component {
                 newta: "",
                 stu_tags: [],
                 ta_tags: []
-            }
+            };
             ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
         }
     }
@@ -56,9 +56,9 @@ class mLessonList extends Component {
         that.setState({
             title: result.data[0].name,
             description: result.data[0].description,
-        })
-        for (let index in result.data[0].TAs){
-            ajax_post(api_list['query_user'], {id:result.data[0].TAs[index]}, that, LessonList.add_ta_callback);
+        });
+        for (let index in result.data[0].tas){
+            ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, LessonList.add_ta_callback);
         }
         for (let index in result.data[0].students){
             ajax_post(api_list['query_user'], {id:result.data[0].students[index]}, that, LessonList.add_stu_callback)
@@ -72,12 +72,13 @@ class mLessonList extends Component {
             const data = {
                 name: this.state.title,
                 description: this.state.description,
-                TAs: this.state.ta_tags.map(ta => {
+                tas: this.state.ta_tags.map(ta => {
                     return ta.id;
                 }),
                 students: this.state.stu_tags.map(stu => {
                     return stu.id;
-                })
+                }),
+                notices: []
             };
             console.log(data);
             ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
@@ -87,7 +88,7 @@ class mLessonList extends Component {
                 id: parseInt(this.props.course_id),
                 name: this.state.title,
                 description: this.state.description,
-                TAs: this.state.ta_tags.map(ta => {
+                tas: this.state.ta_tags.map(ta => {
                     return ta.id;
                 }),
                 students: this.state.stu_tags.map(stu => {
@@ -142,6 +143,13 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let stu_tags = that.state.stu_tags;
+        const tmp_name = result.data[0].username;
+        for(let stu of stu_tags) {
+            if(tmp_name === stu.username) {
+                alert("You already added student "+tmp_name+".");
+                return;
+            }
+        }
         stu_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({stu_tags: stu_tags});
         that.setState({newstu: ""});
@@ -159,15 +167,52 @@ class mLessonList extends Component {
         }
         // console.log(result.data);
         let ta_tags = that.state.ta_tags;
+        const tmp_name = result.data[0].username;
+        for(let stu of ta_tags) {
+            if(tmp_name === stu.username) {
+                alert("You already added TA "+tmp_name+".");
+                return;
+            }
+        }
         ta_tags.push({username: result.data[0].username, id: result.data[0].id});
         that.setState({ta_tags: ta_tags});
         that.setState({newta: ""});
         // console.log(that.state.ta_tags);
     }
 
+
+    static deleteStudent_callback_closure(tag) {
+        return function(that, result)
+        {
+            if (result.data.code === 0) {
+                that.setState({stu_tags: that.state.stu_tags.filter(t => t.username !== tag.username)});
+            } else {
+                alert("Something went wrong while deleting "+tag.username);
+            }
+        }
+    }
+
+    static deleteTA_callback_closure(tag) {
+        return function(that, result)
+        {
+            if (result.data.code === 0) {
+                that.setState({ta_tags: that.state.ta_tags.filter(t => t.username !== tag.username)});
+            } else {
+                alert("Something went wrong while deleting "+tag.username);
+            }
+        }
+    }
+
     render() {
         const stutagElements = this.state.stu_tags.map(tag => {
-            const onRemove = () => this.setState({ stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username) });
+            const onRemove = () => {
+                if(!this.props.isCreating) {
+                    ajax_post(api_list['deleteStudent_course'], {stu_id: tag.id, course_id: this.props.course_id},
+                        this, mLessonList.deleteStudent_callback_closure(tag));
+                } else {
+                    this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
+                }
+            };
             return (
                 <Tag
                     key={tag.username}
@@ -180,7 +225,11 @@ class mLessonList extends Component {
         });
 
         const tatagElements = this.state.ta_tags.map(tag => {
-            const onRemove = () => this.setState({ ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username) });
+            const onRemove = () => {
+                if(!this.props.isCreating) {
+                    this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
+                }
+            };
             return (
                 <Tag
                     key={tag.username}
@@ -191,8 +240,6 @@ class mLessonList extends Component {
                 </Tag>
             );
         });
-
-        const button = <Button variant="primary" type="submit">暂存</Button>;
 
         return (
             <>
@@ -221,8 +268,9 @@ class mLessonList extends Component {
                         }}>提交</Button>
                     </Col>
                 </Form.Group>
-                {tatagElements}
-
+                <Container style={{paddingBottom: '10px'}}>
+                    {tatagElements}
+                </Container>
                 <Form.Group as={Row} controlId="students">
                     <Form.Label column lg="2">添加学生</Form.Label>
                     <Col lg="8">
@@ -234,12 +282,15 @@ class mLessonList extends Component {
                         }}>提交</Button>
                     </Col>
                 </Form.Group>
-                {stutagElements}
-                <br/>
-                {button}
-                <Button onClick={()=>{
-                    this.props.history.push('/ta');
-                }}> 放弃 </Button>
+                <Container style={{paddingBottom: '10px'}}>
+                    {stutagElements}
+                </Container>
+                <Container>
+                    <Button style={{margin: '10px'}} variant="primary" type="submit">暂存</Button>
+                    <Button style={{margin: '10px'}} onClick={()=>{
+                        this.props.history.push('/ta');
+                    }}> 放弃 </Button>
+                </Container>
             </Form>
 
             </>

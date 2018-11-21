@@ -50,7 +50,7 @@ class APIProblemHandler(base.BaseHandler):
             target_path = self.root_dir + '/' + str(problem_id)
             os.remove(target_path+'/'+str(problem_id)+'.md')
             os.removedirs(target_path)
-            await self.deleteObject('homeworks', **self.args)
+            await self.deleteObject('problems', **self.args)
             self.set_res_dict(res_dict, code=0, msg='homework deleted')
         except:
             self.set_res_dict(res_dict, code=1, msg='fail to delete any homework')
@@ -62,7 +62,7 @@ class APIProblemHandler(base.BaseHandler):
         try:
             problem_id = self.args['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-            target_homework = (await self.getObject('homeworks', secure=1, id=self.args['id']))[0]
+            target_homework = (await self.getObject('problems', secure=1, id=self.args['id']))[0]
             try:
                 if 'description' in self.args.keys():
                     description = bytearray()
@@ -77,7 +77,7 @@ class APIProblemHandler(base.BaseHandler):
                     if key == 'id':
                         continue
                     target_homework[key] = self.args[key]
-                self.saveObject('homeworks', secure=1, object= target_homework)
+                await self.saveObject('problems', secure=1, object= target_homework)
                 self.set_res_dict(res_dict, code=0, msg='homework updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')
@@ -131,18 +131,12 @@ class APIProblemHandler(base.BaseHandler):
                                     homework_id=self.args['homework_id'],
                                     submit_time = datetime.datetime.fromtimestamp(cur_timestamp))
 
-            # {
-            #     "user_id":2,
-            #     "problem_id":1,
-            #     "homework_id":1,
-            #     "src_code":"I2luY2x1ZGUgPGlvc3RyZWFtPgp1c2luZyBuYW1lc3BhY2Ugc3RkOwppbnQgbWFpbigpCnsKICAgIGludCBhPTA7CiAgICBpbnQgYj0wOwogICAgY2luPj5hPj5iOwogICAgY291dDw8YStiOwogICAgcmV0dXJuIDA7Cn0="
-            # }
+
             record_created = (await self.getObject('records',
                                                    secure=1,
                                                    user_id=self.args['user_id'],
                                                    problem_id=self.args['problem_id'],
                                                    homework_id=self.args['homework_id'],
-                                                   # submit_time=cur_timestamp
                                                    submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
                                                    ))[0]
             problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
@@ -158,50 +152,70 @@ class APIProblemHandler(base.BaseHandler):
             # src_code = base64.b64decode(byte_content)
             src_file = open(src_file_path, mode='wb')
             src_file.write(self.args['src_code'].encode(encoding='utf-8'))
+
             src_file.close()
-            #创建临时的测评文件夹，需要删除
-            if not os.path.exists('test'):
-                os.makedirs('test')
-            # if not os.path.exists('checkers'):
-            #     os.makedirs('checkers')
 
-            problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
-            judge_req = dict()
-            judge_req['TIME_LIMIT'] = problem_testing['time_limit']
-            judge_req['MEMORY_LIMIT'] = problem_testing['memory_limit']
-            judge_req['OUTPUT_LIMIT'] = 64
-            judge_req['INPRE'] = 'test'
-            judge_req['INSUF'] = 'in'
-            judge_req['OUTPRE'] = 'test'
-            judge_req['OUTSUF'] = 'out'
-            judge_req['Language'] = 'C++'
-            judge_req['DATA_DIR'] = os.getcwd()+'/test'
-            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-            judge_req['CHECKER'] = 'ncmp'
-            judge_req['NTESTS'] = 2
-            judge_req['SOURCE_FILE'] = str_id
-            judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
+            if self.args['src_language']==1 or self.args['src_language']==2:
+                if not os.path.exists('test'):
+                    os.makedirs('test')
+                # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
+                judge_req = {}
+                judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+                judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+                judge_req['OUTPUT_LIMIT'] = 64
+                judge_req['INPRE'] = 'test'
+                judge_req['INSUF'] = 'in'
+                judge_req['OUTPRE'] = 'test'
+                judge_req['OUTSUF'] = 'out'
+                judge_req['Language'] = 'C++'
+                judge_req['DATA_DIR'] = os.getcwd()+'/test'
+                judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+                judge_req['CHECKER'] = 'ncmp'
+                judge_req['NTESTS'] = 2
+                judge_req['SOURCE_FILE'] = str_id
+                judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
 
-            result_dict={'Accept':0,
-                         'Wrong Answer':1,
-                         'Runtime Error':2,
-                         'Time Limit Exceed':3,
-                         'Memory Limit Exceed':4,
-                         'Output Limit Exceed':5,
-                         'Danger System Call':6,
-                         'Judgement Failed':7,
-                         'Compile Error':8,
-                         'unknown':9,
-                         }
+                result_dict={'Accept':0,
+                             'Wrong Answer':1,
+                             'Runtime Error':2,
+                             'Time Limit Exceed':3,
+                             'Memory Limit Exceed':4,
+                             'Output Limit Exceed':5,
+                             'Danger System Call':6,
+                             'Judgement Failed':7,
+                             'Compile Error':8,
+                             'unknown':9,
+                             }
 
-            response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
-            print(response.text)
-            judge_result = json.loads(response.text)
-            record_created['src_size']=os.path.getsize(src_file_path)
-            record_created['consume_time']=judge_result['time']
-            record_created['consume_memory']=judge_result['memory']
-            record_created['result']=result_dict[judge_result['Result']]
-            await self.saveObject('records', record_created)
+                judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+
+                # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+                # print(response.text)
+                # judge_result = json.loads(response.text)
+                record_created['src_size']=os.path.getsize(src_file_path)
+                record_created['consume_time']=judge_result['time']
+                record_created['consume_memory']=judge_result['memory']
+                record_created['result']=result_dict[judge_result['Result']]
+                await self.saveObject('records', record_created)
+            elif self.args['src_language']==3:
+                if not os.path.exists('judge_script'):
+                    os.makedirs('judge_script')
+                judge_req = {}
+                judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+                judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+                judge_req['OUTPUT_LIMIT'] = 64
+                judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
+                judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
+                judge_req['SOURCE'] = str_id
+                judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
+
+                judge_result = json.loads(
+                    requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+                record_created['src_size'] = os.path.getsize(src_file_path)
+                record_created['result'] = judge_result['Score']
+                record_created['consume_time'] = judge_result['time']
+                record_created['consume_memory'] = judge_result['memory']
+                await self.saveObject('records', record_created)
 
             self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         except Exception as e:

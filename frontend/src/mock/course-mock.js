@@ -6,7 +6,7 @@ let courses = [{
     id: 0,
     name: "course no.1",
     description: "this is course no.1",
-    TAs: [0],
+    tas: [0],
     students: [1],
     homeworks: [0, 1],
     status: 1,
@@ -15,7 +15,7 @@ let courses = [{
     id: 1,
     name: "course no.2",
     description: "this is course no.2",
-    TAs: [0],
+    tas: [0],
     students: [],
     homeworks: [],
     status: 0,
@@ -30,7 +30,7 @@ Mock.mock(URL+api_list['create_course'], function(options) {
         id: course_count,
         name: data.name,
         description: data.description,
-        TAs: data.TAs,
+        tas: data.tas,
         students: data.students,
         homeworks: [],
         status: 0,
@@ -54,8 +54,8 @@ Mock.mock(URL+api_list['create_course'], function(options) {
         } else
         if (user.role === 2){
             const val = (user, new_course)=>{
-                for (let idx in new_course.TAs)
-                    if (new_course.TAs[idx] === user.id)
+                for (let idx in new_course.tas)
+                    if (new_course.tas[idx] === user.id)
                         return true;
                 return false;
             }
@@ -133,7 +133,7 @@ Mock.mock(URL+api_list['addTA_course'], function(options) {
     for (let index in courses) {
         const course = courses[index];
         if (course.id === course_id){
-            courses[index].TAs.push(ta_id);
+            courses[index].tas.push(ta_id);
             return {code:0};
         }
     }
@@ -164,9 +164,9 @@ Mock.mock(URL+api_list['deleteTA_course'], function(options) {
     for (let index in courses) {
         const course = courses[index];
         if (course.id === course_id){
-            for (let idx in course.TAs)
-                if (course.TAs[idx] === ta_id){
-                    courses[index].TAs.splice(idx, 1);
+            for (let idx in course.tas)
+                if (course.tas[idx] === ta_id){
+                    courses[index].tas.splice(idx, 1);
                     return {code:0};
                 }
         }

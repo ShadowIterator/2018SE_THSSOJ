@@ -49,35 +49,47 @@ class mLessonList extends Component {
     render() {
         return (
             <div style={Spacing}>
+                {this.props.role === 2 && this.props.listname === '未发布课程' &&
                 <Row>
                     <Col lg={8}>
                         <h4>{this.props.listname}</h4>
                     </Col>
                     <Col lg={4}>
-                        {this.props.role === 2 && this.props.listname === '未发布课程' &&
-                            <Button onClick={() => {
-                                this.props.history.push('/createlesson');
-                            }}>创建课程</Button>
-                        }
+                        <Button onClick={() => {
+                            this.props.history.push('/createlesson');
+                        }}>创建课程</Button>
                     </Col>
                 </Row>
+                }
+                {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                    <h4>{this.props.listname}</h4>
+                }
                 <Menu>
                     {this.props.lessonlist.map((lesson)=>(<li>
+                        {this.props.role === 2 && this.props.listname === '未发布课程' &&
                         <Row style={{width: '100%'}}>
                             <Col lg={6}>
-                                <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
-                                    <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                                <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                                   className="bp3-menu-item bp3-popover-dismiss">
+                                    <div id={lesson.id.toString()}
+                                         className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
                                 </a>
                             </Col>
-                            {this.props.role === 2 && this.props.listname === '未发布课程' &&
-                                <Col lg={6}>
-                                    <Button onClick={() => {
-                                        this.props.history.push('/editlesson/' + lesson.id.toString());
-                                    }}>编辑</Button>
-                                    <Button>发布</Button>
-                                </Col>
-                            }
+                            <Col lg={6}>
+                                <Button onClick={() => {
+                                    this.props.history.push('/editlesson/' + lesson.id.toString());
+                                }}>编辑</Button>
+                                <Button>发布</Button>
+                            </Col>
                         </Row>
+                        }
+                        {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                            <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                            className="bp3-menu-item bp3-popover-dismiss">
+                            <div id={lesson.id.toString()}
+                                 className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                            </a>
+                        }
                     </li>))}
                 </Menu>
             </div>
