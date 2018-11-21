@@ -31,6 +31,7 @@ class mLessonList extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
     handleClick(event) {
+        console.log("handleClick()");
         event.preventDefault();
         let id = event.target.id;
         id = id>=0? id:-id;
@@ -41,9 +42,9 @@ class mLessonList extends Component {
         } else if(this.props.role === 2) {
             pathname = '/talesson';
         }
+        console.log(pathname);
         this.props.history.push({
             pathname: pathname + id_param,
-            course_id: id,
         });
     }
     render() {

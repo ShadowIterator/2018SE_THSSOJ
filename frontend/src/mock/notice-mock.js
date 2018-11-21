@@ -1,5 +1,6 @@
 import {URL, api_list} from "../ajax-utils/api-manager";
 import Mock from 'mockjs';
+import {courses} from "./course-mock";
 
 let notices = [{
     'id': 0,
@@ -28,6 +29,15 @@ Mock.mock(URL+api_list['create_notice'], function(options) {
     };
     notice_counter += 1;
     notices.push(notice);
+
+    for (let index in courses){
+        let course = courses[index];
+        if (course.id === data.course_id){
+            course.notices.push(notice.id);
+        }
+    }
+    console.log(courses);
+
     return {code:0};
 });
 
@@ -62,13 +72,25 @@ Mock.mock(URL+api_list['update_notice'], function(options){
 
 Mock.mock(URL+api_list['query_notice'], function(options){
     const data = JSON.parse(options.body);
-    const id = data.id;
     let res = [];
-    for (let index in notices) {
-        let notice = notices[index];
-        if (notice.id === id){
-          res.push(notice);
-          // return {code:0};
+    // console.log(data.course_id);
+    if (data.id !== undefined) {
+        const id = data.id;
+        for (let index in notices) {
+            let notice = notices[index];
+            if (notice.id === id) {
+                res.push(notice);
+                // return {code:0};
+            }
+        }
+    } else
+    if (data.course_id !== undefined) {
+        const course_id = data.course_id;
+        for (let index in notices) {
+            let notice = notices[index];
+            if (notice.course_id === course_id) {
+                res.push(notice);
+            }
         }
     }
     return res

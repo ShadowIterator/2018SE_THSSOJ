@@ -8,9 +8,9 @@ import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/cor
 import {withRouter} from "react-router-dom"
 
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -36,15 +36,14 @@ class mTAHomepageMiddle extends Component {
         // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
-        console.log("componentDidMount");
         if(!this.props.state || this.props.id===undefined) {
             return;
         }
         const id = this.props.id;
-        ajax_post(api_list['query_user'], {id:id}, this, TAHomepageMiddle.query_user_callback);
+        ajax_post(api_list['query_user'], {id:id}, this, mTAHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        console.log("componentWillUpdate");
+        // console.log("componentWillUpdate");
         console.log(nextProps);
         if(nextProps.id===undefined)
             return;
@@ -54,7 +53,7 @@ class mTAHomepageMiddle extends Component {
         }
     }
     static query_user_callback(that, result) {
-        console.log("query_user_callback");
+        // console.log("query_user_callback");
         if(result.data.length === 0) {
             console.log("Query failed. No such user.");
             return;
@@ -63,11 +62,11 @@ class mTAHomepageMiddle extends Component {
         const student_courses = user.student_courses;
         const ta_courses = user.ta_courses;
         for(let id of student_courses) {
-            ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_stu_course_callback);
+            ajax_post(api_list['query_course'], {id:id}, that, mTAHomepageMiddle.query_stu_course_callback);
         }
         console.log(ta_courses);
         for(let id of ta_courses) {
-            ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_ta_course_callback);
+            ajax_post(api_list['query_course'], {id:id}, that, mTAHomepageMiddle.query_ta_course_callback);
         }
     }
     static query_stu_course_callback(that, result) {
@@ -81,7 +80,7 @@ class mTAHomepageMiddle extends Component {
         const notice_ids = course.notices;
         that.stulesson.push({id:id, name:name});
         for(let notice_id of notice_ids) {
-            ajax_post(api_list['query_notice'], {id:notice_id}, that, TAHomepageMiddle.query_notice_callback);
+            ajax_post(api_list['query_notice'], {id:notice_id}, that, mTAHomepageMiddle.query_notice_callback);
         }
         that.setState({stulesson:that.stulesson});
     }

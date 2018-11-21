@@ -60,7 +60,7 @@ Mock.mock(URL+api_list['create_course'], function(options) {
                 return false;
             }
             if (val){
-                user.TA_courses.push(new_course.id);
+                user.ta_courses.push(new_course.id);
             }
         }
     }
@@ -103,6 +103,7 @@ Mock.mock(URL+api_list['update_course'], function(options) {
 Mock.mock(URL+api_list['query_course'], function(options) {
     const data = JSON.parse(options.body);
     const id = data.id;
+    console.log(typeof id);
     for(let index in courses) {
         const course = courses[index];
         if (course.id === id) {
@@ -173,3 +174,5 @@ Mock.mock(URL+api_list['deleteTA_course'], function(options) {
     }
     return {code:1};
 });
+
+export {courses}

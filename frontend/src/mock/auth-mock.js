@@ -11,7 +11,7 @@ let users = [{
     'realname':'teaching assistant',
     'student_id':2016011111,
     'student_courses':[],
-    'TA_courses':[0, 1],
+    'ta_courses':[0, 1],
     'role':2,
 },{
     'id': 1,
