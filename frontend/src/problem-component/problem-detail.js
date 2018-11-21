@@ -87,8 +87,13 @@ class ProblemDetailRecord extends Component {
                 if(re.consume_time===undefined)
                     continue;
                 console.log("inside table render for loop", re);
-                const result_id = re.result;
-                const result = this.result_arr[result_id];
+                let result = '';
+                if(re.result!==null) {
+                    const result_id = re.result;
+                    result = this.result_arr[result_id];
+                } else {
+                    result = re.score.toString() + ' 分';
+                }
                 body.push(
                     <tr>
                         <td>{counter}</td>
@@ -167,6 +172,7 @@ class ProblemDetail extends Component {
         const id = rec.id;
         const submit_time = rec.submit_time;
         const rec_result = rec.result;
+        const rec_score = rec.score;
         const consume_time = rec.consume_time;
         const consume_memory = rec.consume_memory;
         const src_size = rec.src_size;
@@ -174,6 +180,7 @@ class ProblemDetail extends Component {
             if(rec.id===id) {
                 rec.submit_time = submit_time;
                 rec.result = rec_result;
+                rec.score = rec_score;
                 rec.consume_time = consume_time;
                 rec.consume_memory = consume_memory;
                 rec.src_size = src_size;
