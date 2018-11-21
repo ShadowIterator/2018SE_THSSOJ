@@ -35,17 +35,17 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
     username VARCHAR(32) UNIQUE,    --
     password VARCHAR(512),          --
-    status INTEGER,                 --
+    status INTEGER DEFAULT 1,                --
     email VARCHAR(512),             --
-    realname VARCHAR(32),           --
-    student_id VARCHAR(32),         --
+    realname VARCHAR(32) DEFAULT '',           --
+    student_id VARCHAR(32) DEFAULT '',         --
     validate_time TIMESTAMP ,          --
-    create_time TIMESTAMP,          --
-    role INTEGER,                   --
+    create_time TIMESTAMP DEFAULT current_timestamp,          --
+    role INTEGER DEFAULT 0,                   --
     validate_code INTEGER,          --
-    gender INTEGER,                 --
-    student_courses INTEGER[],      --
-    ta_courses INTEGER[]            --
+    gender INTEGER DEFAULT 2,                 --
+    student_courses INTEGER[] DEFAULT '{}',      --
+    ta_courses INTEGER[] DEFAULT '{}'            --
 );
 
 DROP TABLE IF EXISTS courses;
@@ -53,11 +53,11 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
-    tas INTEGER[],
-    students INTEGER[],
-    status INTEGER,
-    homeworks INTEGER[],
-    notices INTEGER[]
+    tas INTEGER[] DEFAULT '{}',
+    students INTEGER[] DEFAULT '{}',
+    status INTEGER DEFAULT 0,
+    homeworks INTEGER[] DEFAULT '{}',
+    notices INTEGER[] DEFAULT '{}'
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -66,8 +66,8 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     description TEXT,
     deadline TIMESTAMP,
-    problems INTEGER[],
-    records INTEGER[]
+    problems INTEGER[] DEFAULT '{}',
+    records INTEGER[] DEFAULT '{}'
 );
 
 DROP TABLE IF EXISTS problems;
@@ -75,18 +75,18 @@ CREATE TABLE problems (
     id SERIAL PRIMARY KEY,
     title VARCHAR(128),
 --    description_path VARCHAR(256),
-    time_limit INTEGER, -- MS
-    memory_limit INTEGER,  -- KB
-    judge_method INTEGER,
-    records INTEGER[],
-    openness INTEGER
+    time_limit INTEGER DEFAULT 1000, -- MS
+    memory_limit INTEGER DEFAULT 256000,  -- KB
+    judge_method INTEGER DEFAULT 1,
+    records INTEGER[] DEFAULT '{}',
+    openness INTEGER DEFAULT 0
 );
 
 DROP TABLE IF EXISTS records;
 CREATE TABLE records (
     id SERIAL PRIMARY KEY,
     description TEXT,
-    submit_time TIMESTAMP,
+    submit_time TIMESTAMP DEFAULT current_timestamp,
     user_id INTEGER,
     problem_id INTEGER,
     homework_id INTEGER,
