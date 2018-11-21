@@ -43,7 +43,7 @@ class mLessonList extends Component {
                 newta: "",
                 stu_tags: [],
                 ta_tags: []
-            }
+            };
             ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
         }
     }

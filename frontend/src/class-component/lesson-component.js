@@ -45,7 +45,6 @@ class mLessonList extends Component {
         console.log(pathname);
         this.props.history.push({
             pathname: pathname + id_param,
-            course_id: id,
         });
     }
     render() {
