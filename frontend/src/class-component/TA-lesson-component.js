@@ -82,7 +82,8 @@ class AddNewNotice extends Component {
                         <Form.Control as="textarea" value={this.state.content} onChange={this.changeContent} />
                     </Col>
                 </Form.Group>
-                <Button variant="primary" type="submit">发布</Button>
+                <Button variant="primary" type="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
+                <Button onClick={this.props.cancel_callback} style={{marginLeft:"10px", marginRight:"10px"}}>放弃</Button>
             </Form>
             </Card>
         )

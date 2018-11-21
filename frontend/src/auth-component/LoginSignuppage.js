@@ -271,6 +271,7 @@ class mLoginPage extends Component {
     render() {
         return (
             <div>
+                
                 <LoginMiddlebody callback={this.props.callback} />
             </div>
         )

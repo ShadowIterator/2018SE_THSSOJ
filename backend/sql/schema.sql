@@ -35,13 +35,13 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
     username VARCHAR(32) UNIQUE,    --
     password VARCHAR(512),          --
-    status INTEGER DEFAULT 1,                --
+    status INTEGER DEFAULT 0,                --
     email VARCHAR(512),             --
     realname VARCHAR(32) DEFAULT '',           --
     student_id VARCHAR(32) DEFAULT '',         --
     validate_time TIMESTAMP ,          --
     create_time TIMESTAMP DEFAULT current_timestamp,          --
-    role INTEGER DEFAULT 0,                   --
+    role INTEGER DEFAULT 1,                   --
     validate_code INTEGER,          --
     gender INTEGER DEFAULT 2,                 --
     student_courses INTEGER[] DEFAULT '{}',      --

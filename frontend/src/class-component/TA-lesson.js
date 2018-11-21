@@ -23,22 +23,25 @@ class mTALessonPanel extends Component {
     }
 
     componentDidMount() {
-        // console.log("componentDidMount");
+        console.log("component did mount", this.props);
         if (this.props.stu_id===-1 ||
             this.props.course_name==='') {
             return;
         }
+        console.log("componentDidMount");
 
         const course_id = this.props.course_id;
         ajax_post(api_list['query_notice'], {course_id:course_id}, this, this.query_notice_callback);
     }
 
     componentWillUpdate(nextProps) {
-        // console.log('componentWillUpdate');
+        console.log("component will update", this.props, nextProps);
         if(nextProps.stu_id===-1)
             return;
         if(nextProps.stu_id !== this.props.stu_id ||
-            nextProps.course_id !== this.props.course_id) {
+            nextProps.course_id !== this.props.course_id ||
+            nextProps.course_name !== this.props.course_name) {
+            console.log('componentWillUpdate');
             console.log(nextProps.course_id);
             const course_id = nextProps.course_id;
             ajax_post(api_list['query_notice'], {course_id: course_id}, this, this.query_notice_callback);
@@ -93,7 +96,8 @@ class mTALessonPanel extends Component {
                 content = (<AddNewNotice newnotice_callback={this.newnotice_callback}
                                          stu_id={this.props.stu_id}
                                          course_id={this.props.course_id}
-                                         course_name={this.props.course_name}/>);
+                                         course_name={this.props.course_name}
+                                         cancel_callback={()=>{this.setState({clickNewnotice:false})}}/>);
             } else
             {
                 content = (<TANoticeList infoitems={this.state.infoitems} newNotice={this.clickNewnotice}/>);

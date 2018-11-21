@@ -64,7 +64,7 @@ class UserSettingsForm extends Component {
             username: data.username,
             email: data.email,
             status: data.status? data.status:0,
-            gender: data.gender? data.gender:2,
+            gender: data.gender,
             realname: data.realname? data.realname:'',
             student_id: data.student_id? data.student_id : '' ,
             role: data.role? data.role:0
