@@ -7,11 +7,11 @@ import {withRouter} from "react-router-dom"
 
 import {Card, Form, Container, Row, Col} from "react-bootstrap"
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-// import "../mock/homework-mock";
-// import "../mock/problem-mock";
+import "../mock/course-mock";
+import "../mock/auth-mock";
+import "../mock/notice-mock";
+import "../mock/homework-mock";
+import "../mock/problem-mock";
 
 class mLessonList extends Component {
     constructor(props) {
@@ -57,8 +57,8 @@ class mLessonList extends Component {
             title: result.data[0].name,
             description: result.data[0].description,
         })
-        for (let index in result.data[0].TAs){
-            ajax_post(api_list['query_user'], {id:result.data[0].TAs[index]}, that, LessonList.add_ta_callback);
+        for (let index in result.data[0].tas){
+            ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, LessonList.add_ta_callback);
         }
         for (let index in result.data[0].students){
             ajax_post(api_list['query_user'], {id:result.data[0].students[index]}, that, LessonList.add_stu_callback)
@@ -72,7 +72,7 @@ class mLessonList extends Component {
             const data = {
                 name: this.state.title,
                 description: this.state.description,
-                TAs: this.state.ta_tags.map(ta => {
+                tas: this.state.ta_tags.map(ta => {
                     return ta.id;
                 }),
                 students: this.state.stu_tags.map(stu => {
@@ -87,7 +87,7 @@ class mLessonList extends Component {
                 id: parseInt(this.props.course_id),
                 name: this.state.title,
                 description: this.state.description,
-                TAs: this.state.ta_tags.map(ta => {
+                tas: this.state.ta_tags.map(ta => {
                     return ta.id;
                 }),
                 students: this.state.stu_tags.map(stu => {
