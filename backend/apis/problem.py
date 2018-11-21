@@ -51,9 +51,9 @@ class APIProblemHandler(base.BaseHandler):
             os.remove(target_path+'/'+str(problem_id)+'.md')
             os.removedirs(target_path)
             await self.deleteObject('problems', **self.args)
-            self.set_res_dict(res_dict, code=0, msg='homework deleted')
+            self.set_res_dict(res_dict, code=0, msg='problem deleted')
         except:
-            self.set_res_dict(res_dict, code=1, msg='fail to delete any homework')
+            self.set_res_dict(res_dict, code=1, msg='fail to delete any problem')
         self.return_json(res_dict)
 
     # @tornado.web.authenticated
@@ -78,13 +78,13 @@ class APIProblemHandler(base.BaseHandler):
                         continue
                     target_homework[key] = self.args[key]
                 await self.saveObject('problems', secure=1, object= target_homework)
-                self.set_res_dict(res_dict, code=0, msg='homework updated')
+                self.set_res_dict(res_dict, code=0, msg='problem updated')
             except:
                 self.set_res_dict(res_dict, code=2, msg='update failed')
                 self.return_json(res_dict)
                 return
         except:
-            self.set_res_dict(res_dict, code=1, msg='homework does not exist')
+            self.set_res_dict(res_dict, code=1, msg='problem does not exist')
         self.return_json(res_dict)
 
     # @tornado.web.authenticated
