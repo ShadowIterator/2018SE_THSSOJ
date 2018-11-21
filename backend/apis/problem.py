@@ -144,6 +144,9 @@ class APIProblemHandler(base.BaseHandler):
                                                    homework_id=self.args['homework_id'],
                                                    submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
                                                    ))[0]
+            problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
+            problem_of_code['records'].append(record_created['id'])
+            await self.saveObject('problems', problem_of_code)
             str_id = str(record_created['id'])
             record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
             if not os.path.exists(record_dir):
@@ -153,7 +156,8 @@ class APIProblemHandler(base.BaseHandler):
             # self.str_to_bytes(self.args['src_code'], byte_content)
             # src_code = base64.b64decode(byte_content)
             src_file = open(src_file_path, mode='wb')
-            src_file.write(self.args['src_code'].encode('utf8'))
+            src_file.write(self.args['src_code'].encode(encoding='utf-8'))
+
             src_file.close()
             #创建临时的测评文件夹，需要删除
             if not os.path.exists('test'):
@@ -191,14 +195,20 @@ class APIProblemHandler(base.BaseHandler):
                          }
 
             judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+
+            # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            # print(response.text)
+            # judge_result = json.loads(response.text)
+
             record_created['src_size']=os.path.getsize(src_file_path)
             record_created['consume_time']=judge_result['time']
             record_created['consume_memory']=judge_result['memory']
             record_created['result']=result_dict[judge_result['Result']]
-            self.saveObject('records', record_created)
+            await self.saveObject('records', record_created)
 
             self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
-        except:
+        except Exception as e:
+            print(e)
             self.set_res_dict(res_dict, code=1, msg='fail to submit')
 
         self.return_json(res_dict)

@@ -49,11 +49,12 @@ class mTAHomepageMiddle extends Component {
         }
         const user = result.data[0];
         const student_courses = user.student_courses;
-        const TA_courses = user.TA_courses;
+        const ta_courses = user.ta_courses;
         for(let id of student_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_stu_course_callback);
         }
-        for(let id of TA_courses) {
+        console.log(ta_courses);
+        for(let id of ta_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, TAHomepageMiddle.query_ta_course_callback);
         }
     }
