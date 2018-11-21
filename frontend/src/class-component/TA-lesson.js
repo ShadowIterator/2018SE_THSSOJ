@@ -6,7 +6,7 @@ import {ZeroPadding, Spacing} from "./lesson-component";
 import {Info} from "./lesson-component";
 import {withRouter} from "react-router";
 import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
-import {AddNewNotice} from "./TA-lesson-component";
+import {AddNewNotice, TANoticeList} from "./TA-lesson-component";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
@@ -24,9 +24,8 @@ class mTALessonPanel extends Component {
 
     componentDidMount() {
         // console.log("componentDidMount");
-        if (this.props.stu_id===undefined ||
-            this.props.course_id===undefined ||
-            this.props.course_name===undefined) {
+        if (this.props.stu_id===-1 ||
+            this.props.course_name==='') {
             return;
         }
 
@@ -36,7 +35,7 @@ class mTALessonPanel extends Component {
 
     componentWillUpdate(nextProps) {
         // console.log('componentWillUpdate');
-        if(nextProps.stu_id===undefined)
+        if(nextProps.stu_id===-1)
             return;
         if(nextProps.stu_id !== this.props.stu_id ||
             nextProps.course_id !== this.props.course_id) {
@@ -97,12 +96,7 @@ class mTALessonPanel extends Component {
                                          course_name={this.props.course_name}/>);
             } else
             {
-                content = (<>
-                            <Button onClick={this.clickNewnotice}>
-                                新建通知
-                            </Button>
-                            <Info infoitems={this.state.infoitems}/>
-                            </>);
+                content = (<TANoticeList infoitems={this.state.infoitems} newNotice={this.clickNewnotice}/>);
             }
         } else
         {
@@ -216,7 +210,9 @@ export class TALesson extends Component {
     render() {
         console.log(this.state.course_name);
         return (
-            <TALessonMiddle stu_id={this.props.id} course_id={parseInt(this.props.lesson_id)} course_name={this.state.course_name}/>
+            <Container>
+                <TALessonMiddle stu_id={this.props.id} course_id={parseInt(this.props.lesson_id)} course_name={this.state.course_name}/>
+            </Container>
         );
     }
 

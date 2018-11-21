@@ -53,8 +53,7 @@ class CodeInput extends Component {
         return (
             <div>
             <Card>
-            <CodeMirror style={{width:'100px', height:'100px'}}
-                        options={{
+            <CodeMirror options={{
                             mode: {name: "javascript"},
                             theme: 'neat',
                             lineNumbers: true,

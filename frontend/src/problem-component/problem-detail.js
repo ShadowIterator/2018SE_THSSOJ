@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-import {Tabs, Tab, TabPane} from "react-bootstrap"
+import {Tabs, Tab, Row, Col} from "react-bootstrap"
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
@@ -37,8 +37,7 @@ class ProblemDetailBody extends Component {
 
                 <Tabs defaultActiveKey="home" id="uncontrolled-tab-example" style={{marginBottom: '10px'}}>
                     <Tab eventKey="home" title="题目详情">
-                        {/*<TabPane>*/}
-                            <ReactMarkdown source={this.props.probleminfo.description} />
+                        <ReactMarkdown source={this.props.probleminfo.description} />
                         {/*</TabPane>*/}
                     </Tab>
                     <Tab eventKey="profile" title="提交代码">
@@ -87,7 +86,7 @@ class ProblemDetailRecord extends Component {
             for (const re of this.props.records) {
                 if(re.consume_time===undefined)
                     continue;
-                console.log("inside table render for loop", re)
+                console.log("inside table render for loop", re);
                 const result_id = re.result;
                 const result = this.result_arr[result_id];
                 body.push(

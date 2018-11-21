@@ -8,9 +8,9 @@ import {ZeroPadding} from "./lesson-component";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
+// import "../mock/course-mock";
+// import "../mock/auth-mock";
+// import "../mock/notice-mock";
 
 class StudentHomepageMiddle extends Component {
     constructor(props) {
@@ -44,7 +44,7 @@ class StudentHomepageMiddle extends Component {
         const lesson_ids = user.student_courses? user.student_courses:[];
         // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
-            ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentHomepageMiddle.query_course_callback);
+            ajax_post(api_list['query_course'], {id:lesson_id, status:1}, that, StudentHomepageMiddle.query_course_callback);
         }
     }
     static query_course_callback(that, result) {

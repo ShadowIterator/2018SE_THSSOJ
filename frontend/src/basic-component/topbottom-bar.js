@@ -75,8 +75,11 @@ class mTopbar extends Component {
                     <Popover content={<Dropdown {...this.props}/>} position={Position.BOTTOM_LEFT}>
                         <Button className={Classes.MINIMAL} icon="user" />
                     </Popover>
-                    <Button className={Classes.MINIMAL} icon="cog" onClick={()=>{
-                        this.props.history.push('/usersettings');}}/>
+                    {this.props.state &&
+                        <Button className={Classes.MINIMAL} icon="cog" onClick={() => {
+                            this.props.history.push('/usersettings');
+                        }}/>
+                    }
                 </Navbar.Group>
             </Navbar>
         )
