@@ -5,12 +5,11 @@ import {Container, Col, Row, Card, Form, Tabs, Tab} from 'react-bootstrap';
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {withRouter} from "react-router";
 import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
-
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
-import "../mock/homework-mock";
-import "../mock/problem-mock";
+//import "../mockcourse-mock";
+//import "../mockauth-mock";
+//import "../mocknotice-mock";
+//import "../mockhomework-mock";
+//import "../mockproblem-mock";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 

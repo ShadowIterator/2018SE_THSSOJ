@@ -7,11 +7,11 @@ import {withRouter} from "react-router-dom"
 
 import {Card, Form, Container, Row, Col} from "react-bootstrap"
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
-import "../mock/homework-mock";
-import "../mock/problem-mock";
+//import "../mock/course-mock";
+//import "../mock/auth-mock";
+//import "../mock/notice-mock";
+//import "../mock/homework-mock";
+//import "../mock/problem-mock";
 
 class mLessonList extends Component {
     constructor(props) {

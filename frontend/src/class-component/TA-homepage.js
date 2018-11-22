@@ -8,9 +8,9 @@ import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/cor
 import {withRouter} from "react-router-dom"
 
 
-import "../mock/course-mock";
-import "../mock/auth-mock";
-import "../mock/notice-mock";
+//import "../mock//course-mock";
+//import "../mock//auth-mock";
+//import "../mock//notice-mock";
 
 const ZeroPadding = {
     "padding-left": 0,
