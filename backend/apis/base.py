@@ -11,6 +11,7 @@ import tornado.ioloop
 import tornado.locks
 import tornado.options
 import tornado.web
+import traceback
 import unicodedata
 import site
 from tornado.options import define, options
@@ -27,6 +28,9 @@ class NoResultError(Exception):
     pass
 
 class NoMethodError(Exception):
+    pass
+
+class BaseError(Exception):
     pass
 
 # permLevel = {
@@ -61,22 +65,24 @@ permissions = {
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'write': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
-            'realname': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
-            'student_id': (PERMISSIONLEVEL.TA, PERMISSIONLEVEL.EVERYONE),
-            'validate_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
-            'create_time': (PERMISSIONLEVEL.STUDENT, PERMISSIONLEVEL.EVERYONE),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TA_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'courses': {
@@ -84,7 +90,7 @@ permissions = {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -94,7 +100,7 @@ permissions = {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
-            'TAs': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -146,6 +152,7 @@ permissions = {
             'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -158,6 +165,7 @@ permissions = {
             'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -181,6 +189,15 @@ permissions = {
     }
 }
 
+database_keys = {
+    'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
+    'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices'],
+    'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness'],
+    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'score', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
+    'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
+}
+
 # class DatabaseRowObject(tornado.util.ObjectDict):
 #     def __init__(self, db, *args, **kw):
 #         self.db = db
@@ -202,6 +219,40 @@ permissions = {
 #                 print(key)
 #         # self.execute('''UPDATE ''')
 
+def filterKeys(si_table_name, kw):
+    # print('filterKeys: ', kw)
+    rtn = {}
+    keyslist = database_keys[si_table_name]
+    for key,value in kw.items():
+        if(key in keyslist):
+            rtn[key] = value
+    return rtn
+
+
+def catch_exception_write(func):
+    async def wrapper(self, *args, **kw):
+        try:
+            return await func(self, *args, **kw)
+        except Exception as e:
+            print('catch_exception: return code = -1\n', repr(e))
+            print(traceback.print_exc())
+            self.write(json.dumps({'code': 1}).encode())
+    return wrapper
+
+def check_password(func):
+    async def wrapper(self, *args, **kw):
+        user = await self.get_current_user_object()
+        print('checkpassword: ', user['password'], self.args['auth_password'])
+        if(user['password'] == self.args['auth_password']):
+            return await func(self, *args, **kw)
+        raise BaseError('password incorrect')
+    return wrapper
+        # try:
+        #     if(self.user['password'] == self.args['auth_password']):
+        #         return
+        #
+        # except:
+        #     raise BaseError('check password failed')
 
 async def maybe_create_tables(db, filename):
     # try:
@@ -235,10 +286,24 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
+        self.root_dir='root'
+        self.user = None
+
+    async def get(self, type): #detail
+        print('get: ', type)
+        await self._call_method('''_{action_name}_get'''.format(action_name = type))
+
+    async def post(self, type):
+        print('post: ', type)
+        await self._call_method('''_{action_name}_post'''.format(action_name = type))
+
+
+
         # if(not self.user):
         #     self.user = {
         #         'role':
         #     }
+
 
     def row_to_obj(self, row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
@@ -257,6 +322,8 @@ class BaseHandler(tornado.web.RequestHandler):
         #     return None
         # else:
         #     return users[0]
+        if(self.user != None):
+            return self.user
         try:
             user_id = self.get_secure_cookie('user_id')
             print('user_id:', int(user_id))
@@ -339,6 +406,9 @@ class BaseHandler(tornado.web.RequestHandler):
     async def saveObject(self, si_table_name, object, secure = 0):
         if(secure):
             object = await self.objectFilter(si_table_name, 'write', object)
+        print('saveObject-before: ', object)
+        object = filterKeys(si_table_name, object)
+        print('saveObject: ', object)
         fmtList = []
         valueList = []
         for key,value in object.items():
@@ -366,6 +436,9 @@ class BaseHandler(tornado.web.RequestHandler):
             return res
 
     async def getObject(self, si_table_name, secure = 0, **kw):
+        print('getobject: ', kw)
+        kw = filterKeys(si_table_name, kw)
+        print('getobject after filter: ', kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
@@ -396,6 +469,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     async def createObject(self, si_table_name, **kw):
         print('createObject: kw = ', kw)
+        kw = filterKeys(si_table_name, kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
         # propfmt = []
@@ -426,9 +500,11 @@ class BaseHandler(tornado.web.RequestHandler):
     def jsonFilter(self, table_name, method, dic, per_role, per_owner):
         rtn = {}
         permissionList = permissions[table_name][method]
+        print('jsonFilter: ', dic)
         for key,value in dic.items():
             if(key in permissionList.keys()):
                 permission = permissionList[key]
+                print(permission)
                 if(permission[0] <= per_role and permission[1] <= per_owner):
                     rtn[key] = value
         return rtn
@@ -446,12 +522,38 @@ class BaseHandler(tornado.web.RequestHandler):
         print(method)
         func = getattr(self, method, None)
         if(not callable(func)):
+            print('no method')
             raise NoMethodError
-            return
-        await func(*args, **kw)
+        print('await to call function')
+        return await func(*args, **kw)
+        # res = await func(*args, **kw)
+        # print('call method res = ', res)
+        # return res
 
     def options(self, *args, **kw):
         # no body
         self.set_status(204)
         self.finish()
 
+    def return_json(self, res_dict):
+        self.write(tornado.escape.json_encode(res_dict))
+
+    def set_res_dict(self, res_dict, **contents):
+        for key in contents.keys():
+            res_dict[key] = contents[key]
+
+    def check_input(self, *keys):
+        for key in keys:
+            if key not in self.args:
+                return False
+        return True
+
+    def str_to_bytes(self, src, tgt):
+        for each_char in src:
+            tgt.append(ord(each_char))
+
+    def bytes_to_str(self, src):
+        tgt = ''
+        for each_char in src:
+            tgt+=chr(each_char)
+        return tgt

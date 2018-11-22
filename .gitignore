@@ -3,11 +3,13 @@ data
 __pycache__
 .idea
 .DS_Store
-*.txt
+
 *.iml
 *.xml
 *.sconfig
 backend/venv/
 backend/temp/
+node_modules
+DS_Store
 *.pyc
 app_config.py

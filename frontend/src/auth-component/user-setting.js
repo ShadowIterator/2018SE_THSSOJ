@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip} from '@blueprintjs/core';
-import {AuthContext} from "../basic-component/auth-context";
-import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 
@@ -21,7 +20,7 @@ class UserSettingsForm extends Component {
             password: '',
             isOpen: false,
             validating: false,
-            validate_code: ''
+            validate_code: '',
         };
         this.handleChange = this.handleChange.bind(this);
         this.handleGender = this.handleGender.bind(this);
@@ -30,28 +29,44 @@ class UserSettingsForm extends Component {
         this.fillInfo = this.fillInfo.bind(this);
         this.validate_account = this.validate_account.bind(this);
         this.activate_account = this.activate_account.bind(this);
+        this.prev_id = -1;
     }
-    fillInfo() {
-        const id = this.context.id;
+    fillInfo(id) {
+        if(id===undefined)
+            return;
         const query_data = {id: id};
-        console.log(query_data);
         ajax_post(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
     }
     componentDidMount() {
-        if(this.context.state) {
-            this.fillInfo();
+        this.setState({
+            prev_props: {
+                id: this.props.id,
+                state: this.props.id,
+                role: this.props.role,
+            }
+        });
+        if(this.props.state && this.props.id!==undefined) {
+            this.fillInfo(this.props.id);
+        }
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined || nextProps.id===-1)
+            return;
+        if(nextProps.id !== this.prev_id) {
+            this.prev_id = nextProps.id;
+            this.fillInfo(nextProps.id);
         }
     }
     static mount_callback(that, result) {
         const data = result.data[0];
-        console.log(data);
+        // console.log(data);
         that.setState({
             username: data.username,
             email: data.email,
             status: data.status? data.status:0,
-            gender: data.gender? data.gender:2,
+            gender: data.gender,
             realname: data.realname? data.realname:'',
-            student_id: data.student_id? (data.student_id>0 ? data.student_id.toString() : '') : '' ,
+            student_id: data.student_id? data.student_id : '' ,
             role: data.role? data.role:0
         });
     }
@@ -82,12 +97,12 @@ class UserSettingsForm extends Component {
         event.stopPropagation();
         this.setState({isOpen:false});
         const update_data = {
-            id: this.context.id,
+            id: this.props.id,
             auth_password: pwd_encrypt(this.state.password),
             email: this.state.email,
             gender: this.state.gender,
             realname: this.state.realname,
-            student_id: parseInt(this.state.student_id),
+            student_id: this.state.student_id,
         };
         console.log(update_data);
         ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
@@ -100,10 +115,10 @@ class UserSettingsForm extends Component {
         } else {
             alert("Update failed.");
         }
-        that.fillInfo();
+        that.fillInfo(that.props.id);
     }
     validate_account() {
-        const id = this.context.id;
+        const id = this.props.id;
         const validate_data = {id:id};
         ajax_post(api_list['validate_user'], validate_data, this, UserSettingsForm.validate_callback);
     }
@@ -118,7 +133,7 @@ class UserSettingsForm extends Component {
         }
     }
     activate_account() {
-        const id = this.context.id;
+        const id = this.props.id;
         const validate_code = parseInt(this.state.validate_code);
         const activate_data = {
             id:id,
@@ -132,7 +147,7 @@ class UserSettingsForm extends Component {
             that.setState({
                 validating: false,
             });
-            that.fillInfo();
+            that.fillInfo(that.props.id);
         } else {
             alert("Validate code error.");
         }
@@ -176,23 +191,23 @@ class UserSettingsForm extends Component {
         }
         const gender = this.state.gender;
         return(
-            <>
+            <div>
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group as={Row} controlId="username">
-                    <Form.Label column lg="4">Username</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Username</Form.Label>
+                    <Col lg="9">
                         <Form.Control value={this.state.username} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="email">
-                    <Form.Label column lg="4">Email</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Email</Form.Label>
+                    <Col lg="9">
                         <Form.Control type="email" value={this.state.email} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="gender">
-                    <Form.Label column lg="4">Gender</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Gender</Form.Label>
+                    <Col lg="9">
                         <HTMLSelect onChange={this.handleGender} fill>
                         <option value={'male'} selected={gender === 0}>男</option>
                         <option value={'female'} selected={gender === 1}>女</option>
@@ -201,26 +216,26 @@ class UserSettingsForm extends Component {
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="realname">
-                    <Form.Label column lg="4">Real Name</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Real Name</Form.Label>
+                    <Col lg="9">
                         <Form.Control value={this.state.realname} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="student_id">
-                    <Form.Label column lg="4">Student ID</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Student ID</Form.Label>
+                    <Col lg="9">
                           <Form.Control value={this.state.student_id} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="role">
-                    <Form.Label column lg="4">Role</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Role</Form.Label>
+                    <Col lg="9">
                         <Form.Label>{role}</Form.Label>
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="status">
-                    <Form.Label column lg="4">Status</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Status</Form.Label>
+                    <Col lg="9">
                         {status_html}
                     </Col>
                 </Form.Group>
@@ -235,7 +250,8 @@ class UserSettingsForm extends Component {
                 isOpen={this.state.isOpen}
             >
                 <div className={Classes.DIALOG_BODY}>
-                    <Form>
+                    <Form onSubmit={(e)=>{e.preventDefault();
+                        e.stopPropagation();}}>
                     <Form.Group as={Row} controlId="password">
                         <Form.Label>Password</Form.Label>
                         <Form.Control type="password" value={this.state.password} placeholder="Please enter your password to confirm."
@@ -250,20 +266,20 @@ class UserSettingsForm extends Component {
                     </div>
                 </div>
                 </Dialog>
-                </>
+                </div>
         );
     }
 }
-UserSettingsForm.contextType = AuthContext;
 
 export class UserSettings extends Component {
     render() {
+        console.log(this.props);
         return(
           <Card className="text-center">
               <Card.Body>
                   <Card.Title>修改个人信息</Card.Title>
                   <Container>
-                      <UserSettingsForm/>
+                      <UserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
                   </Container>
               </Card.Body>
           </Card>

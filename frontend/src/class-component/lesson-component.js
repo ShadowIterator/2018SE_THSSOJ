@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
 import {
-    Card,
     Menu,
+    Card,
     Tag,
+    Button,
+    ButtonGroup
 } from "@blueprintjs/core";
+import {Col, Row, Container} from "react-bootstrap";
+import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
-import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
-
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -25,86 +28,132 @@ const Spacing = {
     "margin-bottom": "40px"
 };
 
-class LessonList extends Component {
+class mLessonList extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            lessonnames: ['2018夏前端',
-                '2019秋软件工程']
+        this.handleClick = this.handleClick.bind(this);
+    }
+    handleClick(event) {
+        if(this.props.listname === '未发布课程') {
+            return;
         }
+        event.preventDefault();
+        let id = event.target.id;
+        id = id>=0? id:-id;
+        let pathname;
+        const id_param = '/' + id.toString();
+        if(this.props.role===1) {
+            pathname = '/studentlesson';
+        } else if(this.props.role === 2) {
+            pathname = '/talesson';
+        }
+        console.log(pathname);
+        this.props.history.push({
+            pathname: pathname + id_param,
+        });
     }
     render() {
+        let lessonlist = this.props.lessonlist;
+        lessonlist.sort(function(a, b){
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
         return (
             <div style={Spacing}>
-            <h4>{this.props.listname}</h4>
-            <Menu>
-            {this.state.lessonnames.map((name)=><Menu.Item icon="book" text={name} />)}
-            </Menu>
+                {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                <Row>
+                    <Col lg={8}>
+                        <h4>{this.props.listname}</h4>
+                    </Col>
+                    <Col lg={4}>
+                        <Button onClick={() => {
+                            this.props.history.push('/createlesson');
+                        }}>创建课程</Button>
+                    </Col>
+                </Row>
+                }
+                {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                    <h4>{this.props.listname}</h4>
+                }
+                <Menu>
+                    {lessonlist.map((lesson)=>(<li>
+                        {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                        <Row style={{width: '100%'}}>
+                            <Col lg={8}>
+                                <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                                   className="bp3-menu-item bp3-popover-dismiss">
+                                    <div id={lesson.id.toString()}
+                                         className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                                </a>
+                            </Col>
+                            <Col lg={4}>
+                                <ButtonGroup>
+                                    <Button onClick={() => {
+                                        this.props.history.push('/editlesson/' + lesson.id.toString());
+                                    }} icon='edit' />
+                                    <Button onClick={() => {
+                                        ajax_post(api_list['update_course'], {id: lesson.id, status: 1},
+                                            this, (that, result) => {
+                                                if(result.data.code!==0) {
+                                                    alert("Publish course failed.");
+                                                    return;
+                                                }
+                                                window.location.reload();
+                                            })
+                                    }
+                                    } icon='upload' />
+                                    <Button onClick={() => {
+                                        ajax_post(api_list['delete_course'], {id: lesson.id},
+                                            this, (that, result) => {
+                                                if(result.data.code!==0) {
+                                                    alert("Delete failed.");
+                                                    return;
+                                                }
+                                                window.location.reload();
+                                            })
+                                    }
+                                    } icon='trash' />
+                                </ButtonGroup>
+                            </Col>
+                        </Row>
+                        }
+                        {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                            <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                            className="bp3-menu-item bp3-popover-dismiss">
+                            <div id={lesson.id.toString()}
+                                 className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                            </a>
+                        }
+                    </li>))}
+                </Menu>
             </div>
         )
     }
 }
+mLessonList.contextType = AuthContext;
+const LessonList = withRouter(mLessonList);
 
 class StudentLessonList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            lessonlist: [],
-        }
-        this.lessonlist = [];
-    }
-    componentDidMount() {
-        if(!this.context.state)
-            return;
-        const id = this.context.id;
-        ajax_get(api_list['query_user'], {id:id}, this, StudentLessonList.query_user_callback);
-    }
-    static query_user_callback(that, result) {
-        if(result.data.length === 0) {
-            alert("Query failed. No such user.");
-            return;
-        }
-        const user = result.data[0];
-        const lesson_ids = user.student_course;
-        console.log(lesson_ids);
-        for(let lesson_id of lesson_ids) {
-            ajax_get(api_list['query_course'], {id:lesson_id}, that, that.query_course_callback);
-        }
-        that.setState({lessonlist:that.lessonlist});
-    }
-    static query_course_callback(that, result) {
-        if(result.data.length === 0) {
-            alert("Query failed. No such course.");
-            return;
-        }
-        const course = result.data[0];
-        const name = course.name;
-        const id = course.id;
-        that.lesssonlist.push({id:id, name:name});
-    }
     render() {
         return (
             <Card interactive={false} style={FullHeight}>
-                <LessonList listname="课程" />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname="课程" lessonlist={this.props.lessonlist} />
             </Card>
         )
     }
 }
-StudentLessonList.contextType = AuthContext;
 
 class TALessonList extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            lessonlist: [
-                "课程", "管理的课程", "未发布课程"
-            ]
-        }
-    }
     render() {
-        const lists = this.state.lessonlist.map(
-            (name) => <LessonList listname={name}/>
+        const lists = (
+            <div>
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
+                <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
+            </div>
         );
+        // console.log(this.state);
         return (
             <Card interactive={false} style={FullHeight}>
                 {lists}
@@ -114,24 +163,16 @@ class TALessonList extends Component {
 }
 
 const InfoItemStyle = {
-    "margin-top": "10px",
-    "margin-bottom": "10px"
+    "margin-top": "6px",
+    "margin-bottom": "6px"
 };
 
 class InfoItem extends Component {
-    constructor(props) {
-        super(props);
-        this.state={
-            lessonname: "2018夏前端",
-            type: "新作业",
-            content: "新作业已发布请及时查看"
-        }
-    }
     render() {
         return (
             <Card interactive={true} style={InfoItemStyle}>
-                <h5>{this.state.lessonname} <Tag key={this.state.type}>{this.state.type}</Tag></h5>
-                <p>{this.state.content}</p>
+                <h5>{this.props.title} <Tag key={this.props.type}>{this.props.type}</Tag></h5>
+                <p>{this.props.content}</p>
             </Card>
         )
     }
@@ -142,12 +183,9 @@ class Info extends Component {
         return (
             <Card interactive={false}>
                 <h4>通知</h4>
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
-                <InfoItem />
+                {this.props.infoitems.map((item)=>(
+                    <InfoItem title={item.title} content={item.content} type="通知" />
+                ))}
             </Card>
         )
     }
