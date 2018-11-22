@@ -43,6 +43,7 @@ class APINoticeHandler(base.BaseHandler):
         notice = (await self.getObject('notices', **self.args))[0]
         course['notices'].append(notice.id)
         course['notices'] = list(set(course['notices']))
+        await self.saveObject('courses', course)
         self.write(json.dumps({'code': 0}).encode())
 
     async def get(self, type): #detail

@@ -69,7 +69,7 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 			} else
 			{
 				if (rr.jr == Accept)
-					judgerResult.result = JudgeResult2string(JudgementFailed);
+					judgerResult.result = JudgeResult2string(RuntimeError);
 				else
 					judgerResult.result = JudgeResult2string(rr.jr);
 				judgerResult.info = string("Failed at test case ")+oss.str();
@@ -146,7 +146,7 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 		} else
 		{
 			if (rr.jr == Accept)
-				judgerResult.result = JudgeResult2string(JudgementFailed);
+				judgerResult.result = JudgeResult2string(RuntimeError);
 			else
 				judgerResult.result = JudgeResult2string(rr.jr);
 			judgerResult.info = string("Failed at test case ")+oss.str();
