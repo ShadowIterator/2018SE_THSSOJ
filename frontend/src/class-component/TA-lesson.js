@@ -54,21 +54,21 @@ class TAHomeworkPanel extends Component {
             homework2prob[hw.id.toString()] = [];
             const prob_ids = hw.problem_ids;
             console.log('TAHomeworkPanel: probs: ', hw.problems);
-            for(let prob of this.props.problemitems) {
-                if(prob_ids.includes(prob.id)) {
-                    homework2prob[hw.id.toString()].push({
-                        id:prob.id,
-                        title:prob.title
-                    });
-                }
-            }
-            // const pbs = hw.problems;
-            // for(let pb of pbs ) {
-            //     homework2prob[hw.id.toString()].push({
-            //         id: pb.id,
-            //         title: pb.title,
-            //     });
+            // for(let prob of this.props.problemitems) {
+            //     if(prob_ids.includes(prob.id)) {
+            //         homework2prob[hw.id.toString()].push({
+            //             id:prob.id,
+            //             title:prob.title
+            //         });
+            //     }
             // }
+            const pbs = hw.problems;
+            for(let pb of pbs ) {
+                homework2prob[hw.id.toString()].push({
+                    id: pb.id,
+                    title: pb.title,
+                });
+            }
         }
         return (
             <Card>
@@ -135,12 +135,13 @@ class mTALessonPanel extends Component {
         };
         this.homeworkitems = [];
         this.problemitems = [];
+        this.bindobjs = [];
         // this.courseInfo = null
         this.clickNewnotice = this.clickNewnotice.bind(this);
         this.query_notice_callback = this.query_notice_callback.bind(this);
         this.newnotice_callback = this.newnotice_callback.bind(this);
         this.query_homework_callback = this.query_homework_callback.bind(this);
-        this.append_homeworkItems_callback = this.append_homeworkItems_callback.bind(this);
+        // this.append_homeworkItems_callback = this.append_homeworkItems_callback.bind(this);
     }
 
     query_homework_callback(that, result) {
@@ -176,16 +177,19 @@ class mTALessonPanel extends Component {
 
     append_homeworkItems_callback(that, result) {
         // console.log('append homeworkitem: ', result);
+
         if(result.data.length === 0) {
             console.log('No items');
             return ;
         }
+        // console.log('append homeworkitems-enter: ', this);
         let homeworklist = that.state.homeworkitems;
         const data = result.data[0];
         const code = parseInt(data.code);
         console.log('append homework: ', data);
         // if(code === 0) {
         // this.id_in_homeworklist = homeworklist.length;
+        let idx = homeworklist.length;
         homeworklist.push({
             id: data.id,
             name: data.name,
@@ -195,32 +199,52 @@ class mTALessonPanel extends Component {
         });
         that.setState({homeworkitems: homeworklist});
         that.homeworkitems = homeworklist;
-        // this.gp = that;
-        console.log('append homeworkitems: ', that.homeworkitems)
+        console.log('append homeworkitems: ', that.homeworkitems);
         for(let pid of data.problems) {
-            ajax_post(api_list['query_problem'], {id: pid}, that, mTALessonPanel.append_problem_callback);
+            ajax_post(api_list['query_problem'], {id: pid}, that, mTALessonPanel.append_problem_callback_wraper(idx));
         }
         // }
 
     }
 
-    static append_problem_callback(that, result) {
-        if(result.data.code===1) {
-            return;
-        }
-        if(result.data.length===0)
-            return;
-        const title = result.data[0].title;
-        const id = result.data[0].id;
-        // let homeworklist = that.gp.state.homeworkitems;
-        // homeworklist[that.id_in_homeworklist].problems.push({id:id, title:title});
-        // that.gp.setState({homeworkitems: homeworklist});
-        // that.gp.homeworkitems = homeworklist;
-        // console.log('append_prob: ', id, title, that.id_in_homeworklist, that.gp);
-        that.problemitems.push({id:id, title:title});
-        that.setState({problemitems:that.problemitems});
-        // that.problems.push({id:id, title:title})
+
+    static append_problem_callback_wraper(idx) {
+        return (function (that, result) {
+            if(result.data.code===1) {
+                return;
+            }
+            if(result.data.length===0)
+                return;
+            const title = result.data[0].title;
+            const id = result.data[0].id;
+            let homeworklist = that.state.homeworkitems;
+
+            homeworklist[idx].problems.push({id: id, title: title});
+            that.setState({homeworkitems: homeworklist});
+            that.homeworkitems = homeworklist;
+            console.log('append_prob: ', id, title, idx, that.homeworkitems);
+
+        });
     }
+
+    // static append_problem_callback(that, result) {
+    //     if(result.data.code===1) {
+    //         return;
+    //     }
+    //     if(result.data.length===0)
+    //         return;
+    //     const title = result.data[0].title;
+    //     const id = result.data[0].id;
+    //     let homeworklist = that.gp.state.homeworkitems;
+    //     // homeworklist[that.id_in_homeworklist].problems.push({id:id, title:title});
+    //     homeworklist[this.idx].problems.push({id: id, title: title});
+    //     that.gp.setState({homeworkitems: homeworklist});
+    //     that.gp.homeworkitems = homeworklist;
+    //     console.log('append_prob: ', id, title, this.idx, that.gp);
+    //     // that.problemitems.push({id:id, title:title});
+    //     // that.setState({problemitems:that.problemitems});
+    //     // that.problems.push({id:id, title:title})
+    // }
 
     componentDidMount() {
         // console.log("componentDidMount");
@@ -251,8 +275,7 @@ class mTALessonPanel extends Component {
         if(nextProps.stu_id===-1)
             return;
         if(nextProps.stu_id !== this.props.stu_id ||
-            nextProps.course_id !== this.props.course_id ||
-            nextProps.course_name !== this.props.course_name) {
+            nextProps.course_id !== this.props.course_id) {
             console.log(nextProps.course_id);
             const course_id = nextProps.course_id;
             // this.setState({homeworkitems: []});
@@ -333,11 +356,11 @@ class mTALessonPanel extends Component {
             } else
             {
                 content = (<div>
-                            <Button onClick={this.clickNewnotice}>
-                                新建通知
-                            </Button>
-                            <Info infoitems={this.state.infoitems}/>
-                            </div>);
+                    <Button onClick={this.clickNewnotice}>
+                        新建通知
+                    </Button>
+                    <Info infoitems={this.state.infoitems}/>
+                </div>);
             }
         } else
         {
@@ -407,14 +430,14 @@ class TALessonMiddle extends Component {
     render() {
         return (
             <div>
-            <h1>{this.props.course_name}</h1>
-            <Container fluid>
-                <Row>
-                    <Col lg={12} style={ZeroPadding}>
-                        <TALessonTabs stu_id={this.props.stu_id} course_id={this.props.course_id} course_name={this.props.course_name}/>
-                    </Col>
-                </Row>
-            </Container>
+                <h1>{this.props.course_name}</h1>
+                <Container fluid>
+                    <Row>
+                        <Col lg={12} style={ZeroPadding}>
+                            <TALessonTabs stu_id={this.props.stu_id} course_id={this.props.course_id} course_name={this.props.course_name}/>
+                        </Col>
+                    </Row>
+                </Container>
             </div>
         )
     }
@@ -436,6 +459,12 @@ export class TALesson extends Component {
         console.log(course_id);
         ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
     }
+
+    // query_closure(args) {
+    //     return function(that, result) {
+    //
+    //     }
+    // }
 
     static query_course_callback(that, result) {
         if (result.data.length === 0){
