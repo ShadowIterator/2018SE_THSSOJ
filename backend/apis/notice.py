@@ -39,7 +39,7 @@ class APINoticeHandler(base.BaseHandler):
     async def _create_post(self):
         course_id = self.args['course_id']
         await self.createObject('notices', **self.args)
-        course = await self.getObject('courses', id = course_id)
+        course = (await self.getObject('courses', id = course_id))[0]
         notice = (await self.getObject('notices', **self.args))[0]
         course['notices'].append(notice.id)
         course['notices'] = list(set(course['notices']))

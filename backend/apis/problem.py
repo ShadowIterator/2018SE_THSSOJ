@@ -215,11 +215,13 @@ class APIProblemHandler(base.BaseHandler):
                 judge_result = json.loads(
                     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
                 record_created['src_size'] = os.path.getsize(src_file_path)
+                # print('judge_result ', judge_result)
                 record_created['score'] = judge_result['Score']
                 record_created['result'] = None
                 record_created['consume_time'] = judge_result['time']
                 record_created['consume_memory'] = judge_result['memory']
-                await self.saveObject('records', record_created)
+                print('record_created ', record_created)
+                await self.saveObject('records', record_created, secure=1)
 
             self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         except Exception as e:

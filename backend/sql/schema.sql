@@ -120,6 +120,6 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 
 INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{1}', '{1,2,3}');
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{1}', 1);
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{}', 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('ip_sort', 1000, 262144, 2, '{}', 1);
 -- INSERT INTO records (user_id, problem_id, homework_id, submit_time, score, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);

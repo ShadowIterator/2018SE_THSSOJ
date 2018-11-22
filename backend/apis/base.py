@@ -152,6 +152,7 @@ permissions = {
             'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -164,6 +165,7 @@ permissions = {
             'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -192,7 +194,7 @@ database_keys = {
     'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices'],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
     'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness'],
-    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
+    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'score', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
 }
 
