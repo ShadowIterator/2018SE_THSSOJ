@@ -60,6 +60,7 @@ CREATE TABLE courses (
     notices INTEGER[] DEFAULT '{}'
     -- TODO: 起止时间
     -- TODO: 生成一个unique的课程暗号
+    -- TODO: 增加一项用来标记是否已经过期
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -83,6 +84,10 @@ CREATE TABLE problems (
     judge_method INTEGER DEFAULT 1,
     records INTEGER[] DEFAULT '{}',
     openness INTEGER DEFAULT 0
+    -- TODO: 是否提交对应数据以及标准程序是否通过
+    -- TODO: 允许的语言，整数列表
+    -- TODO: 创建者id
+    -- TODO: command，用于脚本评测所用的命令
 );
 
 DROP TABLE IF EXISTS records;
