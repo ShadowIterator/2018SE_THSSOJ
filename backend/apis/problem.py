@@ -7,6 +7,8 @@ import requests
 from . import base
 from .base import *
 
+judger_url = 'http://judger:12345'
+
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
@@ -189,7 +191,7 @@ class APIProblemHandler(base.BaseHandler):
                              'unknown':9,
                              }
 
-                judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+                judge_result = json.loads(requests.post(judger_url+'/traditionaljudger', data=json.dumps(judge_req)).text)
 
                 # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
                 # print(response.text)
@@ -213,7 +215,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['OTHERS'] = os.getcwd()+'/judge_script/fake-node/fake-node-linux '+'test.js '+'index.js'
 
                 judge_result = json.loads(
-                    requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+                    requests.post(judger_url+'/scriptjudger', data=json.dumps(judge_req)).text)
                 record_created['src_size'] = os.path.getsize(src_file_path)
                 # print('judge_result ', judge_result)
                 record_created['score'] = judge_result['Score']

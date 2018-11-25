@@ -1,4 +1,4 @@
-const URL = 'http://localhost:8000';
+const URL = 'http://localhost:80';
 
 const api_list = {
     'login': '/api/user/login',

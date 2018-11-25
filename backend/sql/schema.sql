@@ -58,6 +58,8 @@ CREATE TABLE courses (
     status INTEGER DEFAULT 0,
     homeworks INTEGER[] DEFAULT '{}',
     notices INTEGER[] DEFAULT '{}'
+    -- TODO: 起止时间
+    -- TODO: 生成一个unique的课程暗号
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -68,6 +70,7 @@ CREATE TABLE homeworks (
     deadline TIMESTAMP,
     problems INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}'
+    -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
 );
 
 DROP TABLE IF EXISTS problems;
@@ -97,6 +100,7 @@ CREATE TABLE records (
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte
 --    src_path, VARCHAR(512),
+	-- TODO: 把泽神返回的所有结果存起来，并且更新一下Wiki上的API返回值等信息
 );
 
 DROP TABLE IF EXISTS notices;
@@ -106,7 +110,10 @@ CREATE TABLE notices (
     course_id INTEGER,
     title VARCHAR(128),
     content TEXT
+   	-- TODO: 添加创建时间
 );
+
+-- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
 
 -- create items
 INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
