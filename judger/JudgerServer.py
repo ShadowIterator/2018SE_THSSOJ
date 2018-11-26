@@ -1,4 +1,6 @@
 import os
+import zipfile
+import shutil
 import subprocess
 import time
 import json
@@ -12,7 +14,7 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import tornado.websocket
-from urllib.parse import urlencode, unquote
+# from urllib.parse import urlencode, unquote
 from tornado.options import define, options
 
 define("port", default=12345, help="run on the given port", type=int)
@@ -89,12 +91,37 @@ class scriptJudger(tornado.web.RequestHandler):
 					'memory': 0,
 					'Info': "No comment"})
 
+class htmlJudger(tornado.web.RequestHandler):
+	def post(self):
+		data = json.loads(self.request.body.decode())
+		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.zip')
+		if not os.path.isfile(sourceFile):
+			self.write({'Score': 0,
+						'Info': 'sourec file not found!'})
+			return
+
+		targetPath = os.path.join('/tmp', data['SOURCE'])
+		zipf = zipfile.ZipFile(sourceFile, 'r')
+		if os.path.exists(targetPath):
+			if os.path.isfile(targetPath):
+				os.remove(targetPath)
+			else:
+				shutil.rmtree(targetPath)
+		os.mkdir(targetPath)
+		for fname in zipf.namelist():
+			zipf.extract(fname, targetPath)
+		zipf.close()
+
+		self.write({'Score': 0,
+					'Info': 'No comment'})
+
 
 class Application(tornado.web.Application):
 	def __init__(self):
 		handlers = [
 			(r"/traditionaljudger", traditionalJudger),
-			(r"/scriptjudger", scriptJudger)
+			(r"/scriptjudger", scriptJudger),
+			(r"/htmljudger", htmlJudger),
 		]
 		settings = dict(
 			ui_modules = {},
