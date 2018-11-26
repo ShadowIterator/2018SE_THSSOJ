@@ -7,3 +7,6 @@ backend/.idea/
 backend/venv/
 backend/temp/
 node_modules
+__pycache__
+backend/root/
+app_config.py
