@@ -507,6 +507,10 @@ class BaseHandler(tornado.web.RequestHandler):
                     rtn[key] = value
         return rtn
 
+    async def _testhello_post(self):
+        print('app: in testhello')
+        self.write('hello: ' + self.__class__.__name__  + ' ' + self.args['msg'])
+        return None
 
     def getargs(self):
         # print('getargs: ', self.request.body.decode() or '{}')
