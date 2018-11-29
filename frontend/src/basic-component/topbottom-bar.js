@@ -8,16 +8,24 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
+import { Layout } from 'antd';
 import {withRouter} from "react-router";
 
+const { Footer } = Layout;
 class mDropdown extends Component {
     render() {
         let menuItem;
         if(this.props.state) {
             menuItem = (
                 <div>
-                    <Menu.Item text="全部课程" onClick={()=>{alert("Jump to all classes");}} />
-                    <Menu.Divider />
+                    {this.props.role !== 3 &&
+                    <Menu.Item text="全部课程" onClick={() => {
+                        alert("Jump to all classes");
+                    }}/>
+                    }
+                    {this.props.role !== 3 &&
+                        <Menu.Divider/>
+                    }
                     <Menu.Item text="Logout" onClick={()=>{this.props.history.push("/logout");}} />
                 </div>
             );
@@ -53,6 +61,8 @@ class mTopbar extends Component {
                 this.props.history.push('/student');
             } else if (this.props.role === 2) {
                 this.props.history.push('/ta');
+            } else if(this.props.role === 3) {
+                this.props.history.push('/admin');
             }
         } else {
             this.props.history.push('/login');
@@ -68,7 +78,9 @@ class mTopbar extends Component {
                     <Navbar.Heading>THSSOJ</Navbar.Heading>
                     <Navbar.Divider />
                     <Button className={Classes.MINIMAL} icon="home" text="主页" onClick={this.handleHomeClick} />
-                    <Button className={Classes.MINIMAL} icon="document" text="公共题库" onClick={this.handlePublicClick} />
+                    {this.props.role !== 3 &&
+                        <Button className={Classes.MINIMAL} icon="document" text="公共题库" onClick={this.handlePublicClick}/>
+                    }
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />
@@ -90,13 +102,16 @@ class mTopbar extends Component {
 class Bottombar extends Component {
     render() {
         return (
-            <BSNavbar bg="light" sticky="bottom">
-                <BSNavbar.Collapse className="justify-content-lg-center">
-                    <BSNavbar.Text>
-                        Developped by Thss
-                    </BSNavbar.Text>
-                </BSNavbar.Collapse>
-            </BSNavbar>
+            <Footer style={{ textAlign: 'center' }}>
+                {/*<BSNavbar bg="light" sticky="bottom">*/}
+                {/*<BSNavbar.Collapse className="justify-content-lg-center">*/}
+                {/*<BSNavbar.Text>*/}
+                {/*Developped by Thss*/}
+                {/*</BSNavbar.Text>*/}
+                {/*</BSNavbar.Collapse>*/}
+                {/*</BSNavbar>*/}
+                THSSOJ ©2018 Created by THSS
+            </Footer>
         )
     }
 }

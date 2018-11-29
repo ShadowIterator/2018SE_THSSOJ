@@ -16,6 +16,11 @@ import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
 import {CreateLesson, EditLesson} from "./class-component/TA-create-lesson";
 
+import {AdminPage} from "./admin-component/admin-page";
+
+import { Layout } from 'antd';
+import 'antd/dist/antd.css';
+
 import Cookies from 'js-cookie';
 
 import "@blueprintjs/core/lib/css/blueprint.css";
@@ -102,8 +107,10 @@ class App extends Component {
             <div>
                 <Router>
                     <div>
+                        <Layout>
                         <Topbar {...this.state}/>
                         <Route exact path="/" component={Home} />
+                        <Route path="/admin" render={()=><AdminPage {...this.state} />} />
                         <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
                         <Route path="/signup" render={()=><SignupPage {...this.state} />} />
                         <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
@@ -115,6 +122,7 @@ class App extends Component {
                         <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                         <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
+                        </Layout>
                     </div>
                 </Router>
                 <Bottombar/>
