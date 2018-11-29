@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-
+import {Tabs, Tab, Row, Col} from "react-bootstrap"
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
@@ -9,9 +9,9 @@ import ReactMarkdown from '../../node_modules/react-markdown';
 
 import {CodeInput} from "../basic-component/code-input";
 
-import {mock_flag} from "../ajax-utils/api-manager";
+// import {Tab, Tabs} from "@blueprintjs/core"
 
-// import "../mock/course-mock";
+// import "../mock//course-mock";
 // import "../mock/auth-mock";
 // import "../mock/notice-mock";
 // import "../mock/homework-mock";
@@ -20,13 +20,36 @@ import {mock_flag} from "../ajax-utils/api-manager";
 class ProblemDetailBody extends Component {
     render() {
         return (
-            <>
-                <ReactMarkdown source={this.props.probleminfo.description} />
-                <CodeInput state={this.props.state} role={this.props.role}
-                           id={this.props.id} problem_id={this.props.probleminfo.id}
-                           homework_id={this.props.homework_id}/>
-                <ProblemDetailRecord records={this.props.records} />
-            </>
+            <div>
+                {/*<Tabs*/}
+                    {/*animate={true}*/}
+                    {/*id="question_id"*/}
+                    {/*key="horizontal"*/}
+                    {/*large*/}
+                {/*>*/}
+                    {/*<Tab id="rx" title="题目详情" panel={<ReactMarkdown source={this.props.probleminfo.description} />} />*/}
+                    {/*<Tab id="ng" title="提交代码" panel={<CodeInput state={this.props.state} role={this.props.role}*/}
+                                                                   {/*id={this.props.id} problem_id={this.props.probleminfo.id}*/}
+                                                                   {/*homework_id={this.props.homework_id}*/}
+                                                                   {/*/>} />*/}
+                    {/*<Tab id="mb" title="查看结果" panel={<ProblemDetailRecord records={this.props.records} />} />*/}
+                {/*</Tabs>*/}
+
+                <Tabs defaultActiveKey="home" id="uncontrolled-tab-example" style={{marginBottom: '10px'}}>
+                    <Tab eventKey="home" title="题目详情">
+                        <ReactMarkdown source={this.props.probleminfo.description} />
+                        {/*</TabPane>*/}
+                    </Tab>
+                    <Tab eventKey="profile" title="提交代码">
+                        <CodeInput state={this.props.state} role={this.props.role}
+                                   id={this.props.id} problem_id={this.props.probleminfo.id}
+                                   homework_id={this.props.homework_id}/>
+                    </Tab>
+                    <Tab eventKey="contact" title="查看结果">
+                        <ProblemDetailRecord records={this.props.records} />
+                    </Tab>
+                </Tabs>
+            </div>
         );
     }
 }
@@ -63,9 +86,14 @@ class ProblemDetailRecord extends Component {
             for (const re of this.props.records) {
                 if(re.consume_time===undefined)
                     continue;
-                console.log("inside table render for loop", re)
-                const result_id = re.result;
-                const result = this.result_arr[result_id];
+                console.log("inside table render for loop", re);
+                let result = '';
+                if(re.result!==null) {
+                    const result_id = re.result;
+                    result = this.result_arr[result_id];
+                } else {
+                    result = re.score.toString() + ' 分';
+                }
                 body.push(
                     <tr>
                         <td>{counter}</td>
@@ -144,6 +172,7 @@ class ProblemDetail extends Component {
         const id = rec.id;
         const submit_time = rec.submit_time;
         const rec_result = rec.result;
+        const rec_score = rec.score;
         const consume_time = rec.consume_time;
         const consume_memory = rec.consume_memory;
         const src_size = rec.src_size;
@@ -151,6 +180,7 @@ class ProblemDetail extends Component {
             if(rec.id===id) {
                 rec.submit_time = submit_time;
                 rec.result = rec_result;
+                rec.score = rec_score;
                 rec.consume_time = consume_time;
                 rec.consume_memory = consume_memory;
                 rec.src_size = src_size;
@@ -162,8 +192,9 @@ class ProblemDetail extends Component {
         return (
             <Card>
                 <Card.Body>
-                    {/*<Card.Title>{this.state.title}</Card.Title>*/}
+                    <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
                     <Container>
+                        <div style={splitter} />
                         <ProblemDetailBody state={this.props.state} role={this.props.role}
                                            id={this.props.id} probleminfo={this.state}
                                            homework_id={parseInt(this.props.homework_id)}
@@ -174,5 +205,15 @@ class ProblemDetail extends Component {
         );
     }
 }
+
+const splitter =
+{
+    height:'1px',
+    backgroundColor:'#ADADAD',
+    float:'center',
+    width:'100%',
+    marginTop: '10px',
+    marginBottom: '10px',
+};
 
 export {ProblemDetail};

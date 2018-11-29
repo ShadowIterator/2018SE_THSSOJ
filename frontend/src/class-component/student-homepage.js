@@ -44,7 +44,7 @@ class StudentHomepageMiddle extends Component {
         const lesson_ids = user.student_courses? user.student_courses:[];
         // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
-            ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentHomepageMiddle.query_course_callback);
+            ajax_post(api_list['query_course'], {id:lesson_id, status:1}, that, StudentHomepageMiddle.query_course_callback);
         }
     }
     static query_course_callback(that, result) {
@@ -87,7 +87,7 @@ class StudentHomepageMiddle extends Component {
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
         return (
-            <>
+            <div>
             <Container fluid>
                 <Row>
                     <Col lg={3} style={ZeroPadding}>
@@ -98,7 +98,7 @@ class StudentHomepageMiddle extends Component {
                     </Col>
                 </Row>
             </Container>
-            </>
+            </div>
         )
     }
 }
@@ -106,9 +106,9 @@ class StudentHomepageMiddle extends Component {
 class StudentHomepage extends Component {
     render() {
         return (
-            <>
+            <div>
                 <StudentHomepageMiddle state={this.props.state} id={this.props.id} role={this.props.role} />
-            </>
+            </div>
         )
     }
 }

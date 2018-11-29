@@ -67,6 +67,8 @@ class scriptJudger(tornado.web.RequestHandler):
 			return
 		open(targetFile, "wb").write(open(sourceFile, "rb").read())
 
+		if not ('OUTPUT_PATH' in data):
+			data['OUTPUT_PATH'] = os.getcwd()
 		params = ['./scriptJudger', \
 					'--tl=%d' % data['TIME_LIMIT'],
 					'--ml=%d' % data['MEMORY_LIMIT'],\
@@ -75,6 +77,7 @@ class scriptJudger(tornado.web.RequestHandler):
 					'--outputpath=%s' % data['OUTPUT_PATH'], \
 					data['OTHERS']
 					]
+		print(params)
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
 		judger.wait()
 

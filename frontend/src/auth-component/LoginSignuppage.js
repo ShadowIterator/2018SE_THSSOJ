@@ -270,9 +270,9 @@ class mLoginPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <LoginMiddlebody callback={this.props.callback} />
-            </>
+            </div>
         )
     }
 }
@@ -308,9 +308,9 @@ class mSignupPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <SignupMiddlebody/>
-            </>
+            </div>
         )
     }
 }
@@ -328,7 +328,7 @@ class mLogoutPage extends Component {
         const code = result.data.code;
         if(code===0) {
             Cookies.remove('mid');
-            alert("Logout succeed.");
+            // alert("Logout succeed.");
         } else {
             alert("Logout failed.");
         }

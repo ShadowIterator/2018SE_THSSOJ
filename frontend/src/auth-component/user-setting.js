@@ -64,7 +64,7 @@ class UserSettingsForm extends Component {
             username: data.username,
             email: data.email,
             status: data.status? data.status:0,
-            gender: data.gender? data.gender:2,
+            gender: data.gender,
             realname: data.realname? data.realname:'',
             student_id: data.student_id? data.student_id : '' ,
             role: data.role? data.role:0
@@ -191,23 +191,23 @@ class UserSettingsForm extends Component {
         }
         const gender = this.state.gender;
         return(
-            <>
+            <div>
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group as={Row} controlId="username">
-                    <Form.Label column lg="4">Username</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Username</Form.Label>
+                    <Col lg="9">
                         <Form.Control value={this.state.username} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="email">
-                    <Form.Label column lg="4">Email</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Email</Form.Label>
+                    <Col lg="9">
                         <Form.Control type="email" value={this.state.email} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="gender">
-                    <Form.Label column lg="4">Gender</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Gender</Form.Label>
+                    <Col lg="9">
                         <HTMLSelect onChange={this.handleGender} fill>
                         <option value={'male'} selected={gender === 0}>男</option>
                         <option value={'female'} selected={gender === 1}>女</option>
@@ -216,26 +216,26 @@ class UserSettingsForm extends Component {
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="realname">
-                    <Form.Label column lg="4">Real Name</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Real Name</Form.Label>
+                    <Col lg="9">
                         <Form.Control value={this.state.realname} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="student_id">
-                    <Form.Label column lg="4">Student ID</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Student ID</Form.Label>
+                    <Col lg="9">
                           <Form.Control value={this.state.student_id} onChange={this.handleChange} />
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="role">
-                    <Form.Label column lg="4">Role</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Role</Form.Label>
+                    <Col lg="9">
                         <Form.Label>{role}</Form.Label>
                     </Col>
                 </Form.Group>
                 <Form.Group as={Row} controlId="status">
-                    <Form.Label column lg="4">Status</Form.Label>
-                    <Col lg="8">
+                    <Form.Label column lg="3">Status</Form.Label>
+                    <Col lg="9">
                         {status_html}
                     </Col>
                 </Form.Group>
@@ -266,7 +266,7 @@ class UserSettingsForm extends Component {
                     </div>
                 </div>
                 </Dialog>
-                </>
+                </div>
         );
     }
 }

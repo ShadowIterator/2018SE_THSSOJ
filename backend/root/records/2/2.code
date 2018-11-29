@@ -1,1 +1,4 @@
-asdsafer
+// C++ code here
+int main(){
+    while (true);
+}

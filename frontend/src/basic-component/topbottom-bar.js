@@ -15,19 +15,19 @@ class mDropdown extends Component {
         let menuItem;
         if(this.props.state) {
             menuItem = (
-                <>
+                <div>
                     <Menu.Item text="全部课程" onClick={()=>{alert("Jump to all classes");}} />
                     <Menu.Divider />
                     <Menu.Item text="Logout" onClick={()=>{this.props.history.push("/logout");}} />
-                </>
+                </div>
             );
         } else {
             menuItem = (
-                <>
+                <div>
                     <Menu.Item text="Signup" onClick={()=>{this.props.history.push("/signup");}} />
                     <Menu.Divider />
                     <Menu.Item text="Login" onClick={()=>{this.props.history.push("/login");}} />
-                </>
+                </div>
             )
         }
         return (
@@ -75,8 +75,11 @@ class mTopbar extends Component {
                     <Popover content={<Dropdown {...this.props}/>} position={Position.BOTTOM_LEFT}>
                         <Button className={Classes.MINIMAL} icon="user" />
                     </Popover>
-                    <Button className={Classes.MINIMAL} icon="cog" onClick={()=>{
-                        this.props.history.push('/usersettings');}}/>
+                    {this.props.state &&
+                        <Button className={Classes.MINIMAL} icon="cog" onClick={() => {
+                            this.props.history.push('/usersettings');
+                        }}/>
+                    }
                 </Navbar.Group>
             </Navbar>
         )
