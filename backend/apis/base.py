@@ -4,6 +4,8 @@ import bcrypt
 # import markdown
 import os.path
 import psycopg2
+import datetime
+import time
 import re
 import tornado.escape
 import tornado.httpserver
@@ -383,6 +385,22 @@ class BaseHandler(tornado.web.RequestHandler):
         print(results[0])
         return results[0]
 
+    async def querylr(self, si_table_name, l , r):
+        stmt = 'SELECT * FROM {table_name} LIMIT {n} OFFSET {s}'.format(
+            n = r - l + 1,
+            s = l - 1,
+            table_name = si_table_name,
+        )
+        print('querylr: ', stmt)
+        res = await self.query(stmt)
+        for x in res:
+            for key, value in x.items():
+                print(key, isinstance(value, datetime.datetime))
+                if(isinstance(value, datetime.datetime)):
+                    x[key] = int(time.mktime(value.timetuple()))
+        print(res)
+        return res
+
     async def prepare(self):
         pass
         # get_current_user cannot be a coroutine, so set
@@ -447,6 +465,12 @@ class BaseHandler(tornado.web.RequestHandler):
         slst = ' AND '.join(plst)
         print("slst = ", slst)
         res = await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+
+        # for x in res:
+        #     for key, value in x.items():
+        #         print(key, isinstance(value, datetime.datetime))
+        # print(res)
+
         if(secure):
             rtn = []
             for item in res:
