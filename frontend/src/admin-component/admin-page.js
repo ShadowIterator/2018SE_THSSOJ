@@ -10,11 +10,15 @@ class AdminTable extends Component {
         this.state = {
             page: 1,
             data: [],
-            item_per_page: 10,
+            item_per_page: 3,
+            pagination: {},
+            loading: false,
+            count: 0,
         };
         this.data = [];
+        this.updateTable = this.updateTable.bind(this);
     }
-    static updataTable() {
+    updateTable = function() {
         ajax_post(this.props.api, {
             start: (this.state.page-1)*this.state.item_per_page + 1,
             end: this.state.page*this.state.item_per_page,
@@ -24,24 +28,52 @@ class AdminTable extends Component {
                 alert("List failed.");
                 return;
             }
-            for(const d of result.data) {
+            for(const d of result.data.list) {
                 let new_record = {};
                 for(const c of that.props.columns) {
                     new_record[c['dataIndex']] = d[c['dataIndex']];
                 }
                 that.data.push(new_record);
             }
+            const pagination = that.state.pagination;
+            pagination.total = result.data.count;
             that.setState({
                 data: that.data,
+                loading: false,
+                count: result.data.count,
+                pagination: pagination,
             })
         });
-    }
+    };
+    handleTableChange = (pagination) => {
+        const pager = { ...this.state.pagination };
+        pager.current = pagination.current;
+        this.setState({
+            pagination: pager,
+        });
+        this.fetch({
+            page: pagination.current
+        });
+    };
+    fetch = (params = {}) => {
+        console.log('params:', params);
+        this.setState({
+            loading: true,
+            page: params.page,
+        });
+        this.updateTable();
+    };
     componentDidMount() {
-        AdminPage.updataTable();
+        this.updateTable();
     }
     render() {
         return (
-            <Table columns={this.props.columns} dataSource={this.state.data} />
+            <Table columns={this.props.columns}
+                   dataSource={this.state.data}
+                   scroll={{ x: 1300 }}
+                   pagination={this.state.pagination}
+                   loading={this.state.loading}
+                   onChange={this.handleTableChange} />
         );
     }
 }
@@ -52,8 +84,8 @@ const table_api = {
 
 const table_columns = {
     'Users': [
-        {title: 'ID', dataIndex: 'id', key: 'id'},
-        {title: 'Username', dataIndex: 'username', key: 'username'},
+        {title: 'ID', dataIndex: 'id', key: 'id', fixed: 'left'},
+        {title: 'Username', dataIndex: 'username', key: 'username', fixed: 'left'},
         {title: 'Email', dataIndex: 'email', key: 'email'},
         {title: 'Real Name', dataIndex: 'realname', key: 'realname'},
         {title: 'Student ID', dataIndex: 'student_id', key: 'student_id'},
@@ -77,9 +109,17 @@ const table_columns = {
                     return <span>Administrator</span>
             }
         }},
-        {title: 'Student Courses', dataIndex: 'student_courses', key: 'student_courses'},
-        {title: 'TA Courses', dataIndex: 'ta_courses', key: 'ta_courses'},
-        {title: 'Action', dataIndex: 'action', key: 'action', render: (text, record) =>
+        {title: 'Student Courses', dataIndex: 'student_courses', key: 'student_courses', render: (courses) =>
+            <span>
+                [{courses.map((c)=>{return c+','})}]
+            </span>
+        },
+        {title: 'TA Courses', dataIndex: 'ta_courses', key: 'ta_courses', render: (courses) =>
+                <span>
+                [{courses.map((c)=>{return c+','})}]
+            </span>
+        },
+        {title: 'Action', dataIndex: 'action', key: 'action', fixed: 'right', render: (text, record) =>
             <span>
                 <Button onClick={() => {
                     console.log('Delete Users', record.id);
