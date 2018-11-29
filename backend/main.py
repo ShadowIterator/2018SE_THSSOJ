@@ -19,6 +19,7 @@ from apis.notice import *
 from apis.course import *
 from apis.problem import *
 from apis.homework import *
+from apis.db import  BaseDB
 
 from tornado.options import define, options
 
@@ -45,7 +46,7 @@ async def main():
             password=options.db_password,
             dbname=options.db_database) as db:
         await maybe_create_tables(db, 'sql/schema.sql')
-        app = Application(db,
+        app = Application(BaseDB(db),
                           [
                               (r'/api/user/(.*)', APIUserHandler),
                               (r'/api/record/(.*)', APIRecordHandler),
