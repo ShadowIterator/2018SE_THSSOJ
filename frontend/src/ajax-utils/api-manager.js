@@ -4,6 +4,7 @@ const api_list = {
     'login': '/api/user/login',
     'logout': '/api/user/logout',
     'signup': '/api/user/create',
+    'list_user': '/api/user/list',
     'delete_user': '/api/user/delete',
     'query_user': '/api/user/query',
     'activate_user': '/api/user/activate',
