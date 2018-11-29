@@ -33,7 +33,7 @@ class APIUserHandler(base.BaseHandler):
         return res
 
     @tornado.web.authenticated
-    @check_password
+    # @check_password
     async def _delete_post(self):
         # for condition in self.args:
         await self.deleteObject('users', **self.args)

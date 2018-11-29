@@ -111,6 +111,19 @@ CREATE TABLE notices (
 -- create items
 INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st2','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st3','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st4','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st5','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st6','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st7','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st8','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st9','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st10','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st11','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st12','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st13','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st14','1234','siro@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('lrj','1234','lrj@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
