@@ -399,7 +399,12 @@ class BaseHandler(tornado.web.RequestHandler):
                 if(isinstance(value, datetime.datetime)):
                     x[key] = int(time.mktime(value.timetuple()))
         print(res)
-        return res
+
+        rtn = {}
+        rtn['count'] = len(await self.all(si_table_name))
+        rtn['list'] = res
+
+        return rtn
 
     async def prepare(self):
         pass
