@@ -110,7 +110,7 @@ CREATE TABLE notices (
 
 -- create items
 INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1, 2, 3, 4, 5, 6, 7, 8, 9}');
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st2','1234','siro@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st3','1234','siro@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st4','1234','siro@163.com', 1, '{1}');
@@ -134,6 +134,14 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 
 INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{1}', '{1,2,3}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software1', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software2', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software3', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software4', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software5', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software6', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software7', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software8', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{}', 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('ip_sort', 1000, 262144, 2, '{}', 1);
 -- INSERT INTO records (user_id, problem_id, homework_id, submit_time, score, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);
