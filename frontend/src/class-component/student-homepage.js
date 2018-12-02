@@ -22,6 +22,7 @@ class mStudentHomepageMiddle extends Component {
         };
         this.infoitems = [];
         this.lessonlist = [];
+        this.userquery_result = {};
     }
     componentDidMount() {
         if(!this.props.state || this.props.id===undefined)
@@ -42,6 +43,7 @@ class mStudentHomepageMiddle extends Component {
             return;
         }
         const user = result.data[0];
+        that.userquery_result = user;
         const lesson_ids = user.student_courses? user.student_courses:[];
         // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
@@ -60,10 +62,12 @@ class mStudentHomepageMiddle extends Component {
         const notices = course.notices;
         const homeworks = course.homeworks;
         that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
-        for(let notice_id of notices) {
+        // for(let notice_id of notices) {
             // ajax_post(api_list['query_notice'],{id:notice_id}, that, StudentHomepageMiddle.query_notice_callback);
+        // }
+        if( that.userquery_result && that.lessonlist.length === that.userquery_result.student_courses.length) {
+            that.setState({lessonlist: that.lessonlist});
         }
-        that.setState({lessonlist:that.lessonlist});
     }
     static query_notice_callback(that, result) {
         if(result.data.length===0)
@@ -76,7 +80,7 @@ class mStudentHomepageMiddle extends Component {
             title:title,
             content:content,
         });
-        that.setState({infoitems:that.infoitems});
+        // that.setState({infoitems:that.infoitems});
     }
     render() {
         this.lessonlist.sort(function(a, b) {
@@ -92,7 +96,7 @@ class mStudentHomepageMiddle extends Component {
         return (
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
-                    <Breadcrumb.Item>Home</Breadcrumb.Item>
+                    <Breadcrumb.Item><Link to="/student">Home</Link></Breadcrumb.Item>
                 </Breadcrumb>
                 <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                     <Row gutter={16}>

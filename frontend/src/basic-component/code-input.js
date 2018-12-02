@@ -15,6 +15,7 @@ import '../../node_modules/codemirror/mode/python/python.js';
 import '../../node_modules/codemirror/addon/hint/show-hint.css';
 import '../../node_modules/codemirror/addon/hint/show-hint.js';
 import '../../node_modules/codemirror/addon/selection/active-line'
+import {Tabs} from "antd";
 
 const defaultcode = {'javascript': '// javascript code here',
                      'C': '// C code here',
@@ -100,7 +101,7 @@ class CodeInput extends Component {
     render() {
         return (
             <div>
-                <Card>
+                {/*<Card>*/}
                     <CodeMirror options={{
                                     mode: this.state.language,
                                     theme: 'neat',
@@ -111,14 +112,14 @@ class CodeInput extends Component {
                                 onChange={this.codeChange}
                                 value={this.state.code}
                     />
-                </Card>
+                {/*</Card>*/}
                 <select onChange={this.modeChange} value={this.state.mode}>
                     <option value="javascript">javascript</option>
                     <option value="C">C</option>
                     <option value="C++">C++</option>
                     <option value="Python3">Python3</option>
                 </select>
-                <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}}>提交</Button>
+                <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}} style={{outline: 0}}>提交</Button>
             </div>
         )
     }

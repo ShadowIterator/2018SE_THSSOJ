@@ -1,10 +1,14 @@
 import React, {Component} from 'react';
-import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip} from '@blueprintjs/core';
+import {HTMLSelect, Button, Dialog, Classes} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 
 import {Card, Form, Container, Row, Col} from "react-bootstrap"
+
+import { Layout, Breadcrumb } from 'antd';
+import {Link} from "react-router-dom";
+const {Content} = Layout;
 
 class UserSettingsForm extends Component {
     constructor(props) {
@@ -274,15 +278,29 @@ class UserSettingsForm extends Component {
 export class UserSettings extends Component {
     render() {
         console.log(this.props);
+        let homelink = '/';
+        if(this.props.role===1) {
+            homelink = '/student';
+        } else if(this.props.role===2) {
+            homelink = '/ta';
+        } else if(this.props.role===3) {
+            homelink = '/admin';
+        }
         return(
-          <Card className="text-center">
-              <Card.Body>
-                  <Card.Title>修改个人信息</Card.Title>
-                  <Container>
-                      <UserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
-                  </Container>
-              </Card.Body>
-          </Card>
+            <Content style={{padding: '0 50px'}}>
+                <Breadcrumb style={{margin: '16px 0'}}>
+                    <Breadcrumb.Item><Link to={homelink}>Home</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>修改个人信息</Breadcrumb.Item>
+                </Breadcrumb>
+                <Card className="text-center">
+                    <Card.Body>
+                        <Card.Title><h2>修改个人信息</h2></Card.Title>
+                        <Container>
+                            <UserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
+                        </Container>
+                    </Card.Body>
+                </Card>
+            </Content>
         );
     }
 }

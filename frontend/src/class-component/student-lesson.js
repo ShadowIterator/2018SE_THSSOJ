@@ -1,17 +1,20 @@
 import React, { Component } from 'react';
 import {
     Card,
-    Menu
 } from "@blueprintjs/core";
 
-import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
+import {Tabs, Tab} from 'react-bootstrap';
 
 import {Info} from "./lesson-component";
 
-import {ZeroPadding, Spacing} from "./lesson-component";
+import {Spacing} from "./lesson-component";
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
-import {withRouter} from "react-router";
+import {withRouter, Link} from "react-router-dom";
+
+import { Layout, Breadcrumb, Menu, Icon } from 'antd';
+const {Content, Sider} = Layout;
+const { SubMenu } = Menu;
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -32,13 +35,14 @@ class mStudentHomeworkCard extends Component {
         const id_param = '/' + id.toString();
         const homework_id = '/' + this.props.homework_id.toString();
         const pathname = '/problemdetail';
+        const course_id = '/' + this.props.course_id.toString();
         this.props.history.push({
-            pathname: pathname + id_param + homework_id,
+            pathname: pathname + id_param + homework_id + course_id,
         });
     }
     render() {
         return (
-            <Card style={Spacing}>
+            <Card style={{margin: '20px'}}>
                 <h5>{this.props.name}</h5>
                 <Menu>
                     {this.props.questions.map((q)=>(<li>
@@ -72,11 +76,11 @@ class StudentHomeworkPanel extends Component {
             }
         }
         return (
-            <Card>
+            <div>
                 {this.props.homeworkitems.map((hw)=>(
-                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} />
+                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} course_id={this.props.course_id} />
                 ))}
-            </Card>
+            </div>
         )
     }
 }
@@ -114,20 +118,21 @@ class StudentHomework extends Component {
                 homeworkitems={this.props.homeworkitems} problemitems={this.props.problemitems}/></Tab>
         );
         return (
-            <Tabs defaultActiveKey={tabid[0]} id="homework-tab">
-                {tabs}
-            </Tabs>
+            <StudentHomeworkPanel
+                homeworkitems={this.props.homeworkitems} problemitems={this.props.problemitems} course_id={this.props.course_id}/>
         )
     }
 }
 
-class StudentLessonMiddle extends Component {
+class mStudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
             infoitems: [],
             homeworkitems: [],
             problemitems: [],
+            lesson_name: '',
+            current_selected: '1',
         };
         this.infoitems = [];
         this.homeworkitems = [];
@@ -140,6 +145,7 @@ class StudentLessonMiddle extends Component {
     static query_course_callback(that, result) {
         if(result.data.length===0)
             return;
+        that.setState({lesson_name:result.data[0].name});
         const notice_ids = result.data[0].notices;
         const homework_ids = result.data[0].homeworks;
         for(let notice_id of notice_ids) {
@@ -204,20 +210,81 @@ class StudentLessonMiddle extends Component {
             const idb = b.id;
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
+        let breadcrumb, panel;
+        if(this.state.current_selected==='1') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未完成作业</Breadcrumb.Item>
+            </>);
+            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+
+        } else if(this.state.current_selected==='2') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已完成但未批改作业</Breadcrumb.Item>
+            </>);
+            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+        } else if(this.state.current_selected==='3') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已批改作业</Breadcrumb.Item>
+            </>);
+            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+        } else if(this.state.current_selected==='4') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>全部作业</Breadcrumb.Item>
+            </>);
+            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+        } else if(this.state.current_selected==='5') {
+            breadcrumb=(<Breadcrumb.Item>通知</Breadcrumb.Item>);
+            panel=(<Info infoitems={this.infoitems}/>);
+        } else if(this.state.current_selected==='6') {
+            breadcrumb = (<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
+            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+        }
         return (
-            <Container fluid>
-                <Row>
-                    <Col lg={9} style={ZeroPadding}>
-                        <StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems}/>
-                    </Col>
-                    <Col lg={3} style={ZeroPadding}>
-                        <Info infoitems={this.infoitems}/>
-                    </Col>
-                </Row>
-            </Container>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item>
+                        <Link to={"/student"}>Home</Link>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <Link to={"/studentlesson/"+parseInt(this.props.course_id)}>
+                            {this.state.lesson_name}
+                        </Link>
+                    </Breadcrumb.Item>
+                    {breadcrumb}
+                </Breadcrumb>
+                <Layout style={{ padding: '24px 0', background: '#fff' }}>
+                    <Sider width={200} style={{ background: '#fff' }}>
+                        <Menu
+                            onClick={(e)=>{this.setState({current_selected: e.key})}}
+                            mode="inline"
+                            defaultSelectedKeys={['1']}
+                            defaultOpenKeys={['sub1']}
+                            style={{ height: '100%' }}
+                        >
+                            <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />作业</span>}>
+                                <Menu.Item key="1">未完成作业</Menu.Item>
+                                <Menu.Item key="2">已提交但未批改作业</Menu.Item>
+                                <Menu.Item key="3">已批改作业</Menu.Item>
+                                <Menu.Item key="4">全部作业</Menu.Item>
+                            </SubMenu>
+                            <Menu.Item key="5"><Icon type="notification" theme="twoTone" />通知</Menu.Item>
+                            <Menu.Item key="6"><Icon type="info-circle" theme="twoTone" />课程信息</Menu.Item>
+                        </Menu>
+                    </Sider>
+                    <Content style={{ padding: '0 24px', minHeight: 280 }}>
+                        {panel}
+                    </Content>
+                </Layout>
+            </Content>
         )
     }
 }
+
+const StudentLessonMiddle = withRouter(mStudentLessonMiddle);
 
 export class StudentLesson extends Component {
     render() {

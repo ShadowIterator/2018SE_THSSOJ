@@ -1,13 +1,20 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-import {Tabs, Tab, Row, Col} from "react-bootstrap"
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
 import ReactMarkdown from '../../node_modules/react-markdown';
 
 import {CodeInput} from "../basic-component/code-input";
+
+import {Link} from 'react-router-dom';
+
+import "./problem_tab.css";
+
+import { Layout, Breadcrumb, Divider, Tabs } from 'antd';
+const {Content} = Layout;
+const TabPane = Tabs.TabPane;
 
 // import {Tab, Tabs} from "@blueprintjs/core"
 
@@ -17,37 +24,24 @@ import {CodeInput} from "../basic-component/code-input";
 // import "../mock/homework-mock";
 // import "../mock/problem-mock";
 
+
+
 class ProblemDetailBody extends Component {
     render() {
         return (
             <div>
-                {/*<Tabs*/}
-                    {/*animate={true}*/}
-                    {/*id="question_id"*/}
-                    {/*key="horizontal"*/}
-                    {/*large*/}
-                {/*>*/}
-                    {/*<Tab id="rx" title="题目详情" panel={<ReactMarkdown source={this.props.probleminfo.description} />} />*/}
-                    {/*<Tab id="ng" title="提交代码" panel={<CodeInput state={this.props.state} role={this.props.role}*/}
-                                                                   {/*id={this.props.id} problem_id={this.props.probleminfo.id}*/}
-                                                                   {/*homework_id={this.props.homework_id}*/}
-                                                                   {/*/>} />*/}
-                    {/*<Tab id="mb" title="查看结果" panel={<ProblemDetailRecord records={this.props.records} />} />*/}
-                {/*</Tabs>*/}
-
-                <Tabs defaultActiveKey="home" id="uncontrolled-tab-example" style={{marginBottom: '10px'}}>
-                    <Tab eventKey="home" title="题目详情">
+                <Tabs defaultActiveKey="1" onChange={(e)=>{console.log(e.key)}} className='problem_tab'>
+                    <TabPane tab="题目详情" key="1">
                         <ReactMarkdown source={this.props.probleminfo.description} />
-                        {/*</TabPane>*/}
-                    </Tab>
-                    <Tab eventKey="profile" title="提交代码">
+                    </TabPane>
+                    <TabPane tab="提交代码" key="2">
                         <CodeInput state={this.props.state} role={this.props.role}
                                    id={this.props.id} problem_id={this.props.probleminfo.id}
                                    homework_id={this.props.homework_id}/>
-                    </Tab>
-                    <Tab eventKey="contact" title="查看结果">
+                    </TabPane>
+                    <TabPane tab="查看结果" key="3">
                         <ProblemDetailRecord records={this.props.records} />
-                    </Tab>
+                    </TabPane>
                 </Tabs>
             </div>
         );
@@ -138,6 +132,7 @@ class ProblemDetail extends Component {
             memory_limit: 0,
             judge_method: 0,
             records: [],
+            lesson_name: ''
         };
         this.records = [];
     }
@@ -145,6 +140,13 @@ class ProblemDetail extends Component {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
         ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
+            if(result.data.code===1) {
+                return;
+            }
+            const course = result.data[0];
+            that.setState({lesson_name:course.name});
+        });
     }
     static query_problem_callback(that, result) {
         if(result.data.length===0)
@@ -190,18 +192,24 @@ class ProblemDetail extends Component {
     }
     render() {
         return (
-            <Card>
-                <Card.Body>
-                    <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
-                    <Container>
-                        <div style={splitter} />
-                        <ProblemDetailBody state={this.props.state} role={this.props.role}
-                                           id={this.props.id} probleminfo={this.state}
-                                           homework_id={parseInt(this.props.homework_id)}
-                                           records={this.state.records}/>
-                    </Container>
-                </Card.Body>
-            </Card>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item><Link to='/student'>Home</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item><Link to={'/studentlesson/'+this.props.lesson_id}>{this.state.lesson_name}</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>{this.state.title}</Breadcrumb.Item>
+                </Breadcrumb>
+                <Card>
+                    <Card.Body>
+                        <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
+                        <Container>
+                            <ProblemDetailBody state={this.props.state} role={this.props.role}
+                                               id={this.props.id} probleminfo={this.state}
+                                               homework_id={parseInt(this.props.homework_id)}
+                                               records={this.state.records}/>
+                        </Container>
+                    </Card.Body>
+                </Card>
+            </Content>
         );
     }
 }

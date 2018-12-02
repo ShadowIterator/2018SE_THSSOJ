@@ -116,10 +116,14 @@ class App extends Component {
                         <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
                         <Route path="/student" render={()=><StudentHomepage {...this.state} />} />
                         <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
-                        <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
+                        <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state}
+                                                                                           lesson_id={props.match.params.id} />} />
                         <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
                         <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
-                        <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
+                        <Route path="/problemdetail/:id/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.id}
+                                                                                                     homework_id={props.match.params.hid}
+                                                                                                     lesson_id={props.match.params.lid}
+                                                                                                     {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                         <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
                         </Layout>
