@@ -46,7 +46,9 @@ async def main():
             password=options.db_password,
             dbname=options.db_database) as db:
         await maybe_create_tables(db, 'sql/schema.sql')
-        app = Application(BaseDB(db),
+        rdb = BaseDB(db)
+        await rdb.createObject('users', username = 'hfz', password = '1234')
+        app = Application(rdb,
                           [
                               (r'/api/user/(.*)', APIUserHandler),
                               (r'/api/record/(.*)', APIRecordHandler),

@@ -64,7 +64,7 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
-        await self.createObject('users',
+        await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],
                                 email=self.args['email'],

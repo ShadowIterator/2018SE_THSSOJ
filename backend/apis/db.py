@@ -169,15 +169,6 @@ database_keys = {
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
 }
 
-def filterKeys(si_table_name, kw):
-    # print('filterKeys: ', kw)
-    rtn = {}
-    keyslist = database_keys[si_table_name]
-    for key,value in kw.items():
-        if(key in keyslist):
-            rtn[key] = value
-    return rtn
-
 
 class NoResultError(Exception):
     pass
@@ -192,6 +183,14 @@ class BaseError(Exception):
 class BaseDB:
     def __init__(self, db):
         self.db = db
+        self.tables = {}
+        self.tables['users'] = Users(self, 'users')
+        self.tables['courses'] = Courses(self, 'courses')
+        self.tables['homeworks'] = Homeworks(self, 'homeworks')
+        self.tables['problems'] = Homeworks(self, 'problems')
+        self.tables['records'] = Homeworks(self, 'records')
+        self.tables['notices'] = Homeworks(self, 'notices')
+
         # self.table_name = si_table_name
 
     @staticmethod
@@ -255,15 +254,44 @@ class BaseDB:
     async def dropTable(self, si_table_name):
         await self.execute('''DROP TABLE IF EXISTS {table_name};'''.format(table_name = si_table_name))
 
-
     async def createTable(self, si_table_name, **kw):
-        await self.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
+        await self.db.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
+
+    def generate_table_object(self, si_table_name):
+        rtn = globals()[si_table_name](self.db, si_table_name)
+        return rtn
 
     async def saveObject(self, si_table_name, object, cur_user = None):
+        return await self.tables[si_table_name].saveObject(object, cur_user)
+
+    async def all(self, si_table_name, cur_user = None):
+        return await self.tables[si_table_name].all(cur_user)
+
+    async def getObject(self, si_table_name, cur_user = None, **kw):
+        return await self.tables[si_table_name].getObject(cur_user, **kw)
+
+    async def deleteObject(self, si_table_name, **kw):
+        return await self.tables[si_table_name].deleteObject(**kw)
+
+    async def createObject(self, si_table_name, **kw):
+        return await self.tables[si_table_name].createObject(**kw)
+
+
+class BaseTable:
+
+    def __init__(self, db, si_table_name):
+        self.db = db
+        # self.table_name = self.__class__.__name__.lower()
+        self.table_name = si_table_name
+        self.permissions = permissions[si_table_name]
+        self.database_keys = database_keys[si_table_name]
+
+    async def saveObject(self, object, cur_user = None):
+        si_table_name = self.table_name
         if(cur_user):
-            object = await self.objectFilter(si_table_name, 'write', object, cur_user)
+            object = await self.objectFilter('write', object, cur_user)
         print('saveObject-before: ', object)
-        object = filterKeys(si_table_name, object)
+        object = self.filterKeys(object)
         print('saveObject: ', object)
         fmtList = []
         valueList = []
@@ -273,21 +301,23 @@ class BaseDB:
                 valueList.append(value)
         sfmt = ' , '.join(fmtList)
         print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
-        await self.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
+        await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
 
-    async def all(self, si_table_name, cur_user = None):
-        res = await self.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
+    async def all(self, cur_user = None):
+        si_table_name = self.table_name
+        res = await self.db.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
         if(cur_user):
             rtn = []
             for item in res:
-                rtn.append(await self.objectFilter(si_table_name, 'read', item, cur_user))
+                rtn.append(await self.objectFilter('read', item, cur_user))
             return rtn
         else:
             return res
 
-    async def getObject(self, si_table_name, cur_user = None, **kw):
+    async def getObject(self, cur_user = None, **kw):
+        si_table_name = self.table_name
         print('getobject: ', kw)
-        kw = filterKeys(si_table_name, kw)
+        kw = self.filterKeys(kw)
         print('getobject after filter: ', kw)
         plst = []
         valuelist = []
@@ -296,17 +326,18 @@ class BaseDB:
             valuelist.append(value)
         slst = ' AND '.join(plst)
         print("slst = ", slst)
-        res = await self.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        res = await self.db.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
         if(cur_user):
             rtn = []
             for item in res:
-                rtn.append(await self.objectFilter(si_table_name, 'read', item, cur_user))
+                rtn.append(await self.objectFilter('read', item, cur_user))
             return rtn
         else:
             return res
 
 
-    async def deleteObject(self, si_table_name, **kw):
+    async def deleteObject(self, **kw):
+        si_table_name = self.table_name
         plst = []
         valuelist = []
         for key, value in kw.items():
@@ -314,12 +345,13 @@ class BaseDB:
             valuelist.append(value)
         slst = ' AND '.join(plst)
         print("slst = ", slst)
-        return await self.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        return await self.db.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
 
 
-    async def createObject(self, si_table_name, **kw):
+    async def createObject(self, **kw):
+        si_table_name = self.table_name
         print('createObject: kw = ', kw)
-        kw = filterKeys(si_table_name, kw)
+        kw = self.filterKeys(kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
         # propfmt = []
@@ -331,10 +363,11 @@ class BaseDB:
 
         str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
-        await self.execute(str_fmt, *propvalues)
+        await self.db.execute(str_fmt, *propvalues)
 
-    async def objectFilter(self, table_name, method, dic, user):
+    async def objectFilter(self, method, dic, user):
         # user = await self.get_current_user_object()
+        table_name = self.table_name
         per_owner = 0
         per_role = 0
         try:
@@ -345,16 +378,46 @@ class BaseDB:
         except:
             print('object filter: user not loged in')
         print('permission: ', per_role, per_owner)
-        return self.jsonFilter(table_name, method, dic, per_role, per_owner)
+        return self.jsonFilter(method, dic, per_role, per_owner)
 
-    def jsonFilter(self, table_name, method, dic, per_role, per_owner):
+    def jsonFilter(self, method, dic, per_role, per_owner):
+        table_name = self.table_name
         rtn = {}
-        permissionList = permissions[table_name][method]
+        # permissionList = permissions[table_name][method]
+        permissionList = self.permissions[method]
         print('jsonFilter: ', dic)
-        for key,value in dic.items():
+        for key, value in dic.items():
             if(key in permissionList.keys()):
                 permission = permissionList[key]
                 print(permission)
                 if(permission[0] <= per_role and permission[1] <= per_owner):
                     rtn[key] = value
         return rtn
+
+    def filterKeys(self, kw):
+        si_table_name = self.table_name
+        # print('filterKeys: ', kw)
+        rtn = {}
+        keyslist = self.database_keys
+        for key, value in kw.items():
+            if (key in keyslist):
+                rtn[key] = value
+        return rtn
+
+class Users(BaseTable):
+    pass
+
+class Courses(BaseTable):
+    pass
+
+class Homeworks(BaseTable):
+    pass
+
+class Problems(BaseTable):
+    pass
+
+class Records(BaseTable):
+    pass
+
+class Notices(BaseTable):
+    pass
