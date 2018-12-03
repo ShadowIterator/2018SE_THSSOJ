@@ -3,12 +3,15 @@ import React, { Component } from 'react';
 import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
 
 import {ZeroPadding, Spacing} from "./lesson-component";
-import {Info} from "./lesson-component";
-import {withRouter} from "react-router";
+import {withRouter, Link} from "react-router-dom";
 import {AddNewNotice, TANoticeList} from "./TA-lesson-component";
-import {AnchorButton, Button, Card, Code, H5, Intent, Menu, Switch} from "@blueprintjs/core";
+import {AnchorButton, Button, Card, Code, H5, Intent, Menu as blueMenu, Switch} from "@blueprintjs/core";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
+
+import { Layout, Breadcrumb, Menu, Icon } from 'antd';
+const {Content, Sider} = Layout;
+const { SubMenu } = Menu;
 
 class mTAHomeworkCard extends Component {
     constructor(props) {
@@ -30,13 +33,13 @@ class mTAHomeworkCard extends Component {
         return (
             <Card style={Spacing}>
                 <h5>{this.props.name}</h5>
-                <Menu>
+                <blueMenu>
                     {this.props.questions.map((q)=>(<li>
                         <a id={(-q.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
                             <div id={q.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{q.title}</div>
                         </a>
                     </li>))}
-                </Menu>
+                </blueMenu>
             </Card>
         )
     }
@@ -62,13 +65,6 @@ class TAHomeworkPanel extends Component {
                     });
                 }
             }
-            // const pbs = hw.problems;
-            // for(let pb of pbs ) {
-            //     homework2prob[hw.id.toString()].push({
-            //         id: pb.id,
-            //         title: pb.title,
-            //     });
-            // }
         }
         return (
             <Card>
@@ -422,15 +418,13 @@ class TALessonMiddle extends Component {
 export class TALesson extends Component {
     constructor(props) {
         super(props);
-        // console.log("props id");
-        // console.log(this.props.id);
         this.state = {
             course_name: '',
+            current_selected: '1'
         };
     }
 
     componentDidMount() {
-        // console.log("TALesson componentDidMount");
         const course_id = parseInt(this.props.lesson_id);
         console.log(course_id);
         ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
@@ -448,11 +442,69 @@ export class TALesson extends Component {
 
 
     render() {
-        console.log(this.state.course_name);
+        let breadcrumb;
+        let content;
+        if(this.state.current_selected === '1') {
+            breadcrumb = (
+                <>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未完成作业</Breadcrumb.Item>
+                </>
+            );
+            content = <h3>未完成作业</h3>;
+        } else if(this.state.current_selected === '2') {
+            breadcrumb = (
+                <>
+                    <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>作业成绩</Breadcrumb.Item>
+                </>
+            );
+            content = <h3>作业成绩</h3>;
+        } else if(this.state.current_selected === '3') {
+            breadcrumb = (
+                    <Breadcrumb.Item>通知</Breadcrumb.Item>
+            );
+            content = <h3>通知</h3>;
+        } else if(this.state.current_selected === '4') {
+            breadcrumb = (
+                    <Breadcrumb.Item>课程信息</Breadcrumb.Item>
+            );
+            content = <h3>课程信息</h3>;
+        }
         return (
-            <Container>
-                <TALessonMiddle stu_id={this.props.id} course_id={parseInt(this.props.lesson_id)} course_name={this.state.course_name}/>
-            </Container>
+            <>
+            {/*<Container>*/}
+                {/*<TALessonMiddle stu_id={this.props.id} course_id={parseInt(this.props.lesson_id)} course_name={this.state.course_name}/>*/}
+            {/*</Container>*/}
+                <Content style={{ padding: '0 50px' }}>
+                    <Breadcrumb style={{ margin: '16px 0' }}>
+                        <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to={"/talesson/"+this.props.lesson_id}>{this.state.course_name}</Link></Breadcrumb.Item>
+                        {breadcrumb}
+                    </Breadcrumb>
+                    <Layout style={{ padding: '24px 0', background: '#fff' }}>
+                        <Sider width={200} style={{ background: '#fff' }}>
+                            <Menu
+                                onClick={(e)=>{this.setState({current_selected: e.key})}}
+                                mode="inline"
+                                defaultSelectedKeys={['1']}
+                                defaultOpenKeys={['sub1']}
+                                style={{ height: '100%' }}
+                            >
+                                <SubMenu key="sub1" title={<span><Icon type="edit" />作业</span>}>
+                                    <Menu.Item key="1">未完成作业</Menu.Item>
+                                    <Menu.Item key="2">作业成绩</Menu.Item>
+                                </SubMenu>
+                                <Menu.Item key="3"><Icon type="notification" />通知</Menu.Item>
+                                <Menu.Item key="4"><Icon type="info-circle" />课程信息</Menu.Item>
+                            </Menu>
+                        </Sider>
+                        <Content style={{ padding: '0 24px', minHeight: 280 }}>
+                            {content}
+                        </Content>
+                    </Layout>
+                </Content>
+            </>
         );
     }
 

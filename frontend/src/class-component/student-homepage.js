@@ -99,6 +99,7 @@ class mStudentHomepageMiddle extends Component {
                     <Breadcrumb.Item><Link to="/student">Home</Link></Breadcrumb.Item>
                 </Breadcrumb>
                 <div style={{background: '#fff', padding: 24, minHeight: 640}}>
+                    <h2>本学期课程</h2>
                     <Row gutter={16}>
                     {this.state.lessonlist.map((lesson)=>
                         <Col span={8}>

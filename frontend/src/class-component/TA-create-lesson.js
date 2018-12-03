@@ -3,9 +3,12 @@ import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip, Tag}
 import {AuthContext} from "../basic-component/auth-context";
 import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
-import {withRouter} from "react-router-dom"
-
+import {withRouter, Link} from "react-router-dom"
 import {Card, Form, Container, Row, Col} from "react-bootstrap"
+
+import { Layout, Breadcrumb } from 'antd';
+const {Content} = Layout;
+
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -336,14 +339,22 @@ const LessonList = withRouter(mLessonList);
 class CreateLesson extends Component {
     render() {
         return (
-            <Card className="text-center">
-                <Card.Body>
-                    <Card.Title>创建课程</Card.Title>
-                    <Container>
-                        <LessonList/>
-                    </Container>
-                </Card.Body>
-            </Card>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>创建课程</Breadcrumb.Item>
+                </Breadcrumb>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+                    <Card className="text-center">
+                        <Card.Body>
+                            <Card.Title>创建课程</Card.Title>
+                            <Container>
+                                <LessonList/>
+                            </Container>
+                        </Card.Body>
+                    </Card>
+                </div>
+            </Content>
         )
     }
 }
@@ -355,14 +366,22 @@ class EditLesson extends Component {
 
     render() {
         return (
-            <Card className="text-center">
-                <Card.Body>
-                    <Card.Title>编辑课程信息{this.props.lesson_id}</Card.Title>
-                    <Container>
-                        <LessonList course_id={this.props.lesson_id}/>
-                    </Container>
-                </Card.Body>
-            </Card>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>编辑课程信息</Breadcrumb.Item>
+                </Breadcrumb>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280 }}>
+                    <Card className="text-center">
+                        <Card.Body>
+                            <Card.Title>编辑课程信息</Card.Title>
+                            <Container>
+                                <LessonList course_id={this.props.lesson_id}/>
+                            </Container>
+                        </Card.Body>
+                    </Card>
+                </div>
+            </Content>
         )
     }
 }
