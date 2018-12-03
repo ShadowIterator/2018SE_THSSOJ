@@ -12,17 +12,15 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import traceback
+import asyncio
 import unicodedata
 import site
 from tornado.options import define, options
 
-# from tornado.options import define, options
-# define("port", default=8000, help="run on the given port", type=int)
-# define("db_host", default="127.0.0.1", help="blog database host")
-# define("db_port", default=5432, help="blog database port")
-# define("db_database", default="thssoj", help="blog database name")
-# define("db_user", default="postgres", help="blog database user")
-# define("db_password", default="zUY3Z2N2ul", help="blog database password")
+
+
+
+
 
 class NoResultError(Exception):
     pass
@@ -32,40 +30,6 @@ class NoMethodError(Exception):
 
 class BaseError(Exception):
     pass
-
-# permLevel = {
-#     'NORMAL' : 0,
-#     'STUDENT' : 1,
-#     'TA': 2,
-#     'ADMIN': 3,
-#     'EVERYONE': 0,
-#     'ONESELF': 1
-# }
-
-
-
-# class DatabaseRowObject(tornado.util.ObjectDict):
-#     def __init__(self, db, *args, **kw):
-#         self.db = db
-#         super(DatabaseRowObject, self).__init__(*args, **kw)
-#
-#     async def execute(self, stmt, *args):
-#         """Execute a SQL statement.
-#
-#         Must be called with ``await self.execute(...)``
-#         """
-#         with (await self.application.db.cursor()) as cur:
-#             await cur.execute(stmt, args)
-#
-#     async def save(self):
-#         properties = []
-#         for key, value in self:
-#             if key != 'db' and key != 'id':
-#                 properties.append(str(key) + ' = ' + str(value))
-#                 print(key)
-#         # self.execute('''UPDATE ''')
-
-
 
 def catch_exception_write(func):
     async def wrapper(self, *args, **kw):
@@ -85,12 +49,7 @@ def check_password(func):
             return await func(self, *args, **kw)
         raise BaseError('password incorrect')
     return wrapper
-        # try:
-        #     if(self.user['password'] == self.args['auth_password']):
-        #         return
-        #
-        # except:
-        #     raise BaseError('check password failed')
+
 
 async def maybe_create_tables(db, filename):
     # try:
@@ -114,8 +73,17 @@ class Application(tornado.web.Application):
         self.db_instance = db
         super(Application, self).__init__(*args, **kw)
 
+    def setDB(self, db):
+        self.db_instance = db
+
+
+
 
 class BaseHandler(tornado.web.RequestHandler):
+    async def try_query(self):
+        print('try_query')
+        print('handler_query: ', await self.db.getObject('users', username='ss'))
+
     def __init__(self, *args, **kw):
         super(BaseHandler, self).__init__(*args, **kw)
         self.db = self.application.db_instance
