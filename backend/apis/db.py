@@ -389,7 +389,7 @@ class BaseTable:
         for key, value in dic.items():
             if(key in permissionList.keys()):
                 permission = permissionList[key]
-                print(permission)
+                # print(permission)
                 if(permission[0] <= per_role and permission[1] <= per_owner):
                     rtn[key] = value
         return rtn

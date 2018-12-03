@@ -47,13 +47,13 @@ def async_aquire_db(func):
         return await func(self, *args, **kw)
     return wrapper
 
-class BaseTest(AsyncHTTPTestCase):
+class BaseTestCase(AsyncHTTPTestCase):
     async def set_application_db(self):
-        # print('in get_db', options.db_host,
-        #         options.db_port,
-        #         options.db_user,
-        #         options.db_password,
-        #         options.db_database)
+        print('in get_db', options.db_host,
+                options.db_port,
+                options.db_user,
+                options.db_password,
+                options.db_database)
         while True:
             try:
                 db = await aiopg.create_pool(
@@ -62,7 +62,7 @@ class BaseTest(AsyncHTTPTestCase):
                         user=options.db_user,
                         password=options.db_password,
                         dbname=options.db_database)
-                await maybe_create_tables(db, 'sql/schema.sql')
+                await maybe_create_tables(db, '../sql/schema.sql')
                 print('create pool done')
                 break
             except:
@@ -78,9 +78,9 @@ class BaseTest(AsyncHTTPTestCase):
         print('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
-        options.parse_config_file('settings/app_config.py')
+        options.parse_config_file('../settings/app_config.py')
         self.db = None
-        super(BaseTest, self).setUp()
+        super(BaseTestCase, self).setUp()
 
 
     def get_app(self):
@@ -89,6 +89,18 @@ class BaseTest(AsyncHTTPTestCase):
                           options.RoutineList,
                           **options.AppConfig
                            )
+
+    def getbodyObject(self, response):
+        return json.loads(response.body)
+
+    async def get_response(self, uri, *args, **kw):
+        return await self.http_client.fetch(self.get_url(uri), *args, **kw)
+
+    async def post_request(self, uri, **kw):
+        return await self.get_response(uri, method = 'POST', body = json.dumps(kw).encode())
+
+    async def get_request(self, uri, **kw):
+        return await self.get_response(uri, method = 'GET', body = None)
 
     # an example
     # @async_aquire_db
@@ -100,13 +112,13 @@ class BaseTest(AsyncHTTPTestCase):
     #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
 
 
-    @async_aquire_db
-    async def test_2(self):
-        print('test_2')
-        await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
-        await self.db.createObject('users', username = 'hfzzz1', password = 'pwd', email = 'xx@xx.com')
-        response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz1"}')
-        self.assertIn(b'st', response.body)
-        print(response.body)
-        print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
-
+    # @async_aquire_db
+    # async def test_2(self):
+    #     print('test_2')
+    #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
+    #     await self.db.createObject('users', username = 'hfzzz1', password = 'pwd', email = 'xx@xx.com')
+    #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz1"}')
+    #     self.assertIn(b'st', response.body)
+    #     print(response.body)
+    #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
+    #
