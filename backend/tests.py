@@ -41,6 +41,7 @@ define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
 
 def async_aquire_db(func):
+    @tornado.testing.gen_test
     async def wrapper(self, *args, **kw):
         await self.set_application_db()
         return await func(self, *args, **kw)
@@ -90,7 +91,6 @@ class BaseTest(AsyncHTTPTestCase):
                            )
 
     # an example
-    # @tornado.testing.gen_test
     # @async_aquire_db
     # async def test_hello(self):
     #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
@@ -99,7 +99,7 @@ class BaseTest(AsyncHTTPTestCase):
     #     print(response.body)
     #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
 
-    @tornado.testing.gen_test
+
     @async_aquire_db
     async def test_2(self):
         print('test_2')
