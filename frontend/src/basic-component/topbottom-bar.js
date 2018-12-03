@@ -69,7 +69,7 @@ class mTopbar extends Component {
         }
     }
     handlePublicClick() {
-        alert("Should jump to public questions.");
+        this.props.history.push('/problembase');
     }
     render() {
         return (

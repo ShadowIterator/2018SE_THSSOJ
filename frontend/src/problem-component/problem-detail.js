@@ -24,7 +24,8 @@ const TabPane = Tabs.TabPane;
 // import "../mock/homework-mock";
 // import "../mock/problem-mock";
 
-
+// TODO: 公共题库题目的筛选功能
+// TODO: 请求题目的API不能使用LIST方法，因为不能显示非公开的题目
 
 class ProblemDetailBody extends Component {
     render() {
@@ -140,6 +141,8 @@ class ProblemDetail extends Component {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
         ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        if(this.props.lesson_id==='0')
+            return;
         ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
             if(result.data.code===1) {
                 return;
@@ -193,11 +196,19 @@ class ProblemDetail extends Component {
     render() {
         return (
             <Content style={{ padding: '0 50px' }}>
-                <Breadcrumb style={{ margin: '16px 0' }}>
-                    <Breadcrumb.Item><Link to='/student'>Home</Link></Breadcrumb.Item>
-                    <Breadcrumb.Item><Link to={'/studentlesson/'+this.props.lesson_id}>{this.state.lesson_name}</Link></Breadcrumb.Item>
-                    <Breadcrumb.Item>{this.state.title}</Breadcrumb.Item>
-                </Breadcrumb>
+                {this.props.lesson_id !== '0' &&
+                    <Breadcrumb style={{margin: '16px 0'}}>
+                        <Breadcrumb.Item><Link to='/student'>Home</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to={'/studentlesson/' + this.props.lesson_id}>{this.state.lesson_name}</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.title}</Breadcrumb.Item>
+                    </Breadcrumb>
+                }
+                {this.props.lesson_id === '0' &&
+                    <Breadcrumb style={{margin: '16px 0'}}>
+                        <Breadcrumb.Item><Link to='/problembase'>公共题库</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.title}</Breadcrumb.Item>
+                    </Breadcrumb>
+                }
                 <Card>
                     <Card.Body>
                         <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>

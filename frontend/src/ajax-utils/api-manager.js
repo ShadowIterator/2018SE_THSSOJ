@@ -41,6 +41,7 @@ const api_list = {
     'update_problem': '/api/problem/update',
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
+    'list_problem': '/api/problem/list'
 };
 
 export {URL, api_list}

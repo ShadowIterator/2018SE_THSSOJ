@@ -17,6 +17,7 @@ import {UserSettings} from "./auth-component/user-setting";
 import {CreateLesson, EditLesson} from "./class-component/TA-create-lesson";
 
 import {AdminPage} from "./admin-component/admin-page";
+import {ProblemBase} from "./problem-base/problem-base";
 
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
@@ -126,6 +127,7 @@ class App extends Component {
                                                                                                      {...this.state} />} />
                         <Route path="/createlesson" component={CreateLesson}/>
                         <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
+                        <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
                         </Layout>
                     </div>
                 </Router>

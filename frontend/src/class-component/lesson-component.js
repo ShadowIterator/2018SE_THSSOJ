@@ -181,12 +181,14 @@ class InfoItem extends Component {
 class Info extends Component {
     render() {
         return (
-            <Card interactive={false}>
-                <h4>通知</h4>
+            <>
+            {/*<Card interactive={false}>*/}
+                {/*<h4>通知</h4>*/}
                 {this.props.infoitems.map((item)=>(
                     <InfoItem title={item.title} content={item.content} type="通知" />
                 ))}
-            </Card>
+            {/*</Card>*/}
+            </>
         )
     }
 }
