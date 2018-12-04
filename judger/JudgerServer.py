@@ -100,7 +100,7 @@ class htmlJudger(tornado.web.RequestHandler):
 						'Info': 'sourec file not found!'})
 			return
 
-		targetPath = os.path.join('/tmp', data['SOURCE'])
+		targetPath = os.path.join('/tmp', 'htmltest')
 		zipf = zipfile.ZipFile(sourceFile, 'r')
 		if os.path.exists(targetPath):
 			if os.path.isfile(targetPath):
@@ -111,7 +111,9 @@ class htmlJudger(tornado.web.RequestHandler):
 		for fname in zipf.namelist():
 			zipf.extract(fname, targetPath)
 		zipf.close()
+		
 
+		shutil.rmtree(targetPath)
 		self.write({'Score': 0,
 					'Info': 'No comment'})
 

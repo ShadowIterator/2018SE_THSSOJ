@@ -10,7 +10,7 @@ from urllib.parse import urlencode
 # data['INSUF'] = 'in'
 # data['OUTPRE'] = 'test'
 # data['OUTSUF'] = 'out'
-# data['Language'] = 'C++'
+# data['Language'] = 'Python'
 # data['DATA_DIR'] = '/home/ycdfwzy/github/2018SE_THSSOJ/judger/test'
 # data['CHECKER_DIR'] = '/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers'
 # data['CHECKER'] = 'ncmp'
@@ -35,10 +35,6 @@ from urllib.parse import urlencode
 # print(json.loads(r.text))
 
 data = dict()
-# data['TIME_LIMIT'] = 1
-# data['MEMORY_LIMIT'] = 256
-# data['OUTPUT_LIMIT'] = 64
-# data['WORK_PATH'] = '/home/ycdfwzy/github/2018SE_THSSOJ/judger/test/script/test-script'
 data['SOURCE_PATH'] = '/home/ycdfwzy/'
 data['SOURCE'] = '123'
 data['SCRIPT_PATH'] = '/home/ycdfwzy/'
