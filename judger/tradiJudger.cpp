@@ -28,6 +28,16 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						"-o",
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
+
+	// ofstream fout("result0.json");
+	// fout << "{" << endl;
+	// fout << "    \"Result\" : \"" << judgerResult.result << "\"," << endl;
+	// fout << "    \"time\" : " << "1" << "," << endl;
+	// fout << "    \"memory\" : " << "2" << "," << endl;
+	// fout << "    \"Info\" : \"" << judgerResult.info << "\"" << endl;
+	// fout << "}" << endl;
+	// fout.close();
+
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
 			ostringstream oss;
@@ -84,6 +94,15 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 		judgerResult.memory = cr.memory;
 		judgerResult.info = cr.info;
 	}
+
+	ofstream fout1("result1.json");
+	fout1 << "{" << endl;
+	fout1 << "    \"Result\" : \"" << judgerResult.result << "\"," << endl;
+	fout1 << "    \"time\" : " << "1" << "," << endl;
+	fout1 << "    \"memory\" : " << "2" << "," << endl;
+	fout1 << "    \"Info\" : \"" << judgerResult.info << "\"" << endl;
+	fout1 << "}" << endl;
+	fout1.close();
 	return judgerResult;
 }
 
@@ -222,6 +241,7 @@ JudgerResult main_test(const JudgerConfig& judgerConfig){
 }
 
 int main(int argc, char** argv){
+	// cout << "tradiJudger" << endl;
 	JudgerConfig judgerConfig;
 	tradi_judger_parse_args(argc, argv, judgerConfig);
 	JudgerResult judgerResult = main_test(judgerConfig);
@@ -234,5 +254,13 @@ int main(int argc, char** argv){
 	fout << "    \"Info\" : \"" << judgerResult.info << "\"" << endl;
 	fout << "}" << endl;
 	fout.close();
+	// ofstream fout("result.json");
+	// fout << "{" << endl;
+	// fout << "    \"Result\" : \"" << "judgerResult.result" << "\"," << endl;
+	// fout << "    \"time\" : " << "1" << "," << endl;
+	// fout << "    \"memory\" : " << "2" << "," << endl;
+	// fout << "    \"Info\" : \"" << "judgerResult.info" << "\"" << endl;
+	// fout << "}" << endl;
+	// fout.close();
 	return 0;
 }

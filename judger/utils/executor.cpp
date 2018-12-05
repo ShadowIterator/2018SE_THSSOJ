@@ -21,6 +21,7 @@
 #include <errno.h>
 #include "parseArgs.h"
 #include "configs.h"
+#include "security.h"
 
 using namespace std;
 
@@ -199,22 +200,9 @@ void kill_process(pid_t p = -1){
 	}
 }
 
-bool check_safe_syscall(pid_t){
-	return true;
-}
-
-void on_syscall_exit(pid_t p){
-	struct user_regs_struct reg;
-	ptrace(PTRACE_GETREGS, p, NULL, &reg);
-
-	if ((long long int)reg.orig_rax >= 1024) {
-		reg.orig_rax -= 1024;
-		reg.rax = -EACCES;
-		ptrace(PTRACE_SETREGS, p, NULL, &reg);
-	}
-}
-
 RunResult parentMainWork(pid_t childpid){
+	init_config(runConfig);
+
 	cntProcess = 0;
 	if (!add_process(childpid)){
 		// cout << "Error while add_process first." << endl;
@@ -248,9 +236,9 @@ RunResult parentMainWork(pid_t childpid){
 			int sig = 0;
 			struct rusage ruse;
 
-			printf("before wait\n");
+			// printf("before wait\n");
 			pid_t p = wait4(-1, &stat, __WALL, &ruse);
-			printf("after wait %d\n", p);
+			// printf("after wait %d\n", p);
 			if (p == apid) {
 				if (WIFEXITED(stat) || WIFSIGNALED(stat)) {
 					// cout << "TLE detected by assist process!" << endl;
@@ -295,7 +283,7 @@ RunResult parentMainWork(pid_t childpid){
 			// if the child terminated normally, that is, by
             //  calling exit() or _exit(), or by returning from main()
 			if (WIFEXITED(stat)){
-				printf("in WIFEXITED\n");
+				// printf("in WIFEXITED\n");
 				if (mp[idx].mode == NotStart){
 					kill_process();
 					printf("JGF detected by mp[idx].mode == NotStart\n");
@@ -317,7 +305,7 @@ RunResult parentMainWork(pid_t childpid){
 			// if the child process was terminated by a signal.
 			if (WIFSIGNALED(stat)){
 				// cout << "in WIFSIGNALED" << endl;
-				printf("in WIFSIGNALED\n");
+				// printf("in WIFSIGNALED\n");
 				if (p == mp[0].pid){
 					switch(WTERMSIG(stat)) {
 					case SIGXCPU: // nearly impossible
@@ -347,13 +335,12 @@ RunResult parentMainWork(pid_t childpid){
             //  signal; this is possible only if the call was done using WUN‐
             //  TRACED or when the child is being traced
 			if (WIFSTOPPED(stat)){
-				// cout << "in WIFSTOPPED" << endl;
-				printf("in WIFSTOPPED\n");
+				// printf("in WIFSTOPPED\n");
 				sig = WSTOPSIG(stat);
 				// printf("sig=%d, SIGTRAP=%d, SIGSTOP=%d\n", sig, SIGTRAP, SIGSTOP);
 
 				if (mp[idx].mode == NotStart){
-					printf("mp[idx].mode == NotStart\n");
+					// printf("mp[idx].mode == NotStart\n");
 					if ((idx == 0 && sig == SIGTRAP) || (idx != 0 && sig == SIGSTOP)){
 						if (idx == 0){
 							// PTRACE_O_EXITKILL: Send a SIGKILL signal to the tracee
@@ -384,7 +371,7 @@ RunResult parentMainWork(pid_t childpid){
 
 				// system call traps
 				if (sig == (SIGTRAP | 0x80)){
-					printf("sig == (SIGTRAP | 0x80)\n");
+					// printf("sig == (SIGTRAP | 0x80)\n");
 					if (mp[idx].mode == Running){
 						// check safe syscall
 						if (runConfig.safe && !check_safe_syscall(p)){

@@ -43,8 +43,12 @@ class traditionalJudger(tornado.web.RequestHandler):
 					]
 		if 'CHECKER_DIR' in data:
 			params.append('--checker-dir=%s' % data['CHECKER_DIR'])
-		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
+		
+		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
+		stdoutdata, stderrdata = judger.communicate()
+		print(stdoutdata.decode())
 		judger.wait()
+
 		with open("result.json", "r", encoding='utf-8') as f:
 			judgerResult = json.dumps(json.load(f))
 			# print(judgerResult)
@@ -77,7 +81,9 @@ class scriptJudger(tornado.web.RequestHandler):
 					'--outputpath=%s' % data['OUTPUT_PATH'], \
 					data['OTHERS']
 					]
-		judger = subprocess.Popen(params, stdout=subprocess.PIPE)
+		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
+		stdoutdata, stderrdata = judger.communicate()
+		print(stdoutdata.decode())
 		judger.wait()
 
 		os.remove(targetFile)
