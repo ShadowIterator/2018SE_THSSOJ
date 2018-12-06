@@ -7,6 +7,8 @@ using namespace std;
 #define READ 1
 #define WRITE 2
 #define STAT 3
+typedef unsigned long long int reg_val_t;
+const unsigned PATHMAX = 512;
 
 set<string> readable;
 set<string> writable;
@@ -93,6 +95,180 @@ string toStdPath(const string& path) {	// make path endwith '/'
 	return path+'/';
 }
 
+string getParent(const string& path) {
+	size_t p = path.rfind('/');
+	if (p == string::npos) {
+		return "";
+	}
+	return path.substr(0, p);
+}
+
+string getcwdp(pid_t p){
+	char s[32];
+	char cwd[PATHMAX+1];
+	if (p == 0){
+		sprintf(s, "/proc/self/cwd");
+	} else
+	{
+		sprintf(s, "/proc/%lld/cwd", (long long int)p);
+	}
+	size_t sz = readlink(s, cwd, PATHMAX);
+	if (sz == -1)
+		return "";
+	cwd[sz] = '\0';
+	return cwd;
+}
+// todo: modify it for improvement
+string abspath(pid_t pid, const string &path) {
+	if (path.size() > PATHMAX) {
+		return "";
+	}
+	if (path.empty()) {
+		return path;
+	} 
+	string s;
+	string b;
+	size_t st;
+	if (path[0] == '/') {
+		s = "/";
+		st = 1;
+	} else {
+		s = getcwdp(pid) + "/";
+		st = 0;
+	}
+	for (size_t i = st; i < path.size(); i++) {
+		b += path[i];
+		if (path[i] == '/') {
+			if (b == "../" && !s.empty()) {
+				if (s == "./") {
+					s = "../";
+				} else if (s != "/") {
+					size_t p = s.size() - 1;
+					while (p > 0 && s[p - 1] != '/') {
+						p--;
+					}
+					if (s.size() - p == 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/') {
+						s += b;
+					} else {
+						s.resize(p);
+					}
+				}
+			} else if (b != "./" && b != "/") {
+				s += b;
+			}
+			b.clear();
+		}
+	}
+	if (b == ".." && !s.empty()) {
+		if (s == "./") {
+			s = "..";
+		} else if (s != "/") {
+			size_t p = s.size() - 1;
+			while (p > 0 && s[p - 1] != '/') {
+				p--;
+			}
+			if (s.size() - p == 3 && s[p] == '.' && s[p + 1] == '.' && s[p + 2] == '/') {
+				s += b;
+			} else {
+				s.resize(p);
+			}
+		}
+	} else if (b != ".") {
+		s += b;
+	}
+	if (s.size() >= 2 && s[s.size() - 1] == '/') {
+		s.resize(s.size() - 1);
+	}
+	return s;
+}
+
+string read_string_from_regs(reg_val_t addr, pid_t pid) {
+	char res[PATHMAX + 1], *ptr = res;
+	while (ptr != res + PATHMAX) {
+		*(reg_val_t*)ptr = ptrace(PTRACE_PEEKDATA, pid, addr, NULL);
+		for (int i = 0; i < sizeof(reg_val_t); i++, ptr++, addr++) {
+			if (*ptr == 0) {
+				return res;
+			}
+		}
+	}
+	res[PATHMAX] = 0;
+	return res;
+}
+
+string read_abspath_from_regs(reg_val_t addr, pid_t pid) {
+	return abspath(pid, read_string_from_regs(addr, pid));
+	// return read_string_from_regs(addr, pid);
+}
+
+string realpath(const string &path) {
+	char real[PATH_MAX + 1] = {};
+	if (realpath(path.c_str(), real) == NULL) {
+		return "";
+	}
+	return real;
+}
+
+bool endWith(const string &str, const string &tail) {
+	return str.compare(str.size() - tail.size(), tail.size(), tail) == 0;
+}
+ 
+bool startWith(const string &str, const string &head) {
+	return str.compare(0, head.size(), head) == 0;
+}
+
+bool in_able_set(const string& file, const set<string>& able_set) {
+	if (file.length() > PATHMAX )
+		return false;
+	if (able_set.count(file))
+		return true;
+
+	if (file.find("/...") != string::npos ||
+		startWith(file, "...") ||
+		endWith(file, "/..") ||
+		file == ".." )
+		return false;
+
+	string path;
+	int level = 0;
+	for (path = getParent(file);
+		!path.empty();
+		level++, path = getParent(path)) {
+		if (level == 1 && able_set.count(path+"/*"))
+			return true;
+		if (able_set.count(path+"/"))
+			return true;
+	}
+	if (level == 1 && able_set.count("/*"))
+		return true;
+
+	if (able_set.count("/"))
+		return true;
+	return false;
+}
+
+bool is_writable_file(const string& file) {
+	if (file == "/")
+		return writable.count("system_root");
+	return in_able_set(file, writable) || in_able_set(realpath(file), writable);
+}
+
+bool is_readable_file(const string& file) {
+	if (is_writable_file(file))
+		return true;
+	if (file == "/")
+		return readable.count("system_root");
+	return in_able_set(file, readable) || in_able_set(realpath(file), readable);
+}
+
+bool is_statable_file(const string& file) {
+	if (is_readable_file(file))
+		return true;
+	if (file == "/")
+		return statable.count("system_root");
+	return in_able_set(file, statable) || in_able_set(realpath(file), statable);
+}
+
 bool check_safe_syscall(pid_t p){
 	struct user_regs_struct reg;
 	ptrace(PTRACE_GETREGS, p, NULL, &reg);
@@ -113,19 +289,53 @@ bool check_safe_syscall(pid_t p){
 		return false;
 	}
 
-	if (syscall == __NR_socket ||
-		syscall == __NR_connect ||
-		syscall == __NR_geteuid ||
-		syscall == __NR_getuid) {
+	// if (syscall == __NR_socket ||
+	// 	syscall == __NR_connect ||
+	// 	syscall == __NR_geteuid ||
+	// 	syscall == __NR_getuid) {
 
-		reg.orig_rax += 1024;
-		ptrace(PTRACE_SETREGS, p, NULL, &reg);
+	// 	reg.orig_rax += 1024;
+	// 	ptrace(PTRACE_SETREGS, p, NULL, &reg);
 
-	} else
+	// } else
 	if (syscall_limit[syscall]-- == 0) {
 		// cout << "syscall limit " << syscall << endl;
 		printf("syscall limit %d\n", syscall);
 		return false;
+	}
+
+	switch (syscall) {
+		case __NR_open:
+		case __NR_openat:
+			reg_val_t fn_addr;
+			reg_val_t flags;
+			if (syscall == __NR_open) {
+				fn_addr = reg.rdi;
+				flags = reg.rsi;
+			} else {	// __NR_openat
+				fn_addr = reg.rsi;
+				flags = reg.rdx;
+			}
+			string fn = read_abspath_from_regs(fn_addr, p);
+			// printf("filepath: %s\n", fn.c_str());
+			bool is_read_only = (flags & O_ACCMODE) == O_RDONLY &&
+								(flags & O_CREAT) == 0 &&
+								(flags & O_EXCL) == 0 &&
+								(flags & O_TRUNC) == 0;
+			if (is_read_only) {
+				if (realpath(fn) != "" && !is_readable_file(fn)) {
+					// printf("filepath: %s\n", fn.c_str());
+					// printf("/usr/ count: %u\n", readable.count("/usr/"));
+					// return on_dgs_file_detect(pid, reg, fn);
+					return false;
+				}
+			} else {
+				if (!is_writable_file(fn)) {
+					// return on_dgs_file_detect(pid, reg, fn);
+					return false;
+				}
+			}
+			break;
 	}
 
 	return true;
@@ -140,14 +350,6 @@ void on_syscall_exit(pid_t p){
 		reg.rax = -EACCES;
 		ptrace(PTRACE_SETREGS, p, NULL, &reg);
 	}
-}
-
-string getParent(const string& path) {
-	size_t p = path.rfind('/');
-	if (p == string::npos) {
-		return "";
-	}
-	return path.substr(0, p);
 }
 
 void add_permission(const string& file, int mode) {
@@ -255,8 +457,6 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_mkdir          ] = -1;
 		syscall_limit[__NR_prlimit64      ] = -1;
 		syscall_limit[__NR_sysinfo        ] = -1;
-		// syscall_limit[__NR_renameat       ] = -1;
-		// syscall_limit[__NR_renameat2      ] = -1;
 
 		syscall_limit[__NR_chdir          ] = -1;
 		syscall_limit[__NR_fchdir         ] = -1;

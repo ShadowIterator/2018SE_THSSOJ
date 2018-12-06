@@ -17,6 +17,7 @@
 #include <string>
 #include <iostream>
 #include <errno.h>
+#include <limits.h>
 #include "configs.h"
 
 bool check_safe_syscall(pid_t);
