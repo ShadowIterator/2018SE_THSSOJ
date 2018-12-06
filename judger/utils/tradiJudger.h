@@ -81,16 +81,6 @@ CompileResult runCompiler(
 	va_end(ap);
 
 	// cout << "after parse args" << endl;
-
-	std::ofstream fout("result0.json");
-	fout << "{" << endl;
-	fout << "    \"Result\" : \"" << "judgerResult.result" << "\"," << endl;
-	fout << "    \"time\" : " << "1" << "," << endl;
-	fout << "    \"memory\" : " << "2" << "," << endl;
-	fout << "    \"Info\" : \"" << "judgerResult.info" << "\"" << endl;
-	fout << "}" << endl;
-	fout.close();
-	
 	RunResult res = runExecutor(compileConfig);
 	CompileResult ret(res.jr, res.time, res.memory,
 					(res.jr == Accept) && (res.ec == NoError));
