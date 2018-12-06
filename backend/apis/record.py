@@ -21,28 +21,37 @@ class APIRecordHandler(base.BaseHandler):
     @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
-        res = await self.getObject('records', secure = 1, **self.args)
+        res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
         for js in res:
             timepoint = int(js['submit_time'].timestamp())
             js['submit_time'] = timepoint
-        self.write(json.dumps(res).encode())
+        return res
+        # self.write(json.dumps(res).encode())
 
+    # @tornado.web.authenticated
     async def _srcCode_post(self):
         raise Exception('implement srcCode')
 
+    # @tornado.web.authenticated
     async def _delete_post(self):
         # for condition in self.args:
-        await self.deleteObject('records', **self.args)
+        res_dict = {}
+        await self.db.deleteObject('records', **self.args)
+        self.set_res_dict(res_dict, code=0, msg='record deleted')
+        return res_dict
 
+    # @tornado.web.authenticated
     async def _create_post(self):
-        await self.createObject('records', **self.args)
-        self.write(json.dumps({'code': 0}).encode())
+        res_dict = {}
+        await self.db.createObject('records', **self.args)
+        self.set_res_dict(res_dict, code=0, msg='record created')
+        return res_dict
 
-    async def get(self, type): #detail
-        # self.getargs()
-        print('get: ', type)
-        await self._call_method('''_{action_name}_get'''.format(action_name = type))
-
-    async def post(self, type):
-        print('post: ', type)
-        await self._call_method('''_{action_name}_post'''.format(action_name = type))
+    # async def get(self, type): #detail
+    #     # self.getargs()
+    #     print('get: ', type)
+    #     await self._call_method('''_{action_name}_get'''.format(action_name = type))
+    #
+    # async def post(self, type):
+    #     print('post: ', type)
+    #     await self._call_method('''_{action_name}_post'''.format(action_name = type))

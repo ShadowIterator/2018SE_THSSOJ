@@ -96,13 +96,27 @@ class BaseHandler(tornado.web.RequestHandler):
         self.root_dir='root'
         self.user = None
 
-    async def get(self, type): #detail
-        print('get: ', type)
-        await self._call_method('''_{action_name}_get'''.format(action_name = type))
+    # async def get(self, type): #detail
+    #     print('get: ', type)
+    #     await self._call_method('''_{action_name}_get'''.format(action_name = type))
 
+    @catch_exception_write
+    async def get(self, type):  # detail
+        # self.getargs()
+        print('get: ', type)
+        res = await self._call_method('''_{action_name}_get'''.format(action_name=type))
+        self.write(json.dumps(res).encode())
+
+    # async def post(self, type):
+    #     print('post: ', type)
+    #     await self._call_method('''_{action_name}_post'''.format(action_name = type))
+
+    @catch_exception_write
     async def post(self, type):
         print('post: ', type)
-        await self._call_method('''_{action_name}_post'''.format(action_name = type))
+        res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
+        print('return: ', res)
+        self.write(json.dumps(res).encode())
 
     async def get_current_user_object(self):
         if(self.user != None):

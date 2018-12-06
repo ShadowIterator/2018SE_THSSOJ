@@ -158,19 +158,19 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 1
         return res_dict
 
-    @catch_exception_write
-    async def get(self, type): #detail
-        # self.getargs()
-        print('get: ', type)
-        res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
-        self.write(json.dumps(res).encode())
-
-    @catch_exception_write
-    async def post(self, type):
-        print('post: ', type)
-        res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
-        print('return: ', res)
-        self.write(json.dumps(res).encode())
+    # @catch_exception_write
+    # async def get(self, type): #detail
+    #     # self.getargs()
+    #     print('get: ', type)
+    #     res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
+    #     self.write(json.dumps(res).encode())
+    #
+    # @catch_exception_write
+    # async def post(self, type):
+    #     print('post: ', type)
+    #     res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
+    #     print('return: ', res)
+    #     self.write(json.dumps(res).encode())
 
         #
         # if(type == 'create'):
