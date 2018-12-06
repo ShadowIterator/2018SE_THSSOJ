@@ -133,6 +133,12 @@ class mStudentLessonMiddle extends Component {
             problemitems: [],
             lesson_name: '',
             current_selected: '1',
+            unfinished_homeworkitems: [],
+            unfinished_problemitems: [],
+            finished_homeworkitems: [],
+            finished_problemitems: [],
+            judged_homeworkitems: [],
+            judged_problemitems: [],
         };
         this.infoitems = [];
         this.homeworkitems = [];
