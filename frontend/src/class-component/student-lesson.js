@@ -133,16 +133,11 @@ class mStudentLessonMiddle extends Component {
             problemitems: [],
             lesson_name: '',
             current_selected: '1',
-            unfinished_homeworkitems: [],
-            unfinished_problemitems: [],
-            finished_homeworkitems: [],
-            finished_problemitems: [],
-            judged_homeworkitems: [],
-            judged_problemitems: [],
         };
         this.infoitems = [];
         this.homeworkitems = [];
         this.problemitems = [];
+        this.homeworkstatus = {};
     }
     componentDidMount() {
         const course_id = parseInt(this.props.course_id);
@@ -175,7 +170,24 @@ class mStudentLessonMiddle extends Component {
             deadline:deadline,
             problem_ids:problem_ids,
         });
+        that.homeworkstatus[id] = {};
         that.setState({homeworkitems:that.homeworkitems});
+        for(let prob_id of problem_ids) {
+            ajax_post(api_list['query_record'], {
+                user_id: this.props.id,
+                problem_id: prob_id,
+                homework_id: id,
+                record_type: 2,
+            }, that, (that, result)=>{
+                if(result.data.length === 0) {
+                    that.homeworkstatus[id][prob_id] = 0;
+                } else if(result.data[0].status === 0) {
+                    that.homeworkstatus[id][prob_id] = 1;
+                } else {
+                    that.homeworkstatus[id][prob_id] = 2;
+                }
+            });
+        }
         for(let prob_id of problem_ids) {
             ajax_post(api_list['query_problem'], {id:prob_id}, that, StudentLessonMiddle.query_problem_callback);
         }
@@ -222,7 +234,30 @@ class mStudentLessonMiddle extends Component {
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
                 <Breadcrumb.Item>未完成作业</Breadcrumb.Item>
             </>);
-            panel=(<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems} course_id={this.props.course_id}/>);
+            let unfinished_homeworkitems = [];
+            let unfinished_problemitems = [];
+            for(const homework of this.homeworkitems) {
+                const id = homework.id;
+                let flag = 0;
+                for(const prob_id in this.homeworkstatus[id]) {
+                    if(this.homeworkstatus[id][prob_id]!==0) {
+                        flag = 1;
+                    }
+                }
+                if(flag === 0) {
+                    unfinished_homeworkitems.push(homework);
+                    for(const prob_id of homework.problem_ids) {
+                        for(const prob_item of this.problemitems) {
+                            if(prob_id === prob_item.id) {
+                                let prob_item_new = prob_item;
+                                prob_item_new.status = this.homeworkstatus[id][prob_id];
+                                unfinished_problemitems.push(prob_item_new);
+                            }
+                        }
+                    }
+                }
+            }
+            panel=(<StudentHomework homeworkitems={unfinished_homeworkitems} problemitems={unfinished_problemitems} course_id={this.props.course_id}/>);
 
         } else if(this.state.current_selected==='2') {
             breadcrumb=(<>
