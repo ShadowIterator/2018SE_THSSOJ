@@ -16,7 +16,7 @@ class ExampleTestCase(BaseTestCase):
         )
         self.assertIn(b'st', response.body)
     # second request
-        response = await self.post_request('/api/user/query', username = 'hfzzz1')
+        response = await self.post_request('/api/user/query', username = 'hfzzz1', password = 'pwd')
         self.assertIn(b'"username": "hfzzz1"', response.body)
     # third request
         response = await self.post_request('/api/user/query', username = 'hfzzz')
