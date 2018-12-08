@@ -107,6 +107,29 @@ void childMainWork(){
 		}
 	}
 
+	char *env_path_str = getenv("PATH");
+	char *env_lang_str = getenv("LANG");
+	char *env_shell_str = getenv("SHELL");
+	string env_path = env_path_str ? env_path_str : "";
+	string env_lang = env_lang_str ? env_lang_str : "";
+	string env_shell = env_shell_str ? env_shell_str : "";
+	env_path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
+
+	clearenv();
+	// setenv("USER", "poor_program", 1);
+	// setenv("LOGNAME", "poor_program", 1);
+	setenv("HOME", runConfig.path.c_str(), 1);
+	if (env_lang_str) {
+		setenv("LANG", env_lang.c_str(), 1);
+	}
+	if (env_path_str) {
+		setenv("PATH", env_path.c_str(), 1);
+	}
+	setenv("PWD", runConfig.path.c_str(), 1);
+	if (env_shell_str) {
+		setenv("SHELL", env_shell.c_str(), 1);
+	}
+
 	size_t sz = runConfig.argArr.size();
 	char** argv = new char*[sz+1];
 	for (int i = 0; i < sz; ++i){

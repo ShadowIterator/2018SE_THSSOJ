@@ -68,6 +68,7 @@ int syscall_limit_default[][2] = {
 	{__NR_clock_gettime , -1},
 
 	{__NR_restart_syscall, -1},
+	{__NR_getrandom      , -1},
 
 	{-1                 , -1}
 };
@@ -210,6 +211,8 @@ string realpath(const string &path) {
 }
 
 bool endWith(const string &str, const string &tail) {
+	if (str.size() < tail.size())
+		return false;
 	return str.compare(str.size() - tail.size(), tail.size(), tail) == 0;
 }
  
@@ -220,7 +223,7 @@ bool startWith(const string &str, const string &head) {
 bool in_able_set(const string& file, const set<string>& able_set) {
 	if (file.length() > PATHMAX )
 		return false;
-	if (able_set.count(file))
+	if (able_set.count(file) || able_set.count(file+"/"))
 		return true;
 
 	if (file.find("/...") != string::npos ||
@@ -269,7 +272,7 @@ bool is_statable_file(const string& file) {
 	return in_able_set(file, statable) || in_able_set(realpath(file), statable);
 }
 
-bool check_safe_syscall(pid_t p){
+bool check_safe_syscall(pid_t p) {
 	struct user_regs_struct reg;
 	ptrace(PTRACE_GETREGS, p, NULL, &reg);
 
@@ -304,11 +307,13 @@ bool check_safe_syscall(pid_t p){
 		return false;
 	}
 
+	string fn;
+	reg_val_t fn_addr;
+	reg_val_t flags;
+	bool is_read_only;
 	switch (syscall) {
 		case __NR_open:
 		case __NR_openat:
-			reg_val_t fn_addr;
-			reg_val_t flags;
 			if (syscall == __NR_open) {
 				fn_addr = reg.rdi;
 				flags = reg.rsi;
@@ -316,24 +321,85 @@ bool check_safe_syscall(pid_t p){
 				fn_addr = reg.rsi;
 				flags = reg.rdx;
 			}
-			string fn = read_abspath_from_regs(fn_addr, p);
+			fn = read_abspath_from_regs(fn_addr, p);
 			// printf("filepath: %s\n", fn.c_str());
-			bool is_read_only = (flags & O_ACCMODE) == O_RDONLY &&
-								(flags & O_CREAT) == 0 &&
-								(flags & O_EXCL) == 0 &&
-								(flags & O_TRUNC) == 0;
+			is_read_only = (flags & O_ACCMODE) == O_RDONLY &&
+							(flags & O_CREAT) == 0 &&
+							(flags & O_EXCL) == 0 &&
+							(flags & O_TRUNC) == 0;
 			if (is_read_only) {
 				if (realpath(fn) != "" && !is_readable_file(fn)) {
-					// printf("filepath: %s\n", fn.c_str());
+					printf("open readable filepath: %s\n", fn.c_str());
 					// printf("/usr/ count: %u\n", readable.count("/usr/"));
 					// return on_dgs_file_detect(pid, reg, fn);
 					return false;
 				}
 			} else {
 				if (!is_writable_file(fn)) {
+					printf("open writable filepath: %s\n", fn.c_str());
 					// return on_dgs_file_detect(pid, reg, fn);
 					return false;
 				}
+			}
+			break;
+		case __NR_readlink:
+		case __NR_readlinkat:
+			if (syscall == __NR_readlink) {
+				fn_addr = reg.rdi;
+			} else {	// __NR_readlinkat
+				fn_addr = reg.rsi;
+			}
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_readable_file(fn)) {
+				printf("readlink filepath: %s\n", fn.c_str());
+				return false;
+			}
+			break;
+		case __NR_unlink:
+		case __NR_unlinkat:
+			if (syscall == __NR_unlink) {
+				fn_addr = reg.rdi;
+			} else {	// __NR_unlinkat
+				fn_addr = reg.rsi;
+			}
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_writable_file(fn)) {
+				printf("unlink filepath: %s\n", fn.c_str());
+				return false;
+			}
+			break;
+		case __NR_access:
+			fn_addr = reg.rdi;
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_statable_file(fn)) {
+				printf("access filepath %s\n", fn.c_str());
+				return false;
+			}
+			break;
+		case __NR_stat:
+		case __NR_lstat:
+			fn_addr = reg.rdi;
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_statable_file(fn)) {
+				printf("stat filepath %s\n", fn.c_str());
+				return false;
+			}
+			break;
+		case __NR_execve:
+			fn_addr = reg.rdi;
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_readable_file(fn)) {
+				printf("execve filepath: %s\n", fn.c_str());
+				return false;
+			}
+			break;
+		case __NR_chmod:
+		case __NR_rename:
+			fn_addr = reg.rdi;
+			fn = read_abspath_from_regs(fn_addr, p);
+			if (!is_writable_file(fn)) {
+				printf("chmod rename filepath: %s\n", fn.c_str());
+				return false;
 			}
 			break;
 	}
@@ -381,6 +447,10 @@ void init_config(const RunConfig& runConfig) {
 		readable.insert(string(readable_default[i]));
 	}
 
+	statable.insert("/tmp");
+	statable.insert("/usr");
+	statable.insert("/lib");
+
 	add_permission(toStdPath(runConfig.path), READ|STAT);
 	// statable.insert( toStdPath(runConfig.path) );
 	// readable.insert( toStdPath(runConfig.path) );
@@ -413,6 +483,15 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_getdents       ] = -1;
 		syscall_limit[__NR_getdents64     ] = -1;
 
+		syscall_limit[__NR_prlimit64      ] = -1;
+		syscall_limit[__NR_sysinfo        ] = -1;
+
+		syscall_limit[__NR_getpid         ] = -1;
+		syscall_limit[__NR_getuid         ] = -1;
+		syscall_limit[__NR_geteuid        ] = -1;
+		syscall_limit[__NR_getgid         ] = -1;
+		syscall_limit[__NR_getegid        ] = -1;
+
 		readable.insert("/usr/bin/python3.6");
 		readable.insert("/usr/lib/python3.6/");
 		readable.insert("/usr/lib/python3/");
@@ -427,6 +506,10 @@ void init_config(const RunConfig& runConfig) {
 		statable.insert("/usr");
 		statable.insert("/usr/bin");
 		statable.insert("/usr/lib");
+
+		statable.insert("/usr/");
+		statable.insert("/usr/bin/");
+		statable.insert("/usr/lib/");
 	}
 
 	if (runConfig.Lang == "compiler") {
@@ -460,6 +543,14 @@ void init_config(const RunConfig& runConfig) {
 
 		syscall_limit[__NR_chdir          ] = -1;
 		syscall_limit[__NR_fchdir         ] = -1;
+
+		syscall_limit[__NR_getrandom      ] = -1;
+
+		syscall_limit[__NR_getuid         ] = -1;
+		syscall_limit[__NR_geteuid        ] = -1;
+		syscall_limit[__NR_getgid         ] = -1;
+		syscall_limit[__NR_getegid        ] = -1;
+
 
 		// syscall_limit[__NR_ftruncate      ] = -1; // for javac = =
 
