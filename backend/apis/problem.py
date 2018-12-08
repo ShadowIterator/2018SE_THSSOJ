@@ -192,11 +192,10 @@ class APIProblemHandler(base.BaseHandler):
                                 submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
 
         record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
-                                               secure=1,
-                                               user_id=self.args['user_id'],
-                                               problem_id=self.args['problem_id'],
-                                               homework_id=self.args['homework_id'],
-                                               submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
+                                                user_id=self.args['user_id'],
+                                                problem_id=self.args['problem_id'],
+                                                homework_id=self.args['homework_id'],
+                                                submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
                                                ))[0]
 
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
@@ -379,3 +378,25 @@ class APIProblemHandler(base.BaseHandler):
         #     self.set_res_dict(res_dict, code=1, msg='fail to submit')
         #
         # self.return_json(res_dict)
+
+    # @tornado.web.authenticated
+    async def _uploadCode_post(self):
+        pass
+
+    # @tornado.web.authenticated
+    async def _uploadCases_post(self):
+        pass
+
+    # @tornado.web.authenticated
+    async def _uploadScript_post(self):
+        pass
+
+    # @tornado.web.authenticated
+    async def _search_post(self):
+        all_problems = await self.db.all('problems', cur_user=self.get_current_user_object())
+        search_res=[]
+        key_word = self.args['keyword']
+
+        for each_problem in all_problems:
+            if key_word in each_problem:
+                search_res.append(each_problem['id'])

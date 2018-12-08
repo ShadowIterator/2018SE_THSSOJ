@@ -4,6 +4,7 @@ import hashlib
 import smtplib
 import random
 import datetime
+import os
 from email.mime.text import MIMEText
 from email.header import Header
 from . import base
@@ -13,6 +14,10 @@ from .base import *
 
 
 class APIRecordHandler(base.BaseHandler):
+    def __init__(self, *args, **kw):
+        super().__init__(*args, **kw)
+        self.root_dir = self.root_dir+'/records'
+
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
         if 'submit_time' in self.args.keys():
@@ -30,8 +35,17 @@ class APIRecordHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _srcCode_post(self):
-        raise Exception('implement srcCode')
-
+        # raise Exception('implement srcCode')
+        res_dict={}
+        record_id = str(self.args['id'])
+        record_dir = self.root_dir+'/'+record_id
+        if not os.path.exists(record_dir):
+            self.set_res_dict(res_dict, code=1, msg='no such record')
+            return res_dict
+        src_file_path = record_dir + '/' + record_id + '.code'
+        content = open(src_file_path, mode='rb').read().decode()
+        self.set_res_dict(res_dict, code=0, src_code=content)
+        return res_dict
     # @tornado.web.authenticated
     async def _delete_post(self):
         # for condition in self.args:
