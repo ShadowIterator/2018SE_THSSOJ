@@ -38,7 +38,7 @@ class ProblemDetailBody extends Component {
                     <TabPane tab="提交代码" key="2">
                         <CodeInput state={this.props.state} role={this.props.role}
                                    id={this.props.id} problem_id={this.props.probleminfo.id}
-                                   homework_id={this.props.homework_id}/>
+                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
                     </TabPane>
                     <TabPane tab="查看结果" key="3">
                         <ProblemDetailRecord records={this.props.records} />
@@ -216,7 +216,7 @@ class ProblemDetail extends Component {
                             <ProblemDetailBody state={this.props.state} role={this.props.role}
                                                id={this.props.id} probleminfo={this.state}
                                                homework_id={parseInt(this.props.homework_id)}
-                                               records={this.state.records}/>
+                                               records={this.state.records} lesson_id={this.props.lesson_id}/>
                         </Container>
                     </Card.Body>
                 </Card>
@@ -224,15 +224,5 @@ class ProblemDetail extends Component {
         );
     }
 }
-
-const splitter =
-{
-    height:'1px',
-    backgroundColor:'#ADADAD',
-    float:'center',
-    width:'100%',
-    marginTop: '10px',
-    marginBottom: '10px',
-};
 
 export {ProblemDetail};

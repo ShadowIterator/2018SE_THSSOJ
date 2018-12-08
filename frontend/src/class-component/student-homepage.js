@@ -96,7 +96,7 @@ class mStudentHomepageMiddle extends Component {
         return (
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
-                    <Breadcrumb.Item><Link to="/student">Home</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
                 </Breadcrumb>
                 <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                     <h2>本学期课程</h2>
