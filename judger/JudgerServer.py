@@ -16,16 +16,21 @@ import tornado.web
 import tornado.websocket
 # from urllib.parse import urlencode, unquote
 from tornado.options import define, options
+from queue import Queue, Empty
+from threading import Thread
 
 define("port", default=12345, help="run on the given port", type=int)
 
-class traditionalJudger(tornado.web.RequestHandler):
-	def get(self):
-		self.write('Hello')
+tradiQ = Queue()
+scriptQ = Queue()
 
-	def post(self):
-		data = json.loads(self.request.body.decode())
-		# print(data)
+def handleTraditionalJudger():
+	while (True):
+		try:
+			data = tradiQ.get(block = True, timeout = 1)
+		except Empty:
+			# print 'Thread' ,  self.Thread_id , 'end'
+			continue
 		params = ['./tradiJudger', \
 					'--tl=%d' % data['TIME_LIMIT'],
 					'--ml=%d' % data['MEMORY_LIMIT'],\
@@ -43,34 +48,58 @@ class traditionalJudger(tornado.web.RequestHandler):
 					]
 		if 'CHECKER_DIR' in data:
 			params.append('--checker-dir=%s' % data['CHECKER_DIR'])
+		record_id = data['id']
+
+		tradiQ.task_done()
 		
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
 		stdoutdata, stderrdata = judger.communicate()
-		print(stdoutdata.decode())
+		print('id: ', record_id, stdoutdata.decode())
 		judger.wait()
 
 		with open("result.json", "r", encoding='utf-8') as f:
-			judgerResult = json.dumps(json.load(f))
-			# print(judgerResult)
-			self.write(judgerResult)
-			return
-		self.write({'Result': 'Judgement Failed',
-					'time': 0,
-					'memory': 0,
-					'Info': "No comment"})
+			judgerResult = json.load(f)
+			judgerResult['id'] = record_id
+			print(judgerResult)
+			# r = requests.post('http://localhost:', data = json.dumps(judgerResult))
+			# print(r)
+			continue
+		judgerResult = {'Result': 'Judgement Failed',
+						'time': 0,
+						'memory': 0,
+						'Info': "No comment",
+						'id': record_id}
+		print(judgerResult)
+		# self.write({'Result': 'Judgement Failed',
+		# 			'time': 0,
+		# 			'memory': 0,
+		# 			'Info': "No comment",
+		# 			'id': record_id})
 
-class scriptJudger(tornado.web.RequestHandler):
-	def post(self):
-		data = json.loads(self.request.body.decode())
-		# print(data)
+def handleScriptJudger():
+	while (True):
+		try:
+			data = scriptQ.get(block = True, timeout = 1)
+		except Empty:
+			# print 'Thread' ,  self.Thread_id , 'end'
+			continue
+
+		record_id = data['id']
 		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
 		targetFile = os.path.join(data['WORK_PATH'], 'index.js')
 		if not os.path.isfile(sourceFile):
-			self.write({'Score': 0,
-						'time': 0,
-						'memory': 0,
-						'Info': "No comment"})
-			return
+			judgerResult = {'Score': 0,
+							'time': 0,
+							'memory': 0,
+							'Info': "No comment",
+							'id': record_id}
+			print(judgerResult)
+			# self.write({'Score': 0,
+			# 			'time': 0,
+			# 			'memory': 0,
+			# 			'Info': "No comment"})
+			scriptQ.task_done()
+			continue
 		open(targetFile, "wb").write(open(sourceFile, "rb").read())
 
 		params = ['./scriptJudger', \
@@ -81,6 +110,7 @@ class scriptJudger(tornado.web.RequestHandler):
 					'--outputpath=%s' % data['OUTPUT_PATH'], \
 					data['OTHERS']
 					]
+		scriptQ.task_done()
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
 		stdoutdata, stderrdata = judger.communicate()
 		print(stdoutdata.decode())
@@ -88,14 +118,103 @@ class scriptJudger(tornado.web.RequestHandler):
 
 		os.remove(targetFile)
 		with open("result.json", "r", encoding='utf-8') as f:
-			judgerResult = json.dumps(json.load(f))
-			# print(judgerResult)
-			self.write(judgerResult)
-			return
-		self.write({'Score': 0,
-					'time': 0,
-					'memory': 0,
-					'Info': "No comment"})
+			# judgerResult = json.dumps(json.load(f))
+			judgerResult = json.load(f)
+			judgerResult['id'] = record_id
+			print(judgerResult)
+			# self.write(judgerResult)
+			continue
+		judgerResult = {'Score': 0,
+						'time': 0,
+						'memory': 0,
+						'Info': "No comment",
+						'id': record_id}
+		print(judgerResult)
+		# self.write({'Score': 0,
+		# 			'time': 0,
+		# 			'memory': 0,
+		# 			'Info': "No comment"})
+
+
+class traditionalJudger(tornado.web.RequestHandler):
+	def get(self):
+		self.write('Hello')
+
+	def post(self):
+		data = json.loads(self.request.body.decode())
+		tradiQ.put(data)
+		self.write({ 'status': 'In-Queue' })
+		# params = ['./tradiJudger', \
+		# 			'--tl=%d' % data['TIME_LIMIT'],
+		# 			'--ml=%d' % data['MEMORY_LIMIT'],\
+		# 			'--ol=%d' % data['OUTPUT_LIMIT'],\
+		# 			'--in-pre=%s' % data['INPRE'],\
+		# 			'--in-suf=%s' % data['INSUF'],\
+		# 			'--out-pre=%s' % data['OUTPRE'],\
+		# 			'--out-suf=%s' % data['OUTSUF'],\
+		# 			'--Lang=%s' % data['Language'],\
+		# 			'--data-dir=%s' % data['DATA_DIR'],\
+		# 			'--checker=%s' % data['CHECKER'],\
+		# 			'--n-tests=%d' % data['NTESTS'],\
+		# 			'--source-name=%s' % data['SOURCE_FILE'],\
+		# 			'--source-dir=%s' % data['SOURCE_DIR']
+		# 			]
+		# if 'CHECKER_DIR' in data:
+		# 	params.append('--checker-dir=%s' % data['CHECKER_DIR'])
+		
+		# judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
+		# stdoutdata, stderrdata = judger.communicate()
+		# print(stdoutdata.decode())
+		# judger.wait()
+
+		# with open("result.json", "r", encoding='utf-8') as f:
+		# 	judgerResult = json.dumps(json.load(f))
+		# 	# print(judgerResult)
+		# 	self.write(judgerResult)
+		# 	return
+		# self.write({'Result': 'Judgement Failed',
+		# 			'time': 0,
+		# 			'memory': 0,
+		# 			'Info': "No comment"})
+
+class scriptJudger(tornado.web.RequestHandler):
+	def post(self):
+		data = json.loads(self.request.body.decode())
+		scriptQ.put(data)
+		self.write({ 'status': 'In-Queue' })
+		# sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
+		# targetFile = os.path.join(data['WORK_PATH'], 'index.js')
+		# if not os.path.isfile(sourceFile):
+		# 	self.write({'Score': 0,
+		# 				'time': 0,
+		# 				'memory': 0,
+		# 				'Info': "No comment"})
+		# 	return
+		# open(targetFile, "wb").write(open(sourceFile, "rb").read())
+
+		# params = ['./scriptJudger', \
+		# 			'--tl=%d' % data['TIME_LIMIT'],
+		# 			'--ml=%d' % data['MEMORY_LIMIT'],\
+		# 			'--ol=%d' % data['OUTPUT_LIMIT'],\
+		# 			'--work-path=%s' % data['WORK_PATH'],\
+		# 			'--outputpath=%s' % data['OUTPUT_PATH'], \
+		# 			data['OTHERS']
+		# 			]
+		# judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
+		# stdoutdata, stderrdata = judger.communicate()
+		# print(stdoutdata.decode())
+		# judger.wait()
+
+		# os.remove(targetFile)
+		# with open("result.json", "r", encoding='utf-8') as f:
+		# 	judgerResult = json.dumps(json.load(f))
+		# 	# print(judgerResult)
+		# 	self.write(judgerResult)
+		# 	return
+		# self.write({'Score': 0,
+		# 			'time': 0,
+		# 			'memory': 0,
+		# 			'Info': "No comment"})
 
 class htmlJudger(tornado.web.RequestHandler):
 	def post(self):
@@ -149,6 +268,10 @@ if __name__ == "__main__":
 	# 							], stdout=subprocess.PIPE)
 	# time.sleep(1)
 	# judger.kill()
+	traditioanlJudgerThread = Thread(target=handleTraditionalJudger)
+	scriptJudgerJudgerThread = Thread(target=handleScriptJudger)
+	traditioanlJudgerThread.start()
+	scriptJudgerJudgerThread.start()
 	app = Application()
 	app.listen(options.port)
 	tornado.ioloop.IOLoop.current().start()

@@ -415,7 +415,7 @@ RunResult parentMainWork(pid_t childpid){
 				} else
 
 				if (sig == SIGTRAP) {
-					printf("sig == SIGTRAP\n");
+					// printf("sig == SIGTRAP\n");
 					switch ((stat >> 16) & 0xffff) {
 						case PTRACE_EVENT_CLONE:
 						case PTRACE_EVENT_FORK:
