@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
-import {Button, Card} from '@blueprintjs/core';
+import {Button} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "./auth-context";
@@ -15,7 +15,10 @@ import '../../node_modules/codemirror/mode/python/python.js';
 import '../../node_modules/codemirror/addon/hint/show-hint.css';
 import '../../node_modules/codemirror/addon/hint/show-hint.js';
 import '../../node_modules/codemirror/addon/selection/active-line'
-import {Tabs} from "antd";
+
+import {Select, Row, Col} from "antd";
+
+const Option = Select.Option;
 
 const defaultcode = {'javascript': '// javascript code here',
                      'C': '// C code here',
@@ -31,13 +34,14 @@ class CodeInput extends Component {
             mode: 'javascript',
             language: 'text/javascript'
         };
-        this.clickHandler = this.clickHandler.bind(this);
+        this.clickSubmit = this.clickSubmit.bind(this);
+        this.clickTest = this.clickTest.bind(this);
         this.codeChange = this.codeChange.bind(this);
         this.modeChange = this.modeChange.bind(this);
     }
 
-    modeChange(e) {
-        let mode = e.target.value;
+    modeChange(value) {
+        let mode = value;
         this.setState({
             code: defaultcode[mode],
             mode: mode
@@ -66,7 +70,46 @@ class CodeInput extends Component {
         this.setState({code: value});
     }
 
-    clickHandler(e){
+    clickSubmit(e){
+        e.preventDefault();
+        e.stopPropagation();
+        let lang;
+        if (this.state.mode === 'javascript')
+            lang = 3;
+        else if (this.state.mode === 'C')
+            lang = 1;
+        else if (this.state.mode === 'C++')
+            lang = 2;
+        else if (this.state.mode === 'Python3')
+            lang = 4;
+        else
+            lang = -1;
+        let record_type;
+        if(this.props.lesson_id === 0) {
+            record_type = 0;
+        } else {
+            record_type = 2;
+        }
+        const data = {
+            user_id: this.props.id,
+            problem_id: this.props.problem_id,
+            homework_id: this.props.homework_id,
+            record_type: record_type,
+            src_code: this.state.code,
+            src_language: lang
+        };
+        ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
+    }
+
+    static submit_callback(that, result) {
+        if(result.data.code===0) {
+            alert("Successfully submit your code.");
+        } else {
+            alert("Something wrong while submitting your code.");
+        }
+    }
+
+    clickTest(e) {
         e.preventDefault();
         e.stopPropagation();
         let lang;
@@ -84,24 +127,39 @@ class CodeInput extends Component {
             user_id: this.props.id,
             problem_id: this.props.problem_id,
             homework_id: this.props.homework_id,
+            record_type: 1,
             src_code: this.state.code,
-            src_language: lang
+            src_language: lang,
+            test_radio: 100,
         };
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
 
-    static submit_callback(that, result) {
-        if(result.data.code===0) {
-            alert("Successfully submit your code.");
-        } else {
-            alert("Something wrong while submitting your code.");
-        }
-    }
-
     render() {
+        let options = [];
+        let language;
+        if(!this.props.problem_info.language) {
+            language = [1, 2, 3, 4];
+        } else {
+            language = this.props.problem_info.language;
+        }
+        for(const lang_id of language) {
+            if(lang_id === 1) {
+                options.push(<Option value={"C"}>C</Option>);
+            } else if(lang_id === 2) {
+                options.push(<Option value={"C++"}>C++</Option>);
+            } else if(lang_id === 3) {
+                options.push(<Option value={"javascript"}>Javascript</Option>);
+            } else if(lang_id === 4) {
+                options.push(<Option value={"Python3"}>Python3</Option>);
+            }
+        }
         return (
             <div>
-                {/*<Card>*/}
+                <Select onChange={this.modeChange} value={this.state.mode} style={{outline: 0, width: 120, marginBottom: 10}}>
+                    {options}
+                </Select>
+                <div style={{border: '1px solid grey'}}>
                     <CodeMirror options={{
                                     mode: this.state.language,
                                     theme: 'neat',
@@ -112,14 +170,19 @@ class CodeInput extends Component {
                                 onChange={this.codeChange}
                                 value={this.state.code}
                     />
-                {/*</Card>*/}
-                <select onChange={this.modeChange} value={this.state.mode}>
-                    <option value="javascript">javascript</option>
-                    <option value="C">C</option>
-                    <option value="C++">C++</option>
-                    <option value="Python3">Python3</option>
-                </select>
-                <Button large icon="upload" onClick={this.clickHandler} style={{marginTop:'10px'}} style={{outline: 0}}>提交</Button>
+                </div>
+                <Row type="flex" justify="center">
+                    <Col span={4}>
+                        <div style={{textAlign: 'center', marginTop: '10px'}}>
+                            <Button icon="build" onClick={this.clickTest} style={{outline: 0}}>测试</Button>
+                        </div>
+                    </Col>
+                    <Col span={4}>
+                        <div style={{textAlign: 'center', marginTop: '10px'}}>
+                            <Button icon="upload" onClick={this.clickSubmit} style={{outline: 0}}>提交</Button>
+                        </div>
+                    </Col>
+                </Row>
             </div>
         )
     }

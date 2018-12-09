@@ -50,16 +50,6 @@ class mStudentHomeworkCard extends Component {
         console.log("questions:", this.props.questions);
         return (
             <div style={{margin: '20px'}}>
-            {/*<Card style={{margin: '20px'}}>*/}
-                {/*<h5>{this.props.name}</h5>*/}
-                {/*<Menu>*/}
-                    {/*{this.props.questions.map((q)=>(<li>*/}
-                        {/*<a id={(-q.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">*/}
-                            {/*<div id={q.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{q.title}</div>*/}
-                        {/*</a>*/}
-                    {/*</li>))}*/}
-                {/*</Menu>*/}
-            {/*</Card>*/}
                 <List
                     header={<h5>{this.props.name}</h5>}
                     footer={<div>截止日期</div>}
@@ -67,10 +57,13 @@ class mStudentHomeworkCard extends Component {
                     dataSource={this.props.questions}
                     renderItem={item => {
                         console.log(item);
+                        if(item.status === undefined) {
+                            item.status = {};
+                        }
                         return (
                             <List.Item key={item.id}>
                                 <List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />
-                                {item.status.flag===0 && <div>未完成</div>}
+                                {item.status.flag === 0 && <div>未完成</div>}
                                 {item.status.flag===1 && <div>已完成</div>}
                                 {item.status.flag===2 && <div>已批改</div>}
                             </List.Item>);
@@ -129,6 +122,7 @@ class mStudentLessonMiddle extends Component {
             problemitems: [],
             lesson_name: '',
             current_selected: '1',
+            homeworkstatus: {},
         };
         this.infoitems = [];
         this.homeworkitems = [];
@@ -191,6 +185,7 @@ class mStudentLessonMiddle extends Component {
                         record: result.data[0],
                     };
                 }
+                that.setState({homeworkstatus: that.homeworkstatus});
             });
         }
         for(let prob_id of problem_ids) {
@@ -252,7 +247,11 @@ class mStudentLessonMiddle extends Component {
                     if(this.homeworkstatus[id.toString()][prob_id].flag===0) {
                         flag = 1;
                         break;
-                    } else if(this.homeworkstatus[id.toString()][prob_id].flag===2) {
+                    }
+                }
+                for(const prob_id in this.homeworkstatus[id.toString()]) {
+                    if(this.homeworkstatus[id.toString()][prob_id].flag===2) {
+                        flag = 0;
                         break;
                     }
                 }

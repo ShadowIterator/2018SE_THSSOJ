@@ -10,9 +10,11 @@ import {CodeInput} from "../basic-component/code-input";
 
 import {Link} from 'react-router-dom';
 
+import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
+
 import "./problem_tab.css";
 
-import { Layout, Breadcrumb, Divider, Tabs } from 'antd';
+import { Layout, Breadcrumb, Tabs, Modal } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
 
@@ -38,10 +40,12 @@ class ProblemDetailBody extends Component {
                     <TabPane tab="提交代码" key="2">
                         <CodeInput state={this.props.state} role={this.props.role}
                                    id={this.props.id} problem_id={this.props.probleminfo.id}
+                                   problem_info={this.props.probleminfo}
                                    homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
                     </TabPane>
                     <TabPane tab="查看结果" key="3">
-                        <ProblemDetailRecord records={this.props.records} />
+                        <ProblemDetailRecord records={this.props.records} submit_record={this.props.submit_record}
+                                             lesson_id={this.props.lesson_id} />
                     </TabPane>
                 </Tabs>
             </div>
@@ -50,6 +54,14 @@ class ProblemDetailBody extends Component {
 }
 
 class ProblemDetailRecord extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            visible: false,
+            modal_text: '',
+            src_code: ''
+        }
+    }
     result_arr = ['Accepted',
         'Wrong Answer',
         'Runtime Error',
@@ -74,6 +86,43 @@ class ProblemDetailRecord extends Component {
     }
     render() {
         let body = [];
+        if(this.props.submit_record !== null) {
+            const sub = this.props.submit_record;
+            let result = '';
+            if(sub.result_type === 0) {
+                const result_id = sub.result;
+                if(isNaN(result_id)) {
+                    result = '找不到结果';
+                } else {
+                    result = this.result_arr[result_id];
+                }
+            } else {
+                if(isNaN(sub.score)) {
+                    result = '找不到结果';
+                } else {
+                    result = sub.score.toString() + ' 分';
+                }
+            }
+            body.push(
+                <tr>
+                    <td>0</td>
+                    {this.props.lesson_id !== 0 &&
+                    <td>正式提交</td>
+                    }
+                    <td>{result}</td>
+                    <td>{sub.consume_time.toString() + 'ms'}</td>
+                    <td>{sub.consume_memory.toString() + ' kb'}</td>
+                    <td>{sub.src_size.toString() + ' B'}</td>
+                    <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
+                    <td><a onClick={()=>{
+                        ajax_post(api_list['srcCode_record'], {id: sub.id}, this, (that, result) => {
+                            that.setState({src_code: result.data.src_code});
+                        });
+                        this.setState({visible: true});
+                    }}>查看源码</a></td>
+                </tr>
+            )
+        }
         // console.log('outside table render', this.props.records, this.props.records.consume_time);
         if(this.props.records[0]!==undefined && this.props.records[0].consume_time!==undefined) {
             console.log('inside table render', this.props.records);
@@ -83,41 +132,76 @@ class ProblemDetailRecord extends Component {
                     continue;
                 console.log("inside table render for loop", re);
                 let result = '';
-                if(re.result!==null) {
+                if(re.result_type === 0) {
                     const result_id = re.result;
-                    result = this.result_arr[result_id];
+                    if(isNaN(result_id)) {
+                        result = '找不到结果';
+                    } else {
+                        result = this.result_arr[result_id];
+                    }
                 } else {
-                    result = re.score.toString() + ' 分';
+                    if(isNaN(re.score)) {
+                        result = '找不到结果';
+                    } else {
+                        result = re.score.toString() + ' 分';
+                    }
                 }
                 body.push(
                     <tr>
                         <td>{counter}</td>
+                        {this.props.lesson_id !== 0 &&
+                        <td>{'测试' + re.test_radio.toString() + '%数据'}</td>
+                        }
                         <td>{result}</td>
                         <td>{re.consume_time.toString() + ' ms'}</td>
                         <td>{re.consume_memory.toString() + ' kb'}</td>
                         <td>{re.src_size.toString() + ' B'}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
+                        <td><a onClick={()=>{
+                            ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
+                                that.setState({src_code: result.data.src_code});
+                            });
+                            this.setState({visible: true});
+                        }}>查看源码</a></td>
                     </tr>
                 );
                 counter += 1;
             }
         }
         return (
-            <Table striped bordered hover style={{marginTop: '10px'}}>
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <th>运行结果</th>
-                    <th>运行时间</th>
-                    <th>所占空间</th>
-                    <th>文件大小</th>
-                    <th>提交时间</th>
-                </tr>
-                </thead>
-                <tbody>
-                    {body}
-                </tbody>
-            </Table>
+            <div>
+                <Table striped bordered hover style={{marginTop: '10px'}}>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        {this.props.lesson_id !== 0 &&
+                        <th>测试类型</th>
+                        }
+                        <th>运行结果</th>
+                        <th>运行时间</th>
+                        <th>所占空间</th>
+                        <th>文件大小</th>
+                        <th>提交时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {body}
+                    </tbody>
+                </Table>
+                <Modal
+                    title="Basic Modal"
+                    visible={this.state.visible}
+                    onOk={()=>{this.setState({visible: false})}}
+                    onCancel={()=>{this.setState({visible: false})}}
+                >
+                    <CodeMirror options={{
+                        // mode: this.state.language,
+                        theme: 'neat',
+                        lineNumbers: true,
+                    }} value={this.state.src_code} readOnly={true}/>
+                </Modal>
+            </div>
         );
     }
 }
@@ -133,7 +217,9 @@ class ProblemDetail extends Component {
             memory_limit: 0,
             judge_method: 0,
             records: [],
-            lesson_name: ''
+            lesson_name: '',
+            submit_record: null,
+            language: []
         };
         this.records = [];
     }
@@ -155,42 +241,49 @@ class ProblemDetail extends Component {
         if(result.data.length===0)
             return;
         const prob = result.data[0];
-        for(let id of prob.records) {
-            that.records.push({id:id});
-        }
         that.setState({
             title: prob.title,
             description: prob.description,
             time_limit: parseInt(prob.time_limit),
             memory_limit: parseInt(prob.memory_limit),
             judge_method: parseInt(prob.judge_method),
-            records: that.records,
+            language: prob.language,
+            // records: that.records,
         });
-        for(let id of prob.records) {
-            ajax_post(api_list['query_record'], {id:id}, that, ProblemDetail.query_record_callback);
-        }
-    }
-    static query_record_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        const rec = result.data[0];
-        const id = rec.id;
-        const submit_time = rec.submit_time;
-        const rec_result = rec.result;
-        const rec_score = rec.score;
-        const consume_time = rec.consume_time;
-        const consume_memory = rec.consume_memory;
-        const src_size = rec.src_size;
-        for(let rec of that.records) {
-            if(rec.id===id) {
-                rec.submit_time = submit_time;
-                rec.result = rec_result;
-                rec.score = rec_score;
-                rec.consume_time = consume_time;
-                rec.consume_memory = consume_memory;
-                rec.src_size = src_size;
-                that.setState({records:that.records});
-            }
+        if(that.props.lesson_id === 0) {
+            ajax_post(api_list['query_record'], {
+                user_id: that.props.id,
+                problem_id: parseInt(that.props.problem_id),
+                record_type: 0,
+            }, that, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({records: result.data});
+            });
+        } else {
+            ajax_post(api_list['query_record'], {
+                user_id: that.props.id,
+                problem_id: parseInt(that.props.problem_id),
+                homework_id: parseInt(that.props.homework_id),
+                record_type: 1,
+            }, that, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({records: result.data});
+            });
+            ajax_post(api_list['query_record'], {
+                user_id: that.props.id,
+                problem_id: parseInt(that.props.problem_id),
+                homework_id: parseInt(that.props.homework_id),
+                record_type: 2,
+            }, that, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({submit_record: result.data[0]});
+            })
         }
     }
     render() {
@@ -198,7 +291,7 @@ class ProblemDetail extends Component {
             <Content style={{ padding: '0 50px' }}>
                 {this.props.lesson_id !== '0' &&
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to='/student'>Home</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to='/student'>主页</Link></Breadcrumb.Item>
                         <Breadcrumb.Item><Link to={'/studentlesson/' + this.props.lesson_id}>{this.state.lesson_name}</Link></Breadcrumb.Item>
                         <Breadcrumb.Item>{this.state.title}</Breadcrumb.Item>
                     </Breadcrumb>
@@ -216,7 +309,8 @@ class ProblemDetail extends Component {
                             <ProblemDetailBody state={this.props.state} role={this.props.role}
                                                id={this.props.id} probleminfo={this.state}
                                                homework_id={parseInt(this.props.homework_id)}
-                                               records={this.state.records} lesson_id={this.props.lesson_id}/>
+                                               records={this.state.records} lesson_id={this.props.lesson_id}
+                                               submit_record={this.state.submit_record}/>
                         </Container>
                     </Card.Body>
                 </Card>

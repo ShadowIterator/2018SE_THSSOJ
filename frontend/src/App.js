@@ -45,6 +45,7 @@ class App extends Component {
             id: -1,
             role: -1,
             jumpToLogin: false,
+            username: ''
         };
         this.logout_callback = this.logout_callback.bind(this);
         this.login_callback = this.login_callback.bind(this);
@@ -77,6 +78,7 @@ class App extends Component {
             state: true,
             id: data.id,
             role: data.role,
+            username: data.username,
         });
     }
     logout_callback() {
@@ -125,8 +127,8 @@ class App extends Component {
                                                                                                      homework_id={props.match.params.hid}
                                                                                                      lesson_id={props.match.params.lid}
                                                                                                      {...this.state} />} />
-                        <Route path="/createlesson" component={CreateLesson}/>
-                        <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
+                        <Route path="/createlesson" render={() => <CreateLesson {...this.state} />} />
+                        <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} {...this.state} />} />
                         <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
                         </Layout>
                     </div>
