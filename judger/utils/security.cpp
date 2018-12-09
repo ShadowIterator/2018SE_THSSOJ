@@ -512,6 +512,48 @@ void init_config(const RunConfig& runConfig) {
 		statable.insert("/usr/lib/");
 	}
 
+	if (runConfig.Lang == "Script") {
+		syscall_limit[__NR_set_tid_address] = 1;
+		syscall_limit[__NR_set_robust_list] = -1;
+		syscall_limit[__NR_futex          ] = -1;
+
+		syscall_limit[__NR_prlimit64      ] = -1;
+		syscall_limit[__NR_sysinfo        ] = -1;
+
+		syscall_limit[__NR_pipe           ] = -1;
+		syscall_limit[__NR_pipe2          ] = -1;
+		syscall_limit[__NR_epoll_create1  ] = -1;
+		syscall_limit[__NR_epoll_ctl      ] = -1;
+		syscall_limit[__NR_epoll_wait     ] = -1;
+		syscall_limit[__NR_eventfd2       ] = -1;
+
+		syscall_limit[__NR_clock_gettime  ] = -1;
+		syscall_limit[__NR_clock_getres   ] = -1;
+
+		syscall_limit[__NR_getpid         ] = -1;
+		syscall_limit[__NR_getuid         ] = -1;
+		syscall_limit[__NR_geteuid        ] = -1;
+		syscall_limit[__NR_getgid         ] = -1;
+		syscall_limit[__NR_getegid        ] = -1;
+
+		syscall_limit[__NR_prctl          ] = -1;
+		syscall_limit[__NR_poll           ] = -1;
+
+		readable.insert(runConfig.path);
+		writable.insert(runConfig.path + "/");
+
+		readable.insert("/usr/bin/nodejs");
+		readable.insert("/usr/lib/nodejs/");
+
+		statable.insert("/usr");
+		statable.insert("/usr/bin");
+		statable.insert("/usr/lib");
+
+		statable.insert("/usr/");
+		statable.insert("/usr/bin/");
+		statable.insert("/usr/lib/");
+	}
+
 	if (runConfig.Lang == "compiler") {
 		syscall_limit[__NR_gettid         ] = -1;
 		syscall_limit[__NR_set_tid_address] = -1;
