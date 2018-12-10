@@ -62,7 +62,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                         user=options.db_user,
                         password=options.db_password,
                         dbname=options.db_database)
-                await maybe_create_tables(db, '../sql/schema.sql')
+                await maybe_create_tables(db, './sql/schema.sql')
                 print('create pool done')
                 break
             except:
@@ -78,7 +78,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         print('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
-        options.parse_config_file('../settings/app_config.py')
+        options.parse_config_file('./settings/app_config.py')
         self.db = None
         super(BaseTestCase, self).setUp()
 

@@ -98,7 +98,7 @@ CREATE TABLE records (
     src_language INTEGER,
     result INTEGER,
     score INTEGER,
-    submit_status INTEGER,
+    status INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte

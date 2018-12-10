@@ -80,12 +80,14 @@ class APIRecordHandler(base.BaseHandler):
             match_record['consume_time'] = judge_result['time']
             match_record['consume_memory'] = judge_result['memory']
             match_record['result'] = result_dict[judge_result['Result']]
-            await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
+
         elif match_record['src_language'] == 3:
             match_record['consume_time'] = judge_result['time']
             match_record['consume_memory'] = judge_result['memory']
             match_record['score'] = judge_result['Score']
-            await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
+
+        match_record['status'] = 1
+        await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
 
 
     # async def get(self, type): #detail
