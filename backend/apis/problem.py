@@ -245,13 +245,15 @@ class APIProblemHandler(base.BaseHandler):
                            'unknown': 9,
                            }
 
-            judge_result = json.loads(
-                requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+            # judge_result = json.loads(
+            #     requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+
+            # record_created['consume_time'] = judge_result['time']
+            # record_created['consume_memory'] = judge_result['memory']
+            # record_created['result'] = result_dict[judge_result['Result']]
             record_created['src_size'] = os.path.getsize(src_file_path)
-            record_created['consume_time'] = judge_result['time']
-            record_created['consume_memory'] = judge_result['memory']
-            record_created['result'] = result_dict[judge_result['Result']]
             await self.db.saveObject('records', cur_user=self.get_current_user_object(), object=record_created)
+            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
@@ -265,13 +267,15 @@ class APIProblemHandler(base.BaseHandler):
             judge_req[
                 'OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
 
-            judge_result = json.loads(
-                requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+            # judge_result = json.loads(
+            #     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+
+            # record_created['result'] = judge_result['Score']
+            # record_created['consume_time'] = judge_result['time']
+            # record_created['consume_memory'] = judge_result['memory']
             record_created['src_size'] = os.path.getsize(src_file_path)
-            record_created['result'] = judge_result['Score']
-            record_created['consume_time'] = judge_result['time']
-            record_created['consume_memory'] = judge_result['memory']
             await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         return res_dict

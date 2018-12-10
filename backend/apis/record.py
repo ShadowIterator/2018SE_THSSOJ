@@ -64,13 +64,28 @@ class APIRecordHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _returnresult_post(self):
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
+        result_dict = {'Accept': 0,
+                       'Wrong Answer': 1,
+                       'Runtime Error': 2,
+                       'Time Limit Exceed': 3,
+                       'Memory Limit Exceed': 4,
+                       'Output Limit Exceed': 5,
+                       'Danger System Call': 6,
+                       'Judgement Failed': 7,
+                       'Compile Error': 8,
+                       'unknown': 9,
+                       }
+        judge_result = json.loads(self.args['res'])
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
-            judge_result = json.loads(self.args['res'])
-
+            match_record['consume_time'] = judge_result['time']
+            match_record['consume_memory'] = judge_result['memory']
+            match_record['result'] = result_dict[judge_result['Result']]
+            await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
         elif match_record['src_language'] == 3:
-            pass
-
-
+            match_record['consume_time'] = judge_result['time']
+            match_record['consume_memory'] = judge_result['memory']
+            match_record['score'] = judge_result['Score']
+            await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
 
 
     # async def get(self, type): #detail
