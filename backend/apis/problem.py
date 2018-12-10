@@ -185,8 +185,8 @@ class APIProblemHandler(base.BaseHandler):
         current_time = datetime.datetime.now()
         cur_timestamp = int(time.mktime(current_time.timetuple()))
 
-        self.args['submit_time']=datetime.datetime.fromtimestamp(cur_timestamp)
-        self.args['status']=0
+        self.args['submit_time'] = datetime.datetime.fromtimestamp(cur_timestamp)
+        self.args['status'] = 0
         await self.db.createObject('records', **self.args)
                                 # user_id=self.args['user_id'],
                                 # problem_id=self.args['problem_id'],
@@ -201,6 +201,10 @@ class APIProblemHandler(base.BaseHandler):
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
         problem_of_code['records'].append(record_created['id'])
         await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
+        if 'homework_id' in self.args:
+            matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
+            matched_homework['records'].append(record_created['id'])
+            await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         if not os.path.exists(record_dir):
@@ -212,6 +216,12 @@ class APIProblemHandler(base.BaseHandler):
         src_file = open(src_file_path, mode='wb')
         src_file.write(self.args['src_code'].encode(encoding='utf-8'))
         src_file.close()
+
+        record_created['src_size'] = os.path.getsize(src_file_path)
+        await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+        if self.args['record_type']==2:
+            self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
+            return res_dict
 
         if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
             if not os.path.exists('test'):
@@ -233,26 +243,13 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            result_dict = {'Accept': 0,
-                           'Wrong Answer': 1,
-                           'Runtime Error': 2,
-                           'Time Limit Exceed': 3,
-                           'Memory Limit Exceed': 4,
-                           'Output Limit Exceed': 5,
-                           'Danger System Call': 6,
-                           'Judgement Failed': 7,
-                           'Compile Error': 8,
-                           'unknown': 9,
-                           }
-
             # judge_result = json.loads(
             #     requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
 
             # record_created['consume_time'] = judge_result['time']
             # record_created['consume_memory'] = judge_result['memory']
             # record_created['result'] = result_dict[judge_result['Result']]
-            record_created['src_size'] = os.path.getsize(src_file_path)
-            await self.db.saveObject('records', cur_user=self.get_current_user_object(), object=record_created)
+
             requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
@@ -264,8 +261,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req[
-                'OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
+            judge_req['OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
 
             # judge_result = json.loads(
             #     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
@@ -273,8 +269,7 @@ class APIProblemHandler(base.BaseHandler):
             # record_created['result'] = judge_result['Score']
             # record_created['consume_time'] = judge_result['time']
             # record_created['consume_memory'] = judge_result['memory']
-            record_created['src_size'] = os.path.getsize(src_file_path)
-            await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+
             requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')

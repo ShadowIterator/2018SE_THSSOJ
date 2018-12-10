@@ -53,11 +53,14 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
+    course_spell TEXT,
     tas INTEGER[] DEFAULT '{}',
     students INTEGER[] DEFAULT '{}',
     status INTEGER DEFAULT 0,
     homeworks INTEGER[] DEFAULT '{}',
-    notices INTEGER[] DEFAULT '{}'
+    notices INTEGER[] DEFAULT '{}',
+    start_time TIMESTAMP,
+    end_time TIMESTAMP
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -66,6 +69,7 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     description TEXT,
     deadline TIMESTAMP,
+    status INTEGER DEFAULT 0,
     problems INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}'
 );
@@ -81,7 +85,8 @@ CREATE TABLE problems (
     judge_method INTEGER DEFAULT 1,
     language INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
-    openness INTEGER DEFAULT 0
+    openness INTEGER DEFAULT 0,
+    status INTEGER DEFAULT 0
 );
 
 DROP TABLE IF EXISTS records;

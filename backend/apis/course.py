@@ -1,4 +1,7 @@
 
+import datetime
+import time
+import uuid
 from . import base
 from .base import *
 
@@ -7,10 +10,17 @@ class APICourseHandler(base.BaseHandler):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/courses'
 
+    def getargs(self):
+        self.args = json.loads(self.request.body.decode() or '{}')
+        if 'start_time' in self.args.keys():
+            self.args['start_time'] = datetime.datetime.fromtimestamp(self.args['create_time'])
+        if 'end_time' in self.args.keys():
+            self.args['end_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
+
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
-        await self.db.createObject('courses',**self.args)
+        await self.db.createObject('courses', **self.args)
         course_created = (await self.db.getObject('courses', **self.args))[0]
         course_id = course_created['id']
         for stu_id in self.args['students']:
@@ -21,6 +31,9 @@ class APICourseHandler(base.BaseHandler):
             TA = (await self.db.getObject('users', cur_user = self.get_current_user_object(), id=TA_id))[0]
             TA['ta_courses'].append(course_id)
             await self.db.saveObject('users', object=TA, cur_user = self.get_current_user_object())
+        spell = str(uuid.uuid1())
+        course_created['course_spell'] = spell
+        self.db.saveObject('courses', object=course_created, cur_user=self.get_current_user_object())
         self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
         return res_dict
         # try:
@@ -75,6 +88,7 @@ class APICourseHandler(base.BaseHandler):
         await self.db.saveObject('courses', cur_user = self.get_current_user_object(), object=target_course)
         self.set_res_dict(res_dict, code=0, msg='course updated')
         return res_dict
+
         # try:
         #     target_course = (await self.getObject('courses', secure=1, id=self.args['id']))[0]
         #     try:
@@ -97,6 +111,11 @@ class APICourseHandler(base.BaseHandler):
     async def _query_post(self):
         # print('query = ', self.args)
         res = await self.db.getObject('courses', cur_user = self.get_current_user_object(), **self.args)
+        for course in res:
+            if 'start_time' in course.keys() and course['start_time'] is not None:
+                course['start_time'] = int(time.mktime(course['start_time'].timetuple()))
+            if 'end_time' in course.keys() and course['end_time'] is not None:
+                course['end_time'] = int(time.mktime(course['end_time'].timetuple()))
         return res
         # self.return_json(res)
 
