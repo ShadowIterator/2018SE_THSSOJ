@@ -1,4 +1,7 @@
-from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+# from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+import unittest
+import tornado.testing
+from ..basetestcase.basetestcase import BaseTestCase, async_aquire_db
 
 class ExampleTestCase(BaseTestCase):
 
@@ -24,3 +27,6 @@ class ExampleTestCase(BaseTestCase):
         self.assertEqual(response_object[0]['username'], 'hfzzz')
     # query db
         print('getobj in db: ', await self.db.getObject('users', username='hfzzz'))
+
+if __name__ == '__main__':
+    tornado.testing.main()
