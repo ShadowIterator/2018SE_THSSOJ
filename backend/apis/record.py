@@ -61,6 +61,18 @@ class APIRecordHandler(base.BaseHandler):
         self.set_res_dict(res_dict, code=0, msg='record created')
         return res_dict
 
+    # @tornado.web.authenticated
+    async def _returnresult_post(self):
+        match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
+        if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
+            judge_result = json.loads(self.args['res'])
+
+        elif match_record['src_language'] == 3:
+            pass
+
+
+
+
     # async def get(self, type): #detail
     #     # self.getargs()
     #     print('get: ', type)

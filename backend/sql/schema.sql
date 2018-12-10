@@ -74,10 +74,12 @@ DROP TABLE IF EXISTS problems;
 CREATE TABLE problems (
     id SERIAL PRIMARY KEY,
     title VARCHAR(128),
+    user_id INTEGER,
 --    description_path VARCHAR(256),
     time_limit INTEGER DEFAULT 1000, -- MS
     memory_limit INTEGER DEFAULT 256000,  -- KB
     judge_method INTEGER DEFAULT 1,
+    language INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
     openness INTEGER DEFAULT 0
 );
@@ -90,6 +92,10 @@ CREATE TABLE records (
     user_id INTEGER,
     problem_id INTEGER,
     homework_id INTEGER,
+    record_type INTEGER,
+    result_type INTEGER,
+    test_ratio INTEGER,
+    src_language INTEGER,
     result INTEGER,
     score INTEGER,
     submit_status INTEGER,

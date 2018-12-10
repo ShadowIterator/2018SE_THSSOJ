@@ -177,7 +177,7 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
-        if not self.check_input('user_id', 'problem_id', 'homework_id', 'src_code'):
+        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'result_type', 'test_ratio'):
             self.set_res_dict(res_dict, code=1, msg='not enough params')
             # self.return_json(res_dict)
             return res_dict
@@ -185,16 +185,16 @@ class APIProblemHandler(base.BaseHandler):
         current_time = datetime.datetime.now()
         cur_timestamp = int(time.mktime(current_time.timetuple()))
 
-        await self.db.createObject('records',
-                                user_id=self.args['user_id'],
-                                problem_id=self.args['problem_id'],
-                                homework_id=self.args['homework_id'],
-                                submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
+        self.args['submit_time']=datetime.datetime.fromtimestamp(cur_timestamp)
+        self.args['status']=0
+        await self.db.createObject('records', **self.args)
+                                # user_id=self.args['user_id'],
+                                # problem_id=self.args['problem_id'],
+                                # homework_id=self.args['homework_id'],
+                                # submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
 
         record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
                                                 user_id=self.args['user_id'],
-                                                problem_id=self.args['problem_id'],
-                                                homework_id=self.args['homework_id'],
                                                 submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
                                                ))[0]
 
@@ -213,7 +213,7 @@ class APIProblemHandler(base.BaseHandler):
         src_file.write(self.args['src_code'].encode(encoding='utf-8'))
         src_file.close()
 
-        if self.args['src_language'] == 1 or self.args['src_language'] == 2:
+        if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
             if not os.path.exists('test'):
                 os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
