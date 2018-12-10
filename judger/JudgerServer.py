@@ -61,7 +61,7 @@ def handleTraditionalJudger():
 			judgerResult = json.load(f)
 			judgerResult['id'] = record_id
 			print(judgerResult)
-			# r = requests.post('http://localhost:', data = json.dumps(judgerResult))
+			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 			# print(r)
 			continue
 		judgerResult = {'Result': 'Judgement Failed',
@@ -69,6 +69,7 @@ def handleTraditionalJudger():
 						'memory': 0,
 						'Info': "No comment",
 						'id': record_id}
+		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 		print(judgerResult)
 		# self.write({'Result': 'Judgement Failed',
 		# 			'time': 0,
@@ -94,6 +95,7 @@ def handleScriptJudger():
 							'Info': "No comment",
 							'id': record_id}
 			print(judgerResult)
+			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 			# self.write({'Score': 0,
 			# 			'time': 0,
 			# 			'memory': 0,
@@ -122,6 +124,7 @@ def handleScriptJudger():
 			judgerResult = json.load(f)
 			judgerResult['id'] = record_id
 			print(judgerResult)
+			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 			# self.write(judgerResult)
 			continue
 		judgerResult = {'Score': 0,
@@ -130,6 +133,7 @@ def handleScriptJudger():
 						'Info': "No comment",
 						'id': record_id}
 		print(judgerResult)
+		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 		# self.write({'Score': 0,
 		# 			'time': 0,
 		# 			'memory': 0,
