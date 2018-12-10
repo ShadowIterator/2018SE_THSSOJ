@@ -81,6 +81,11 @@ class mTopbar extends Component {
                     {this.props.role !== 3 &&
                         <Button className={Classes.MINIMAL} icon="document" text="公共题库" onClick={this.handlePublicClick} style={{outline: 0}}/>
                     }
+                    {this.props.role === 2 &&
+                        <Button className={Classes.MINIMAL} icon="new-object" text="新建题目" onClick={()=>{
+                            this.props.history.push('/problemcreate');
+                        }} style={{outline: 0}} />
+                    }
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />
@@ -103,13 +108,6 @@ class Bottombar extends Component {
     render() {
         return (
             <Footer style={{ textAlign: 'center' }}>
-                {/*<BSNavbar bg="light" sticky="bottom">*/}
-                {/*<BSNavbar.Collapse className="justify-content-lg-center">*/}
-                {/*<BSNavbar.Text>*/}
-                {/*Developped by Thss*/}
-                {/*</BSNavbar.Text>*/}
-                {/*</BSNavbar.Collapse>*/}
-                {/*</BSNavbar>*/}
                 THSSOJ ©2018 Created by THSS
             </Footer>
         )

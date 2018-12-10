@@ -19,6 +19,8 @@ import {CreateLesson, EditLesson} from "./class-component/TA-create-lesson";
 import {AdminPage} from "./admin-component/admin-page";
 import {ProblemBase} from "./problem-base/problem-base";
 
+import {ProblemCreate} from "./problem-component/problem-create";
+
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
 
@@ -111,25 +113,26 @@ class App extends Component {
                 <Router>
                     <div>
                         <Layout>
-                        <Topbar {...this.state}/>
-                        <Route exact path="/" component={Home} />
-                        <Route path="/admin" render={()=><AdminPage {...this.state} />} />
-                        <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
-                        <Route path="/signup" render={()=><SignupPage {...this.state} />} />
-                        <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
-                        <Route path="/student" render={()=><StudentHomepage {...this.state} />} />
-                        <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
-                        <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state}
-                                                                                           lesson_id={props.match.params.id} />} />
-                        <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
-                        <Route path="/problemdetail/:id/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.id}
-                                                                                                     homework_id={props.match.params.hid}
-                                                                                                     lesson_id={props.match.params.lid}
-                                                                                                     {...this.state} />} />
-                        <Route path="/createlesson" render={() => <CreateLesson {...this.state} />} />
-                        <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} {...this.state} />} />
-                        <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
+                            <Topbar {...this.state}/>
+                            <Route exact path="/" component={Home} />
+                            <Route path="/admin" render={()=><AdminPage {...this.state} />} />
+                            <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
+                            <Route path="/signup" render={()=><SignupPage {...this.state} />} />
+                            <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
+                            <Route path="/student" render={()=><StudentHomepage {...this.state} />} />
+                            <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
+                            <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state}
+                                                                                               lesson_id={props.match.params.id} />} />
+                            <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
+                            <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
+                            <Route path="/problemdetail/:id/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.id}
+                                                                                                         homework_id={props.match.params.hid}
+                                                                                                         lesson_id={props.match.params.lid}
+                                                                                                         {...this.state} />} />
+                            <Route path="/createlesson" render={() => <CreateLesson {...this.state} />} />
+                            <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} {...this.state} />} />
+                            <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
+                            <Route path="/problemcreate" render={(props) => <ProblemCreate {...this.state} />} />
                         </Layout>
                     </div>
                 </Router>
