@@ -13,12 +13,7 @@ import tornado.options
 import tornado.web
 import unicodedata
 from apis.base import maybe_create_tables, Application
-from apis.user import *
-from apis.record import *
-from apis.notice import *
-from apis.course import *
-from apis.problem import *
-from apis.homework import *
+from apis.db import BaseDB
 
 from tornado.options import define, options
 
@@ -29,6 +24,8 @@ define("db_database", default="test", help="blog database name")
 define("db_user", default="thssoj", help="blog database user")
 define("db_password", default="thssoj", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
+define('RoutineList', default=None, help='tornado settings file', type=list)
+define('AppConfig', default=None, help='tornado settings file', type=dict)
 
 async def main():
     tornado.options.parse_command_line()
@@ -45,20 +42,12 @@ async def main():
             password=options.db_password,
             dbname=options.db_database) as db:
         await maybe_create_tables(db, 'sql/schema.sql')
-        app = Application(db,
-                          [
-                              (r'/api/user/(.*)', APIUserHandler),
-                              (r'/api/record/(.*)', APIRecordHandler),
-                              (r'/api/notice/(.*)', APINoticeHandler),
-                              (r'/api/course/(.*)', APICourseHandler),
-                              (r'/api/problem/(.*)', APIProblemHandler),
-                              (r'/api/homework/(.*)', APIHomeworkHandler),
-                          ],
-                          **{
-                          'debug': True,
-                          'cookie_secret':'ahsdfhksadjfhksjahfkashdf',
-                          # 'xsrf_cookies':True,
-                          })
+        rdb = BaseDB(db)
+        await rdb.createObject('users', username = 'hfz', password = '1234')
+        app = Application(rdb,
+                          options.RoutineList,
+                          **options.AppConfig
+                          )
         app.listen(options.port)
 
         # In this demo the server will simply run until interrupted

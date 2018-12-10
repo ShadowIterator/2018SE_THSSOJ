@@ -191,7 +191,7 @@ class UserSettingsForm extends Component {
         }
         const gender = this.state.gender;
         return(
-            <>
+            <div>
             <Form onSubmit={this.handleSubmit}>
                 <Form.Group as={Row} controlId="username">
                     <Form.Label column lg="4">Username</Form.Label>
@@ -266,7 +266,7 @@ class UserSettingsForm extends Component {
                     </div>
                 </div>
                 </Dialog>
-                </>
+                </div>
         );
     }
 }

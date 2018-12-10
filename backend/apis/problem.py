@@ -20,210 +20,384 @@ class APIProblemHandler(base.BaseHandler):
         if not self.check_input('title', 'description', 'time_limit', 'memory_limit',
                                 'judge_method','records', 'openness'):
             self.set_res_dict(res_dict, code=1, msg='lack parameters')
-            self.return_json(res_dict)
-            return
-        try:
-            byte_content = bytearray()
-            self.str_to_bytes(self.args['description'], byte_content)
-            description = base64.b64decode(byte_content)
-            del self.args['description']
-            await self.createObject('problems', **self.args)
-            problem_in_db= (await self.getObject('problems', secure=1, **self.args))[0]
-            target_path = self.root_dir+'/'+str(problem_in_db['id'])
-            if not os.path.exists(target_path):
-                os.makedirs(target_path)
-            description_file = open(target_path+'/'+str(problem_in_db['id'])+'.md', mode='wb')
-            description_file.write(description)
-            description_file.close()
-            self.set_res_dict(res_dict, code=0, msg='problem created')
-        except:
-            print(traceback.print_exc())
-            self.set_res_dict(res_dict, code=1, msg='fail to create problem')
+            # self.return_json(res_dict)
+            return res_dict
 
-        self.return_json(res_dict)
+        byte_content = bytearray()
+        self.str_to_bytes(self.args['description'], byte_content)
+        description = base64.b64decode(byte_content)
+        del self.args['description']
+        await self.db.createObject('problems', **self.args)
+        problem_in_db = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), **self.args))[0]
+        target_path = self.root_dir + '/' + str(problem_in_db['id'])
+        if not os.path.exists(target_path):
+            os.makedirs(target_path)
+        description_file = open(target_path + '/' + str(problem_in_db['id']) + '.md', mode='wb')
+        description_file.write(description)
+        description_file.close()
+        self.set_res_dict(res_dict, code=0, msg='problem created')
+        return res_dict
+        # try:
+        #     byte_content = bytearray()
+        #     self.str_to_bytes(self.args['description'], byte_content)
+        #     description = base64.b64decode(byte_content)
+        #     del self.args['description']
+        #     await self.createObject('problems', **self.args)
+        #     problem_in_db= (await self.getObject('problems', secure=1, **self.args))[0]
+        #     target_path = self.root_dir+'/'+str(problem_in_db['id'])
+        #     if not os.path.exists(target_path):
+        #         os.makedirs(target_path)
+        #     description_file = open(target_path+'/'+str(problem_in_db['id'])+'.md', mode='wb')
+        #     description_file.write(description)
+        #     description_file.close()
+        #     self.set_res_dict(res_dict, code=0, msg='problem created')
+        # except:
+        #     print(traceback.print_exc())
+        #     self.set_res_dict(res_dict, code=1, msg='fail to create problem')
+        # self.return_json(res_dict)
 
     # @tornado.web.authenticated
     async def _delete_post(self):
         res_dict={}
-        try:
-            problem_id = self.args['id']
-            target_path = self.root_dir + '/' + str(problem_id)
-            os.remove(target_path+'/'+str(problem_id)+'.md')
-            os.removedirs(target_path)
-            await self.deleteObject('problems', **self.args)
-            self.set_res_dict(res_dict, code=0, msg='problem deleted')
-        except:
-            self.set_res_dict(res_dict, code=1, msg='fail to delete any problem')
-        self.return_json(res_dict)
+        problem_id = self.args['id']
+        target_path = self.root_dir + '/' + str(problem_id)
+        os.remove(target_path + '/' + str(problem_id) + '.md')
+        os.removedirs(target_path)
+        await self.db.deleteObject('problems', **self.args)
+        self.set_res_dict(res_dict, code=0, msg='problem deleted')
+        return res_dict
+        # try:
+        #     problem_id = self.args['id']
+        #     target_path = self.root_dir + '/' + str(problem_id)
+        #     os.remove(target_path+'/'+str(problem_id)+'.md')
+        #     os.removedirs(target_path)
+        #     await self.db.deleteObject('problems', **self.args)
+        #     self.set_res_dict(res_dict, code=0, msg='problem deleted')
+        # except:
+        #     self.set_res_dict(res_dict, code=1, msg='fail to delete any problem')
+        # self.return_json(res_dict)
 
     # @tornado.web.authenticated
     async def _update_post(self):
         res_dict = {}
-        try:
-            problem_id = self.args['id']
-            target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-            target_homework = (await self.getObject('problems', secure=1, id=self.args['id']))[0]
-            try:
-                if 'description' in self.args.keys():
-                    description = bytearray()
-                    byte_content = bytearray()
-                    self.str_to_bytes(self.args['description'], byte_content)
-                    description = base64.b64decode(byte_content)
-                    description_file = open(target_path, mode='wb')
-                    description_file.write(description)
-                    description_file.close()
-                    del self.args['description']
-                for key in self.args.keys():
-                    if key == 'id':
-                        continue
-                    target_homework[key] = self.args[key]
-                await self.saveObject('problems', secure=1, object= target_homework)
-                self.set_res_dict(res_dict, code=0, msg='problem updated')
-            except:
-                self.set_res_dict(res_dict, code=2, msg='update failed')
-                self.return_json(res_dict)
-                return
-        except:
-            self.set_res_dict(res_dict, code=1, msg='problem does not exist')
-        self.return_json(res_dict)
+        problem_id = self.args['id']
+        target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
+        target_homework = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
+
+        if 'description' in self.args.keys():
+            description = bytearray()
+            byte_content = bytearray()
+            self.str_to_bytes(self.args['description'], byte_content)
+            description = base64.b64decode(byte_content)
+            description_file = open(target_path, mode='wb')
+            description_file.write(description)
+            description_file.close()
+            del self.args['description']
+        for key in self.args.keys():
+            if key == 'id':
+                continue
+            target_homework[key] = self.args[key]
+        await self.db.saveObject('problems', cur_user = self.get_current_user_object(), object=target_homework)
+        self.set_res_dict(res_dict, code=0, msg='problem updated')
+        return res_dict
+
+        # try:
+        #     problem_id = self.args['id']
+        #     target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
+        #     target_homework = (await self.getObject('problems', secure=1, id=self.args['id']))[0]
+        #     try:
+        #         if 'description' in self.args.keys():
+        #             description = bytearray()
+        #             byte_content = bytearray()
+        #             self.str_to_bytes(self.args['description'], byte_content)
+        #             description = base64.b64decode(byte_content)
+        #             description_file = open(target_path, mode='wb')
+        #             description_file.write(description)
+        #             description_file.close()
+        #             del self.args['description']
+        #         for key in self.args.keys():
+        #             if key == 'id':
+        #                 continue
+        #             target_homework[key] = self.args[key]
+        #         await self.saveObject('problems', secure=1, object= target_homework)
+        #         self.set_res_dict(res_dict, code=0, msg='problem updated')
+        #     except:
+        #         self.set_res_dict(res_dict, code=2, msg='update failed')
+        #         self.return_json(res_dict)
+        #         return
+        # except:
+        #     self.set_res_dict(res_dict, code=1, msg='problem does not exist')
+        # self.return_json(res_dict)
 
     # @tornado.web.authenticated
     async def _query_post(self):
         res_dict={}
         if 'description' in self.args.keys():
             del self.args['description']
-        try:
-            res = await self.getObject('problems', secure=1, **self.args)
 
-            for problem in res:
-                problem_id = problem['id']
-                target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-                description_file = open(target_path, mode='rb')
-                description = description_file.read()
-                description_file.close()
-                # encoded_content = base64.b64encode(description)
-                encoded_content = description
-                # des_str = self.bytes_to_str(encoded_content)
-                des_str = encoded_content.decode(encoding='utf-8')
-                problem['description'] = des_str
-                print('query_problem_loop', problem)
-                print('path', target_path)
-                print('description', description)
-            self.return_json(res)
-        except Exception as e:
-            print(e)
-            self.set_res_dict(res_dict, code=1, msg='query failed')
-            self.return_json(res_dict)
+        res = await self.db.getObject('problems', cur_user=self.get_current_user_object(), **self.args)
+        for problem in res:
+            problem_id = problem['id']
+            target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
+            description_file = open(target_path, mode='rb')
+            description = description_file.read()
+            description_file.close()
+            # encoded_content = base64.b64encode(description)
+            encoded_content = description
+            # des_str = self.bytes_to_str(encoded_content)
+            des_str = encoded_content.decode(encoding='utf-8')
+            problem['description'] = des_str
+            print('query_problem_loop', problem)
+            print('path', target_path)
+            print('description', description)
+        return res
 
+        # try:
+        #     res = await self.db.getObject('problems', secure=1, **self.args)
+        #     for problem in res:
+        #         problem_id = problem['id']
+        #         target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
+        #         description_file = open(target_path, mode='rb')
+        #         description = description_file.read()
+        #         description_file.close()
+        #         # encoded_content = base64.b64encode(description)
+        #         encoded_content = description
+        #         # des_str = self.bytes_to_str(encoded_content)
+        #         des_str = encoded_content.decode(encoding='utf-8')
+        #         problem['description'] = des_str
+        #         print('query_problem_loop', problem)
+        #         print('path', target_path)
+        #         print('description', description)
+        #     self.return_json(res)
+        # except Exception as e:
+        #     print(e)
+        #     self.set_res_dict(res_dict, code=1, msg='query failed')
+        #     self.return_json(res_dict)
+
+    # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
         if not self.check_input('user_id', 'problem_id', 'homework_id', 'src_code'):
             self.set_res_dict(res_dict, code=1, msg='not enough params')
-            self.return_json(res_dict)
-            return
-        try:
-            current_time = datetime.datetime.now()
-            cur_timestamp = int(time.mktime(current_time.timetuple()))
+            # self.return_json(res_dict)
+            return res_dict
 
-            await self.createObject('records',
-                                    user_id=self.args['user_id'],
-                                    problem_id=self.args['problem_id'],
-                                    homework_id=self.args['homework_id'],
-                                    submit_time = datetime.datetime.fromtimestamp(cur_timestamp))
+        current_time = datetime.datetime.now()
+        cur_timestamp = int(time.mktime(current_time.timetuple()))
+
+        await self.db.createObject('records',
+                                user_id=self.args['user_id'],
+                                problem_id=self.args['problem_id'],
+                                homework_id=self.args['homework_id'],
+                                submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
+
+        record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
+                                                user_id=self.args['user_id'],
+                                                problem_id=self.args['problem_id'],
+                                                homework_id=self.args['homework_id'],
+                                                submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
+                                               ))[0]
+
+        problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
+        problem_of_code['records'].append(record_created['id'])
+        await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
+        str_id = str(record_created['id'])
+        record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
+        if not os.path.exists(record_dir):
+            os.makedirs(record_dir)
+        src_file_path = record_dir + '/' + str_id + '.code'
+        # byte_content = bytearray()
+        # self.str_to_bytes(self.args['src_code'], byte_content)
+        # src_code = base64.b64decode(byte_content)
+        src_file = open(src_file_path, mode='wb')
+        src_file.write(self.args['src_code'].encode(encoding='utf-8'))
+        src_file.close()
+
+        if self.args['src_language'] == 1 or self.args['src_language'] == 2:
+            if not os.path.exists('test'):
+                os.makedirs('test')
+            # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
+            judge_req = {}
+            judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['INPRE'] = 'test'
+            judge_req['INSUF'] = 'in'
+            judge_req['OUTPRE'] = 'test'
+            judge_req['OUTSUF'] = 'out'
+            judge_req['Language'] = 'C++'
+            judge_req['DATA_DIR'] = os.getcwd() + '/test'
+            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            judge_req['CHECKER'] = 'ncmp'
+            judge_req['NTESTS'] = 2
+            judge_req['SOURCE_FILE'] = str_id
+            judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
+
+            result_dict = {'Accept': 0,
+                           'Wrong Answer': 1,
+                           'Runtime Error': 2,
+                           'Time Limit Exceed': 3,
+                           'Memory Limit Exceed': 4,
+                           'Output Limit Exceed': 5,
+                           'Danger System Call': 6,
+                           'Judgement Failed': 7,
+                           'Compile Error': 8,
+                           'unknown': 9,
+                           }
+
+            judge_result = json.loads(
+                requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+            record_created['src_size'] = os.path.getsize(src_file_path)
+            record_created['consume_time'] = judge_result['time']
+            record_created['consume_memory'] = judge_result['memory']
+            record_created['result'] = result_dict[judge_result['Result']]
+            await self.db.saveObject('records', cur_user=self.get_current_user_object(), object=record_created)
+        elif self.args['src_language'] == 3:
+            if not os.path.exists('judge_script'):
+                os.makedirs('judge_script')
+            judge_req = {}
+            judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
+            judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
+            judge_req['SOURCE'] = str_id
+            judge_req[
+                'OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
+
+            judge_result = json.loads(
+                requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+            record_created['src_size'] = os.path.getsize(src_file_path)
+            record_created['result'] = judge_result['Score']
+            record_created['consume_time'] = judge_result['time']
+            record_created['consume_memory'] = judge_result['memory']
+            await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+
+        self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
+        return res_dict
+
+        # try:
+        #     current_time = datetime.datetime.now()
+        #     cur_timestamp = int(time.mktime(current_time.timetuple()))
+        #
+        #     await self.db.createObject('records',
+        #                             user_id=self.args['user_id'],
+        #                             problem_id=self.args['problem_id'],
+        #                             homework_id=self.args['homework_id'],
+        #                             submit_time = datetime.datetime.fromtimestamp(cur_timestamp))
+        #
+        #
+        #     record_created = (await self.db.getObject('records',
+        #                                            secure=1,
+        #                                            user_id=self.args['user_id'],
+        #                                            problem_id=self.args['problem_id'],
+        #                                            homework_id=self.args['homework_id'],
+        #                                            submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
+        #                                            ))[0]
+        #     problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
+        #     problem_of_code['records'].append(record_created['id'])
+        #     await self.saveObject('problems', problem_of_code)
+        #     str_id = str(record_created['id'])
+        #     record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
+        #     if not os.path.exists(record_dir):
+        #         os.makedirs(record_dir)
+        #     src_file_path = record_dir+'/'+str_id+'.code'
+        #     # byte_content = bytearray()
+        #     # self.str_to_bytes(self.args['src_code'], byte_content)
+        #     # src_code = base64.b64decode(byte_content)
+        #     src_file = open(src_file_path, mode='wb')
+        #     src_file.write(self.args['src_code'].encode(encoding='utf-8'))
+        #
+        #     src_file.close()
+        #
+        #     if self.args['src_language']==1 or self.args['src_language']==2:
+        #         if not os.path.exists('test'):
+        #             os.makedirs('test')
+        #         # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
+        #         judge_req = {}
+        #         judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+        #         judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+        #         judge_req['OUTPUT_LIMIT'] = 64
+        #         judge_req['INPRE'] = 'test'
+        #         judge_req['INSUF'] = 'in'
+        #         judge_req['OUTPRE'] = 'test'
+        #         judge_req['OUTSUF'] = 'out'
+        #         judge_req['Language'] = 'C++'
+        #         judge_req['DATA_DIR'] = os.getcwd()+'/test'
+        #         judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+        #         judge_req['CHECKER'] = 'ncmp'
+        #         judge_req['NTESTS'] = 2
+        #         judge_req['SOURCE_FILE'] = str_id
+        #         judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
+        #
+        #         result_dict={'Accept':0,
+        #                      'Wrong Answer':1,
+        #                      'Runtime Error':2,
+        #                      'Time Limit Exceed':3,
+        #                      'Memory Limit Exceed':4,
+        #                      'Output Limit Exceed':5,
+        #                      'Danger System Call':6,
+        #                      'Judgement Failed':7,
+        #                      'Compile Error':8,
+        #                      'unknown':9,
+        #                      }
+        #
+        #         judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
+        #
+        #         # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+        #         # print(response.text)
+        #         # judge_result = json.loads(response.text)
+        #         record_created['src_size']=os.path.getsize(src_file_path)
+        #         record_created['consume_time']=judge_result['time']
+        #         record_created['consume_memory']=judge_result['memory']
+        #         record_created['result']=result_dict[judge_result['Result']]
+        #         await self.saveObject('records', record_created)
+        #     elif self.args['src_language']==3:
+        #         if not os.path.exists('judge_script'):
+        #             os.makedirs('judge_script')
+        #         judge_req = {}
+        #         judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+        #         judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+        #         judge_req['OUTPUT_LIMIT'] = 64
+        #         judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
+        #         judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
+        #         judge_req['SOURCE'] = str_id
+        #         judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
+        #
+        #         judge_result = json.loads(
+        #             requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+        #         record_created['src_size'] = os.path.getsize(src_file_path)
+        #         record_created['result'] = judge_result['Score']
+        #         record_created['consume_time'] = judge_result['time']
+        #         record_created['consume_memory'] = judge_result['memory']
+        #         await self.saveObject('records', record_created)
+        #
+        #     self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
+        # except Exception as e:
+        #     print(e)
+        #     self.set_res_dict(res_dict, code=1, msg='fail to submit')
+        #
+        # self.return_json(res_dict)
 
 
-            record_created = (await self.getObject('records',
-                                                   secure=1,
-                                                   user_id=self.args['user_id'],
-                                                   problem_id=self.args['problem_id'],
-                                                   homework_id=self.args['homework_id'],
-                                                   submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
-                                                   ))[0]
-            problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
-            problem_of_code['records'].append(record_created['id'])
-            await self.saveObject('problems', problem_of_code)
-            str_id = str(record_created['id'])
-            record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
-            if not os.path.exists(record_dir):
-                os.makedirs(record_dir)
-            src_file_path = record_dir+'/'+str_id+'.code'
-            # byte_content = bytearray()
-            # self.str_to_bytes(self.args['src_code'], byte_content)
-            # src_code = base64.b64decode(byte_content)
-            src_file = open(src_file_path, mode='wb')
-            src_file.write(self.args['src_code'].encode(encoding='utf-8'))
+    # @tornado.web.authenticated
+    async def _uploadCode_post(self):
+        pass
 
-            src_file.close()
+    # @tornado.web.authenticated
+    async def _uploadCases_post(self):
+        pass
 
-            language_dict={1:'C',2:'C++',3:'JavaScript',4:'Python'}
+    # @tornado.web.authenticated
+    async def _uploadScript_post(self):
+        pass
 
-            if self.args['src_language']==1 or self.args['src_language']==2 or self.args['src_language']==4:
-                if not os.path.exists('test'):
-                    os.makedirs('test')
-                # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
-                judge_req = {}
-                judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
-                judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
-                judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['INPRE'] = 'test'
-                judge_req['INSUF'] = 'in'
-                judge_req['OUTPRE'] = 'test'
-                judge_req['OUTSUF'] = 'out'
-                judge_req['Language'] = language_dict[self.args['src_language']]
-                judge_req['DATA_DIR'] = os.getcwd()+'/test'
-                judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-                judge_req['CHECKER'] = 'ncmp'
-                judge_req['NTESTS'] = 2
-                judge_req['SOURCE_FILE'] = str_id
-                judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
+    # @tornado.web.authenticated
+    async def _search_post(self):
+        all_problems = await self.db.all('problems', cur_user=self.get_current_user_object())
+        search_res=[]
+        key_word = self.args['keyword']
 
-                result_dict={'Accept':0,
-                             'Wrong Answer':1,
-                             'Runtime Error':2,
-                             'Time Limit Exceed':3,
-                             'Memory Limit Exceed':4,
-                             'Output Limit Exceed':5,
-                             'Danger System Call':6,
-                             'Judgement Failed':7,
-                             'Compile Error':8,
-                             'unknown':9,
-                             }
-
-                judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
-
-                # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
-                # print(response.text)
-                # judge_result = json.loads(response.text)
-                record_created['src_size']=os.path.getsize(src_file_path)
-                record_created['consume_time']=judge_result['time']
-                record_created['consume_memory']=judge_result['memory']
-                record_created['result']=result_dict[judge_result['Result']]
-                record_created['score'] = None
-                await self.saveObject('records', record_created)
-            elif self.args['src_language']==3:
-                if not os.path.exists('judge_script'):
-                    os.makedirs('judge_script')
-                judge_req = {}
-                judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
-                judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
-                judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
-                judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
-                judge_req['SOURCE'] = str_id
-                judge_req['OTHERS'] = os.getcwd()+'/judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
-
-                judge_result = json.loads(
-                    requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
-                record_created['src_size'] = os.path.getsize(src_file_path)
-                record_created['score'] = judge_result['Score']
-                record_created['result'] = None
-                record_created['consume_time'] = judge_result['time']
-                record_created['consume_memory'] = judge_result['memory']
-                await self.saveObject('records', record_created)
-
-            self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
-        except Exception as e:
-            print(e)
-            self.set_res_dict(res_dict, code=1, msg='fail to submit')
-
-        self.return_json(res_dict)
+        for each_problem in all_problems:
+            if key_word in each_problem:
+                search_res.append(each_problem['id'])

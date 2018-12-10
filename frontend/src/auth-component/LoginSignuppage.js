@@ -9,7 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import Cookies from "js-cookie";
 
-// import "../mock/auth-mock"
+//import "../mock//auth-mock"
 
 class Login extends Component
 {
@@ -270,9 +270,9 @@ class mLoginPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <LoginMiddlebody callback={this.props.callback} />
-            </>
+            </div>
         )
     }
 }
@@ -308,9 +308,9 @@ class mSignupPage extends Component {
     }
     render() {
         return (
-            <>
+            <div>
                 <SignupMiddlebody/>
-            </>
+            </div>
         )
     }
 }

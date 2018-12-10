@@ -8,33 +8,26 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
-import {AuthContext, auth_state} from './auth-context';
 import {withRouter} from "react-router";
-// import Cookies from 'universal-cookie';
-import Cookies from 'js-cookie';
-import {ajax_post} from "../ajax-utils/ajax-method";
-import {api_list} from "../ajax-utils/api-manager";
-
-// const cookies = new Cookies();
 
 class mDropdown extends Component {
     render() {
         let menuItem;
         if(this.props.state) {
             menuItem = (
-                <>
+                <div>
                     <Menu.Item text="全部课程" onClick={()=>{alert("Jump to all classes");}} />
                     <Menu.Divider />
                     <Menu.Item text="Logout" onClick={()=>{this.props.history.push("/logout");}} />
-                </>
+                </div>
             );
         } else {
             menuItem = (
-                <>
+                <div>
                     <Menu.Item text="Signup" onClick={()=>{this.props.history.push("/signup");}} />
                     <Menu.Divider />
                     <Menu.Item text="Login" onClick={()=>{this.props.history.push("/login");}} />
-                </>
+                </div>
             )
         }
         return (

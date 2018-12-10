@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import {
-    Card,
     Menu,
+    Card,
     Tag,
+    Button
 } from "@blueprintjs/core";
+import {Col, Row} from "react-bootstrap";
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
 
@@ -29,6 +31,7 @@ class mLessonList extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
     handleClick(event) {
+        console.log("handleClick()");
         event.preventDefault();
         let id = event.target.id;
         id = id>=0? id:-id;
@@ -39,20 +42,55 @@ class mLessonList extends Component {
         } else if(this.props.role === 2) {
             pathname = '/talesson';
         }
+        console.log(pathname);
         this.props.history.push({
             pathname: pathname + id_param,
-            course_id: id,
         });
     }
     render() {
         return (
             <div style={Spacing}>
-               <h4>{this.props.listname}</h4>
+                {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                <Row>
+                    <Col lg={8}>
+                        <h4>{this.props.listname}</h4>
+                    </Col>
+                    <Col lg={4}>
+                        <Button onClick={() => {
+                            this.props.history.push('/createlesson');
+                        }}>创建课程</Button>
+                    </Col>
+                </Row>
+                }
+                {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                    <h4>{this.props.listname}</h4>
+                }
                 <Menu>
                     {this.props.lessonlist.map((lesson)=>(<li>
-                        <a id={(-lesson.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
-                            <div id={lesson.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
-                        </a>
+                        {this.props.role === 2 && this.props.listname === '未发布课程' &&
+                        <Row style={{width: '100%'}}>
+                            <Col lg={6}>
+                                <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                                   className="bp3-menu-item bp3-popover-dismiss">
+                                    <div id={lesson.id.toString()}
+                                         className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                                </a>
+                            </Col>
+                            <Col lg={6}>
+                                <Button onClick={() => {
+                                    this.props.history.push('/editlesson/' + lesson.id.toString());
+                                }}>编辑</Button>
+                                <Button>发布</Button>
+                            </Col>
+                        </Row>
+                        }
+                        {(this.props.role !== 2 || this.props.listname !== '未发布课程') &&
+                            <a id={(-lesson.id).toString()} onClick={this.handleClick}
+                            className="bp3-menu-item bp3-popover-dismiss">
+                            <div id={lesson.id.toString()}
+                                 className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
+                            </a>
+                        }
                     </li>))}
                 </Menu>
             </div>
@@ -75,11 +113,11 @@ class StudentLessonList extends Component {
 class TALessonList extends Component {
     render() {
         const lists = (
-            <>
+            <div>
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[0]} lessonlist={this.props.stulesson} />
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[1]} lessonlist={this.props.talesson} />
                 <LessonList state={this.props.state} id={this.props.id} role={this.props.role} listname={this.props.lessonlist[2]} lessonlist={this.props.uplesson} />
-            </>
+            </div>
         );
         // console.log(this.state);
         return (

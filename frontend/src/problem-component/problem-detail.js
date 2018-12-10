@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-
+import {Tabs, Tab, TabPane} from "react-bootstrap"
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
@@ -9,7 +9,9 @@ import ReactMarkdown from '../../node_modules/react-markdown';
 
 import {CodeInput} from "../basic-component/code-input";
 
-// import "../mock/course-mock";
+// import {Tab, Tabs} from "@blueprintjs/core"
+
+// import "../mock//course-mock";
 // import "../mock/auth-mock";
 // import "../mock/notice-mock";
 // import "../mock/homework-mock";
@@ -18,13 +20,37 @@ import {CodeInput} from "../basic-component/code-input";
 class ProblemDetailBody extends Component {
     render() {
         return (
-            <>
-                <ReactMarkdown source={this.props.probleminfo.description} />
-                <CodeInput state={this.props.state} role={this.props.role}
-                           id={this.props.id} problem_id={this.props.probleminfo.id}
-                           homework_id={this.props.homework_id}/>
-                <ProblemDetailRecord records={this.props.records} />
-            </>
+            <div>
+                {/*<Tabs*/}
+                    {/*animate={true}*/}
+                    {/*id="question_id"*/}
+                    {/*key="horizontal"*/}
+                    {/*large*/}
+                {/*>*/}
+                    {/*<Tab id="rx" title="题目详情" panel={<ReactMarkdown source={this.props.probleminfo.description} />} />*/}
+                    {/*<Tab id="ng" title="提交代码" panel={<CodeInput state={this.props.state} role={this.props.role}*/}
+                                                                   {/*id={this.props.id} problem_id={this.props.probleminfo.id}*/}
+                                                                   {/*homework_id={this.props.homework_id}*/}
+                                                                   {/*/>} />*/}
+                    {/*<Tab id="mb" title="查看结果" panel={<ProblemDetailRecord records={this.props.records} />} />*/}
+                {/*</Tabs>*/}
+
+                <Tabs defaultActiveKey="home" id="uncontrolled-tab-example" style={{marginBottom: '10px'}}>
+                    <Tab eventKey="home" title="题目详情">
+                        {/*<TabPane>*/}
+                            <ReactMarkdown source={this.props.probleminfo.description} />
+                        {/*</TabPane>*/}
+                    </Tab>
+                    <Tab eventKey="profile" title="提交代码">
+                        <CodeInput state={this.props.state} role={this.props.role}
+                                   id={this.props.id} problem_id={this.props.probleminfo.id}
+                                   homework_id={this.props.homework_id}/>
+                    </Tab>
+                    <Tab eventKey="contact" title="查看结果">
+                        <ProblemDetailRecord records={this.props.records} />
+                    </Tab>
+                </Tabs>
+            </div>
         );
     }
 }
@@ -160,8 +186,9 @@ class ProblemDetail extends Component {
         return (
             <Card>
                 <Card.Body>
-                    {/*<Card.Title>{this.state.title}</Card.Title>*/}
+                    <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
                     <Container>
+                        <div style={splitter} />
                         <ProblemDetailBody state={this.props.state} role={this.props.role}
                                            id={this.props.id} probleminfo={this.state}
                                            homework_id={parseInt(this.props.homework_id)}
@@ -172,5 +199,15 @@ class ProblemDetail extends Component {
         );
     }
 }
+
+const splitter =
+{
+    height:'1px',
+    backgroundColor:'#ADADAD',
+    float:'center',
+    width:'100%',
+    marginTop: '10px',
+    marginBottom: '10px',
+};
 
 export {ProblemDetail};
