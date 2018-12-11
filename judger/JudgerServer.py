@@ -59,15 +59,18 @@ def handleTraditionalJudger():
 
 		with open("result.json", "r", encoding='utf-8') as f:
 			judgerResult = json.load(f)
-			judgerResult['id'] = record_id
-			print(judgerResult)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+			jr = { 'res': judgerResult,
+					'id': record_id
+					}
+			# judgerResult['id'] = record_id
+			print(jr)
+			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
 			# print(r)
 			continue
-		judgerResult = {'Result': 'Judgement Failed',
+		judgerResult = {'res': {'Result': 'Judgement Failed',
 						'time': 0,
 						'memory': 0,
-						'Info': "No comment",
+						'Info': "No comment",},
 						'id': record_id}
 		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
 		print(judgerResult)
@@ -89,10 +92,10 @@ def handleScriptJudger():
 		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
 		targetFile = os.path.join(data['WORK_PATH'], 'index.js')
 		if not os.path.isfile(sourceFile):
-			judgerResult = {'Score': 0,
+			judgerResult = {'res':{'Score': 0,
 							'time': 0,
 							'memory': 0,
-							'Info': "No comment",
+							'Info': "No comment",},
 							'id': record_id}
 			print(judgerResult)
 			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
@@ -125,15 +128,17 @@ def handleScriptJudger():
 		with open("result.json", "r", encoding='utf-8') as f:
 			# judgerResult = json.dumps(json.load(f))
 			judgerResult = json.load(f)
-			judgerResult['id'] = record_id
-			print(judgerResult)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+			jr = {'res': judgerResult,
+				  'id': record_id}
+			# judgerResult['id'] = record_id
+			print(jr)
+			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
 			# self.write(judgerResult)
 			continue
-		judgerResult = {'Score': 0,
+		judgerResult = {'res':{'Score': 0,
 						'time': 0,
 						'memory': 0,
-						'Info': "No comment",
+						'Info': "No comment",},
 						'id': record_id}
 		print(judgerResult)
 		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
