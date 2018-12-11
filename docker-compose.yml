@@ -5,8 +5,6 @@ services:
     build: ./backend
     volumes:
       - ./backend:/usr/src/app
-    # ports:
-    #   - "8000:8000"
     expose:
       - "8000"
     depends_on:
@@ -48,3 +46,4 @@ services:
       - "12345"
     volumes:
       - './backend/root:/usr/src/app/root'
+      - './backend/judge_script:/usr/src/app/judge_script'

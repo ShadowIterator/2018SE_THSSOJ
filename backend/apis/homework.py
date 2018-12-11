@@ -11,7 +11,7 @@ class APIHomeworkHandler(base.BaseHandler):
         self.root_dir = self.root_dir+'/homeworks'
 
     async def _list_post(self):
-        self.return_json(await self.querylr('homeworks', self.args['start'], self.args['end']))
+        return await self.querylr('homeworks', self.args['start'], self.args['end'])
 
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')

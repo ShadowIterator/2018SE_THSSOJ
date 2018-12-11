@@ -4,11 +4,20 @@ __pycache__
 .idea
 .DS_Store
 
+*.log
+judger/*.txt
+
+*.err
+*.res
+*.rpt
+
 *.iml
 *.xml
 *.sconfig
 backend/venv/
 backend/temp/
+backend/root/records
+backend/test
 node_modules
 __pycache__
 backend/root/

@@ -9,13 +9,16 @@ class APICourseHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/courses'
-        
+
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
         if 'start_time' in self.args.keys():
             self.args['start_time'] = datetime.datetime.fromtimestamp(self.args['start_time'])
         if 'end_time' in self.args.keys():
             self.args['end_time'] = datetime.datetime.fromtimestamp(self.args['end_time'])
+            
+    async def _list_post(self):
+        return await self.querylr('courses', self.args['start'], self.args['end'])
 
     # @tornado.web.authenticated
     async def _create_post(self):

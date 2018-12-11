@@ -24,7 +24,7 @@ class APIRecordHandler(base.BaseHandler):
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     async def _list_post(self):
-        self.return_json(await self.querylr('records', self.args['start'], self.args['end']))
+        return await self.querylr('records', self.args['start'], self.args['end'])
 
     @tornado.web.authenticated
     async def _query_post(self):
@@ -34,7 +34,6 @@ class APIRecordHandler(base.BaseHandler):
             timepoint = int(js['submit_time'].timestamp())
             js['submit_time'] = timepoint
         return res
-        # self.write(json.dumps(res).encode())
 
     # @tornado.web.authenticated
     async def _srcCode_post(self):

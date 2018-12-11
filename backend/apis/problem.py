@@ -8,13 +8,15 @@ import uuid
 from . import base
 from .base import *
 
+judger_url = 'http://judger:12345'
+
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/problems'
 
     async def _list_post(self):
-        self.return_json(await self.querylr('problems', self.args['start'], self.args['end']))
+        return await self.querylr('problems', self.args['start'], self.args['end'])
 
     # @tornado.web.authenticated
     async def _create_post(self):
