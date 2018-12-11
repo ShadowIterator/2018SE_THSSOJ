@@ -13,6 +13,13 @@ const {TextArea} = Input;
 const FormItem = Form.Item;
 
 class RegistrationForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            upload_code: {},
+            upload_case: {},
+        }
+    }
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
@@ -27,6 +34,8 @@ class RegistrationForm extends React.Component {
                     language: values.language.map((lang)=>parseInt(lang)),
                     openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                     user_id: this.props.id,
+                    code_url: this.state.upload_code.url,
+                    case_url: this.state.upload_code.url,
                 };
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
@@ -195,16 +204,77 @@ class RegistrationForm extends React.Component {
                     label="上传标准程序"
                 >
                     <div className="dropbox">
-                        {getFieldDecorator('upload', {
-                            valuePropName: 'fileList',
+                        {getFieldDecorator('upload_code', {
+                            rules: [{required: true, message: '请上传标准程序'}],
+                            valuePropName: 'code',
                             getValueFromEvent: this.normFile,
                         })(
-                            <Upload.Dragger name="files" action="/upload.do">
+                            <Upload.Dragger name="code" action={api_list['upload_code']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log(fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.url = file.response.url;
+                                    }
+                                    return file;
+                                });
+
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.status === 'success';
+                                    }
+                                    return true;
+                                });
+
+                                this.setState({ upload_code: fileList[0] });
+                            }}>
                                 <p className="ant-upload-drag-icon">
                                     <Icon type="inbox" />
                                 </p>
-                                <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                                <p className="ant-upload-hint">Support for a single or bulk upload.</p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传标准程序</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试数据"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_case', {
+                            rules: [{required: true, message: '请上传测试数据'}],
+                            valuePropName: 'cases',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="case" action={api_list['upload_case']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log(fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.url = file.response.url;
+                                    }
+                                    return file;
+                                });
+
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+
+                                this.setState({ upload_case: fileList[0] });
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox" />
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传测试数据</p>
                             </Upload.Dragger>
                         )}
                     </div>
@@ -251,9 +321,9 @@ const ProblemCreateForm = Form.create({
                 ...props.switch,
                 value: props.switch.value,
             }),
-            upload: Form.createFormField({
-                ...props.upload,
-                value: props.upload.value,
+            upload_code: Form.createFormField({
+                ...props.upload_code,
+                value: props.upload_code.value,
             }),
 
         };
@@ -289,7 +359,10 @@ class ProblemCreate extends Component {
                 switch: {
                     value: ''
                 },
-                upload: {
+                upload_code: {
+                    value: ''
+                },
+                upload_case: {
                     value: ''
                 }
             }

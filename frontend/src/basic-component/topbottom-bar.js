@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import {Navbar as BSNavbar} from "react-bootstrap";
 import {Alignment,
     Button,
     Classes,
@@ -8,8 +7,8 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
-import {Layout, Tabs} from 'antd';
-import {withRouter} from "react-router";
+import {Layout} from 'antd';
+import {withRouter} from "react-router-dom";
 
 const { Footer } = Layout;
 class mDropdown extends Component {
@@ -22,6 +21,12 @@ class mDropdown extends Component {
                     <Menu.Item text="全部课程" onClick={() => {
                         alert("Jump to all classes");
                     }}/>
+                    }
+                    {this.props.role === 2 &&
+                    <Menu.Item text="我的题目" onClick={() => {
+                        this.props.history.push("/myproblem");
+                    }
+                    }/>
                     }
                     {this.props.role !== 3 &&
                         <Menu.Divider/>
@@ -45,7 +50,6 @@ class mDropdown extends Component {
         )
     }
 }
-// mDropdown.contextType = AuthContext;
 
 const Dropdown = withRouter(mDropdown);
 

@@ -8,15 +8,6 @@ import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge, Divider } fro
 const {Content} = Layout;
 const {Meta} = Card;
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-
-const ZeroPadding = {
-    "padding-left": 0,
-    "padding-right": 0
-};
-
 class mTAHomepageMiddle extends Component {
     constructor(props) {
         super(props);

@@ -20,6 +20,7 @@ import {AdminPage} from "./admin-component/admin-page";
 import {ProblemBase} from "./problem-base/problem-base";
 
 import {ProblemCreate} from "./problem-component/problem-create";
+import {MyProblem} from "./problem-component/problem-my";
 
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
@@ -133,6 +134,7 @@ class App extends Component {
                             <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} {...this.state} />} />
                             <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
                             <Route path="/problemcreate" render={(props) => <ProblemCreate {...this.state} />} />
+                            <Route path="/myproblem" render={(props) => <MyProblem {...this.state} />} />
                         </Layout>
                     </div>
                 </Router>
