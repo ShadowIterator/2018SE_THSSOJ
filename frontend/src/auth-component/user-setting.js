@@ -1,10 +1,20 @@
 import React, {Component} from 'react';
-import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip} from '@blueprintjs/core';
+import {HTMLSelect, Button, Dialog, Classes} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 
-import {Card, Form, Container, Row, Col} from "react-bootstrap"
+import {Card, Container} from "react-bootstrap"
+
+import { Layout, Breadcrumb } from 'antd';
+import {
+    Form, Input, Tooltip, Icon, Cascader, Select, Row, Col, Checkbox, AutoComplete,
+} from 'antd';
+import {Link} from "react-router-dom";
+const {Content} = Layout;
+const FormItem = Form.Item;
+const Option = Select.Option;
+const AutoCompleteOption = AutoComplete.Option;
 
 class UserSettingsForm extends Component {
     constructor(props) {
@@ -75,11 +85,21 @@ class UserSettingsForm extends Component {
             [event.target.id]: event.target.value
         });
     }
-    handleGender(event) {
-        const gender_value = event.target.value;
-        if(gender_value==='male') {
-            this.setState({gender:0});
-        } else if(gender_value==='female') {
+    // handleGender(event) {
+    //     const gender_value = event.target.value;
+    //     if(gender_value==='0') {
+    //         this.setState({gender:0});
+    //     } else if(gender_value==='1') {
+    //         this.setState({gender: 1});
+    //     } else {
+    //         this.setState({gender: 2});
+    //     }
+    // }
+    handleGender(value) {
+        const gender_value = value;
+        if(gender_value==='0') {
+            this.setState({gender: 0});
+        } else if(gender_value==='1') {
             this.setState({gender: 1});
         } else {
             this.setState({gender: 2});
@@ -153,10 +173,38 @@ class UserSettingsForm extends Component {
         }
     }
     render() {
+
+        const { getFieldDecorator } = this.props.form;
+        // console.log(getFieldDecorator)
+
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 24 },
+                sm: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 24 },
+                sm: { span: 20 },
+            },
+        };
+
+        const prefixSelector = getFieldDecorator('prefix', {
+            initialValue: '86',
+        })(
+            <Select style={{ width: 70 }}>
+                <Option value="86">+86</Option>
+                <Option value="87">+87</Option>
+            </Select>
+        );
+
         let role = "学生";
         if(this.state.role === 2) {
             role = "助教";
         }
+
+        const gender = this.state.gender.toString();
+        console.log('gender: ', gender);
+
         let status_html;
         if(!this.state.validating) {
             if (this.state.status) {
@@ -189,56 +237,138 @@ class UserSettingsForm extends Component {
                 </Form.Group>
             )
         }
-        const gender = this.state.gender;
+
         return(
             <div>
             <Form onSubmit={this.handleSubmit}>
-                <Form.Group as={Row} controlId="username">
-                    <Form.Label column lg="3">Username</Form.Label>
-                    <Col lg="9">
-                        <Form.Control value={this.state.username} onChange={this.handleChange} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="email">
-                    <Form.Label column lg="3">Email</Form.Label>
-                    <Col lg="9">
-                        <Form.Control type="email" value={this.state.email} onChange={this.handleChange} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="gender">
-                    <Form.Label column lg="3">Gender</Form.Label>
-                    <Col lg="9">
-                        <HTMLSelect onChange={this.handleGender} fill>
-                        <option value={'male'} selected={gender === 0}>男</option>
-                        <option value={'female'} selected={gender === 1}>女</option>
-                        <option value={'unknown'} selected={gender === 2}>未知</option>
-                        </HTMLSelect>
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="realname">
-                    <Form.Label column lg="3">Real Name</Form.Label>
-                    <Col lg="9">
-                        <Form.Control value={this.state.realname} onChange={this.handleChange} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="student_id">
-                    <Form.Label column lg="3">Student ID</Form.Label>
-                    <Col lg="9">
-                          <Form.Control value={this.state.student_id} onChange={this.handleChange} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="role">
-                    <Form.Label column lg="3">Role</Form.Label>
-                    <Col lg="9">
-                        <Form.Label>{role}</Form.Label>
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="status">
-                    <Form.Label column lg="3">Status</Form.Label>
-                    <Col lg="9">
-                        {status_html}
-                    </Col>
-                </Form.Group>
+                <FormItem
+                    {...formItemLayout}
+                    label="username"
+                >
+                    {getFieldDecorator('username', {
+                        initialValue: this.state.username,
+                        rules: [{ required: false, message: 'Please input your username!' }],
+                    })(
+                        <Input style={{ width: '100%' }} onChange={this.handleChange} />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="E-mail"
+                >
+                    {getFieldDecorator('email', {
+                        initialValue: this.state.email,
+                        rules: [{
+                            type: 'email', message: 'The input is not valid E-mail!',
+                        }, {
+                            required: false, message: 'Please input your E-mail!',
+                        }],
+                    })(
+                        <Input onChange={this.handleChange} disabled={true}/>
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="gender"
+                    hasFeedback
+                >
+                    {getFieldDecorator('gender', {
+                        initialValue: gender,
+                    })(
+                    <Select onChange={this.handleGender}>
+                        <Option value="0">男</Option>
+                        <Option value="1">女</Option>
+                        <Option value="2">未知</Option>
+                    </Select>
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="Real Name"
+                >
+                    {getFieldDecorator('realname', {
+                        initialValue: this.state.realname,
+                        rules: [{ required: false, message: 'Please input your real name!' }],
+                    })(
+                        <Input style={{ width: '100%' }} onChange={this.handleChange} />
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="Student ID"
+                >
+                    {getFieldDecorator('student_id', {
+                        initialValue: this.state.student_id,
+                        rules: [{ required: false, message: 'Please input your student ID!' }],
+                    })(
+                        <Input style={{ width: '100%' }} onChange={this.handleChange} />
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="Role"
+                >
+                    <span className="ant-form-text">{role}</span>
+                </FormItem>
+
+                {/*<FormItem*/}
+                    {/*{...formItemLayout}*/}
+                    {/*label="status"*/}
+                {/*>*/}
+                    {/*/!*<span className="ant-form-text">{role}</span>*!/*/}
+                    {/*{status_html}*/}
+                {/*</FormItem>*/}
+
+                {/*<Form.Group as={Row} controlId="username">*/}
+                    {/*<Form.Label column lg="3">Username</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Control value={this.state.username} onChange={this.handleChange} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="email">*/}
+                    {/*<Form.Label column lg="3">Email</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Control type="email" value={this.state.email} onChange={this.handleChange} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="gender">*/}
+                    {/*<Form.Label column lg="3">Gender</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<HTMLSelect onChange={this.handleGender} fill>*/}
+                        {/*<option value={'male'} selected={gender === 0}>男</option>*/}
+                        {/*<option value={'female'} selected={gender === 1}>女</option>*/}
+                        {/*<option value={'unknown'} selected={gender === 2}>未知</option>*/}
+                        {/*</HTMLSelect>*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="realname">*/}
+                    {/*<Form.Label column lg="3">Real Name</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Control value={this.state.realname} onChange={this.handleChange} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="student_id">*/}
+                    {/*<Form.Label column lg="3">Student ID</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                          {/*<Form.Control value={this.state.student_id} onChange={this.handleChange} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="role">*/}
+                    {/*<Form.Label column lg="3">Role</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Label>{role}</Form.Label>*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="status">*/}
+                    {/*<Form.Label column lg="3">Status</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*{status_html}*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
                 <Button variant="primary" type="submit">
                     Save
                 </Button>
@@ -271,18 +401,51 @@ class UserSettingsForm extends Component {
     }
 }
 
+const WrappedUserSettingsForm = Form.create()(UserSettingsForm);
+
 export class UserSettings extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            fields: {
+                username: {
+                    value: '',
+                },
+            },
+        }
+    }
+
+    handleFormChange = (changedFields) => {
+        this.setState(({ fields }) => ({
+            fields: { ...fields, ...changedFields },
+        }));
+    }
+
     render() {
         console.log(this.props);
+        let homelink = '/';
+        if(this.props.role===1) {
+            homelink = '/student';
+        } else if(this.props.role===2) {
+            homelink = '/ta';
+        } else if(this.props.role===3) {
+            homelink = '/admin';
+        }
         return(
-          <Card className="text-center">
-              <Card.Body>
-                  <Card.Title>修改个人信息</Card.Title>
-                  <Container>
-                      <UserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
-                  </Container>
-              </Card.Body>
-          </Card>
+            <Content style={{padding: '0 50px'}}>
+                <Breadcrumb style={{margin: '16px 0'}}>
+                    <Breadcrumb.Item><Link to={homelink}>Home</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>修改个人信息</Breadcrumb.Item>
+                </Breadcrumb>
+                <Card className="text-center">
+                    <Card.Body>
+                        <Card.Title><h2>修改个人信息</h2></Card.Title>
+                        <Container>
+                            <WrappedUserSettingsForm state={this.props.state} id={this.props.id} role={this.props.role}/>
+                        </Container>
+                    </Card.Body>
+                </Card>
+            </Content>
         );
     }
 }

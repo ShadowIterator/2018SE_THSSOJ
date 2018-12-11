@@ -36,6 +36,9 @@ class APINoticeHandler(base.BaseHandler):
         # for condition in self.args:
         await self.deleteObject('notices', **self.args)
 
+    async def _list_post(self):
+        self.return_json(await self.querylr('notices', self.args['start'], self.args['end']))
+
     async def _create_post(self):
         course_id = self.args['course_id']
         await self.createObject('notices', **self.args)

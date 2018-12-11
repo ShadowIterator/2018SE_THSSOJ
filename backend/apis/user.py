@@ -20,7 +20,7 @@ class APIUserHandler(base.BaseHandler):
             self.args['validate_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
 
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.getObject('users', secure = 1, **self.args)
@@ -33,7 +33,7 @@ class APIUserHandler(base.BaseHandler):
         return res
 
     @tornado.web.authenticated
-    @check_password
+    # @check_password
     async def _delete_post(self):
         # for condition in self.args:
         await self.deleteObject('users', **self.args)
@@ -174,6 +174,8 @@ class APIUserHandler(base.BaseHandler):
         print('return: ', res)
         self.write(json.dumps(res).encode())
 
+    async def _list_post(self):
+        return await self.querylr('users', self.args['start'], self.args['end'])
         #
         # if(type == 'create'):
         #     print('post create')

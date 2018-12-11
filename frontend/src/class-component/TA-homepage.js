@@ -1,21 +1,12 @@
 import React, { Component } from 'react';
-import {Row, Col, Container} from "react-bootstrap";
-import {TALessonList, Info} from "./lesson-component";
-import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "../basic-component/auth-context";
-import { AnchorButton, Button, Code, H5, Intent, Switch } from "@blueprintjs/core";
-import {withRouter} from "react-router-dom"
-
-
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-
-const ZeroPadding = {
-    "padding-left": 0,
-    "padding-right": 0
-};
+import {Link, withRouter} from "react-router-dom"
+import {Button} from "@blueprintjs/core";
+import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge, Divider } from 'antd';
+const {Content} = Layout;
+const {Meta} = Card;
 
 class mTAHomepageMiddle extends Component {
     constructor(props) {
@@ -77,8 +68,10 @@ class mTAHomepageMiddle extends Component {
         const course = result.data[0];
         const name = course.name;
         const id = course.id;
+        const description = course.description;
         const notice_ids = course.notices;
-        that.stulesson.push({id:id, name:name});
+        const homeworks = course.homeworks;
+        that.stulesson.push({id:id, name:name, description:description, notices:notice_ids, homeworks: homeworks});
         for(let notice_id of notice_ids) {
             ajax_post(api_list['query_notice'], {id:notice_id}, that, mTAHomepageMiddle.query_notice_callback);
         }
@@ -93,16 +86,17 @@ class mTAHomepageMiddle extends Component {
         const course = result.data[0];
         const name = course.name;
         const id = course.id;
+        const description = course.description;
         const status = course.status;
         const notice_ids = course.notices;
         for(let notice_id of notice_ids) {
             ajax_post(api_list['query_notice'], {id:notice_id}, that, TAHomepageMiddle.query_notice_callback);
         }
         if(status) {
-            that.talesson.push({id:id, name:name});
+            that.talesson.push({id:id, name:name, description:description});
             that.setState({talesson:that.talesson});
         } else {
-            that.uplesson.push({id:id, name:name});
+            that.uplesson.push({id:id, name:name, description:description});
             that.setState({uplesson:that.uplesson});
         }
     }
@@ -119,25 +113,104 @@ class mTAHomepageMiddle extends Component {
         });
         that.setState({infoitems:that.infoitems});
     }
-    // clickLesson(){
-    //     this.props.history.push("/createlesson");
-    // }
     render() {
         return (
-            <Container fluid={true}>
-                <Row>
-                    <Col lg={3} style={ZeroPadding}>
-                        <TALessonList state={this.props.state} id={this.props.id} role={this.props.role}
-                                      lessonlist={this.state.lessonlist}
-                                      stulesson={this.state.stulesson}
-                                      talesson={this.state.talesson}
-                                      uplesson={this.state.uplesson}/>
-                    </Col>
-                    <Col lg={9} style={ZeroPadding}>
-                        <Info infoitems={this.state.infoitems}/>
-                    </Col>
-                </Row>
-            </Container>
+                <Content style={{padding: '0 50px'}}>
+                    <Breadcrumb style={{margin: '16px 0'}}>
+                        <Breadcrumb.Item><Link to="/ta">Home</Link></Breadcrumb.Item>
+                    </Breadcrumb>
+                    <div style={{background: '#fff', padding: 24, minHeight: 640}}>
+                        <h2>我管理的课程</h2>
+                        <Row gutter={16}>
+                            {this.state.talesson.map((lesson)=>
+                                <Col span={8}>
+                                    <Card style={{width: '100%', marginTop: 16}}
+                                          actions={[
+                                              <Tooltip title="查看通知">
+                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                      <Icon type="notification" theme="twoTone" />
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="查看作业">
+                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                      <Icon type="edit" theme="twoTone" />
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="查看成绩">
+                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                      <Icon type="check-circle" theme="twoTone" />
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="查看课程信息">
+                                                  <Icon type="info-circle" theme="twoTone"
+                                                        onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
+                                              </Tooltip>]}>
+                                        <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={lesson.description}/>
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
+                        <Divider />
+                        <Row>
+                            <Col span={20}>
+                                <h2>未发布的课程</h2>
+                            </Col>
+                            <Col span={4}>
+                                <Button onClick={() => {
+                                    this.props.history.push('/createlesson');
+                                }} type="primary" size="large" icon="plus" large={true}>创建课程</Button>
+                            </Col>
+                        </Row>
+                        <Row gutter={16}>
+                            {this.state.uplesson.map((lesson)=>
+                                <Col span={8}>
+                                    <Card style={{width: '100%', marginTop: 16}}
+                                          actions={[
+                                              <Tooltip title="编辑课程信息">
+                                                  <div onClick={() => {
+                                                      this.props.history.push('/editlesson/' + lesson.id.toString());
+                                                  }}>
+                                                      <Icon type="edit" theme="twoTone" />
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="发布课程">
+                                                  <div onClick={() => {
+                                                      ajax_post(api_list['update_course'], {id: lesson.id, status: 1},
+                                                          this, (that, result) => {
+                                                              if(result.data.code!==0) {
+                                                                  alert("Publish course failed.");
+                                                                  return;
+                                                              }
+                                                              window.location.reload();
+                                                          })
+                                                        }
+                                                  }>
+                                                      <Icon type="rocket" theme="twoTone" />
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="删除课程">
+                                                  <Icon type="delete" theme="twoTone"
+                                                        onClick={() => {
+                                                            ajax_post(api_list['delete_course'], {id: lesson.id},
+                                                                this, (that, result) => {
+                                                                    if(result.data.code!==0) {
+                                                                        alert("Delete failed.");
+                                                                        return;
+                                                                    }
+                                                                    window.location.reload();
+                                                                })
+                                                        }
+                                                        }/>
+                                              </Tooltip>]}>
+                                        <Meta title={<Link to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
+                                              description={lesson.description}/>
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
+                    </div>
+                </Content>
         )
 
     }

@@ -1,17 +1,13 @@
 import React, { Component } from 'react';
-import {
-    Card,
-    Menu
-} from "@blueprintjs/core";
-
-import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
-
 import {Info} from "./lesson-component";
 
-import {ZeroPadding, Spacing} from "./lesson-component";
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
-import {withRouter} from "react-router";
+import {withRouter, Link} from "react-router-dom";
+
+import { Layout, Breadcrumb, Menu, Icon, List } from 'antd';
+const {Content, Sider} = Layout;
+const { SubMenu } = Menu;
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -24,6 +20,7 @@ class mStudentHomeworkCard extends Component {
     constructor(props) {
         super(props);
         this.handleClick = this.handleClick.bind(this);
+        this.handleClickId = this.handleClickId.bind(this);
     }
     handleClick(event) {
         event.preventDefault();
@@ -32,22 +29,47 @@ class mStudentHomeworkCard extends Component {
         const id_param = '/' + id.toString();
         const homework_id = '/' + this.props.homework_id.toString();
         const pathname = '/problemdetail';
+        const course_id = '/' + this.props.course_id.toString();
         this.props.history.push({
-            pathname: pathname + id_param + homework_id,
+            pathname: pathname + id_param + homework_id + course_id,
         });
     }
+    handleClickId(id) {
+        return (event) => {
+            event.preventDefault();
+            const id_param = '/' + id.toString();
+            const homework_id = '/' + this.props.homework_id.toString();
+            const pathname = '/problemdetail';
+            const course_id = '/' + this.props.course_id.toString();
+            this.props.history.push({
+                pathname: pathname + id_param + homework_id + course_id,
+            });
+        }
+    }
     render() {
+        console.log("questions:", this.props.questions);
         return (
-            <Card style={Spacing}>
-                <h5>{this.props.name}</h5>
-                <Menu>
-                    {this.props.questions.map((q)=>(<li>
-                        <a id={(-q.id).toString()} onClick={this.handleClick} className="bp3-menu-item bp3-popover-dismiss">
-                            <div id={q.id.toString()} className="bp3-text-overflow-ellipsis bp3-fill">{q.title}</div>
-                        </a>
-                    </li>))}
-                </Menu>
-            </Card>
+            <div style={{margin: '20px'}}>
+                <List
+                    header={<h5>{this.props.name}</h5>}
+                    footer={<div>截止日期</div>}
+                    bordered
+                    dataSource={this.props.questions}
+                    renderItem={item => {
+                        console.log(item);
+                        if(item.status === undefined) {
+                            item.status = {};
+                        }
+                        return (
+                            <List.Item key={item.id}>
+                                <List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />
+                                {item.status.flag === 0 && <div>未完成</div>}
+                                {item.status.flag===1 && <div>已完成</div>}
+                                {item.status.flag===2 && <div>已批改</div>}
+                            </List.Item>);
+                    }}
+                />
+            </div>
         )
     }
 }
@@ -66,72 +88,46 @@ class StudentHomeworkPanel extends Component {
                 if(prob_ids.includes(prob.id)) {
                     homework2prob[hw.id.toString()].push({
                         id:prob.id,
-                        title:prob.title
+                        title:prob.title,
+                        status:prob.status,
                     });
                 }
             }
         }
         return (
-            <Card>
+            <div>
                 {this.props.homeworkitems.map((hw)=>(
-                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} />
+                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} course_id={this.props.course_id} />
                 ))}
-            </Card>
+            </div>
         )
     }
 }
 
 class StudentHomework extends Component {
-    constructor(props) {
-        super(props);
-        this.state= {
-            tabname: [
-                "未完成作业", "已完成但未批改作业", "已批改作业", "全部作业"
-            ],
-            tabid: [
-                'uh', 'su', 'sp', 'al'
-            ],
-            tabnum: [
-                0, 1, 2, 3
-            ],
-            selectedId: 'uh'
-        };
-        this.handleChooseTab = this.handleChooseTab.bind(this);
-    }
-
-    handleChooseTab(newTabId, prevTabId, event) {
-        this.setState({
-            selectedId: newTabId
-        })
-    }
-
     render() {
-        const tabname = this.state.tabname;
-        const tabid = this.state.tabid;
-        const tabnum = this.state.tabnum;
-        const tabs = tabnum.map(
-            (i) => <Tab eventKey={tabid[i]} title={tabname[i]}><StudentHomeworkPanel
-                homeworkitems={this.props.homeworkitems} problemitems={this.props.problemitems}/></Tab>
-        );
         return (
-            <Tabs defaultActiveKey={tabid[0]} id="homework-tab">
-                {tabs}
-            </Tabs>
+            <StudentHomeworkPanel
+                homeworkitems={this.props.homeworkitems} problemitems={this.props.problemitems} course_id={this.props.course_id}/>
         )
     }
 }
 
-class StudentLessonMiddle extends Component {
+class mStudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
             infoitems: [],
             homeworkitems: [],
             problemitems: [],
+            lesson_name: '',
+            current_selected: '1',
+            homeworkstatus: {},
         };
         this.infoitems = [];
         this.homeworkitems = [];
         this.problemitems = [];
+        this.homeworkstatus = {};
     }
     componentDidMount() {
         const course_id = parseInt(this.props.course_id);
@@ -140,6 +136,7 @@ class StudentLessonMiddle extends Component {
     static query_course_callback(that, result) {
         if(result.data.length===0)
             return;
+        that.setState({lesson_name:result.data[0].name});
         const notice_ids = result.data[0].notices;
         const homework_ids = result.data[0].homeworks;
         for(let notice_id of notice_ids) {
@@ -163,7 +160,34 @@ class StudentLessonMiddle extends Component {
             deadline:deadline,
             problem_ids:problem_ids,
         });
+        that.homeworkstatus[id.toString()] = {};
         that.setState({homeworkitems:that.homeworkitems});
+        for(let prob_id of problem_ids) {
+            ajax_post(api_list['query_record'], {
+                user_id: that.props.id,
+                problem_id: prob_id,
+                homework_id: id,
+                record_type: 2,
+            }, that, (that, result)=>{
+                if(result.data.length === 0) {
+                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
+                        flag: 0,
+                        record: null,
+                    };
+                } else if(result.data[0].status === 0) {
+                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
+                        flag: 1,
+                        record: result.data[0],
+                    };
+                } else {
+                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
+                        flag: 1,
+                        record: result.data[0],
+                    };
+                }
+                that.setState({homeworkstatus: that.homeworkstatus});
+            });
+        }
         for(let prob_id of problem_ids) {
             ajax_post(api_list['query_problem'], {id:prob_id}, that, StudentLessonMiddle.query_problem_callback);
         }
@@ -186,9 +210,13 @@ class StudentLessonMiddle extends Component {
         const title = result.data[0].title;
         const id = result.data[0].id;
         that.problemitems.push({id:id, title:title});
+        console.log("query_problem_callback", that.problemitems);
         that.setState({problemitems:that.problemitems});
     }
     render() {
+        console.log("problem items", this.problemitems);
+        console.log("homework items", this.homeworkitems);
+        console.log("homework status", this.homeworkstatus);
         this.infoitems.sort(function(a, b) {
             const ida = a.id;
             const idb = b.id;
@@ -204,20 +232,180 @@ class StudentLessonMiddle extends Component {
             const idb = b.id;
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
+        let breadcrumb, panel;
+        if(this.state.current_selected==='1') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未完成作业</Breadcrumb.Item>
+            </>);
+            let unfinished_homeworkitems = [];
+            let unfinished_problemitems = [];
+            for(const homework of this.homeworkitems) {
+                const id = homework.id;
+                let flag = 0;
+                for(const prob_id in this.homeworkstatus[id.toString()]) {
+                    if(this.homeworkstatus[id.toString()][prob_id].flag===0) {
+                        flag = 1;
+                        break;
+                    }
+                }
+                for(const prob_id in this.homeworkstatus[id.toString()]) {
+                    if(this.homeworkstatus[id.toString()][prob_id].flag===2) {
+                        flag = 0;
+                        break;
+                    }
+                }
+                if(flag === 1) {
+                    unfinished_homeworkitems.push(homework);
+                    for(const prob_id of homework.problem_ids) {
+                        for(const prob_item of this.problemitems) {
+                            if(prob_id === prob_item.id) {
+                                let prob_item_new = prob_item;
+                                prob_item_new.status = this.homeworkstatus[id.toString()][prob_id.toString()];
+                                unfinished_problemitems.push(prob_item_new);
+                            }
+                        }
+                    }
+                }
+            }
+            if(unfinished_homeworkitems.length !== 0) {
+                panel = (
+                    <StudentHomework homeworkitems={unfinished_homeworkitems} problemitems={unfinished_problemitems}
+                                     course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有未完成的作业</h3>)
+            }
+
+        } else if(this.state.current_selected==='2') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已完成但未批改作业</Breadcrumb.Item>
+            </>);
+            let finished_homeworkitems = [];
+            let finished_problemitems = [];
+            for(const homework of this.homeworkitems) {
+                const id = homework.id;
+                let flag = 0;
+                for(const prob_id in this.homeworkstatus[id.toString()]) {
+                    if(this.homeworkstatus[id.toString()][prob_id].flag!==1) {
+                        flag = 1;
+                        break;
+                    }
+                }
+                if(flag === 0) {
+                    finished_homeworkitems.push(homework);
+                    for(const prob_id of homework.problem_ids) {
+                        for(const prob_item of this.problemitems) {
+                            if(prob_id === prob_item.id) {
+                                let prob_item_new = prob_item;
+                                prob_item_new.status = this.homeworkstatus[id.toString()][prob_id.toString()];
+                                finished_problemitems.push(prob_item_new);
+                            }
+                        }
+                    }
+                }
+            }
+            if(finished_homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={finished_homeworkitems} problemitems={finished_problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有已完成但未批改的作业</h3>)
+            }
+        } else if(this.state.current_selected==='3') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已批改作业</Breadcrumb.Item>
+            </>);
+            let judged_homeworkitems = [];
+            let judged_problemitems = [];
+            for(const homework of this.homeworkitems) {
+                const id = homework.id;
+                let flag = 0;
+                for(const prob_id in this.homeworkstatus[id.toString()]) {
+                    if(this.homeworkstatus[id.toString()][prob_id].flag===2) {
+                        flag = 1;
+                        break;
+                    }
+                }
+                if(flag === 1) {
+                    judged_homeworkitems.push(homework);
+                    for(const prob_id of homework.problem_ids) {
+                        for(const prob_item of this.problemitems) {
+                            if(prob_id === prob_item.id) {
+                                let prob_item_new = prob_item;
+                                prob_item_new.status = this.homeworkstatus[id.toString()][prob_id.toString()];
+                                judged_problemitems.push(prob_item_new);
+                            }
+                        }
+                    }
+                }
+            }
+            if(judged_homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={judged_homeworkitems} problemitems={judged_problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有已批改的作业</h3>)
+            }
+        } else if(this.state.current_selected==='4') {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>全部作业</Breadcrumb.Item>
+            </>);
+            if(this.homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有作业</h3>)
+            }
+        } else if(this.state.current_selected==='5') {
+            breadcrumb=(<Breadcrumb.Item>通知</Breadcrumb.Item>);
+            panel=(<Info infoitems={this.infoitems}/>);
+        } else if(this.state.current_selected==='6') {
+            breadcrumb = (<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
+            panel = (<div>TODO: 课程信息</div>)
+        }
         return (
-            <Container fluid>
-                <Row>
-                    <Col lg={9} style={ZeroPadding}>
-                        <StudentHomework homeworkitems={this.homeworkitems} problemitems={this.problemitems}/>
-                    </Col>
-                    <Col lg={3} style={ZeroPadding}>
-                        <Info infoitems={this.infoitems}/>
-                    </Col>
-                </Row>
-            </Container>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item>
+                        <Link to={"/student"}>主页</Link>
+                    </Breadcrumb.Item>
+                    <Breadcrumb.Item>
+                        <Link to={"/studentlesson/"+parseInt(this.props.course_id)}>
+                            {this.state.lesson_name}
+                        </Link>
+                    </Breadcrumb.Item>
+                    {breadcrumb}
+                </Breadcrumb>
+                <Layout style={{ padding: '24px 0', background: '#fff' }}>
+                    <Sider width={200} style={{ background: '#fff' }}>
+                        <Menu
+                            onClick={(e)=>{this.setState({current_selected: e.key})}}
+                            mode="inline"
+                            defaultSelectedKeys={['1']}
+                            defaultOpenKeys={['sub1']}
+                            style={{ height: '100%' }}
+                        >
+                            <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />作业</span>}>
+                                <Menu.Item key="1">未完成作业</Menu.Item>
+                                <Menu.Item key="2">已提交但未批改作业</Menu.Item>
+                                <Menu.Item key="3">已批改作业</Menu.Item>
+                                <Menu.Item key="4">全部作业</Menu.Item>
+                            </SubMenu>
+                            <Menu.Item key="5"><Icon type="notification" theme="twoTone" />通知</Menu.Item>
+                            <Menu.Item key="6"><Icon type="info-circle" theme="twoTone" />课程信息</Menu.Item>
+                        </Menu>
+                    </Sider>
+                    <Content style={{ padding: '0 24px', minHeight: 280 }}>
+                        {panel}
+                    </Content>
+                </Layout>
+            </Content>
         )
     }
 }
+
+const StudentLessonMiddle = withRouter(mStudentLessonMiddle);
 
 export class StudentLesson extends Component {
     render() {

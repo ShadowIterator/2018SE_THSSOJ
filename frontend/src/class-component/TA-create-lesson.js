@@ -1,11 +1,16 @@
 import React, {Component} from 'react';
-import {HTMLSelect, Button, Dialog, Classes, Intent, AnchorButton, Tooltip, Tag} from '@blueprintjs/core';
-import {AuthContext} from "../basic-component/auth-context";
-import {ajax_get, ajax_post} from "../ajax-utils/ajax-method";
+import {Button, Tag} from '@blueprintjs/core';
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
-import {withRouter} from "react-router-dom"
+import {withRouter, Link} from "react-router-dom"
+import {Form, Container, Row, Col} from "react-bootstrap"
 
-import {Card, Form, Container, Row, Col} from "react-bootstrap"
+import moment from "moment";
+
+import { Layout, Breadcrumb, DatePicker } from 'antd';
+const {Content} = Layout;
+const {RangePicker} = DatePicker;
+
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -30,7 +35,8 @@ class mLessonList extends Component {
                 newstu: "",
                 newta: "",
                 stu_tags: [],
-                ta_tags: []
+                ta_tags: [],
+                date: [],
             }
         } else
         {
@@ -42,7 +48,8 @@ class mLessonList extends Component {
                 newstu: "",
                 newta: "",
                 stu_tags: [],
-                ta_tags: []
+                ta_tags: [],
+                date: [],
             };
             ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
         }
@@ -56,6 +63,7 @@ class mLessonList extends Component {
         that.setState({
             title: result.data[0].name,
             description: result.data[0].description,
+            date: [moment.unix(result.date[0].start_time),moment.unix(result.date[0].end_time)],
         });
         for (let index in result.data[0].tas){
             ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, LessonList.add_ta_callback);
@@ -78,8 +86,13 @@ class mLessonList extends Component {
                 students: this.state.stu_tags.map(stu => {
                     return stu.id;
                 }),
-                notices: []
+                notices: [],
+                start_time: this.state.date[0].unix(),
+                end_time: this.state.date[1].unix(),
             };
+            if(!(this.props.id in data.tas)) {
+                data.tas.push(this.props.id);
+            }
             console.log(data);
             ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
         } else
@@ -93,7 +106,9 @@ class mLessonList extends Component {
                 }),
                 students: this.state.stu_tags.map(stu => {
                     return stu.id;
-                })
+                }),
+                start_time: this.state.date[0].unix(),
+                end_time: this.state.date[1].unix(),
             };
             console.log(data);
             ajax_post(api_list['update_course'], data, this, LessonList.submit_callback);
@@ -150,26 +165,10 @@ class mLessonList extends Component {
                 return;
             }
         }
-        // if(!that.state.isCreating) {
-        //     ajax_post(api_list['addStudent_course'], {stu_id: result.data[0].id, course_id: that.props.course_id},
-        //         that, that.add_stu_callback_not_create(result.data[0].username, result.data[0].id));
-        // } else {
-            stu_tags.push({username: result.data[0].username, id: result.data[0].id});
-            that.setState({stu_tags: stu_tags});
-            that.setState({newstu: ""});
-        // }
+        stu_tags.push({username: result.data[0].username, id: result.data[0].id});
+        that.setState({stu_tags: stu_tags});
+        that.setState({newstu: ""});
     }
-
-    // add_stu_callback_not_create(username, id) {
-    //     return function(that, result) {
-    //         if (result.data.code === 0) {
-    //             let stu_tags = that.state.stu_tags;
-    //             stu_tags.push({username: username, id: id});
-    //             that.setState({stu_tags: stu_tags});
-    //             that.setState({newstu: ""});
-    //         }
-    //     }
-    // }
 
     static add_ta_callback(that, result) {
         if (result.data.length===0) {
@@ -180,7 +179,6 @@ class mLessonList extends Component {
             alert("ta Not found");
             return;
         }
-        // console.log(result.data);
         let ta_tags = that.state.ta_tags;
         const tmp_name = result.data[0].username;
         for(let stu of ta_tags) {
@@ -189,59 +187,14 @@ class mLessonList extends Component {
                 return;
             }
         }
-        // if(!that.state.isCreating) {
-        //     ajax_post(api_list['addTA_course'], {ta_id: result.data[0].id, course_id: that.props.course_id},
-        //         that, that.add_ta_callback_not_create(result.data[0].username, result.data[0].id));
-        // } else {
-            ta_tags.push({username: result.data[0].username, id: result.data[0].id});
-            that.setState({ta_tags: ta_tags});
-            that.setState({newta: ""});
-        // }
+        ta_tags.push({username: result.data[0].username, id: result.data[0].id});
+        that.setState({ta_tags: ta_tags});
+        that.setState({newta: ""});
     }
-
-    // add_ta_callback_not_create(username, id) {
-    //     return function(that, result) {
-    //         if(result.data.code === 0) {
-    //             let ta_tags = that.state.ta_tags;
-    //             ta_tags.push({username:username, id:id});
-    //             that.setState({ta_tags: ta_tags});
-    //             that.setState({newta: ""});
-    //         }
-    //     }
-    // }
-
-
-    // deleteStudent_callback_closure(tag) {
-    //     return function(that, result)
-    //     {
-    //         if (result.data.code === 0) {
-    //             that.setState({stu_tags: that.state.stu_tags.filter(t => t.username !== tag.username)});
-    //         } else {
-    //             alert("Something went wrong while deleting "+tag.username);
-    //         }
-    //     }
-    // }
-
-    // deleteTA_callback_closure(tag) {
-    //     return function(that, result)
-    //     {
-    //         if (result.data.code === 0) {
-    //             that.setState({ta_tags: that.state.ta_tags.filter(t => t.username !== tag.username)});
-    //         } else {
-    //             alert("Something went wrong while deleting "+tag.username);
-    //         }
-    //     }
-    // }
-
     render() {
         const stutagElements = this.state.stu_tags.map(tag => {
             const onRemove = () => {
-                // if(!this.props.isCreating) {
-                //     ajax_post(api_list['deleteStudent_course'], {stu_id: tag.id, course_id: this.props.course_id},
-                //         this, this.deleteStudent_callback_closure(tag));
-                // } else {
-                    this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
-                // }
+                this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
             };
             return (
                 <Tag
@@ -289,7 +242,19 @@ class mLessonList extends Component {
                         <Form.Control as="textarea" value={this.state.description} onChange={this.changeDescription} />
                     </Col>
                 </Form.Group>
-
+                <Form.Group as={Row} controlId="data">
+                    <Form.Label column lg="2">起止时间</Form.Label>
+                    <Col lg="10">
+                        <RangePicker value={this.state.date}
+                                     size="large"
+                                     style={{width: '100%', outline: 0}}
+                                     placeholder={['开课时间','结课时间']}
+                                     onChange={(date) => {
+                                        console.log(date);
+                                        this.setState({date: date});
+                        }}/>
+                    </Col>
+                </Form.Group>
                 <Form.Group as={Row} controlId="tas">
                     <Form.Label column lg="2">添加助教</Form.Label>
                     <Col lg="8">
@@ -336,14 +301,18 @@ const LessonList = withRouter(mLessonList);
 class CreateLesson extends Component {
     render() {
         return (
-            <Card className="text-center">
-                <Card.Body>
-                    <Card.Title>创建课程</Card.Title>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>创建课程</Breadcrumb.Item>
+                </Breadcrumb>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                    <h3>创建课程</h3>
                     <Container>
-                        <LessonList/>
+                        <LessonList username={this.props.username} id={this.props.id}/>
                     </Container>
-                </Card.Body>
-            </Card>
+                </div>
+            </Content>
         )
     }
 }
@@ -355,14 +324,18 @@ class EditLesson extends Component {
 
     render() {
         return (
-            <Card className="text-center">
-                <Card.Body>
-                    <Card.Title>编辑课程信息{this.props.lesson_id}</Card.Title>
+            <Content style={{ padding: '0 50px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>编辑课程信息</Breadcrumb.Item>
+                </Breadcrumb>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                    <h3>编辑课程信息</h3>
                     <Container>
                         <LessonList course_id={this.props.lesson_id}/>
                     </Container>
-                </Card.Body>
-            </Card>
+                </div>
+            </Content>
         )
     }
 }

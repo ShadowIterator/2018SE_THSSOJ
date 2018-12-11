@@ -181,12 +181,12 @@ class InfoItem extends Component {
 class Info extends Component {
     render() {
         return (
-            <Card interactive={false}>
-                <h4>通知</h4>
+            <div>
                 {this.props.infoitems.map((item)=>(
                     <InfoItem title={item.title} content={item.content} type="通知" />
                 ))}
-            </Card>
+            {this.props.infoitems.length === 0 && <h3>您当前没有通知</h3>}
+            </div>
         )
     }
 }
