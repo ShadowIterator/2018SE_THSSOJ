@@ -44,10 +44,14 @@ def async_aquire_db(func):
     @tornado.testing.gen_test
     async def wrapper(self, *args, **kw):
         await self.set_application_db()
+        await self.prepare()
         return await func(self, *args, **kw)
     return wrapper
 
 class BaseTestCase(AsyncHTTPTestCase):
+    async def prepare(self):
+        pass
+
     async def set_application_db(self):
         print('in get_db', options.db_host,
                 options.db_port,
