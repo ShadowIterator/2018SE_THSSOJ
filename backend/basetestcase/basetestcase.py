@@ -27,8 +27,7 @@ from tornado.options import define, options
 from tornado.options import define, options
 from tornado.httpclient import AsyncHTTPClient
 from tornado.testing import AsyncHTTPTestCase, AsyncTestCase
-from tornado.httpserver import HTTPRequest
-from unittest.mock import Mock
+import tornado.httputil
 
 define("port", default=8000, help="run on the given port")
 define("db_host", default="postgres", help="blog database host")
@@ -84,6 +83,8 @@ class BaseTestCase(AsyncHTTPTestCase):
     def setUp(self):
         options.parse_config_file('./settings/app_config.py')
         self.db = None
+        self.cookies = dict()
+        self.user_id_cookie = ''
         super(BaseTestCase, self).setUp()
 
 
@@ -98,7 +99,21 @@ class BaseTestCase(AsyncHTTPTestCase):
         return json.loads(response.body)
 
     async def get_response(self, uri, *args, **kw):
-        return await self.http_client.fetch(self.get_url(uri), *args, **kw)
+        header = tornado.httputil.HTTPHeaders({'content-type': 'application/json', 'Cookie': self.user_id_cookie})
+        # for key, value in self.cookies.items():
+        #     header.add('Cookie', '='.join((key, value)))
+        # print('post header: ', header)
+        res = await self.http_client.fetch(self.get_url(uri), headers = header, *args, **kw)
+        for cookie in res.headers.get_list('Set-Cookie'):
+            parsed_cookie = tornado.httputil.parse_cookie(cookie)
+            # print('setcookie: ', parsed_cookie)
+            # for key, value in parsed_cookie.items():
+            #     if(key != 'Path'):
+            #         self.cookies[key] = '='.join((key, value))
+            if 'user_id' in parsed_cookie.keys():
+                self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
+        # print('selfcookies: ', self.user_id_cookie)
+        return res
 
     async def post_request(self, uri, **kw):
         return await self.get_response(uri, method = 'POST', body = json.dumps(kw).encode())

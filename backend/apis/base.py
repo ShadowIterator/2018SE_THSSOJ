@@ -113,6 +113,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @catch_exception_write
     async def post(self, type):
+        print('request = ', self.request.headers)
         print('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
         print('return: ', res)
