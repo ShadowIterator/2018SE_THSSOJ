@@ -67,14 +67,16 @@ class App extends Component {
     }
     static query_user_callback(that, result) {
         if(result.data.code===1) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         if(result.data.length===0) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         const data = result.data[0];
         that.setState({
