@@ -1,6 +1,7 @@
 #include "utils/tradiJudger.h"
 #include "utils/parseArgs.h"
 #include <fstream>
+#include <sys/stat.h>
 
 using namespace std;
 const string resSuf = ".res";
@@ -27,6 +28,7 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						"-o",
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
+
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
 			ostringstream oss;
@@ -83,6 +85,7 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 		judgerResult.memory = cr.memory;
 		judgerResult.info = cr.info;
 	}
+
 	return judgerResult;
 }
 
@@ -99,59 +102,70 @@ string PythonComplie(const JudgerConfig& judgerConfig){
 JudgerResult run_Python(const JudgerConfig& judgerConfig){
 	JudgerResult judgerResult("Accept", 0, 0, "OK");
 
-	// CompileResult cr = runCompiler(judgerConfig.sourceDir.c_str(),
-	// 								"/usr/bin/python3.6", 
-	// 								"-E", "-O", "-B", "-c",
-	// 								PythonComplie(judgerConfig).c_str(),
-	// 								NULL);
+	CompileResult cr = runCompiler(judgerConfig.sourceDir.c_str(),
+									"/usr/bin/python3.6", 
+									"-E", "-O", "-B", "-c",
+									PythonComplie(judgerConfig).c_str(),
+									NULL);
 	// cout << cr.success << endl;
 	// cout << cr.info << endl;
-	for (int i = 0; i < judgerConfig.ntests; ++i) {
-		ostringstream oss;
-		oss << i << '.';
-		string inputfile = judgerConfig.inputPre+oss.str()+judgerConfig.inputSuf;
-		string outputfile = judgerConfig.outputPre+string(".")+judgerConfig.outputSuf;
-		string ansfile = judgerConfig.outputPre+oss.str()+judgerConfig.outputSuf;
-		string reportfile = judgerConfig.outputPre+rptSuf;
-		RunResult rr = runProgram(judgerConfig.dataDir.c_str(),
-								(judgerConfig.outputPre+resSuf).c_str(),
-								inputfile.c_str(),
-								outputfile.c_str(),
-								(judgerConfig.outputPre+errSuf).c_str(),
-								judgerConfig.Lang.c_str(),
-								"/usr/bin/python3.6",
-								Pathjoin(judgerConfig.sourceDir, judgerConfig.source+string(".code")).c_str(),
-								NULL);
+	if (cr.success) {
+		string target = Pathjoin(judgerConfig.sourceDir, judgerConfig.source);
+		chmod(target.c_str(), 0x777);
+		for (int i = 0; i < judgerConfig.ntests; ++i) {
+			ostringstream oss;
+			oss << i << '.';
+			string inputfile = judgerConfig.inputPre+oss.str()+judgerConfig.inputSuf;
+			string outputfile = judgerConfig.outputPre+string(".")+judgerConfig.outputSuf;
+			string ansfile = judgerConfig.outputPre+oss.str()+judgerConfig.outputSuf;
+			string reportfile = judgerConfig.outputPre+rptSuf;
+			RunResult rr = runProgram(judgerConfig.dataDir.c_str(),
+									(judgerConfig.outputPre+resSuf).c_str(),
+									inputfile.c_str(),
+									outputfile.c_str(),
+									(judgerConfig.outputPre+errSuf).c_str(),
+									judgerConfig.Lang.c_str(),
+									target.c_str(),
+									//"/usr/bin/python3.6",
+									//Pathjoin(judgerConfig.sourceDir, judgerConfig.source+string(".code")).c_str(),
+									NULL);
 
-		judgerResult.time = max(judgerResult.time, rr.time);
-		judgerResult.memory = max(judgerResult.memory, rr.memory);
+			judgerResult.time = max(judgerResult.time, rr.time);
+			judgerResult.memory = max(judgerResult.memory, rr.memory);
 
-		if (rr.jr == Accept && rr.ec == NoError){
-			CheckerResult cr = runChecker(judgerConfig.dataDir.c_str(),
-											Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
-											(judgerConfig.outputPre+resSuf).c_str(),
-											(judgerConfig.outputPre+errSuf).c_str(),
-											Pathjoin(judgerConfig.dataDir, inputfile).c_str(),
-											Pathjoin(judgerConfig.dataDir, outputfile).c_str(),
-											Pathjoin(judgerConfig.dataDir, ansfile).c_str(),
-											Pathjoin(judgerConfig.dataDir, reportfile).c_str());
-			if (!cr.success){
-				judgerResult.result = "Wrong Answer";
-				oss.clear();
-				oss.str("");
-				oss << "TESTCASE #" << i << ": ";
-				judgerResult.info = oss.str()+cr.info;
+			if (rr.jr == Accept && rr.ec == NoError){
+				CheckerResult cr = runChecker(judgerConfig.dataDir.c_str(),
+												Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
+												(judgerConfig.outputPre+resSuf).c_str(),
+												(judgerConfig.outputPre+errSuf).c_str(),
+												Pathjoin(judgerConfig.dataDir, inputfile).c_str(),
+												Pathjoin(judgerConfig.dataDir, outputfile).c_str(),
+												Pathjoin(judgerConfig.dataDir, ansfile).c_str(),
+												Pathjoin(judgerConfig.dataDir, reportfile).c_str());
+				if (!cr.success){
+					judgerResult.result = "Wrong Answer";
+					oss.clear();
+					oss.str("");
+					oss << "TESTCASE #" << i << ": ";
+					judgerResult.info = oss.str()+cr.info;
+					break;
+				}
+			} else
+			{
+				if (rr.jr == Accept)
+					judgerResult.result = JudgeResult2string(JudgementFailed);
+				else
+					judgerResult.result = JudgeResult2string(rr.jr);
+				judgerResult.info = string("Failed at test case ")+oss.str();
 				break;
 			}
-		} else
-		{
-			if (rr.jr == Accept)
-				judgerResult.result = JudgeResult2string(JudgementFailed);
-			else
-				judgerResult.result = JudgeResult2string(rr.jr);
-			judgerResult.info = string("Failed at test case ")+oss.str();
-			break;
 		}
+	} else
+	{
+		judgerResult.result = "Compile Error";
+		judgerResult.time = cr.time;
+		judgerResult.memory = cr.memory;
+		judgerResult.info = cr.info;
 	}
 
 	return judgerResult;
@@ -210,6 +224,7 @@ JudgerResult main_test(const JudgerConfig& judgerConfig){
 }
 
 int main(int argc, char** argv){
+	// cout << "tradiJudger" << endl;
 	JudgerConfig judgerConfig;
 	tradi_judger_parse_args(argc, argv, judgerConfig);
 	JudgerResult judgerResult = main_test(judgerConfig);

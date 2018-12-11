@@ -10,6 +10,8 @@ __pycache__
 backend/venv/
 backend/temp/
 node_modules
+__pycache__
+backend/root/
+app_config.py
 DS_Store
 *.pyc
-app_config.py

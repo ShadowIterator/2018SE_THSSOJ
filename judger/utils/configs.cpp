@@ -22,7 +22,7 @@ std::string JudgeResult2string(JudgeResult jr) {
 			ret = "Output Limit Exceed";
 			break;
 		case DangerSystemCall:
-			ret = "Danger System Call";
+			ret = "Dangerous System Call";
 			break;
 		case JudgementFailed:
 			ret = "Judgement Failed";

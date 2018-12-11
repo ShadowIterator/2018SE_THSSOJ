@@ -320,3 +320,91 @@ void script_judger_parse_args(int argc ,char **argv, ScriptConfig &scriptConfig)
 
 	argp_parse(&script_judger_margs, argc, argv, ARGP_NO_ARGS | ARGP_IN_ORDER, 0, &scriptConfig);
 }
+
+char html_judger_argp_args_doc[] = "run program arg1, arg2, ...";
+char html_judger_argp_doc[] = "A tool to run html judger";
+argp_option html_judger_argp_options[] = {
+	{"tl"                 , 'T', "TIME_LIMIT"  , 0, "Set time limit (in second)"                            ,  1},
+	{"ml"                 , 'M', "MEMORY_LIMIT", 0, "Set memory limit (in mb)"                              ,  2},
+	{"ol"                 , 'O', "OUTPUT_LIMIT", 0, "Set output limit (in mb)"                              ,  3},
+	{"work-path"          , 'w', "WORK_PATH"   , 0, "Set work path"                                         ,  4},
+	{"outputpath"         , 'x', "OUTPUT_PATH" , 0, "Set all output-files' directory"                       ,  5},
+	{"out"                , 'o', "OUTPUT_FILE" , 0, "Set output file name"                                  ,  6},
+	{"err"                , 'e', "ERROR_FILE"  , 0, "Set error file name"                                   ,  7},
+	{"res"                , 'r', "RESULT_FILE" , 0, "Set result file name"                                  ,  8},
+	{0}
+};
+
+error_t html_judger_argp_parse_opt (int key, char *arg, struct argp_state *state){
+	HTMLConfig *config = (HTMLConfig*)state->input;
+	char rp[PATH_MAX+1];
+
+	switch (key){
+		case 'T':
+			config->lim.time = atoi(arg);
+			break;
+		case 'M':
+			config->lim.memory = atoi(arg);
+			break;
+		case 'O':
+			config->lim.output = atoi(arg);
+			break;
+		case 'w':
+			// if (realpath(arg, rp) == NULL){
+			// 	std::cout << "error in realpath; path = " << arg << std::endl;
+			// 	config->workpath = "";
+			// } else
+			// 	config->workpath = std::string(rp);
+			// if (config->workpath.empty()) {
+			// 	argp_usage(state);
+			// }
+			config->workpath = arg;
+			break;
+		case 'x':
+			config->outputpath = arg;
+			break;
+		case 'o':
+			config->outputFileName = arg;
+			break;
+		case 'e':
+			config->errorFileName = arg;
+			break;
+		case 'r':
+			config->resultFileName = arg;
+			break;
+		case ARGP_KEY_ARG:
+			config->argArr.push_back(arg);
+			for (int i = state->next; i < state->argc; i++) {
+				config->argArr.push_back(state->argv[i]);
+			}
+			state->next = state->argc;
+			break;
+		case ARGP_KEY_END:
+			if (state->arg_num == 0) {
+				argp_usage(state);
+			}
+			break;
+		default:
+			return ARGP_ERR_UNKNOWN;
+	}
+
+	return 0;
+}
+
+argp html_judger_margs = {
+	html_judger_argp_options,
+	html_judger_argp_parse_opt,
+	html_judger_argp_args_doc,
+	html_judger_argp_doc
+};
+
+void html_judger_parse_args(int argc ,char **argv, HTMLConfig &htmlConfig){
+	htmlConfig.lim = htmlLimit;
+	htmlConfig.outputpath = "/tmp";
+	htmlConfig.resultFileName = "result.txt";
+	htmlConfig.outputFileName = "output.txt";
+	htmlConfig.errorFileName = "error.txt";
+	htmlConfig.workpath = getCurDir();
+
+	argp_parse(&html_judger_margs, argc, argv, ARGP_NO_ARGS | ARGP_IN_ORDER, 0, &htmlConfig);
+}
