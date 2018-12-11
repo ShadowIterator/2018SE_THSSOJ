@@ -15,8 +15,8 @@ class MyProblem extends Component {
             data: [],
         }
     }
-    request_data = () => {
-        ajax_post(api_list['query_problem'], {user_id: this.props.id}, this, (that, result) => {
+    request_data = (id) => {
+        ajax_post(api_list['query_problem'], {user_id: id}, this, (that, result) => {
             if(result.data.code === 1) {
                 return;
             }
@@ -34,13 +34,13 @@ class MyProblem extends Component {
         });
     };
     componentDidMount() {
-        this.request_data();
+        this.request_data(this.props.id);
     }
     componentWillUpdate(nextProps) {
         if(nextProps.id===undefined)
             return;
         if(nextProps.id !== this.props.id) {
-            this.request_data();
+            this.request_data(nextProps.id);
         }
     }
     columns = [

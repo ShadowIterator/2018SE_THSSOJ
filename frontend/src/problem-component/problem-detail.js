@@ -237,19 +237,19 @@ class ProblemDetail extends Component {
             const course = result.data[0];
             that.setState({lesson_name:course.name});
         });
-        this.update_record();
+        this.update_record(this.props.id);
     }
     componentWillUpdate(nextProps) {
         if(nextProps.id===undefined)
             return;
         if(nextProps.id !== this.props.id) {
-            this.update_record();
+            this.update_record(this.props.id);
         }
     }
-    update_record = () => {
+    update_record = (id) => {
         if(this.props.lesson_id === 0) {
             ajax_post(api_list['query_record'], {
-                user_id: this.props.id,
+                user_id: id,
                 problem_id: parseInt(this.props.problem_id),
                 record_type: 0,
             }, this, (that, result) => {
@@ -260,7 +260,7 @@ class ProblemDetail extends Component {
             });
         } else {
             ajax_post(api_list['query_record'], {
-                user_id: this.props.id,
+                user_id: id,
                 problem_id: parseInt(this.props.problem_id),
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 1,
@@ -271,7 +271,7 @@ class ProblemDetail extends Component {
                 that.setState({records: result.data});
             });
             ajax_post(api_list['query_record'], {
-                user_id: this.props.id,
+                user_id: id,
                 problem_id: parseInt(this.props.problem_id),
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 2,
