@@ -4,6 +4,7 @@ import os
 import time
 import datetime
 import requests
+import uuid
 from . import base
 from .base import *
 
@@ -384,7 +385,22 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
-        pass
+        res_dict = {}
+        # upload_path = os.path.join(os.path.dirname(__file__), 'files')
+        code_meta = self.request.files['code']
+        temp_dir = self.root_dir+'/tmp'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        file_name = code_meta['filename']
+        file_path = temp_dir+'/'+file_name
+        if os.path.exists(file_path):
+            new_filename = str(uuid.uuid1())
+            file_path = file_path.replace(file_name, new_filename)
+        target_file = open(file_path, mode='wb')
+        target_file.write(code_meta['body'])
+        target_file.close()
+        self.set_res_dict(res_dict, code=0, url=os.getcwd()+'/'+file_path)
+        return res_dict
 
     # @tornado.web.authenticated
     async def _uploadCases_post(self):
