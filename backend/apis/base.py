@@ -79,7 +79,9 @@ class Application(tornado.web.Application):
         self.db_instance = db
 
 
-
+# class FormHandler(tornado.web.RequestHandler):
+#     def post(self):
+#         print('form-post')
 
 class BaseHandler(tornado.web.RequestHandler):
     async def try_query(self):
@@ -91,7 +93,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.db = self.application.db_instance
         self.getargs()
         self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 

@@ -24,7 +24,7 @@ class APIRecordHandler(base.BaseHandler):
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     async def _list_post(self):
-        return await self.querylr('records', self.args['start'], self.args['end'])
+        return await self.db.querylr('records', self.args['start'], self.args['end'])
 
     @tornado.web.authenticated
     async def _query_post(self):
@@ -77,6 +77,7 @@ class APIRecordHandler(base.BaseHandler):
                        'Compile Error': 8,
                        'unknown': 9,
                        }
+        print('returnresult: ', match_record)               
         judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
             match_record['consume_time'] = judge_result['time']

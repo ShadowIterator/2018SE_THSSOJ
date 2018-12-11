@@ -94,20 +94,29 @@ class CodeInput extends Component {
         else
             lang = -1;
         let record_type;
-        if(this.props.lesson_id === 0) {
+        let data = {};
+        if(this.props.lesson_id === '0') {
             record_type = 0;
+            data = {
+                user_id: this.props.id,
+                problem_id: this.props.problem_id,
+                record_type: record_type,
+                src_code: this.state.code,
+                src_language: lang,
+                test_ratio: 100,
+            };
         } else {
             record_type = 2;
+            data = {
+                user_id: this.props.id,
+                problem_id: this.props.problem_id,
+                homework_id: this.props.homework_id,
+                record_type: record_type,
+                src_code: this.state.code,
+                src_language: lang,
+                test_ratio: 100,
+            };
         }
-        const data = {
-            user_id: this.props.id,
-            problem_id: this.props.problem_id,
-            homework_id: this.props.homework_id,
-            record_type: record_type,
-            src_code: this.state.code,
-            src_language: lang,
-            test_ratio: 100,
-        };
         console.log(data);
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
@@ -183,11 +192,13 @@ class CodeInput extends Component {
                     />
                 </div>
                 <Row type="flex" justify="center">
+                    {this.props.lesson_id !== '0' &&
                     <Col span={4}>
                         <div style={{textAlign: 'center', marginTop: '10px'}}>
                             <Button icon="build" onClick={this.clickTest} style={{outline: 0}}>测试</Button>
                         </div>
                     </Col>
+                    }
                     <Col span={4}>
                         <div style={{textAlign: 'center', marginTop: '10px'}}>
                             <Button icon="upload" onClick={this.clickSubmit} style={{outline: 0}}>提交</Button>
