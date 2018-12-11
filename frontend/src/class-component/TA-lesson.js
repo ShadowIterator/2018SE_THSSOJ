@@ -149,7 +149,7 @@ class mTALessonPanel extends Component {
             console.log('No course');
         }
         const data = result.data[0];
-        console.log('course data: ', data)
+        console.log('course data: ', data);
         // const code = parseInt(data.code);
         // if(code !== 0){
         //     return ;
