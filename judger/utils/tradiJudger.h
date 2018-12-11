@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <cstdarg>
 #include <sstream>
+#include <fstream>
 #include <sys/types.h>
 #include "configs.h"
 
@@ -80,7 +81,6 @@ CompileResult runCompiler(
 	va_end(ap);
 
 	// cout << "after parse args" << endl;
-	
 	RunResult res = runExecutor(compileConfig);
 	CompileResult ret(res.jr, res.time, res.memory,
 					(res.jr == Accept) && (res.ec == NoError));

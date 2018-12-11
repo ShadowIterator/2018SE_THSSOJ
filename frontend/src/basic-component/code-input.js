@@ -29,10 +29,19 @@ class CodeInput extends Component {
 
     constructor(props) {
         super(props);
+        let lang_str = '';
+        let lang_type = '';
+        switch(this.props.problem_info.language[0]) {
+            case 1: lang_str='C'; lang_type='text/x-csrc'; break;
+            case 2: lang_str='C++'; lang_type='text/x-c++src'; break;
+            case 3: lang_str='Javascript'; lang_type='text/javascript'; break;
+            case 4: lang_str='Python3'; lang_type='text/x-python'; break;
+            default: break;
+        }
         this.state = {
-            code: defaultcode['javascript'],
-            mode: 'javascript',
-            language: 'text/javascript'
+            code: defaultcode[lang_str],
+            mode: lang_str,
+            language: lang_type,
         };
         this.clickSubmit = this.clickSubmit.bind(this);
         this.clickTest = this.clickTest.bind(this);
@@ -96,8 +105,10 @@ class CodeInput extends Component {
             homework_id: this.props.homework_id,
             record_type: record_type,
             src_code: this.state.code,
-            src_language: lang
+            src_language: lang,
+            test_ratio: 100,
         };
+        console.log(data);
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
 
@@ -130,7 +141,7 @@ class CodeInput extends Component {
             record_type: 1,
             src_code: this.state.code,
             src_language: lang,
-            test_radio: 100,
+            test_ratio: 100,
         };
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }

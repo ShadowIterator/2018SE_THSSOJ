@@ -150,7 +150,7 @@ class ProblemDetailRecord extends Component {
                     <tr>
                         <td>{counter}</td>
                         {this.props.lesson_id !== 0 &&
-                        <td>{'测试' + re.test_radio.toString() + '%数据'}</td>
+                        <td>{'测试' + re.test_ratio.toString() + '%数据'}</td>
                         }
                         <td>{result}</td>
                         <td>{re.consume_time.toString() + ' ms'}</td>

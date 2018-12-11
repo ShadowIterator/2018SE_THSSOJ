@@ -1,4 +1,3 @@
-
 import aiopg
 import bcrypt
 import os.path
@@ -16,19 +15,209 @@ import tornado.web
 # import unicodedata
 import asyncio
 
-# from utils.noresulterror import NoResultError
+class PERMISSIONLEVEL(object):
+    NORMAL = 0
+    STUDENT = 1
+    TA = 2
+    ADMIN = 3
+    EVERYONE = 0
+    ONESELF = 1
 
-## to create primarykey: id
-# CREATE SEQUENCE gys.mytable_myid_seq
-#     INCREMENT 1
-#     START 1
-#     MINVALUE 1
-#     MAXVALUE 99999999
-#     CACHE 1;
+permissions = {
+    'users': {
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'username': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'password': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.ONESELF),
+            'realname': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'create_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'role': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'validate_code': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'gender': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'student_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'ta_courses': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'email': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'courses': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'notices': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'start_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'end_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'tas': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'students': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homeworks': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'notices': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'start_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'end_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'homeworks': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'deadline': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problems': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'name': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'deadline': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problems': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'problems': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'time_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'memory_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'judge_method': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'time_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'memory_limit': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'judge_method': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'records': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'records': {
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'submit_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'record_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_ratio': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'description': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'submit_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'problem_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'homework_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_time': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'consume_memory': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_size': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'record_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'result_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_ratio': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'src_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    },
+    'notices': {
+        'read': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'course_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'content': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        },
+        'write': {
+            'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'user_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'course_id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'title': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'content': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+        }
+    }
+}
 
-class BaseHandler(tornado.web.RequestHandler):
-    def row_to_obj(self, row, cur):
+database_keys = {
+    'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
+    'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices', 'start_time', 'end_time', ],
+    'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', ],
+    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 
+                'consume_time', 'consume_memory', 'src_size', 'record_type', 'result_type', 'test_ratio', 'src_language',],
+    'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
+}
+
+
+class NoResultError(Exception):
+    pass
+
+class NoMethodError(Exception):
+    pass
+
+class BaseError(Exception):
+    pass
+
+
+class BaseDB:
+    def __init__(self, db):
+        self.db = db
+        self.tables = {}
+        self.tables['users'] = Users(self, 'users')
+        self.tables['courses'] = Courses(self, 'courses')
+        self.tables['homeworks'] = Homeworks(self, 'homeworks')
+        self.tables['problems'] = Homeworks(self, 'problems')
+        self.tables['records'] = Homeworks(self, 'records')
+        self.tables['notices'] = Homeworks(self, 'notices')
+
+        # self.table_name = si_table_name
+
+    @staticmethod
+    def row_to_obj(row, cur):
         """Convert a SQL row to an object supporting dict and attribute access."""
+        # obj = tornado.util.ObjectDict()
         obj = tornado.util.ObjectDict()
         for val, desc in zip(row, cur.description):
             obj[desc.name] = val
@@ -36,176 +225,220 @@ class BaseHandler(tornado.web.RequestHandler):
 
     async def execute(self, stmt, *args):
         """Execute a SQL statement.
+
         Must be called with ``await self.execute(...)``
         """
-        with (await self.application.db.cursor()) as cur:
+        print('execute: ', stmt, args)
+        with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
     async def query(self, stmt, *args):
         """Query for a list of results.
+
         Typical usage::
+
             results = await self.query(...)
+
         Or::
+
             for row in await self.query(...)
         """
-        print('in query')
-        with (await self.application.db.cursor()) as cur:
+        with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
-            return [self.row_to_obj(row, cur)
+            res = [self.row_to_obj(row, cur)
                     for row in await cur.fetchall()]
+            # for item in res:
+            #     print(item)
+            # for xx in res:
+            #     xx.save()
+            # res[0].name = 'ycdfwzy'
+            # self.saveObject('users', res[0])
+            return res
 
     async def queryone(self, stmt, *args):
         """Query for exactly one result.
+
         Raises NoResultError if there are no results, or ValueError if
         there are more than one.
         """
         results = await self.query(stmt, *args)
         if len(results) == 0:
-            # raise NoResultError()
-            pass
+            raise NoResultError()
         elif len(results) > 1:
             raise ValueError("Expected 1 result, got %d" % len(results))
+        print(results[0])
         return results[0]
 
-    async def prepare(self):
-        # get_current_user cannot be a coroutine, so set
-        # self.current_user in prepare instead.
-        user_id = self.get_secure_cookie("monitor_user")
-        if user_id:
-            # print(user_id)
-            self.current_user = await self.queryone("SELECT * FROM users WHERE id = %s",
-                                                    int(user_id))
+    async def any_author_exists(self):
+        return bool(await self.query("SELECT * FROM authors LIMIT 1"))
 
-# class AuthSignupHandler(BaseHandler):
-#     def get(self):
-#         self.render('signup.html', error=None)
-#
-#     async def post(self):
-#         user_email = self.get_argument("email")
-#         try:
-#             await self.queryone("SELECT * FROM users WHERE email = %s", user_email)
-#         except NoResultError:
-#             user_name = self.get_argument("name")
-#             hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#                 None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("password")),
-#                 bcrypt.gensalt())
-#             user_hashed_password = tornado.escape.to_unicode(hashed_password)
-#             await self.execute("INSERT INTO users (email, name, hashed_password, level) VALUES (%s, %s, %s, 1)",
-#                                         user_email, user_name, user_hashed_password)
-#             user_id = await self.queryone("SELECT id FROM users WHERE email = %s", user_email)
-#             self.set_secure_cookie("monitor_user", str(user_id.id))
-#             self.redirect(self.get_argument("next", "/"))
-#             return
-#         self.render('signup.html', error="This E-mail has existed!")
-#
-# class AuthLoginHandler(BaseHandler):
-#     def get(self):
-#         self.render("login.html", error=None)
-#
-#     async def post(self):
-#         try:
-#             user = await self.queryone("SELECT * FROM users WHERE email = %s",
-#                                         self.get_argument("email"))
-#         except NoResultError:
-#             self.render("login.html", error="Email not found. Please Sign up first.")
-#             return
-#         hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#             None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("password")),
-#             tornado.escape.utf8(user.hashed_password))
-#         hashed_password = tornado.escape.to_unicode(hashed_password)
-#         if hashed_password == user.hashed_password:
-#             self.set_secure_cookie("monitor_user", str(user.id))
-#             self.redirect(self.get_argument("next", "/"))
-#         else:
-#             self.render("login.html", error="Incorrect password.")
-#
-# class AuthLogoutHandler(BaseHandler):
-#     @tornado.web.authenticated
-#     def get(self):
-#         self.clear_cookie("monitor_user")
-#         self.redirect(self.get_argument("next", "/"))
-#
-# class AuthChangepwdsuccHandler(BaseHandler):
-#     def get(self):
-#         self.render("changepwdsucc.html", succ="Successfully changed password!")
-#
-#
-# class AuthChangepwdHandler(BaseHandler):
-#     @tornado.web.authenticated
-#     def get(self):
-#         self.render("changepwd.html", error=None)
-#
-#     async def post(self):
-#         try:
-#             user = await self.queryone("SELECT * FROM users WHERE id = %s",
-#                                         self.current_user.id)
-#         except NoResultError:
-#             self.render("changepwd.html",
-#                         error="User Not Found. There must be something wrong.")
-#             return
-#         if self.get_argument("newpassword") != self.get_argument("newpasswordagain"):
-#             self.render("changepwd.html",
-#                         error="The second password is different from the first one.")
-#             return
-#         new_hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#             None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("newpassword")),
-#             bcrypt.gensalt())
-#         new_hashed_password = tornado.escape.to_unicode(new_hashed_password)
-#         hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#             None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("originalpassword")),
-#             tornado.escape.utf8(user.hashed_password))
-#         hashed_password = tornado.escape.to_unicode(hashed_password)
-#         if hashed_password == user.hashed_password:
-#             await self.execute("UPDATE users SET hashed_password=%s WHERE id=%s;",
-#                                 new_hashed_password,
-#                                 self.current_user.id)
-#             self.clear_cookie("monitor_user")
-#             self.redirect("/auth/changepwdsucc")
-#         else:
-#             self.render("changepwd.html",
-#                         error="Original Password incorrect!")
-#
-# class AuthCreateUserHandler(BaseHandler):
-#     @tornado.web.authenticated
-#     async def get(self):
-#         user_id_str = self.get_secure_cookie("monitor_user")
-#         if not user_id_str: return None
-#         user_id = int(user_id_str)
-#         try:
-#             level = await self.queryone("SELECT level FROM users WHERE id = %s;", user_id)
-#         except:
-#             self.redirect("/")
-#             return
-#         if (level.level != 0):
-#             self.redirect("/")
-#             return
-#         self.render("create.html", error=None)
-#
-#     @tornado.web.authenticated
-#     async def post(self):
-#         user_id_str = self.get_secure_cookie("monitor_user")
-#         if not user_id_str: return None
-#         user_id = int(user_id_str)
-#         try:
-#             level = await self.queryone("SELECT level FROM users WHERE id = %s;", user_id)
-#         except:
-#             self.redirect("/")
-#             return
-#         if (level.level != 0):
-#             self.redirect("/")
-#             return
-#         user_email = self.get_argument("email")
-#         try:
-#             await self.queryone("SELECT * FROM users WHERE email = %s", user_email)
-#         except NoResultError:
-#             user_name = self.get_argument("name")
-#             hashed_password = await tornado.ioloop.IOLoop.current().run_in_executor(
-#                 None, bcrypt.hashpw, tornado.escape.utf8(self.get_argument("password")),
-#                 bcrypt.gensalt())
-#             user_hashed_password = tornado.escape.to_unicode(hashed_password)
-#             await self.execute("INSERT INTO users (email, name, hashed_password, level) VALUES (%s, %s, %s, 1)",
-#                                         user_email, user_name, user_hashed_password)
-#             user_id = await self.queryone("SELECT id FROM users WHERE email = %s", user_email)
-#             self.redirect(self.get_argument("next", "/"))
-#             return
-#         self.render('create.html', error="This E-mail has existed!")
+    async def dropTable(self, si_table_name):
+        await self.execute('''DROP TABLE IF EXISTS {table_name};'''.format(table_name = si_table_name))
+
+    async def createTable(self, si_table_name, **kw):
+        await self.db.execute('''CREATE TABLE {table_name} (\n{cols_info}\n );'''.format(table_name = si_table_name, cols_info = ',\n'.join(map(lambda tp : str(tp[0]) + ' ' + str(tp[1]), kw.items()))), None)
+
+    def generate_table_object(self, si_table_name):
+        rtn = globals()[si_table_name](self.db, si_table_name)
+        return rtn
+
+    async def saveObject(self, si_table_name, object, cur_user = None):
+        return await self.tables[si_table_name].saveObject(object, cur_user)
+
+    async def all(self, si_table_name, cur_user = None):
+        return await self.tables[si_table_name].all(cur_user)
+
+    async def getObject(self, si_table_name, cur_user = None, **kw):
+        return await self.tables[si_table_name].getObject(cur_user, **kw)
+
+    async def deleteObject(self, si_table_name, **kw):
+        return await self.tables[si_table_name].deleteObject(**kw)
+
+    async def createObject(self, si_table_name, **kw):
+        return await self.tables[si_table_name].createObject(**kw)
+
+
+class BaseTable:
+
+    def __init__(self, db, si_table_name):
+        self.db = db
+        # self.table_name = self.__class__.__name__.lower()
+        self.table_name = si_table_name
+        self.permissions = permissions[si_table_name]
+        self.database_keys = database_keys[si_table_name]
+
+    async def saveObject(self, object, cur_user = None):
+        si_table_name = self.table_name
+        if(cur_user):
+            object = await self.objectFilter('write', object, cur_user)
+        print('saveObject-before: ', object)
+        object = self.filterKeys(object)
+        print('saveObject: ', object)
+        fmtList = []
+        valueList = []
+        for key,value in object.items():
+            if key != 'id':
+                fmtList.append(str(key) + ' = %s')
+                valueList.append(value)
+        sfmt = ' , '.join(fmtList)
+        print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
+        await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
+
+    async def all(self, cur_user = None):
+        si_table_name = self.table_name
+        res = await self.db.query('''SELECT * FROM {table_name}'''.format(table_name = si_table_name))
+        if(cur_user):
+            rtn = []
+            for item in res:
+                rtn.append(await self.objectFilter('read', item, cur_user))
+            return rtn
+        else:
+            return res
+
+    async def getObject(self, cur_user = None, **kw):
+        si_table_name = self.table_name
+        print('getobject: ', kw)
+        kw = self.filterKeys(kw)
+        print('getobject after filter: ', kw)
+        plst = []
+        valuelist = []
+        for key, value in kw.items():
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
+        res = await self.db.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+        if(cur_user):
+            rtn = []
+            for item in res:
+                rtn.append(await self.objectFilter('read', item, cur_user))
+            return rtn
+        else:
+            return res
+
+
+    async def deleteObject(self, **kw):
+        si_table_name = self.table_name
+        plst = []
+        valuelist = []
+        for key, value in kw.items():
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        slst = ' AND '.join(plst)
+        print("slst = ", slst)
+        return await self.db.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
+
+
+    async def createObject(self, **kw):
+        si_table_name = self.table_name
+        print('createObject: kw = ', kw)
+        kw = self.filterKeys(kw)
+        propfmt = ['%s'] * len(kw)
+        spropfmt = ','.join(propfmt)
+        # propfmt = []
+        propkeys = []
+        propvalues = []
+        for key, value in kw.items():
+            propkeys.append(str(key))
+            propvalues.append(value)
+
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
+        print('fmt = ', str_fmt, propvalues)
+        await self.db.execute(str_fmt, *propvalues)
+
+    async def objectFilter(self, method, dic, user):
+        # user = await self.get_current_user_object()
+        table_name = self.table_name
+        per_owner = 0
+        per_role = 0
+        try:
+            if (table_name == 'users' and 'id' in dic.keys()):
+                if (dic['id'] == user['id']):
+                    per_owner = 1
+            per_role = user['role']
+        except:
+            print('object filter: user not loged in')
+        print('permission: ', per_role, per_owner)
+        return self.jsonFilter(method, dic, per_role, per_owner)
+
+    def jsonFilter(self, method, dic, per_role, per_owner):
+        table_name = self.table_name
+        rtn = {}
+        # permissionList = permissions[table_name][method]
+        permissionList = self.permissions[method]
+        print('jsonFilter: ', dic)
+        for key, value in dic.items():
+            if(key in permissionList.keys()):
+                permission = permissionList[key]
+                # print(permission)
+                if(permission[0] <= per_role and permission[1] <= per_owner):
+                    rtn[key] = value
+        return rtn
+
+    def filterKeys(self, kw):
+        si_table_name = self.table_name
+        # print('filterKeys: ', kw)
+        rtn = {}
+        keyslist = self.database_keys
+        for key, value in kw.items():
+            if (key in keyslist):
+                rtn[key] = value
+        return rtn
+
+class Users(BaseTable):
+    pass
+
+class Courses(BaseTable):
+    pass
+
+class Homeworks(BaseTable):
+    pass
+
+class Problems(BaseTable):
+    pass
+
+class Records(BaseTable):
+    pass
+
+class Notices(BaseTable):
+    pass

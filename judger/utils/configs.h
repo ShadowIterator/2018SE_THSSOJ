@@ -40,7 +40,7 @@ enum JudgeResult{
 std::string JudgeResult2string(JudgeResult jr);
 void StringFormat(std::string&);
 
-const std::string default_checker_dir = "/Users/hongfz/Learn/2018Autumn/软件工程3/2018SE_THSSOJ/judger/checkers";
+const std::string default_checker_dir = "/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers";
 
 class runLimit{
 public:
@@ -107,10 +107,25 @@ public:
 	std::vector<std::string> argArr;
 };
 
+// HTMLConfig is the same as ScriptConfig temporarily
+// I differ them to add more features for HTML in future
+class HTMLConfig {
+public:
+	std::string outputpath;		//result output error files' full path
+	std::string resultFileName;
+	std::string outputFileName;
+	std::string errorFileName;
+	std::string workpath;
+	runLimit lim;
+
+	std::vector<std::string> argArr;
+};
+
 const runLimit defaultLimit(1, 128, 64, 1024);
 const runLimit compileLimit(15, 512, 64, 1024);
 const runLimit runningLimit(1, 256, 64, 1024);
 const runLimit checkerLimit(2, 256, 64, 1024);
+const runLimit htmlLimit(30, 1024, 1024, 1024);
 
 class RunResult{
 public:
@@ -231,7 +246,7 @@ public:
 	}
 };
 
-class JudgerResult{
+class JudgerResult {
 public:
 	std::string result;
 	int time;	// ms
@@ -242,7 +257,7 @@ public:
 				: result(res), time(_time), memory(_memory), info(_info){}
 };
 
-class ScriptJudgerResult{
+class ScriptJudgerResult {
 public:
 	int score;
 	int time;	// ms
@@ -266,7 +281,7 @@ public:
 			for (int i = 0 ; i < len; ++i)
 				info += buf[i];
 		} while(len > 0);
-//		if (info.back() == '\n')
+
 		if (info.length() > 0 && info[info.length() - 1] == '\n')
 			info = info.substr(0, info.length()-1);
 
@@ -278,7 +293,74 @@ public:
 			return;
 		bool flag = true;
 		while (t+l < info.length()){
-			// std::cout << info[t+l] << std::endl;
+			if (info[t+l] < '0' || info[t+l] > '9') {
+				flag = false;
+				break;
+			}
+			l++;
+		}
+		if (flag){
+			score = atoi(info.substr(t, l).c_str());
+			info = info.substr(0, t);
+		}
+		if (info.length() > 500){
+			info = info.substr(0, 500);
+			info += std::string("...");
+		}
+	}
+
+	void load_Info(const std::string& filename){
+		char buf[512];
+		int fd = open(filename.c_str(), O_RDONLY);
+		if (fd < 0){
+			std::cout << "open file failed when getInfo" << std::endl;
+			return;
+		}
+		info = "";
+		ssize_t len = read(fd, buf, 512);
+		for (int i = 0 ; i < len; ++i)
+			info += buf[i];
+		if (info.length() > 500){
+			info = info.substr(0, 500);
+			info += std::string("...");
+		}
+	}
+};
+
+class HTMLJudgerResult {
+public:
+	int score;
+	std::string info;
+
+	HTMLJudgerResult(int _score = 0, const std::string& _info = "No Comment")
+					: score(_score), info(_info){}
+
+	void load_Score_Info(const std::string& filename){
+		char buf[512];
+		int fd = open(filename.c_str(), O_RDONLY);
+		if (fd < 0){
+			std::cout << "open file failed when getInfo" << std::endl;
+			return;
+		}
+		info = "";
+		ssize_t len;
+		do{
+			len = read(fd, buf, 512);
+			for (int i = 0 ; i < len; ++i)
+				info += buf[i];
+		} while(len > 0);
+
+		if (info.length() > 0 && info[info.length() - 1] == '\n')
+			info = info.substr(0, info.length()-1);
+
+		int t = info.rfind('\n'), l = 0;
+		// std::cout << "t=" << t << std::endl;
+		// std::cout << "npos=" << std::string::npos << std::endl;
+		// std::cout << "length=" << info.length() << std::endl;
+		if (t++ == std::string::npos)
+			return;
+		bool flag = true;
+		while (t+l < info.length()){
 			if (info[t+l] < '0' || info[t+l] > '9') {
 				flag = false;
 				break;

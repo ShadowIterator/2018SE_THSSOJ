@@ -23,7 +23,8 @@ class APIUserHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
-        res = await self.getObject('users', secure = 1, **self.args)
+        res = await self.db.getObject('users', cur_user = self.get_current_user_object(), **self.args)
+        print('query res = ', res)
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
@@ -43,7 +44,7 @@ class APIUserHandler(base.BaseHandler):
     @check_password
     async def _update_post(self):
         print('si_update: ', self.args)
-        await self.saveObject('users', secure = 1, object = self.args)
+        await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
         # rtn = {
@@ -63,7 +64,7 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
-        await self.createObject('users',
+        await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],
                                 email=self.args['email'],
@@ -76,15 +77,12 @@ class APIUserHandler(base.BaseHandler):
         res_dict = {}
         username = self.args['username']
         password = self.args['password']
-        try:
-            users_list = await self.getObject('users', **{'username': username, 'password': password})
-        except:
-            res_dict['code'] = 1
+        # try:
+        users_list = await self.db.getObject('users', **{'username': username, 'password': password})
+        print('login, userlist = ', users_list)
 
-            # self.write(tornado.escape.json_encode(res_dict))
-            return res_dict
+        res_dict['code'] = 1
 
-            return 
         if len(users_list) == 1:
             userObj = users_list[0]
             print(userObj)
@@ -133,7 +131,7 @@ class APIUserHandler(base.BaseHandler):
                 smtpObj.sendmail(sender, receivers, message.as_string())
                 print("邮件发送成功", activate_code)
                 user_qualified['validate_code']=activate_code
-                await self.saveObject('users', user_qualified)
+                await self.db.saveObject('users', user_qualified)
                 res_dict['code']=0
             except:
                 res_dict['code']=1
@@ -151,7 +149,7 @@ class APIUserHandler(base.BaseHandler):
             user_qualified = (await self.getObject('users', id=id))[0]
             if user_qualified['validate_code'] == validate_code:
                 user_qualified.status = 1
-                await self.saveObject('users', user_qualified)
+                await self.db.saveObject('users', user_qualified)
                 res_dict['code'] = 0
             else:
                 res_dict['code'] = 1
@@ -160,19 +158,19 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 1
         return res_dict
 
-    @catch_exception_write
-    async def get(self, type): #detail
-        # self.getargs()
-        print('get: ', type)
-        res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
-        self.write(json.dumps(res).encode())
-
-    @catch_exception_write
-    async def post(self, type):
-        print('post: ', type)
-        res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
-        print('return: ', res)
-        self.write(json.dumps(res).encode())
+    # @catch_exception_write
+    # async def get(self, type): #detail
+    #     # self.getargs()
+    #     print('get: ', type)
+    #     res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
+    #     self.write(json.dumps(res).encode())
+    #
+    # @catch_exception_write
+    # async def post(self, type):
+    #     print('post: ', type)
+    #     res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
+    #     print('return: ', res)
+    #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
         return await self.querylr('users', self.args['start'], self.args['end'])

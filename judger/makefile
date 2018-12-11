@@ -22,6 +22,7 @@ CHECKER_EXE = \
 EXE = \
 	scriptJudger \
 	tradiJudger \
+	htmlJudger \
 	executor \
 	$(CHECKER_EXE)
 
@@ -34,13 +35,17 @@ scriptJudger: scriptJudger.cpp utils/configs.o utils/parseArgs.o utils/scriptJud
 	g++ scriptJudger.cpp utils/configs.o utils/parseArgs.o -o scriptJudger
 tradiJudger: tradiJudger.cpp utils/configs.o utils/parseArgs.o utils/tradiJudger.h
 	g++ tradiJudger.cpp utils/configs.o utils/parseArgs.o -o tradiJudger
-executor: utils/executor.cpp utils/parseArgs.o utils/configs.o
-	g++ utils/executor.cpp utils/parseArgs.o utils/configs.o -o executor
+htmlJudger: htmlJudger.cpp utils/configs.o utils/parseArgs.o utils/htmlJudger.h
+	g++ htmlJudger.cpp utils/configs.o utils/parseArgs.o -o htmlJudger
+executor: utils/executor.cpp utils/parseArgs.o utils/configs.o utils/security.o
+	g++ utils/executor.cpp utils/parseArgs.o utils/configs.o utils/security.o -o executor
 utils/parseArgs.o: utils/parseArgs.cpp utils/parseArgs.h utils/configs.h
 	g++ -c utils/parseArgs.cpp -o utils/parseArgs.o
 utils/configs.o: utils/configs.cpp utils/configs.h
 	g++ -c utils/configs.cpp -o utils/configs.o -std=c++11
+utils/security.o: utils/security.cpp utils/security.h
+	g++ -c utils/security.cpp -o utils/security.o
 clean:
-	rm *.o utils/*.o scriptJudger tradiJudger executor
+	rm *.o utils/*.o scriptJudger tradiJudger htmlJudger executor
 clean_all:
 	rm *.o utils/*.o $(EXE)

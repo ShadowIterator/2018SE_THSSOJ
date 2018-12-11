@@ -53,14 +53,14 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
+    course_spell TEXT,
     tas INTEGER[] DEFAULT '{}',
     students INTEGER[] DEFAULT '{}',
     status INTEGER DEFAULT 0,
     homeworks INTEGER[] DEFAULT '{}',
-    notices INTEGER[] DEFAULT '{}'
-    -- TODO: 起止时间
-    -- TODO: 生成一个unique的课程暗号
-    -- TODO: 增加一项用来标记是否已经过期
+    notices INTEGER[] DEFAULT '{}',
+    start_time TIMESTAMP,
+    end_time TIMESTAMP
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -69,6 +69,7 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     description TEXT,
     deadline TIMESTAMP,
+    status INTEGER DEFAULT 0,
     problems INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}'
     -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
@@ -78,16 +79,16 @@ DROP TABLE IF EXISTS problems;
 CREATE TABLE problems (
     id SERIAL PRIMARY KEY,
     title VARCHAR(128),
+    user_id INTEGER,
 --    description_path VARCHAR(256),
     time_limit INTEGER DEFAULT 1000, -- MS
     memory_limit INTEGER DEFAULT 256000,  -- KB
     judge_method INTEGER DEFAULT 1,
+    language INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
-    openness INTEGER DEFAULT 0
-    -- TODO: 是否提交对应数据以及标准程序是否通过
-    -- TODO: 允许的语言，整数列表
-    -- TODO: 创建者id
-    -- TODO: command，用于脚本评测所用的命令
+    openness INTEGER DEFAULT 0,
+    status INTEGER DEFAULT 0
+
 );
 
 DROP TABLE IF EXISTS records;
@@ -98,9 +99,13 @@ CREATE TABLE records (
     user_id INTEGER,
     problem_id INTEGER,
     homework_id INTEGER,
+    record_type INTEGER,
+    result_type INTEGER,
+    test_ratio INTEGER,
+    src_language INTEGER,
     result INTEGER,
     score INTEGER,
-    submit_status INTEGER,
+    status INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte
@@ -121,22 +126,7 @@ CREATE TABLE notices (
 -- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
 
 -- create items
-INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1, 2, 3, 4, 5, 6, 7, 8, 9}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st2','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st3','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st4','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st5','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st6','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st7','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st8','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st9','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st10','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st11','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st12','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st13','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('st14','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('lrj','1234','lrj@163.com', 1, '{1}');
+INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{2}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 
@@ -144,16 +134,8 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 2.', 'This is notice 2 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 3.', 'This is notice 3 content.');
 
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{1}', '{1,2,3}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software1', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software2', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software3', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software4', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software5', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software6', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software7', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software8', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{}', '{}');
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{}', 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('ip_sort', 1000, 262144, 2, '{}', 1);
+INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{1,2,3}');
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 -- INSERT INTO records (user_id, problem_id, homework_id, submit_time, score, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);
