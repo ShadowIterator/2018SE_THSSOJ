@@ -106,7 +106,7 @@ class ProblemDetailRecord extends Component {
             body.push(
                 <tr>
                     <td>0</td>
-                    {this.props.lesson_id !== 0 &&
+                    {this.props.lesson_id !== '0' &&
                     <td>正式提交</td>
                     }
                     <td>{result}</td>
@@ -149,7 +149,7 @@ class ProblemDetailRecord extends Component {
                 body.push(
                     <tr>
                         <td>{counter}</td>
-                        {this.props.lesson_id !== 0 &&
+                        {this.props.lesson_id !== '0' &&
                         <td>{'测试' + re.test_ratio.toString() + '%数据'}</td>
                         }
                         <td>{result}</td>
@@ -174,7 +174,7 @@ class ProblemDetailRecord extends Component {
                     <thead>
                     <tr>
                         <th>#</th>
-                        {this.props.lesson_id !== 0 &&
+                        {this.props.lesson_id !== '0' &&
                         <th>测试类型</th>
                         }
                         <th>运行结果</th>
@@ -199,7 +199,8 @@ class ProblemDetailRecord extends Component {
                         // mode: this.state.language,
                         theme: 'neat',
                         lineNumbers: true,
-                    }} value={this.state.src_code} readOnly={true}/>
+                        readOnly: true
+                    }} value={this.state.src_code} />
                 </Modal>
             </div>
         );

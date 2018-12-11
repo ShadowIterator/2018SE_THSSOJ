@@ -12,11 +12,26 @@ judger_url = 'http://judger:12345'
 
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
-        super().__init__(*args, **kw)
-        self.root_dir = self.root_dir+'/problems'
+        # super().__init__(*args, **kw)
+        # self.root_dir = self.root_dir+'/problems'
+        # ****************************************************
+        # ****************************************************
+        # ****************************************************
+        super(BaseHandler, self).__init__(*args, **kw)
+        self.db = self.application.db_instance
+        # self.getargs()
+        self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header("Access-Control-Allow-Credentials", 'true')
+
+        self.root_dir='root'
+        self.user = None
+        print(self.request.body)
+
 
     async def _list_post(self):
-        return await self.querylr('problems', self.args['start'], self.args['end'])
+        return await self.db.querylr('problems', self.args['start'], self.args['end'])
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -394,6 +409,8 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
+        print('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
+
         res_dict = {}
         # upload_path = os.path.join(os.path.dirname(__file__), 'files')
         code_meta = self.request.files['code']

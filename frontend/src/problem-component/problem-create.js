@@ -35,7 +35,7 @@ class RegistrationForm extends React.Component {
                     openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                     user_id: this.props.id,
                     code_url: this.state.upload_code.url,
-                    case_url: this.state.upload_code.url,
+                    case_url: this.state.upload_case.url,
                 };
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
@@ -205,14 +205,14 @@ class RegistrationForm extends React.Component {
                 >
                     <div className="dropbox">
                         {getFieldDecorator('upload_code', {
-                            rules: [{required: true, message: '请上传标准程序'}],
+                            // rules: [{required: true, message: '请上传标准程序'}],
                             valuePropName: 'code',
                             getValueFromEvent: this.normFile,
                         })(
-                            <Upload.Dragger name="code" action={api_list['upload_code']}
+                            <Upload.Dragger name="code" action={"http://localhost:8000" + api_list['upload_code']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log(fileList);
+                                console.log("upload_code:",fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -245,14 +245,14 @@ class RegistrationForm extends React.Component {
                 >
                     <div className="dropbox">
                         {getFieldDecorator('upload_case', {
-                            rules: [{required: true, message: '请上传测试数据'}],
+                            // rules: [{required: true, message: '请上传测试数据'}],
                             valuePropName: 'cases',
                             getValueFromEvent: this.normFile,
                         })(
-                            <Upload.Dragger name="case" action={api_list['upload_case']}
+                            <Upload.Dragger name="case" action={"http://localhost:8000" + api_list['upload_case']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log(fileList);
+                                console.log("upload_case",fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -325,7 +325,10 @@ const ProblemCreateForm = Form.create({
                 ...props.upload_code,
                 value: props.upload_code.value,
             }),
-
+            upload_case: Form.createFormField({
+                ...props.upload_case,
+                value: props.upload_case.value,
+            }),
         };
     },
     onValuesChange(_, values) {

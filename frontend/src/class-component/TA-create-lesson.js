@@ -63,7 +63,7 @@ class mLessonList extends Component {
         that.setState({
             title: result.data[0].name,
             description: result.data[0].description,
-            date: [moment.unix(result.date[0].start_time),moment.unix(result.date[0].end_time)],
+            date: [moment.unix(result.data[0].start_time), moment.unix(result.data[0].end_time)],
         });
         for (let index in result.data[0].tas){
             ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, LessonList.add_ta_callback);
