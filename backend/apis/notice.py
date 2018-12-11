@@ -45,6 +45,9 @@ class APINoticeHandler(base.BaseHandler):
         self.set_res_dict(res_dict, code=0, msg='notice deleted')
         return res_dict
 
+    async def _list_post(self):
+        return await self.querylr('notices', self.args['start'], self.args['end'])
+
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict = {}

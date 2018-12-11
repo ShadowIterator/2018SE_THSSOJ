@@ -10,6 +10,9 @@ class APIHomeworkHandler(base.BaseHandler):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/homeworks'
 
+    async def _list_post(self):
+        return await self.querylr('homeworks', self.args['start'], self.args['end'])
+
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
         if 'deadline' in self.args.keys():
