@@ -13,9 +13,9 @@ class APICourseHandler(base.BaseHandler):
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
         if 'start_time' in self.args.keys():
-            self.args['start_time'] = datetime.datetime.fromtimestamp(self.args['create_time'])
+            self.args['start_time'] = datetime.datetime.fromtimestamp(self.args['start_time'])
         if 'end_time' in self.args.keys():
-            self.args['end_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
+            self.args['end_time'] = datetime.datetime.fromtimestamp(self.args['end_time'])
 
     # @tornado.web.authenticated
     async def _create_post(self):

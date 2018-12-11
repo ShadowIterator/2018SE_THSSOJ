@@ -78,7 +78,7 @@ class APIRecordHandler(base.BaseHandler):
                        'Compile Error': 8,
                        'unknown': 9,
                        }
-        judge_result = json.loads(self.args['res'])
+        judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
             match_record['consume_time'] = judge_result['time']
             match_record['consume_memory'] = judge_result['memory']

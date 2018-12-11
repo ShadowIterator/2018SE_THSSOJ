@@ -181,8 +181,9 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
-        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'result_type', 'test_ratio'):
-            self.set_res_dict(res_dict, code=1, msg='not enough params')
+        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'src_language'):
+            print(self.args)
+            self.set_res_dict(res_dict, code=1, msg='submit post not enough params')
             # self.return_json(res_dict)
             return res_dict
 
@@ -222,6 +223,10 @@ class APIProblemHandler(base.BaseHandler):
         src_file.close()
 
         record_created['src_size'] = os.path.getsize(src_file_path)
+        if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
+            record_created['result_type'] = 0
+        elif self.args['src_language'] == 3:
+            record_created['result_type'] = 1
         await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
         if self.args['record_type']==2:
             self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
@@ -232,6 +237,7 @@ class APIProblemHandler(base.BaseHandler):
                 os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
@@ -259,6 +265,7 @@ class APIProblemHandler(base.BaseHandler):
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
