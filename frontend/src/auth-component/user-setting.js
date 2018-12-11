@@ -107,7 +107,8 @@ class UserSettingsForm extends Component {
     }
     handleSubmit(event) {
         event.preventDefault();
-        event.stopPropagation();
+        // event.stopPropagation();
+        console.log("handleSubmit");
         this.setState({
             isOpen: true,
         });
@@ -395,8 +396,8 @@ class UserSettingsForm extends Component {
                         <Button onClick={()=>{this.setState({isOpen:false});}}>Cancel</Button>
                     </div>
                 </div>
-                </Dialog>
-                </div>
+            </Dialog>
+            </div>
         );
     }
 }
