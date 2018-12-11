@@ -4,6 +4,8 @@ import bcrypt
 # import markdown
 import os.path
 import psycopg2
+import datetime
+import time
 import re
 import tornado.escape
 import tornado.httpserver
@@ -133,7 +135,6 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         return self.get_secure_cookie('user_id')
-
 
     async def _testhello_post(self):
         print('app: in testhello')

@@ -104,6 +104,8 @@ def handleScriptJudger():
 			continue
 		open(targetFile, "wb").write(open(sourceFile, "rb").read())
 
+		if not ('OUTPUT_PATH' in data):
+			data['OUTPUT_PATH'] = os.getcwd()
 		params = ['./scriptJudger', \
 					'--tl=%d' % data['TIME_LIMIT'],
 					'--ml=%d' % data['MEMORY_LIMIT'],\
@@ -112,6 +114,7 @@ def handleScriptJudger():
 					'--outputpath=%s' % data['OUTPUT_PATH'], \
 					data['OTHERS']
 					]
+
 		scriptQ.task_done()
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
 		stdoutdata, stderrdata = judger.communicate()

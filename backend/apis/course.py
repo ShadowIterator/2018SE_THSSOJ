@@ -9,7 +9,7 @@ class APICourseHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/courses'
-
+        
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
         if 'start_time' in self.args.keys():
