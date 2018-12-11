@@ -409,6 +409,7 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
+        print('uploadCode_post: ', self.request)
         print('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
 
         res_dict = {}
