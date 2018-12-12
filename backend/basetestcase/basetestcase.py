@@ -38,6 +38,8 @@ define("db_password", default="thssoj", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
+define('traditionalJudgerAddr', default=None, help='judger', type=str)
+define('scriptJudgerAddr', default=None, help='judger', type=str)
 
 def async_aquire_db(func):
     @tornado.testing.gen_test
