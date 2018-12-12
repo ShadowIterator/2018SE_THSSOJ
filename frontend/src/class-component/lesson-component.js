@@ -6,11 +6,12 @@ import {
     Button,
     ButtonGroup
 } from "@blueprintjs/core";
-import {Col, Row, Container} from "react-bootstrap";
+import {Col, Row} from "react-bootstrap";
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
+import {message} from "antd";
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -96,7 +97,8 @@ class mLessonList extends Component {
                                         ajax_post(api_list['update_course'], {id: lesson.id, status: 1},
                                             this, (that, result) => {
                                                 if(result.data.code!==0) {
-                                                    alert("Publish course failed.");
+                                                    // alert("Publish course failed.");
+                                                    message.error("公开课程失败");
                                                     return;
                                                 }
                                                 window.location.reload();
