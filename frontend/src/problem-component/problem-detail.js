@@ -89,18 +89,22 @@ class ProblemDetailRecord extends Component {
         if(this.props.submit_record !== null) {
             const sub = this.props.submit_record;
             let result = '';
-            if(sub.result_type === 0) {
-                const result_id = sub.result;
-                if(isNaN(result_id)) {
-                    result = '找不到结果';
-                } else {
-                    result = this.result_arr[result_id];
-                }
+            if(sub.status === 0) {
+                result = '等待评测';
             } else {
-                if(isNaN(sub.score)) {
-                    result = '找不到结果';
+                if (sub.result_type === 0) {
+                    const result_id = sub.result;
+                    if (isNaN(result_id)) {
+                        result = '找不到结果';
+                    } else {
+                        result = this.result_arr[result_id];
+                    }
                 } else {
-                    result = sub.score.toString() + ' 分';
+                    if (isNaN(sub.score)) {
+                        result = '找不到结果';
+                    } else {
+                        result = sub.score.toString() + ' 分';
+                    }
                 }
             }
             body.push(
@@ -110,9 +114,9 @@ class ProblemDetailRecord extends Component {
                     <td>正式提交</td>
                     }
                     <td>{result}</td>
-                    <td>{sub.consume_time === undefined ? -1 : (sub.consume_time.toString() + 'ms')}</td>
-                    <td>{sub.consume_memory === undefined ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
-                    <td>{sub.src_size === undefined ? -1 : (sub.src_size.toString() + ' B')}</td>
+                    <td>{sub.consume_time === null ? -1 : (sub.consume_time.toString() + 'ms')}</td>
+                    <td>{sub.consume_memory === null ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
+                    <td>{sub.src_size === null ? -1 : (sub.src_size.toString() + ' B')}</td>
                     <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
                     <td><a onClick={()=>{
                         ajax_post(api_list['srcCode_record'], {id: sub.id}, this, (that, result) => {
@@ -132,18 +136,22 @@ class ProblemDetailRecord extends Component {
                     continue;
                 console.log("inside table render for loop", re);
                 let result = '';
-                if(re.result_type === 0) {
-                    const result_id = re.result;
-                    if(isNaN(result_id)) {
-                        result = '找不到结果';
-                    } else {
-                        result = this.result_arr[result_id];
-                    }
+                if(re.status === 0) {
+                    result = '正在评测';
                 } else {
-                    if(isNaN(re.score)) {
-                        result = '找不到结果';
+                    if (re.result_type === 0) {
+                        const result_id = re.result;
+                        if (isNaN(result_id)) {
+                            result = '找不到结果';
+                        } else {
+                            result = this.result_arr[result_id];
+                        }
                     } else {
-                        result = re.score.toString() + ' 分';
+                        if (isNaN(re.score)) {
+                            result = '找不到结果';
+                        } else {
+                            result = re.score.toString() + ' 分';
+                        }
                     }
                 }
                 body.push(
@@ -153,9 +161,9 @@ class ProblemDetailRecord extends Component {
                         <td>{'测试' + re.test_ratio.toString() + '%数据'}</td>
                         }
                         <td>{result}</td>
-                        <td>{re.consume_time === undefined ? -1 : (re.consume_time.toString() + ' ms')}</td>
-                        <td>{re.consume_memory === undefined ? -1 : (re.consume_memory.toString() + ' kb')}</td>
-                        <td>{re.src_size === undefined ? -1 : (re.src_size.toString() + ' B')}</td>
+                        <td>{re.consume_time === null ? -1 : (re.consume_time.toString() + ' ms')}</td>
+                        <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
+                        <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
                         <td><a onClick={()=>{
                             ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
