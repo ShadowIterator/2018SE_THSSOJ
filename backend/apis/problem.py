@@ -359,7 +359,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['Language'] = 'C'
             elif self.args['src_language'] == 2:
                 judge_req['Language'] = 'C++'
-            elif self.args['Python'] == 4:
+            elif self.args['src_language'] == 4:
                 judge_req['Language'] = 'Python'
             judge_req['DATA_DIR'] = os.getcwd() + '/test'
             judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
