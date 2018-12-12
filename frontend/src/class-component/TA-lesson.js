@@ -473,15 +473,23 @@ export class TALesson extends Component {
     render() {
         let breadcrumb;
         let content;
-        if(this.state.current_selected === '1') {
+        if (this.state.current_selected === '1') {
             breadcrumb = (
                 <>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>未完成作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未截至作业</Breadcrumb.Item>
                 </>
             );
-            content = <h3>未完成作业</h3>;
-        } else if(this.state.current_selected === '2') {
+            content = <h3>未截至作业</h3>;
+        } else if (this.state.current_selected === '2') {
+            breadcrumb = (
+                <>
+                    <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>未批改作业</Breadcrumb.Item>
+                </>
+            );
+            content = <h3>未批改作业</h3>;
+        } else if (this.state.current_selected === '3') {
             breadcrumb = (
                 <>
                     <Breadcrumb.Item>作业</Breadcrumb.Item>
@@ -489,12 +497,12 @@ export class TALesson extends Component {
                 </>
             );
             content = <h3>作业成绩</h3>;
-        } else if(this.state.current_selected === '3') {
+        } else if (this.state.current_selected === '4') {
             breadcrumb = (
                     <Breadcrumb.Item>通知</Breadcrumb.Item>
             );
             content = <h3>通知</h3>;
-        } else if(this.state.current_selected === '4') {
+        } else if (this.state.current_selected === '5') {
             breadcrumb = (
                     <Breadcrumb.Item>课程信息</Breadcrumb.Item>
             );
@@ -521,11 +529,12 @@ export class TALesson extends Component {
                                 style={{ height: '100%' }}
                             >
                                 <SubMenu key="sub1" title={<span><Icon type="edit" />作业</span>}>
-                                    <Menu.Item key="1">未完成作业</Menu.Item>
-                                    <Menu.Item key="2">作业成绩</Menu.Item>
+                                    <Menu.Item key="1">未截至作业</Menu.Item>
+                                    <Menu.Item key="2">未批改作业</Menu.Item>
+                                    <Menu.Item key="3">作业成绩</Menu.Item>
                                 </SubMenu>
-                                <Menu.Item key="3"><Icon type="notification" />通知</Menu.Item>
-                                <Menu.Item key="4"><Icon type="info-circle" />课程信息</Menu.Item>
+                                <Menu.Item key="4"><Icon type="notification" />通知</Menu.Item>
+                                <Menu.Item key="5"><Icon type="info-circle" />课程信息</Menu.Item>
                             </Menu>
                         </Sider>
                         <Content style={{ padding: '0 24px', minHeight: 280 }}>
