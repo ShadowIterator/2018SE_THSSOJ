@@ -35,13 +35,13 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
     username VARCHAR(32) UNIQUE,    --
     password VARCHAR(512),          --
-    status INTEGER DEFAULT 1,                --
+    status INTEGER DEFAULT 0,                --
     email VARCHAR(512),             --
     realname VARCHAR(32) DEFAULT '',           --
     student_id VARCHAR(32) DEFAULT '',         --
     validate_time TIMESTAMP ,          --
     create_time TIMESTAMP DEFAULT current_timestamp,          --
-    role INTEGER DEFAULT 0,                   --
+    role INTEGER DEFAULT 1,                   --
     validate_code INTEGER,          --
     gender INTEGER DEFAULT 2,                 --
     student_courses INTEGER[] DEFAULT '{}',      --
@@ -53,11 +53,14 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
+    course_spell TEXT,
     tas INTEGER[] DEFAULT '{}',
     students INTEGER[] DEFAULT '{}',
     status INTEGER DEFAULT 0,
     homeworks INTEGER[] DEFAULT '{}',
-    notices INTEGER[] DEFAULT '{}'
+    notices INTEGER[] DEFAULT '{}',
+    start_time TIMESTAMP,
+    end_time TIMESTAMP
 );
 
 DROP TABLE IF EXISTS homeworks;
@@ -66,8 +69,10 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     description TEXT,
     deadline TIMESTAMP,
+    status INTEGER DEFAULT 0,
     problems INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}'
+    -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
 );
 
 DROP TABLE IF EXISTS problems;
@@ -81,7 +86,9 @@ CREATE TABLE problems (
     judge_method INTEGER DEFAULT 1,
     language INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
-    openness INTEGER DEFAULT 0
+    openness INTEGER DEFAULT 0,
+    status INTEGER DEFAULT 0
+
 );
 
 DROP TABLE IF EXISTS records;
@@ -98,11 +105,12 @@ CREATE TABLE records (
     src_language INTEGER,
     result INTEGER,
     score INTEGER,
-    submit_status INTEGER,
+    status INTEGER,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte
 --    src_path, VARCHAR(512),
+	-- TODO: 把泽神返回的所有结果存起来，并且更新一下Wiki上的API返回值等信息
 );
 
 DROP TABLE IF EXISTS notices;
@@ -112,22 +120,22 @@ CREATE TABLE notices (
     course_id INTEGER,
     title VARCHAR(128),
     content TEXT
+   	-- TODO: 添加创建时间
 );
 
+-- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
+
 -- create items
-INSERT INTO users (username, password, email, role) VALUES ('sherlock','1234','1747310410@qq.com', 1);
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, student_courses) VALUES ('lrj','1234','lrj@163.com', 1, '{1}');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38');
+INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 1.', 'This is notice 1 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 2.', 'This is notice 2 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 3.', 'This is notice 3 content.');
 
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework2', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework3', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{1}');
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{4}', '{2, 3}', 1, '{1, 2}', '{1,2,3}');
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('A+B', 1000, 1024, 1, '{1}', 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness) VALUES ('ip_sort', 1000, 262144, 2, '{}', 1);
--- INSERT INTO records (user_id, problem_id, homework_id, submit_time, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);
+INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{1,2,3}');
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
+INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
+-- INSERT INTO records (user_id, problem_id, homework_id, submit_time, score, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);

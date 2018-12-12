@@ -15,8 +15,9 @@ async function test() {
   const script = new vm.Script(content);
   script.runInContext(context);
 
-  const files = ['ip', 'iterator', 'equal'];
-  const timeouts = [1000, 1000, 1000];
+  const files = ['ip'];
+  const timeouts = [1000];
+  let score = 0;
   for (let i = 0; i < files.length; ++i) {
     console.log('------------');
     console.log(files[i]);
@@ -27,11 +28,13 @@ async function test() {
         timeout: timeouts[i],
       });
       console.log('pass');
+      score = 100;
     } catch (e) {
       console.error(e);
     }
     console.log('------------');
   }
+  console.log(score);
 }
 
 test()

@@ -23,6 +23,9 @@ class APIRecordHandler(base.BaseHandler):
         if 'submit_time' in self.args.keys():
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
+    async def _list_post(self):
+        return await self.db.querylr('records', self.args['start'], self.args['end'])
+
     @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
@@ -31,7 +34,6 @@ class APIRecordHandler(base.BaseHandler):
             timepoint = int(js['submit_time'].timestamp())
             js['submit_time'] = timepoint
         return res
-        # self.write(json.dumps(res).encode())
 
     # @tornado.web.authenticated
     async def _srcCode_post(self):
@@ -64,13 +66,31 @@ class APIRecordHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _returnresult_post(self):
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
+        result_dict = {'Accept': 0,
+                       'Wrong Answer': 1,
+                       'Runtime Error': 2,
+                       'Time Limit Exceed': 3,
+                       'Memory Limit Exceed': 4,
+                       'Output Limit Exceed': 5,
+                       'Danger System Call': 6,
+                       'Judgement Failed': 7,
+                       'Compile Error': 8,
+                       'unknown': 9,
+                       }
+        print('returnresult: ', match_record)               
+        judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
-            judge_result = json.loads(self.args['res'])
+            match_record['consume_time'] = judge_result['time']
+            match_record['consume_memory'] = judge_result['memory']
+            match_record['result'] = result_dict[judge_result['Result']]
 
         elif match_record['src_language'] == 3:
-            pass
+            match_record['consume_time'] = judge_result['time']
+            match_record['consume_memory'] = judge_result['memory']
+            match_record['score'] = judge_result['Score']
 
-
+        match_record['status'] = 1
+        await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
 
 
     # async def get(self, type): #detail

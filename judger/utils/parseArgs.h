@@ -15,5 +15,6 @@
 void exec_parse_args(int argc, char **argv, RunConfig &runConfig);
 void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig);
 void script_judger_parse_args(int argc ,char **argv, ScriptConfig &scriptConfig);
+void html_judger_parse_args(int argc ,char **argv, HTMLConfig &htmlConfig);
 
 #endif

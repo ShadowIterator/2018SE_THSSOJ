@@ -1,16 +1,36 @@
-
 import base64
 import os
 import time
 import datetime
 import requests
+import uuid
 from . import base
 from .base import *
+
+judger_url = 'http://judger:12345'
 
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/problems'
+        # ****************************************************
+        # ****************************************************
+        # ****************************************************
+        # super(BaseHandler, self).__init__(*args, **kw)
+        # self.db = self.application.db_instance
+        # self.getargs()
+        # self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
+        # self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
+        # self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        # self.set_header("Access-Control-Allow-Credentials", 'true')
+        #
+        # self.root_dir='root'
+        # self.user = None
+        # print(self.request.body)
+
+
+    async def _list_post(self):
+        return await self.db.querylr('problems', self.args['start'], self.args['end'])
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -177,16 +197,17 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
-        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'result_type', 'test_ratio'):
-            self.set_res_dict(res_dict, code=1, msg='not enough params')
+        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'src_language'):
+            print(self.args)
+            self.set_res_dict(res_dict, code=1, msg='submit post not enough params')
             # self.return_json(res_dict)
             return res_dict
 
         current_time = datetime.datetime.now()
         cur_timestamp = int(time.mktime(current_time.timetuple()))
 
-        self.args['submit_time']=datetime.datetime.fromtimestamp(cur_timestamp)
-        self.args['status']=0
+        self.args['submit_time'] = datetime.datetime.fromtimestamp(cur_timestamp)
+        self.args['status'] = 0
         await self.db.createObject('records', **self.args)
                                 # user_id=self.args['user_id'],
                                 # problem_id=self.args['problem_id'],
@@ -201,6 +222,10 @@ class APIProblemHandler(base.BaseHandler):
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
         problem_of_code['records'].append(record_created['id'])
         await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
+        if 'homework_id' in self.args:
+            matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
+            matched_homework['records'].append(record_created['id'])
+            await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         if not os.path.exists(record_dir):
@@ -213,11 +238,22 @@ class APIProblemHandler(base.BaseHandler):
         src_file.write(self.args['src_code'].encode(encoding='utf-8'))
         src_file.close()
 
+        record_created['src_size'] = os.path.getsize(src_file_path)
+        if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
+            record_created['result_type'] = 0
+        elif self.args['src_language'] == 3:
+            record_created['result_type'] = 1
+        await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+        if self.args['record_type']==2:
+            self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
+            return res_dict
+
         if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
             if not os.path.exists('test'):
                 os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
@@ -233,45 +269,35 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            result_dict = {'Accept': 0,
-                           'Wrong Answer': 1,
-                           'Runtime Error': 2,
-                           'Time Limit Exceed': 3,
-                           'Memory Limit Exceed': 4,
-                           'Output Limit Exceed': 5,
-                           'Danger System Call': 6,
-                           'Judgement Failed': 7,
-                           'Compile Error': 8,
-                           'unknown': 9,
-                           }
+            # judge_result = json.loads(
+            #     requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
 
-            judge_result = json.loads(
-                requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
-            record_created['src_size'] = os.path.getsize(src_file_path)
-            record_created['consume_time'] = judge_result['time']
-            record_created['consume_memory'] = judge_result['memory']
-            record_created['result'] = result_dict[judge_result['Result']]
-            await self.db.saveObject('records', cur_user=self.get_current_user_object(), object=record_created)
+            # record_created['consume_time'] = judge_result['time']
+            # record_created['consume_memory'] = judge_result['memory']
+            # record_created['result'] = result_dict[judge_result['Result']]
+
+            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
             judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req[
-                'OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
+            judge_req['OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
 
-            judge_result = json.loads(
-                requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
-            record_created['src_size'] = os.path.getsize(src_file_path)
-            record_created['result'] = judge_result['Score']
-            record_created['consume_time'] = judge_result['time']
-            record_created['consume_memory'] = judge_result['memory']
-            await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+            # judge_result = json.loads(
+            #     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
+
+            # record_created['result'] = judge_result['Score']
+            # record_created['consume_time'] = judge_result['time']
+            # record_created['consume_memory'] = judge_result['memory']
+
+            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         return res_dict
@@ -382,7 +408,24 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
-        pass
+        # print('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
+
+        res_dict = {}
+        # upload_path = os.path.join(os.path.dirname(__file__), 'files')
+        code_meta = self.request.files['code']
+        temp_dir = self.root_dir+'/tmp'
+        if not os.path.exists(temp_dir):
+            os.makedirs(temp_dir)
+        file_name = code_meta['filename']
+        file_path = temp_dir+'/'+file_name
+        if os.path.exists(file_path):
+            new_filename = str(uuid.uuid1())
+            file_path = file_path.replace(file_name, new_filename)
+        target_file = open(file_path, mode='wb')
+        target_file.write(code_meta['body'])
+        target_file.close()
+        self.set_res_dict(res_dict, code=0, url=os.getcwd()+'/'+file_path)
+        return res_dict
 
     # @tornado.web.authenticated
     async def _uploadCases_post(self):

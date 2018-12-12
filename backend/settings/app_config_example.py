@@ -4,6 +4,7 @@ from apis.notice import *
 from apis.course import *
 from apis.problem import *
 from apis.homework import *
+from apis.upload import *
 
 port = 8080
 db_host = '127.0.0.1'
@@ -19,6 +20,7 @@ RoutineList = [
                   (r'/api/course/(.*)', APICourseHandler),
                   (r'/api/problem/(.*)', APIProblemHandler),
                   (r'/api/homework/(.*)', APIHomeworkHandler),
+                  (r'/api/upload/(.*)', APIUploadHandler),
               ]
 
 AppConfig = {

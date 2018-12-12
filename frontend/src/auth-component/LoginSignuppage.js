@@ -9,7 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import Cookies from "js-cookie";
 
-//import "../mock//auth-mock"
+// import "../mock/auth-mock"
 
 class Login extends Component
 {
@@ -54,6 +54,8 @@ class Login extends Component
             }
             else if (role === 2) {
                 that.context.router.history.push("/ta");
+            } else if (role === 3) {
+                that.context.router.history.push("/admin")
             }
         } else{
             alert("Username or password incorrect.");
@@ -246,10 +248,12 @@ class mLoginPage extends Component {
         if(this.props.state && this.props.role!==undefined) {
             if(this.props.role === 1) {
                 this.props.history.push('/student');
-            } else if(this.props.role===2) {
+            } else if(this.props.role === 2) {
                 this.props.history.push('/ta');
+            } else if(this.props.role === 3) {
+                this.props.history.push('/admin');
             } else {
-                alert("Bad role number.");
+                    alert("Bad role number.");
             }
         }
     }
@@ -262,6 +266,8 @@ class mLoginPage extends Component {
                     this.props.history.push('/student');
                 } else if(nextProps.role===2) {
                     this.props.history.push('/ta');
+                } else if(nextProps.role===3) {
+                    this.props.history.push('/admin')
                 } else {
                     alert("Bad role number.");
                 }
@@ -286,6 +292,8 @@ class mSignupPage extends Component {
                 this.props.history.push('/student');
             } else if(this.props.role===2) {
                 this.props.history.push('/ta');
+            } else if(this.props.role===3) {
+                this.props.history.push('/admin')
             } else {
                 alert("Bad role number.");
             }
@@ -300,6 +308,8 @@ class mSignupPage extends Component {
                     this.props.history.push('/student');
                 } else if(nextProps.role===2) {
                     this.props.history.push('/ta');
+                } else if(nextProps.role===3) {
+                    this.props.history.push('/admin')
                 } else {
                     alert("Bad role number.");
                 }
@@ -328,7 +338,7 @@ class mLogoutPage extends Component {
         const code = result.data.code;
         if(code===0) {
             Cookies.remove('mid');
-            alert("Logout succeed.");
+            // alert("Logout succeed.");
         } else {
             alert("Logout failed.");
         }
