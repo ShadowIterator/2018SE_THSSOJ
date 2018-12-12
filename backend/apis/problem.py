@@ -5,6 +5,9 @@ import time
 import datetime
 import requests
 import uuid
+import shutil
+import zipfile
+import json
 from . import base
 from .base import *
 
@@ -19,10 +22,27 @@ class APIProblemHandler(base.BaseHandler):
         description=bytearray()
 
         if not self.check_input('title', 'description', 'time_limit', 'memory_limit',
-                                'judge_method','records', 'openness'):
+                                'judge_method', 'records', 'openness', 'code_uri', 'test_language'):
             self.set_res_dict(res_dict, code=1, msg='lack parameters')
             # self.return_json(res_dict)
             return res_dict
+
+        judge_method = self.args['judge_method']
+        test_language = self.args['test_language']
+
+        if judge_method == 0:
+            zip_path = self.root_dir.replace('/problems', '')+'/'+self.args['case_uri']
+            del self.args['case_uri']
+        else:
+            zip_path = self.root_dir.replace('/problems', '')+'/'+self.args['script_uri']
+            del self.args['script_uri']
+
+        code_path = self.root_dir.replace('/problems', '')+'/'+self.args['code_uri']
+
+        src_size = os.path.getsize(code_path)
+
+        file_zip = zipfile.ZipFile(zip_path)
+        del self.args['code_uri']
 
         byte_content = bytearray()
         self.str_to_bytes(self.args['description'], byte_content)
@@ -36,6 +56,39 @@ class APIProblemHandler(base.BaseHandler):
         description_file = open(target_path + '/' + str(problem_in_db['id']) + '.md', mode='wb')
         description_file.write(description)
         description_file.close()
+
+        target_code_path = target_path+'/code'
+        if judge_method == 0:
+            target_zip_path = target_path+'/case'
+        else:
+            target_zip_path = target_path+'/script'
+
+        shutil.move(code_path, target_code_path)
+        file_zip.extractall(target_zip_path)
+        # shutil.move(case_path, target_case_path)
+        config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')
+        config_info = json.load(config_file)
+
+        record_info = {
+            'user_id':self.args['user'],
+            'problem_id':problem_in_db['id'],
+            'record_type':3,
+            'result_type':problem_in_db['judge_method'],
+            'test_ratio':100,
+            'src_language':test_language,
+            'src_size':src_size
+        }
+        await self.db.createObject('records', **record_info)
+        record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(), **record_info))
+        if test_language==1 or test_language==2 or test_language==4:
+            pass
+        elif test_language==3:
+            pass
+
+        os.remove(code_path)
+        os.remove(zip_path)
+
+
         self.set_res_dict(res_dict, code=0, msg='problem created')
         return res_dict
         # try:
@@ -219,6 +272,10 @@ class APIProblemHandler(base.BaseHandler):
         src_file.close()
 
         record_created['src_size'] = os.path.getsize(src_file_path)
+        if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
+            record_created['result_type'] = 0
+        elif self.args['src_language'] == 3:
+            record_created['result_type'] = 1
         await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
         if self.args['record_type']==2:
             self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
@@ -236,7 +293,12 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['INSUF'] = 'in'
             judge_req['OUTPRE'] = 'test'
             judge_req['OUTSUF'] = 'out'
-            judge_req['Language'] = 'C++'
+            if self.args['src_language'] == 1:
+                judge_req['Language'] = 'C'
+            elif self.args['src_language'] == 2:
+                judge_req['Language'] = 'C++'
+            elif self.args['Python'] == 4:
+                judge_req['Language'] = 'Python'
             judge_req['DATA_DIR'] = os.getcwd() + '/test'
             judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = 'ncmp'

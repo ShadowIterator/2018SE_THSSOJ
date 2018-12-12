@@ -114,6 +114,7 @@ permissions = {
             'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'read': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -126,6 +127,7 @@ permissions = {
             'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'records': {
@@ -184,7 +186,7 @@ database_keys = {
     'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
     'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices'],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
-    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness'],
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'test_language'],
     'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
 }

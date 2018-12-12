@@ -86,7 +86,8 @@ CREATE TABLE problems (
     language INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
     openness INTEGER DEFAULT 0,
-    status INTEGER DEFAULT 0
+    status INTEGER DEFAULT 0,
+    test_language INTEGER
 );
 
 DROP TABLE IF EXISTS records;
@@ -103,7 +104,7 @@ CREATE TABLE records (
     src_language INTEGER,
     result INTEGER,
     score INTEGER,
-    status INTEGER,
+    status INTEGER DEFAULT 0,
     consume_time INTEGER, --ms
     consume_memory INTEGER, --KB
     src_size INTEGER --Byte
