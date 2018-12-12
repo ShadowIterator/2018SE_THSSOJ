@@ -4,7 +4,7 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Radio, Card, Table} from 'antd';
+import { Layout, Breadcrumb, Radio, Card, Table, message} from 'antd';
 const {Content, Sider} = Layout;
 
 const problemColumns = [
@@ -38,7 +38,8 @@ class ProblemBase extends Component {
         }, this, (that, result)=>{
             that.data = [];
             if(result.data.code===1) {
-                alert("List failed.");
+                // alert("List failed.");
+                message.error("获取数据失败");
                 return;
             }
             for(const d of result.data.list) {

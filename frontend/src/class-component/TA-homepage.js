@@ -4,7 +4,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "../basic-component/auth-context";
 import {Link, withRouter} from "react-router-dom"
 import {Button} from "@blueprintjs/core";
-import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge, Divider } from 'antd';
+import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, message, Divider } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
 
@@ -181,7 +181,8 @@ class mTAHomepageMiddle extends Component {
                                                       ajax_post(api_list['update_course'], {id: lesson.id, status: 1},
                                                           this, (that, result) => {
                                                               if(result.data.code!==0) {
-                                                                  alert("Publish course failed.");
+                                                                  // alert("Publish course failed.");
+                                                                  message.error("发布课程失败");
                                                                   return;
                                                               }
                                                               window.location.reload();
@@ -197,7 +198,8 @@ class mTAHomepageMiddle extends Component {
                                                             ajax_post(api_list['delete_course'], {id: lesson.id},
                                                                 this, (that, result) => {
                                                                     if(result.data.code!==0) {
-                                                                        alert("Delete failed.");
+                                                                        // alert("Delete failed.");
+                                                                        message.error("删除课程失败");
                                                                         return;
                                                                     }
                                                                     window.location.reload();
