@@ -409,9 +409,9 @@ class BaseTable:
             propkeys.append(str(key))
             propvalues.append(value)
 
-        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt}) RETURNING *;'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
-        await self.db.execute(str_fmt, *propvalues)
+        return await self.db.queryone(str_fmt, *propvalues)
 
     async def objectFilter(self, method, dic, user):
         # user = await self.get_current_user_object()
