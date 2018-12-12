@@ -272,7 +272,6 @@ class UserSettingsForm extends Component {
                 <FormItem
                     {...formItemLayout}
                     label="gender"
-                    hasFeedback
                 >
                     {getFieldDecorator('gender', {
                         initialValue: gender,

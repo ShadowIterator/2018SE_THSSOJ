@@ -9,7 +9,6 @@ import { Layout, Breadcrumb, Form, Input, Select, Row, Col, Checkbox, Button, Sw
 const {Content} = Layout;
 const Option = Select.Option;
 const {TextArea} = Input;
-
 const FormItem = Form.Item;
 
 class RegistrationForm extends React.Component {
