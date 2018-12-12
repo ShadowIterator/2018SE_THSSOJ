@@ -42,7 +42,7 @@ class APIProblemHandler(base.BaseHandler):
         description=bytearray()
 
         if not self.check_input('title', 'description', 'time_limit', 'memory_limit',
-                                'judge_method', 'records', 'openness', 'code_uri', 'test_language'):
+                                'judge_method', 'openness', 'code_uri', 'test_language'):
             self.set_res_dict(res_dict, code=1, msg='lack parameters')
             # self.return_json(res_dict)
             return res_dict
@@ -64,7 +64,7 @@ class APIProblemHandler(base.BaseHandler):
 
         byte_content = bytearray()
         self.str_to_bytes(self.args['description'], byte_content)
-        description = base64.b64decode(byte_content)
+        # description = base64.b64decode(byte_content)
         del self.args['description']
         await self.db.createObject('problems', **self.args)
         problem_in_db = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), **self.args))[0]
@@ -72,7 +72,7 @@ class APIProblemHandler(base.BaseHandler):
         if not os.path.exists(target_path):
             os.makedirs(target_path)
         description_file = open(target_path + '/' + str(problem_in_db['id']) + '.md', mode='wb')
-        description_file.write(description)
+        description_file.write(byte_content)
         description_file.close()
 
         target_code_path = target_path+'/code'
@@ -81,6 +81,7 @@ class APIProblemHandler(base.BaseHandler):
         else:
             target_zip_path = target_path+'/script'
 
+        print("target_code_path ", target_code_path)
         shutil.copyfile(code_path, target_code_path)
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
@@ -88,7 +89,7 @@ class APIProblemHandler(base.BaseHandler):
         config_info = json.load(config_file)
 
         record_info = {
-            'user_id':self.args['user'],
+            'user_id':self.args['user_id'],
             'problem_id':problem_in_db['id'],
             'record_type':3,
             'result_type':problem_in_db['judge_method'],
@@ -97,10 +98,11 @@ class APIProblemHandler(base.BaseHandler):
             'src_size':src_size
         }
         await self.db.createObject('records', **record_info)
-        record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(), **record_info))
+        record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(), **record_info))[0]
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
-        shutil.move(code_path, record_dir)
+        print("record_dir ", record_dir)
+        shutil.copyfile(code_path, record_dir)
 
         if test_language==1 or test_language==2 or test_language==4:
             judge_req = {}
@@ -118,7 +120,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['Language'] = 'C++'
             elif test_language == 4:
                 judge_req['Language'] = 'Python'
-            judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path()
+            judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
             judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = 'ncmp'
             judge_req['NTESTS'] = config_info['NTESTS']
