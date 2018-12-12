@@ -137,6 +137,8 @@ class App extends Component {
                             <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
                             <Route path="/problemcreate" render={(props) => <ProblemCreate {...this.state} />} />
                             <Route path="/myproblem" render={(props) => <MyProblem {...this.state} />} />
+                            <Route path="/problemedit/:id" render={(props) => <ProblemCreate {...this.state} isEditing={true}
+                                                                                             problem_id={props.match.params.id} />} />
                         </Layout>
                     </div>
                 </Router>

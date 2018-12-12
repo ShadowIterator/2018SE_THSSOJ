@@ -59,7 +59,7 @@ class MyProblem extends Component {
         },
         {title: '操作', dataIndex: 'action', key: 'action', render: (text, prob) =>
                 <span>
-                    <Button style={{outline: 0}}><Link to={"/modifyproblem/"+prob.id}>修改</Link></Button>
+                    <Button style={{outline: 0}}><Link to={"/problemedit/"+prob.id}>修改</Link></Button>
                 </span>
         }
     ];
