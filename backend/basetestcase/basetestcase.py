@@ -82,7 +82,7 @@ class BaseTestCase(AsyncHTTPTestCase):
 
     def setUp(self):
         options.parse_config_file('./settings/app_config.py')
-        options.parse_config_file('./settings/env_config.py')
+        options.parse_config_file('./settings/env_config_example.py')
         self.db = None
         self.cookies = dict()
         self.user_id_cookie = ''

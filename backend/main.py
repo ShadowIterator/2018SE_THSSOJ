@@ -18,11 +18,11 @@ from apis.db import BaseDB
 from tornado.options import define, options
 
 define("port", default=8000, help="run on the given port")
-define("db_host", default="postgres", help="blog database host")
+define("db_host", default="127.0.0.1", help="blog database host")
 define("db_port", default=5432, help="blog database port")
 define("db_database", default="test", help="blog database name")
-define("db_user", default="thssoj", help="blog database user")
-define("db_password", default="thssoj", help="blog database password")
+define("db_user", default="postgres", help="blog database user")
+define("db_password", default="", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
@@ -31,7 +31,7 @@ async def main():
     tornado.options.parse_command_line()
 
     options.parse_config_file('settings/app_config.py')# % (options.settings))
-    options.parse_config_file('settings/env_config.py')# % (options.settings))
+    options.parse_config_file('settings/env_config_example.py')# % (options.settings))
 
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
