@@ -69,6 +69,7 @@ class APIUserHandler(base.BaseHandler):
                                 password=self.args['password'],
                                 email=self.args['email'],
                                 create_time=current_time)
+        # print('created: ', result)
         # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
         return {'code': 0}

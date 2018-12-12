@@ -22,6 +22,6 @@ backend/test
 node_modules
 __pycache__
 backend/root/
-app_config.py
+env_config.py
 DS_Store
 *.pyc
