@@ -46,4 +46,5 @@ services:
       - "12345"
     volumes:
       - './backend/root:/usr/src/app/root'
+      - './backend/test:/usr/src/app/test'
       - './backend/judge_script:/usr/src/app/judge_script'
