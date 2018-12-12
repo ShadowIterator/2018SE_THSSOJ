@@ -251,8 +251,6 @@ class mTALessonPanel extends Component {
             this.props.course_name==='') {
             return;
         }
-        console.log("componentDidMount");
-
         console.log("inside component did mount");
         console.log(this.props);
 
@@ -443,14 +441,64 @@ export class TALesson extends Component {
         super(props);
         this.state = {
             course_name: '',
-            current_selected: '1'
+            current_selected: '1',
+
+            clickNewnotice: false,
+            infoitems: [],
+            homeworkitems: [],
+            problemitems: [],
+
         };
+
+        this.query_notice_callback = this.query_notice_callback.bind(this);
+        this.query_homework_callback = this.query_homework_callback.bind(this);
+        this.newnotice_callback = this.newnotice_callback.bind(this);
+        this.append_homeworkItems_callback = this.append_homeworkItems_callback.bind(this);
+        this.clickNewnotice = this.clickNewnotice.bind(this);
     }
 
     componentDidMount() {
+        if (this.props.id===-1 ||
+            this.props.course_name==='') {
+            return;
+        }
+
         const course_id = parseInt(this.props.lesson_id);
         console.log(course_id);
         ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
+
+        console.log("this.props ", this.props);
+
+        this.setState({homeworkitems: []});
+        this.setState({problemitems: []});
+        this.homeworkitems = [];
+        this.problemitems = [];
+
+        // const course_id = this.props.course_id;
+        ajax_post(api_list['query_notice'], {course_id:course_id}, this, this.query_notice_callback);
+        ajax_post(api_list['query_course'], {id:course_id}, this, this.query_homework_callback);
+    }
+
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===-1)
+            return;
+        if(nextProps.id !== this.props.id ||
+            nextProps.lesson_id !== this.props.lesson_id) {
+            const course_id = parseInt(this.props.lesson_id);
+            const next_course_id = parseInt(nextProps.lesson_id);
+            console.log('next course id ', next_course_id);
+
+            ajax_post(api_list['query_course'], {id:next_course_id}, this, TALesson.query_course_callback);
+
+            this.setState({homeworkitems: []});
+            this.setState({problemitems: []});
+            this.homeworkitems = [];
+            this.problemitems = [];
+
+            ajax_post(api_list['query_notice'], {course_id: next_course_id}, this, this.query_notice_callback);
+            ajax_post(api_list['query_course'], {id: next_course_id}, this, this.query_homework_callback);
+
+        }
     }
 
     // query_closure(args) {
@@ -469,10 +517,106 @@ export class TALesson extends Component {
         });
     }
 
+    clickNewnotice(event){
+        event.preventDefault();
+        event.stopPropagation();
+        this.setState({
+            clickNewnotice: true,
+        });
+    }
+
+    newnotice_callback(){
+        this.setState({
+            clickNewnotice: false,
+        });
+        const course_id = parseInt(this.props.lesson_id);
+        console.log("newnotice_callback course_id: ", course_id);
+        ajax_post(api_list['query_notice'], {course_id: course_id}, this, this.query_notice_callback);
+    }
+
+    query_notice_callback(that, result) {
+        if (result.data.length === 0) {
+            console.log("No notice got!");
+            // return;
+        }
+
+        let infoItems = [];
+        for (let index in result.data) {
+            let item = {
+                id: result.data[index].id,
+                title: result.data[index].title,
+                content: result.data[index].content
+            };
+            infoItems.push(item);
+        }
+
+        that.setState( {infoitems: infoItems} );
+    }
+
+    query_homework_callback(that, result) {
+        console.log('require course ');
+        if(result.data.length === 0) {
+            console.log('No course');
+            return;
+        }
+        const data = result.data[0];
+        console.log('course data: ', data);
+        let homeworkIdList = data.homeworks;
+        console.log('homeworklist: ', homeworkIdList);
+        for(let hid in homeworkIdList) {
+            console.log('request hid: ', hid);
+            ajax_post(api_list['query_homework'], {id: homeworkIdList[hid]}, that, that.append_homeworkItems_callback);
+        }
+    }
+
+    append_homeworkItems_callback(that, result) {
+        if(result.data.length === 0) {
+            console.log('No items');
+            return ;
+        }
+        let homeworklist = that.state.homeworkitems;
+        const data = result.data[0];
+        const code = parseInt(data.code);
+        console.log('append homework: ', data);
+
+        let idx = homeworklist.length;
+        homeworklist.push({
+            id: data.id,
+            name: data.name,
+            deadline: data.deadline,
+            problem_ids: data.problems,
+            problems: [],
+        });
+        that.setState({homeworkitems: homeworklist});
+        that.homeworkitems = homeworklist;
+        console.log('append homeworkitems: ', that.homeworkitems);
+        for(let pid of data.problems) {
+            ajax_post(api_list['query_problem'], {id: pid}, that, mTALessonPanel.append_problem_callback_wraper(idx));
+        }
+    }
+
+    static append_problem_callback_wraper(idx) {
+        return (function (that, result) {
+            if(result.data.code===1) {
+                return;
+            }
+            if(result.data.length===0)
+                return;
+            const title = result.data[0].title;
+            const id = result.data[0].id;
+            let homeworklist = that.state.homeworkitems;
+
+            homeworklist[idx].problems.push({id: id, title: title});
+            that.setState({homeworkitems: homeworklist});
+            that.homeworkitems = homeworklist;
+            console.log('append_prob: ', id, title, idx, that.homeworkitems);
+        });
+    }
 
     render() {
         let breadcrumb;
         let content;
+        const course_id = parseInt(this.props.lesson_id);
         if (this.state.current_selected === '1') {
             breadcrumb = (
                 <>
@@ -501,7 +645,15 @@ export class TALesson extends Component {
             breadcrumb = (
                     <Breadcrumb.Item>通知</Breadcrumb.Item>
             );
-            content = <h3>通知</h3>;
+            if (this.state.clickNewnotice) {
+                content = (<AddNewNotice newnotice_callback={this.newnotice_callback}
+                                         stu_id={this.props.id}
+                                         course_id={course_id}
+                                         course_name={this.state.course_name}
+                                         cancel_callback={()=>{this.setState({clickNewnotice:false})}}/>);
+            } else {
+                content = (<TANoticeList infoitems={this.state.infoitems} newNotice={this.clickNewnotice}/>);
+            }
         } else if (this.state.current_selected === '5') {
             breadcrumb = (
                     <Breadcrumb.Item>课程信息</Breadcrumb.Item>
