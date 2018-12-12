@@ -1,11 +1,11 @@
 import React, {Component} from 'react';
 
-import {api_list} from "../ajax-utils/api-manager";
+import {api_list, URL} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
-import {Link} from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
 
-import { Layout, Breadcrumb, Form, Input, Select, Row, Col, Checkbox, Button, Switch, Upload, Icon } from 'antd';
+import { Layout, Breadcrumb, Form, Input, Select, Row, Col, Checkbox, Button, Switch, Upload, Icon, Radio } from 'antd';
 const {Content} = Layout;
 const Option = Select.Option;
 const {TextArea} = Input;
@@ -17,6 +17,9 @@ class RegistrationForm extends React.Component {
         this.state = {
             upload_code: {},
             upload_case: {},
+            upload_script: {},
+            language_radio: [],
+            judge_method: 0,
         }
     }
     handleSubmit = (e) => {
@@ -36,10 +39,14 @@ class RegistrationForm extends React.Component {
                     user_id: this.props.id,
                     code_uri: this.state.upload_code.uri,
                     case_uri: this.state.upload_case.uri,
+                    script_uri: this.state.upload_script.uri,
+                    test_language: parseInt(values.code_lang),
                 };
+                console.log("create_problem_data", data);
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
                         console.log("Successfully create problem.");
+                        this.props.history.push('/ta');
                     } else {
                         alert("Create problem failed.");
                     }
@@ -81,12 +88,16 @@ class RegistrationForm extends React.Component {
 
         const formItemLayout = {
             labelCol: {
-                xs: { span: 24 },
-                sm: { span: 4 },
+                xs: { span: 12 },
+                sm: { span: 10 },
+                md: { span: 10},
+                lg: { span: 6},
             },
             wrapperCol: {
-                xs: { span: 24 },
-                sm: { span: 20 },
+                xs: { span: 12 },
+                sm: { span: 14 },
+                md: { span: 14},
+                lg: { span: 18},
             },
         };
         const tailFormItemLayout = {
@@ -170,7 +181,17 @@ class RegistrationForm extends React.Component {
                             { required: true, message: '请选择本题的评测方式' },
                         ],
                     })(
-                        <Select placeholder="请选择本题的评测方式">
+                        <Select placeholder="请选择本题的评测方式" onChange={(value) => {
+                            console.log('Select change', value);
+                            this.setState({
+                                judge_method: parseInt(value),
+                                language_radio: [],
+                            });
+                            this.props.form.setFieldsValue({
+                                language: [],
+                                code_lang: ''
+                            })
+                        }}>
                             <Option value="0">传统输入输出评测</Option>
                             <Option value="1">脚本评测</Option>
                         </Select>
@@ -185,18 +206,46 @@ class RegistrationForm extends React.Component {
                             { required: true, message: '请选择本题允许的语言' },
                         ],
                     })(
-                        <Checkbox.Group options={[
-                            {label: 'C', value: '1'}, {label: 'C++', value: '2'},
-                            {label: 'Javascript', value: '3'}, {label: 'Python3', value: '4'}
-                        ]} />
+                        <Checkbox.Group onChange={(value) => {
+                            console.log("radio change:", value);
+                            const language_radio = value.map((id) => {
+                                const mapper = {
+                                    '1': 'C', '2': 'C++', '3': 'Javascript', '4': 'Python3',
+                                };
+                                return (<Radio value={id}>{mapper[id]}</Radio>);
+                            });
+                            this.setState({language_radio: language_radio});
+                            this.props.form.setFieldsValue({
+                                code_lang: '',
+                            })
+                        }} options={this.state.judge_method === 0 ?
+                            [{label: 'C', value: '1'}, {label: 'C++', value: '2'}, {label: 'Python3', value: '4'}] :
+                            [{label: 'Javascript', value: '3'}]
+                        }/>
                     )}
                 </FormItem>
                 <FormItem
                     {...formItemLayout}
                     label="是否公开"
                 >
-                    {getFieldDecorator('switch', { valuePropName: 'checked' })(
+                    {getFieldDecorator('switch', {
+                        valuePropName: 'checked',
+                    })(
                         <Switch />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="标准程序使用语言"
+                >
+                    {getFieldDecorator('code_lang', {
+                        rules: [
+                            { required: true, message: '请选择您标准程序使用的语言'},
+                        ],
+                    })(
+                        <Radio.Group>
+                            {this.state.language_radio}
+                        </Radio.Group>
                     )}
                 </FormItem>
                 {!this.props.isEditing &&
@@ -210,7 +259,7 @@ class RegistrationForm extends React.Component {
                             valuePropName: 'code',
                             getValueFromEvent: this.normFile,
                         })(
-                            <Upload.Dragger name="file" action={"http://localhost:8080" + api_list['upload_code']}
+                            <Upload.Dragger name="file" action={URL + api_list['upload_code']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
                                 console.log("upload_code:", fileList);
@@ -241,7 +290,7 @@ class RegistrationForm extends React.Component {
                     </div>
                 </FormItem>
                 }
-                {!this.props.isEditing &&
+                {!this.props.isEditing && this.state.judge_method === 0 &&
                 <FormItem
                     {...formItemLayout}
                     label="上传测试数据"
@@ -252,7 +301,7 @@ class RegistrationForm extends React.Component {
                             valuePropName: 'cases',
                             getValueFromEvent: this.normFile,
                         })(
-                            <Upload.Dragger name="file" action={"http://localhost:8080" + api_list['upload_case']}
+                            <Upload.Dragger name="file" action={URL + api_list['upload_case']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
                                 console.log("upload_case", fileList);
@@ -283,13 +332,55 @@ class RegistrationForm extends React.Component {
                     </div>
                 </FormItem>
                 }
+                {!this.props.isEditing && this.state.judge_method === 1 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试脚本"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_script', {
+                            // rules: [{required: true, message: '请上传测试数据'}],
+                            valuePropName: 'cases',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="file" action={URL + api_list['upload_script']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log("upload_script", fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.uri = file.response.uri;
+                                    }
+                                    return file;
+                                });
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+                                this.setState({upload_script: fileList[0]});
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox"/>
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传测试数据</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>
+                }
                 <FormItem {...tailFormItemLayout} style={{textAlign: 'center'}}>
-                    <Button type="primary" htmlType="submit">下一步</Button>
+                    <Button type="primary" htmlType="submit">创建</Button>
                 </FormItem>
             </Form>
         );
     }
 }
+
+// const WithRouteProblemCreateForm = withRouter(ProblemCreateForm);
 
 const ProblemCreateForm = Form.create({
     onFieldsChange(props, changedFields) {
@@ -333,12 +424,16 @@ const ProblemCreateForm = Form.create({
                 ...props.upload_case,
                 value: props.upload_case.value,
             }),
+            code_lang: Form.createFormField({
+                ...props.code_lang,
+                value: props.code_lang.value,
+            }),
         };
     },
     onValuesChange(_, values) {
         console.log(values);
     },
-})(RegistrationForm);
+})(withRouter(RegistrationForm));
 
 class ProblemCreate extends Component {
     constructor(props) {
@@ -371,6 +466,9 @@ class ProblemCreate extends Component {
                 },
                 upload_case: {
                     value: ''
+                },
+                code_lang: {
+                    value: ''
                 }
             }
         }
@@ -381,7 +479,7 @@ class ProblemCreate extends Component {
         }));
     };
     render() {
-        console.log("handleFormChange", this.state);
+        // console.log("handleFormChange", this.state);
         return (
             <Content style={{ padding: '0 50px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>
