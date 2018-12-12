@@ -14,5 +14,4 @@ install:
   - pip install -r backend/requirements.txt
 script:
   - cd backend/
-  - python ./pycharm_runner/_jb_unittest_runner.py --target testcases.usertest.UserTest
-
+  - python -m unittest testcases.usertest.UserTest
