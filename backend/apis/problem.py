@@ -80,9 +80,14 @@ class APIProblemHandler(base.BaseHandler):
             target_zip_path = target_path+'/case'
         else:
             target_zip_path = target_path+'/script'
+        if not os.path.exists(target_code_path):
+            os.makedirs(target_code_path)
+        if not os.path.exists(target_zip_path):
+            os.makedirs(target_zip_path)
 
-        print("target_code_path ", target_code_path)
-        shutil.copyfile(code_path, target_code_path)
+        # print("target_code_path ", target_code_path)
+        code_file_name = code_path.split('/')[-1]
+        shutil.copyfile(code_path, target_code_path+'/'+code_file_name)
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
         config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')
@@ -102,7 +107,7 @@ class APIProblemHandler(base.BaseHandler):
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         print("record_dir ", record_dir)
-        shutil.copyfile(code_path, record_dir)
+        shutil.copyfile(code_path, record_dir+'/'+str_id+'.code')
 
         if test_language==1 or test_language==2 or test_language==4:
             judge_req = {}
