@@ -9,6 +9,7 @@ import zipfile
 import json
 from . import base
 from .base import *
+from tornado.options import define, options
 
 judger_url = 'http://judger:12345'
 
@@ -124,6 +125,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
             requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            # requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif test_language==3:
             judge_req = {}
             judge_req['id'] = record_created['id']
@@ -135,6 +137,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE'] = str_id
             judge_req['OTHERS'] = './judge.sh -r 100'
             requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+            # requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         os.remove(code_path)
         os.remove(zip_path)
@@ -358,7 +361,8 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            # requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
@@ -372,7 +376,8 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE'] = str_id
             judge_req['OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
 
-            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+            # requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+            requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         return res_dict

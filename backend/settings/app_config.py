@@ -6,6 +6,8 @@ from apis.problem import *
 from apis.homework import *
 from apis.upload import *
 
+scriptJudgerAddr = 'http://localhost:12345/scriptjudger'
+traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
 RoutineList = [
                   (r'/api/user/(.*)', APIUserHandler),
                   (r'/api/record/(.*)', APIRecordHandler),

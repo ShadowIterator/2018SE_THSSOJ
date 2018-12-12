@@ -26,6 +26,8 @@ define("db_password", default="thssoj", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
+define('traditionalJudgerAddr', default=None, help='judger', type=str)
+define('scriptJudgerAddr', default=None, help='judger', type=str)
 
 async def main():
     tornado.options.parse_command_line()
