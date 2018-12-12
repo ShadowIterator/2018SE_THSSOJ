@@ -6,13 +6,10 @@ import {ZeroPadding, Spacing} from "./lesson-component";
 import {withRouter} from "react-router";
 import {Button, Tag, Card} from "@blueprintjs/core";
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-// import "../mock/homework-mock";
-// import "../mock/problem-mock";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
+
+import {message} from 'antd';
 
 class AddNewNotice extends Component {
     constructor(props) {
@@ -46,7 +43,8 @@ class AddNewNotice extends Component {
     submitCallback(that, result){
         console.log("submitCallback");
         if (result.data.code !== 0) {
-            alert("Creating new notice failed!");
+            // alert("Creating new notice failed!");
+            message.error("创建通知失败");
             return;
         }
 

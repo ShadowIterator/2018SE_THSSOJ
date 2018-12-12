@@ -5,7 +5,7 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 
 import {Link} from 'react-router-dom';
 
-import {Layout, Breadcrumb, Table, Button, Popconfirm} from 'antd';
+import {Layout, Breadcrumb, Table, Button, Popconfirm, message} from 'antd';
 const {Content} = Layout;
 
 class MyProblem extends Component {
@@ -63,9 +63,11 @@ class MyProblem extends Component {
                     <Popconfirm title={"你确定要删除题目 "+prob.title+" 吗？"} onConfirm={()=> {
                         ajax_post(api_list['delete_problem'], {id: prob.id}, this, (that, result) => {
                             if(result.data.code === 1) {
-                                alert("删除题目失败");
+                                // alert("删除题目失败");
+                                message.error("删除题目失败");
                             } else {
-                                alert("删除成功");
+                                // alert("删除成功");
+                                message.success("删除成功");
                                 that.request_data(that.props.id);
                             }
                         })

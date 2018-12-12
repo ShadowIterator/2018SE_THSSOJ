@@ -8,11 +8,9 @@ import {Container} from "react-bootstrap"
 import moment from "moment";
 
 import { Layout, Breadcrumb, DatePicker } from 'antd';
-import { Form, Input, Select, Row, Col, Checkbox, Button, Switch, Upload, Icon } from 'antd';
+import { Form, Input, Select, Button, message } from 'antd';
 const {Content} = Layout;
 const {RangePicker} = DatePicker;
-const Option = Select.Option;
-const {TextArea} = Input;
 const FormItem = Form.Item;
 
 // import "../mock/course-mock";
@@ -60,7 +58,8 @@ class mLessonList extends Component {
 
     static editLesson_callback(that, result) {
         if (result.data.length === 0) {
-            alert("未找到课程");
+            // alert("未找到课程");
+            message.error("未找到课程");
             return;
         }
         that.setState({
@@ -131,7 +130,8 @@ class mLessonList extends Component {
 
     static submit_callback(that, result) {
         if (result.data.code !== 0){
-            alert('暂存失败');
+            // alert('暂存失败');
+            message.error("暂存失败");
             return;
         }
         that.props.history.push('/ta');
@@ -163,11 +163,13 @@ class mLessonList extends Component {
 
     static add_stu_callback(that, result) {
         if (result.data.length===0) {
-            alert("stu Not found");
+            // alert("stu Not found");
+            message.error("未找到该学生");
             return;
         }
         if (result.data[0].role !== 1){
-            alert("stu Not found");
+            // alert("stu Not found");
+            message.error("未找到该学生");
             return;
         }
         // console.log(result.data);
@@ -175,7 +177,8 @@ class mLessonList extends Component {
         const tmp_name = result.data[0].username;
         for(let stu of stu_tags) {
             if(tmp_name === stu.username) {
-                alert("You already added student "+tmp_name+".");
+                // alert("You already added student "+tmp_name+".");
+                message.warning("你已经添加了学生 "+tmp_name);
                 return;
             }
         }
@@ -186,18 +189,21 @@ class mLessonList extends Component {
 
     static add_ta_callback(that, result) {
         if (result.data.length===0) {
-            alert("ta Not found");
+            // alert("ta Not found");
+            message.error("未找到该助教");
             return;
         }
         if (result.data[0].role === 1){
-            alert("ta Not found");
+            // alert("ta Not found");
+            message.error("未找到该助教");
             return;
         }
         let ta_tags = that.state.ta_tags;
         const tmp_name = result.data[0].username;
         for(let stu of ta_tags) {
             if(tmp_name === stu.username) {
-                alert("You already added TA "+tmp_name+".");
+                // alert("You already added TA "+tmp_name+".");
+                message.warning("你已经添加了助教 "+tmp_name);
                 return;
             }
         }

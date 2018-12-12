@@ -5,7 +5,8 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 
 import { Link, withRouter } from 'react-router-dom';
 
-import { Layout, Breadcrumb, Form, Input, Select, Row, Col, Checkbox, Button, Switch, Upload, Icon, Radio } from 'antd';
+import { Layout, Breadcrumb, Form, Input, Select, Row,
+    Col, Checkbox, Button, Switch, Upload, Icon, Radio, message } from 'antd';
 const {Content} = Layout;
 const Option = Select.Option;
 const {TextArea} = Input;
@@ -54,7 +55,8 @@ class RegistrationForm extends React.Component {
                         console.log("Successfully create problem.");
                         this.props.history.push('/ta');
                     } else {
-                        alert("Create problem failed.");
+                        // alert("Create problem failed.");
+                        message.error("创建问题失败");
                     }
                 });
             }

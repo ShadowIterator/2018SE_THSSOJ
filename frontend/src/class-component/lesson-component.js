@@ -109,7 +109,8 @@ class mLessonList extends Component {
                                         ajax_post(api_list['delete_course'], {id: lesson.id},
                                             this, (that, result) => {
                                                 if(result.data.code!==0) {
-                                                    alert("Delete failed.");
+                                                    // alert("Delete failed.");
+                                                    message.error("删除课程失败");
                                                     return;
                                                 }
                                                 window.location.reload();
