@@ -1,8 +1,7 @@
 # from basetestcase.basetestcase import BaseTestCase, async_aquire_db
 import unittest
 import tornado.testing
-import os
-from ..basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from basetestcase.basetestcase import BaseTestCase, async_aquire_db
 
 class ExampleTestCase(BaseTestCase):
 

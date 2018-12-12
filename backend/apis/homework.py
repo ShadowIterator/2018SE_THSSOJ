@@ -73,7 +73,7 @@ class APIHomeworkHandler(base.BaseHandler):
         #     self.set_res_dict(res_dict, code=1, msg='homework does not exist')
         # self.return_json(res_dict)
 
-    # @tornado.web.authenticated
+    @tornado.web.authenticated
     async def _query_post(self):
         res_list = await self.db.getObject('homeworks', cur_user = self.get_current_user_object(), **self.args)
         for each_res in res_list:

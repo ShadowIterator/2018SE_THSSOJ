@@ -116,6 +116,7 @@ permissions = {
             'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'read': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -128,6 +129,7 @@ permissions = {
             'openness': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'test_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'records': {
@@ -190,7 +192,8 @@ database_keys = {
     'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
     'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices', 'start_time', 'end_time', ],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
-    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', 'user_id', ],
+
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', 'user_id', 'test_language'],
     'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 
                 'consume_time', 'consume_memory', 'src_size', 'record_type', 'result_type', 'test_ratio', 'src_language', 'status', 'score'],
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
@@ -409,9 +412,9 @@ class BaseTable:
             propkeys.append(str(key))
             propvalues.append(value)
 
-        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt}) RETURNING *;'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
-        await self.db.execute(str_fmt, *propvalues)
+        return await self.db.queryone(str_fmt, *propvalues)
 
     async def objectFilter(self, method, dic, user):
         # user = await self.get_current_user_object()

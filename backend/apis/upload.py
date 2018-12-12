@@ -18,7 +18,7 @@ class APIUploadHandler(base.BaseHandler):
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
         self.root_dir='root'
-        self.dir = self.root_dir + '/tmp'
+        self.dir =  '/tmp'
         self.user = None
         print(self.request.body)
 

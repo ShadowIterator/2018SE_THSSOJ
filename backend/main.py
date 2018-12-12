@@ -26,11 +26,14 @@ define("db_password", default="thssoj", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
+define('traditionalJudgerAddr', default=None, help='judger', type=str)
+define('scriptJudgerAddr', default=None, help='judger', type=str)
 
 async def main():
     tornado.options.parse_command_line()
 
     options.parse_config_file('settings/app_config.py')# % (options.settings))
+    options.parse_config_file('settings/env_config.py')# % (options.settings))
 
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 

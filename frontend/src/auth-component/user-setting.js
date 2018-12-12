@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {HTMLSelect, Button, Dialog, Classes} from '@blueprintjs/core';
+import {Button, Dialog, Classes} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
@@ -8,7 +8,7 @@ import {Card, Container} from "react-bootstrap"
 
 import { Layout, Breadcrumb } from 'antd';
 import {
-    Form, Input, Tooltip, Icon, Cascader, Select, Row, Col, Checkbox, AutoComplete,
+    Form, Input, Select, Row, Col, AutoComplete, message
 } from 'antd';
 import {Link} from "react-router-dom";
 const {Content} = Layout;
@@ -132,9 +132,11 @@ class UserSettingsForm extends Component {
         const code = result.data.code;
         that.setState({password:''});
         if(code === 0) {
-            alert("Successfully update profile.");
+            // alert("Successfully update profile.");
+            message.success("成功更新用户资料");
         } else {
-            alert("Update failed.");
+            // alert("Update failed.");
+            message.error("更新失败");
         }
         that.fillInfo(that.props.id);
     }
@@ -150,7 +152,8 @@ class UserSettingsForm extends Component {
                 validating: true,
             });
         } else {
-            alert("Something went wrong while trying to send validate code.");
+            // alert("Something went wrong while trying to send validate code.");
+            message.error("发送校验码到邮箱失败");
         }
     }
     activate_account() {
@@ -170,7 +173,8 @@ class UserSettingsForm extends Component {
             });
             that.fillInfo(that.props.id);
         } else {
-            alert("Validate code error.");
+            // alert("Validate code error.");
+            message.error("校验码错误");
         }
     }
     render() {
