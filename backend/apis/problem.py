@@ -1,4 +1,3 @@
-
 import base64
 import os
 import time
@@ -11,10 +10,30 @@ import json
 from . import base
 from .base import *
 
+judger_url = 'http://judger:12345'
+
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
         self.root_dir = self.root_dir+'/problems'
+        # ****************************************************
+        # ****************************************************
+        # ****************************************************
+        # super(BaseHandler, self).__init__(*args, **kw)
+        # self.db = self.application.db_instance
+        # self.getargs()
+        # self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
+        # self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
+        # self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        # self.set_header("Access-Control-Allow-Credentials", 'true')
+        #
+        # self.root_dir='root'
+        # self.user = None
+        # print(self.request.body)
+
+
+    async def _list_post(self):
+        return await self.db.querylr('problems', self.args['start'], self.args['end'])
 
     # @tornado.web.authenticated
     async def _create_post(self):
@@ -38,9 +57,7 @@ class APIProblemHandler(base.BaseHandler):
             del self.args['script_uri']
 
         code_path = self.root_dir.replace('/problems', '')+'/'+self.args['code_uri']
-
         src_size = os.path.getsize(code_path)
-
         file_zip = zipfile.ZipFile(zip_path)
         del self.args['code_uri']
 
@@ -63,7 +80,7 @@ class APIProblemHandler(base.BaseHandler):
         else:
             target_zip_path = target_path+'/script'
 
-        shutil.move(code_path, target_code_path)
+        shutil.copyfile(code_path, target_code_path)
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
         config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')
@@ -80,14 +97,47 @@ class APIProblemHandler(base.BaseHandler):
         }
         await self.db.createObject('records', **record_info)
         record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(), **record_info))
+        str_id = str(record_created['id'])
+        record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
+        shutil.move(code_path, record_dir)
+
         if test_language==1 or test_language==2 or test_language==4:
-            pass
+            judge_req = {}
+            judge_req['id'] = record_created['id']
+            judge_req['TIME_LIMIT'] = self.args['time_limit']
+            judge_req['MEMORY_LIMIT'] = self.args['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['INPRE'] = config_info['INPRE']
+            judge_req['INSUF'] = config_info['INSUF']
+            judge_req['OUTPRE'] = config_info['OUTPRE']
+            judge_req['OUTSUF'] = config_info['OUTSUF']
+            if test_language == 1:
+                judge_req['Language'] = 'C'
+            elif test_language == 2:
+                judge_req['Language'] = 'C++'
+            elif test_language == 4:
+                judge_req['Language'] = 'Python'
+            judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path()
+            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            judge_req['CHECKER'] = 'ncmp'
+            judge_req['NTESTS'] = config_info['NTESTS']
+            judge_req['SOURCE_FILE'] = str_id
+            judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
+            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
         elif test_language==3:
-            pass
+            judge_req = {}
+            judge_req['id'] = record_created['id']
+            judge_req['TIME_LIMIT'] = self.args['time_limit']
+            judge_req['MEMORY_LIMIT'] = self.args['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['WORK_PATH'] = os.getcwd() + '/' + target_zip_path
+            judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
+            judge_req['SOURCE'] = str_id
+            judge_req['OTHERS'] = './judge.sh -r 100'
+            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
 
         os.remove(code_path)
         os.remove(zip_path)
-
 
         self.set_res_dict(res_dict, code=0, msg='problem created')
         return res_dict
@@ -231,8 +281,9 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
-        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'result_type', 'test_ratio'):
-            self.set_res_dict(res_dict, code=1, msg='not enough params')
+        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'src_language'):
+            print(self.args)
+            self.set_res_dict(res_dict, code=1, msg='submit post not enough params')
             # self.return_json(res_dict)
             return res_dict
 
@@ -286,6 +337,7 @@ class APIProblemHandler(base.BaseHandler):
                 os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
@@ -306,18 +358,12 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            # judge_result = json.loads(
-            #     requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
-
-            # record_created['consume_time'] = judge_result['time']
-            # record_created['consume_memory'] = judge_result['memory']
-            # record_created['result'] = result_dict[judge_result['Result']]
-
             requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
             judge_req = {}
+            judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
@@ -326,124 +372,16 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE'] = str_id
             judge_req['OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
 
-            # judge_result = json.loads(
-            #     requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
-
-            # record_created['result'] = judge_result['Score']
-            # record_created['consume_time'] = judge_result['time']
-            # record_created['consume_memory'] = judge_result['memory']
-
             requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
         return res_dict
 
-        # try:
-        #     current_time = datetime.datetime.now()
-        #     cur_timestamp = int(time.mktime(current_time.timetuple()))
-        #
-        #     await self.db.createObject('records',
-        #                             user_id=self.args['user_id'],
-        #                             problem_id=self.args['problem_id'],
-        #                             homework_id=self.args['homework_id'],
-        #                             submit_time = datetime.datetime.fromtimestamp(cur_timestamp))
-        #
-        #
-        #     record_created = (await self.db.getObject('records',
-        #                                            secure=1,
-        #                                            user_id=self.args['user_id'],
-        #                                            problem_id=self.args['problem_id'],
-        #                                            homework_id=self.args['homework_id'],
-        #                                            submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
-        #                                            ))[0]
-        #     problem_of_code = (await self.getObject('problems', id=self.args['problem_id']))[0]
-        #     problem_of_code['records'].append(record_created['id'])
-        #     await self.saveObject('problems', problem_of_code)
-        #     str_id = str(record_created['id'])
-        #     record_dir = self.root_dir.replace('problems', 'records')+'/'+str_id
-        #     if not os.path.exists(record_dir):
-        #         os.makedirs(record_dir)
-        #     src_file_path = record_dir+'/'+str_id+'.code'
-        #     # byte_content = bytearray()
-        #     # self.str_to_bytes(self.args['src_code'], byte_content)
-        #     # src_code = base64.b64decode(byte_content)
-        #     src_file = open(src_file_path, mode='wb')
-        #     src_file.write(self.args['src_code'].encode(encoding='utf-8'))
-        #
-        #     src_file.close()
-        #
-        #     if self.args['src_language']==1 or self.args['src_language']==2:
-        #         if not os.path.exists('test'):
-        #             os.makedirs('test')
-        #         # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
-        #         judge_req = {}
-        #         judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
-        #         judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
-        #         judge_req['OUTPUT_LIMIT'] = 64
-        #         judge_req['INPRE'] = 'test'
-        #         judge_req['INSUF'] = 'in'
-        #         judge_req['OUTPRE'] = 'test'
-        #         judge_req['OUTSUF'] = 'out'
-        #         judge_req['Language'] = 'C++'
-        #         judge_req['DATA_DIR'] = os.getcwd()+'/test'
-        #         judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-        #         judge_req['CHECKER'] = 'ncmp'
-        #         judge_req['NTESTS'] = 2
-        #         judge_req['SOURCE_FILE'] = str_id
-        #         judge_req['SOURCE_DIR'] = os.getcwd()+'/'+record_dir
-        #
-        #         result_dict={'Accept':0,
-        #                      'Wrong Answer':1,
-        #                      'Runtime Error':2,
-        #                      'Time Limit Exceed':3,
-        #                      'Memory Limit Exceed':4,
-        #                      'Output Limit Exceed':5,
-        #                      'Danger System Call':6,
-        #                      'Judgement Failed':7,
-        #                      'Compile Error':8,
-        #                      'unknown':9,
-        #                      }
-        #
-        #         judge_result = json.loads(requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req)).text)
-        #
-        #         # response = requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
-        #         # print(response.text)
-        #         # judge_result = json.loads(response.text)
-        #         record_created['src_size']=os.path.getsize(src_file_path)
-        #         record_created['consume_time']=judge_result['time']
-        #         record_created['consume_memory']=judge_result['memory']
-        #         record_created['result']=result_dict[judge_result['Result']]
-        #         await self.saveObject('records', record_created)
-        #     elif self.args['src_language']==3:
-        #         if not os.path.exists('judge_script'):
-        #             os.makedirs('judge_script')
-        #         judge_req = {}
-        #         judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
-        #         judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
-        #         judge_req['OUTPUT_LIMIT'] = 64
-        #         judge_req['WORK_PATH'] = os.getcwd()+'/judge_script'
-        #         judge_req['SOURCE_PATH'] = os.getcwd()+'/'+record_dir
-        #         judge_req['SOURCE'] = str_id
-        #         judge_req['OTHERS'] = os.getcwd()+'judge_script/fake-node/fake-node-linux '+'test.js '+str_id+'.code'
-        #
-        #         judge_result = json.loads(
-        #             requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req)).text)
-        #         record_created['src_size'] = os.path.getsize(src_file_path)
-        #         record_created['result'] = judge_result['Score']
-        #         record_created['consume_time'] = judge_result['time']
-        #         record_created['consume_memory'] = judge_result['memory']
-        #         await self.saveObject('records', record_created)
-        #
-        #     self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
-        # except Exception as e:
-        #     print(e)
-        #     self.set_res_dict(res_dict, code=1, msg='fail to submit')
-        #
-        # self.return_json(res_dict)
-
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
+        # print('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
+
         res_dict = {}
         # upload_path = os.path.join(os.path.dirname(__file__), 'files')
         code_meta = self.request.files['code']

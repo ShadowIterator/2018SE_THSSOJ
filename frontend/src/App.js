@@ -16,6 +16,15 @@ import {Topbar, Bottombar} from "./basic-component/topbottom-bar";
 import {UserSettings} from "./auth-component/user-setting";
 import {CreateLesson, EditLesson} from "./class-component/TA-create-lesson";
 
+import {AdminPage} from "./admin-component/admin-page";
+import {ProblemBase} from "./problem-base/problem-base";
+
+import {ProblemCreate} from "./problem-component/problem-create";
+import {MyProblem} from "./problem-component/problem-my";
+
+import { Layout } from 'antd';
+import 'antd/dist/antd.css';
+
 import Cookies from 'js-cookie';
 
 import "@blueprintjs/core/lib/css/blueprint.css";
@@ -39,6 +48,7 @@ class App extends Component {
             id: -1,
             role: -1,
             jumpToLogin: false,
+            username: ''
         };
         this.logout_callback = this.logout_callback.bind(this);
         this.login_callback = this.login_callback.bind(this);
@@ -57,20 +67,23 @@ class App extends Component {
     }
     static query_user_callback(that, result) {
         if(result.data.code===1) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         if(result.data.length===0) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         const data = result.data[0];
         that.setState({
             state: true,
             id: data.id,
             role: data.role,
+            username: data.username,
         });
     }
     logout_callback() {
@@ -102,19 +115,31 @@ class App extends Component {
             <div>
                 <Router>
                     <div>
-                        <Topbar {...this.state}/>
-                        <Route exact path="/" component={Home} />
-                        <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
-                        <Route path="/signup" render={()=><SignupPage {...this.state} />} />
-                        <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
-                        <Route path="/student" render={()=><StudentHomepage {...this.state} />} />
-                        <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
-                        <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state} lesson_id={props.match.params.id} />} />
-                        <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
-                        <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
-                        <Route path="/problemdetail/:id/:hid" render={(props) => <ProblemDetail problem_id={props.match.params.id} homework_id={props.match.params.hid} {...this.state} />} />
-                        <Route path="/createlesson" component={CreateLesson}/>
-                        <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} />} />
+                        <Layout>
+                            <Topbar {...this.state}/>
+                            <Route exact path="/" component={Home} />
+                            <Route path="/admin" render={()=><AdminPage {...this.state} />} />
+                            <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
+                            <Route path="/signup" render={()=><SignupPage {...this.state} />} />
+                            <Route path="/logout" render={()=><LogoutPage {...this.state} callback={this.logout_callback} />} />
+                            <Route path="/student" render={()=><StudentHomepage {...this.state} />} />
+                            <Route path="/ta" render={()=><TAHomepage {...this.state} />} />
+                            <Route path="/studentlesson/:id" render={(props) => <StudentLesson {...this.state}
+                                                                                               lesson_id={props.match.params.id} />} />
+                            <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
+                            <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
+                            <Route path="/problemdetail/:id/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.id}
+                                                                                                         homework_id={props.match.params.hid}
+                                                                                                         lesson_id={props.match.params.lid}
+                                                                                                         {...this.state} />} />
+                            <Route path="/createlesson" render={() => <CreateLesson {...this.state} />} />
+                            <Route path="/editlesson/:id" render={(props) => <EditLesson lesson_id={props.match.params.id} {...this.state} />} />
+                            <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
+                            <Route path="/problemcreate" render={(props) => <ProblemCreate {...this.state} />} />
+                            <Route path="/myproblem" render={(props) => <MyProblem {...this.state} />} />
+                            <Route path="/problemedit/:id" render={(props) => <ProblemCreate {...this.state} isEditing={true}
+                                                                                             problem_id={props.match.params.id} />} />
+                        </Layout>
                     </div>
                 </Router>
                 <Bottombar/>

@@ -21,6 +21,7 @@
 #include <errno.h>
 #include "parseArgs.h"
 #include "configs.h"
+#include "security.h"
 
 using namespace std;
 
@@ -51,6 +52,13 @@ void childMainWork(){
 	// char path[128];
 	// if (getcwd(path, 128) != NULL);
 	// 	printf("pwd=%s\n", path);
+
+	// printf("execv Command\n");
+	// for (int i = 0; i < runConfig.argArr.size(); ++i){
+	// 	// cout << string(argv[i]) << endl;
+	// 	printf("%s ", runConfig.argArr[i].c_str());
+	// }
+	// printf("\n");
 
 	printf("inputFileName=%s\n", runConfig.inputFileName.c_str());
 	// cout << "inputFileName=" << runConfig.inputFileName << endl;
@@ -99,12 +107,27 @@ void childMainWork(){
 		}
 	}
 
+	char *env_path_str = getenv("PATH");
+	char *env_lang_str = getenv("LANG");
+	char *env_shell_str = getenv("SHELL");
+	string env_path = env_path_str ? env_path_str : "";
+	string env_lang = env_lang_str ? env_lang_str : "";
+	string env_shell = env_shell_str ? env_shell_str : "";
+	env_path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
 
-	// let parent trace this program
-	if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1){
-		// cout << "ptrace error. errno = " << errno << endl;
-		printf("ptrace error. errno = %d", errno);
-		exit(tracemeError);
+	clearenv();
+	// setenv("USER", "poor_program", 1);
+	// setenv("LOGNAME", "poor_program", 1);
+	setenv("HOME", runConfig.path.c_str(), 1);
+	if (env_lang_str) {
+		setenv("LANG", env_lang.c_str(), 1);
+	}
+	if (env_path_str) {
+		setenv("PATH", env_path.c_str(), 1);
+	}
+	setenv("PWD", runConfig.path.c_str(), 1);
+	if (env_shell_str) {
+		setenv("SHELL", env_shell.c_str(), 1);
 	}
 
 	size_t sz = runConfig.argArr.size();
@@ -116,14 +139,21 @@ void childMainWork(){
 	}
 	argv[sz] = NULL;
 
-	for (int i = 0; i < sz; ++i){
-		// cout << string(argv[i]) << endl;
-		printf("%s ", argv[i]);
-	}
-	printf("\n");
+	// printf("execv Command\n");
+	// for (int i = 0; i < sz; ++i){
+	// 	printf("%s ", argv[i]);
+	// }
+	// printf("\n");
 
 	// if (getcwd(path, 128) != NULL);
 	// 	printf("pwd=%s\n", path);
+
+	// let parent trace this program
+	if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) == -1){
+		// cout << "ptrace error. errno = " << errno << endl;
+		printf("ptrace error. errno = %d", errno);
+		exit(tracemeError);
+	}
     
     if (execv(argv[0], argv) == -1){
     	// cout << "execv error. errno = " << errno << endl;
@@ -140,7 +170,7 @@ enum RunMode {
 	Running,
 	RunOtherProcess
 };
-const int MaxProcess = 16;
+const int MaxProcess = 512;
 int cntProcess = 0;
 class mProcess{
 public:
@@ -193,15 +223,9 @@ void kill_process(pid_t p = -1){
 	}
 }
 
-bool check_safe_syscall(pid_t){
-	return true;
-}
-
-void on_syscall_exit(pid_t){
-	return;
-}
-
 RunResult parentMainWork(pid_t childpid){
+	init_config(runConfig);
+
 	cntProcess = 0;
 	if (!add_process(childpid)){
 		// cout << "Error while add_process first." << endl;
@@ -235,8 +259,10 @@ RunResult parentMainWork(pid_t childpid){
 			int sig = 0;
 			struct rusage ruse;
 
+			// printf("before wait\n");
 			pid_t p = wait4(-1, &stat, __WALL, &ruse);
-			if (p == apid){
+			// printf("after wait %d\n", p);
+			if (p == apid) {
 				if (WIFEXITED(stat) || WIFSIGNALED(stat)) {
 					// cout << "TLE detected by assist process!" << endl;
 					printf("TLE detected by assist process!\n");
@@ -277,13 +303,12 @@ RunResult parentMainWork(pid_t childpid){
 				return RunResult(MemoryLimitExceed, usertim, usermem);
 			}
 
-
+			// if the child terminated normally, that is, by
+            //  calling exit() or _exit(), or by returning from main()
 			if (WIFEXITED(stat)){
-				// cout << "in WIFEXITED" << endl;
 				// printf("in WIFEXITED\n");
 				if (mp[idx].mode == NotStart){
 					kill_process();
-					// cout << "JGF detected by mp[idx].mode == NotStart" << endl;
 					printf("JGF detected by mp[idx].mode == NotStart\n");
 					return RunResult(JudgementFailed, usertim, usermem, WEXITSTATUS(stat));
 				} else
@@ -300,7 +325,7 @@ RunResult parentMainWork(pid_t childpid){
 					}
 				}
 			}
-
+			// if the child process was terminated by a signal.
 			if (WIFSIGNALED(stat)){
 				// cout << "in WIFSIGNALED" << endl;
 				// printf("in WIFSIGNALED\n");
@@ -329,12 +354,16 @@ RunResult parentMainWork(pid_t childpid){
 				}
 			}
 
+			// if the child process was stopped by delivery of a
+            //  signal; this is possible only if the call was done using WUN‐
+            //  TRACED or when the child is being traced
 			if (WIFSTOPPED(stat)){
-				// cout << "in WIFSTOPPED" << endl;
 				// printf("in WIFSTOPPED\n");
 				sig = WSTOPSIG(stat);
+				// printf("sig=%d, SIGTRAP=%d, SIGSTOP=%d\n", sig, SIGTRAP, SIGSTOP);
 
 				if (mp[idx].mode == NotStart){
+					// printf("mp[idx].mode == NotStart\n");
 					if ((idx == 0 && sig == SIGTRAP) || (idx != 0 && sig == SIGSTOP)){
 						if (idx == 0){
 							// PTRACE_O_EXITKILL: Send a SIGKILL signal to the tracee
@@ -349,7 +378,7 @@ RunResult parentMainWork(pid_t childpid){
 								//    status>>8 == (SIGTRAP | (PTRACE_EVENT_FORK<<8))
 								//    status>>8 == (SIGTRAP | (PTRACE_EVENT_VFORK<<8))
 								//    status>>8 == (SIGTRAP | (PTRACE_EVENT_EXEC<<8))
-								ptrace_data |= PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK |PTRACE_O_TRACEEXEC;
+								ptrace_data |= PTRACE_O_TRACECLONE | PTRACE_O_TRACEFORK | PTRACE_O_TRACEVFORK | PTRACE_O_TRACEEXEC;
 							}
 							if (ptrace(PTRACE_SETOPTIONS, p, NULL, ptrace_data) == -1){
 								// cout << "ptrace PTRACE_SETOPTIONS for pid=" << p << endl;
@@ -365,6 +394,7 @@ RunResult parentMainWork(pid_t childpid){
 
 				// system call traps
 				if (sig == (SIGTRAP | 0x80)){
+					// printf("sig == (SIGTRAP | 0x80)\n");
 					if (mp[idx].mode == Running){
 						// check safe syscall
 						if (runConfig.safe && !check_safe_syscall(p)){
@@ -385,6 +415,7 @@ RunResult parentMainWork(pid_t childpid){
 				} else
 
 				if (sig == SIGTRAP) {
+					// printf("sig == SIGTRAP\n");
 					switch ((stat >> 16) & 0xffff) {
 						case PTRACE_EVENT_CLONE:
 						case PTRACE_EVENT_FORK:
@@ -409,10 +440,12 @@ RunResult parentMainWork(pid_t childpid){
 					case SIGXCPU:
 						// cout << "TLE detected by sig == stoped. SIGXCPU" << endl;
 						printf("TLE detected by sig == stoped. SIGXCPU\n");
+						kill_process();
 						return RunResult(TimeLimitExceed);
 					case SIGXFSZ:
 						// cout << "OLE detected by sig == stoped. SIGXFSZ" << endl;
 						printf("OLE detected by sig == stoped. SIGXFSZ\n");
+						kill_process();
 						return RunResult(OutputLimitExceed);
 				}
 			}

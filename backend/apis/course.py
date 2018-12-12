@@ -17,6 +17,10 @@ class APICourseHandler(base.BaseHandler):
         if 'end_time' in self.args.keys():
             self.args['end_time'] = datetime.datetime.fromtimestamp(self.args['end_time'])
 
+
+    async def _list_post(self):
+        return await self.db.querylr('courses', self.args['start'], self.args['end'])
+
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}

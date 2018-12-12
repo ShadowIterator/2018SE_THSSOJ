@@ -3,11 +3,14 @@ import {
     Menu,
     Card,
     Tag,
-    Button
+    Button,
+    ButtonGroup
 } from "@blueprintjs/core";
-import {Col, Row} from "react-bootstrap";
+import {Col, Row, Container} from "react-bootstrap";
 import {withRouter} from "react-router";
 import {AuthContext} from "../basic-component/auth-context";
+import {ajax_post} from "../ajax-utils/ajax-method";
+import {api_list} from "../ajax-utils/api-manager";
 
 const ZeroPadding = {
     "padding-left": 0,
@@ -31,7 +34,9 @@ class mLessonList extends Component {
         this.handleClick = this.handleClick.bind(this);
     }
     handleClick(event) {
-        console.log("handleClick()");
+        if(this.props.listname === '未发布课程') {
+            return;
+        }
         event.preventDefault();
         let id = event.target.id;
         id = id>=0? id:-id;
@@ -48,6 +53,12 @@ class mLessonList extends Component {
         });
     }
     render() {
+        let lessonlist = this.props.lessonlist;
+        lessonlist.sort(function(a, b){
+            const ida = a.id;
+            const idb = b.id;
+            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        });
         return (
             <div style={Spacing}>
                 {this.props.role === 2 && this.props.listname === '未发布课程' &&
@@ -66,21 +77,44 @@ class mLessonList extends Component {
                     <h4>{this.props.listname}</h4>
                 }
                 <Menu>
-                    {this.props.lessonlist.map((lesson)=>(<li>
+                    {lessonlist.map((lesson)=>(<li>
                         {this.props.role === 2 && this.props.listname === '未发布课程' &&
                         <Row style={{width: '100%'}}>
-                            <Col lg={6}>
+                            <Col lg={8}>
                                 <a id={(-lesson.id).toString()} onClick={this.handleClick}
                                    className="bp3-menu-item bp3-popover-dismiss">
                                     <div id={lesson.id.toString()}
                                          className="bp3-text-overflow-ellipsis bp3-fill">{lesson.name}</div>
                                 </a>
                             </Col>
-                            <Col lg={6}>
-                                <Button onClick={() => {
-                                    this.props.history.push('/editlesson/' + lesson.id.toString());
-                                }}>编辑</Button>
-                                <Button>发布</Button>
+                            <Col lg={4}>
+                                <ButtonGroup>
+                                    <Button onClick={() => {
+                                        this.props.history.push('/editlesson/' + lesson.id.toString());
+                                    }} icon='edit' />
+                                    <Button onClick={() => {
+                                        ajax_post(api_list['update_course'], {id: lesson.id, status: 1},
+                                            this, (that, result) => {
+                                                if(result.data.code!==0) {
+                                                    alert("Publish course failed.");
+                                                    return;
+                                                }
+                                                window.location.reload();
+                                            })
+                                    }
+                                    } icon='upload' />
+                                    <Button onClick={() => {
+                                        ajax_post(api_list['delete_course'], {id: lesson.id},
+                                            this, (that, result) => {
+                                                if(result.data.code!==0) {
+                                                    alert("Delete failed.");
+                                                    return;
+                                                }
+                                                window.location.reload();
+                                            })
+                                    }
+                                    } icon='trash' />
+                                </ButtonGroup>
                             </Col>
                         </Row>
                         }
@@ -129,8 +163,8 @@ class TALessonList extends Component {
 }
 
 const InfoItemStyle = {
-    "margin-top": "10px",
-    "margin-bottom": "10px"
+    "margin-top": "6px",
+    "margin-bottom": "6px"
 };
 
 class InfoItem extends Component {
@@ -147,12 +181,12 @@ class InfoItem extends Component {
 class Info extends Component {
     render() {
         return (
-            <Card interactive={false}>
-                <h4>通知</h4>
+            <div>
                 {this.props.infoitems.map((item)=>(
                     <InfoItem title={item.title} content={item.content} type="通知" />
                 ))}
-            </Card>
+            {this.props.infoitems.length === 0 && <h3>您当前没有通知</h3>}
+            </div>
         )
     }
 }

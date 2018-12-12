@@ -23,6 +23,9 @@ class APIRecordHandler(base.BaseHandler):
         if 'submit_time' in self.args.keys():
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
+    async def _list_post(self):
+        return await self.db.querylr('records', self.args['start'], self.args['end'])
+
     @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
@@ -31,7 +34,6 @@ class APIRecordHandler(base.BaseHandler):
             timepoint = int(js['submit_time'].timestamp())
             js['submit_time'] = timepoint
         return res
-        # self.write(json.dumps(res).encode())
 
     # @tornado.web.authenticated
     async def _srcCode_post(self):
@@ -75,20 +77,28 @@ class APIRecordHandler(base.BaseHandler):
                        'Compile Error': 8,
                        'unknown': 9,
                        }
-        judge_result = json.loads(self.args['res'])
+        print('returnresult: ', match_record)               
+        judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
             match_record['consume_time'] = judge_result['time']
             match_record['consume_memory'] = judge_result['memory']
             match_record['result'] = result_dict[judge_result['Result']]
+            if match_record['record_type']==3 and match_record['result']==0:
+                matched_problem = self.db.getObject('problems', cur_user=self.get_current_user_object(), id=match_record['problem_id'])
+                matched_problem['status'] = 1
+                self.db.saveObject('problems', cur_user=self.get_current_user_object(), object=matched_problem)
 
         elif match_record['src_language'] == 3:
             match_record['consume_time'] = judge_result['time']
             match_record['consume_memory'] = judge_result['memory']
             match_record['score'] = judge_result['Score']
+            if match_record['record_type']==3 and match_record['score']==100:
+                matched_problem = self.db.getObject('problems', cur_user=self.get_current_user_object(), id=match_record['problem_id'])
+                matched_problem['status'] = 1
+                self.db.saveObject('problems', cur_user=self.get_current_user_object(), object=matched_problem)
 
         match_record['status'] = 1
         await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
-
 
     # async def get(self, type): #detail
     #     # self.getargs()

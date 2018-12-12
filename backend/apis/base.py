@@ -4,6 +4,8 @@ import bcrypt
 # import markdown
 import os.path
 import psycopg2
+import datetime
+import time
 import re
 import tornado.escape
 import tornado.httpserver
@@ -77,7 +79,9 @@ class Application(tornado.web.Application):
         self.db_instance = db
 
 
-
+# class FormHandler(tornado.web.RequestHandler):
+#     def post(self):
+#         print('form-post')
 
 class BaseHandler(tornado.web.RequestHandler):
     async def try_query(self):
@@ -89,7 +93,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.db = self.application.db_instance
         self.getargs()
         self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
-        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
@@ -133,7 +137,6 @@ class BaseHandler(tornado.web.RequestHandler):
 
     def get_current_user(self):
         return self.get_secure_cookie('user_id')
-
 
     async def _testhello_post(self):
         print('app: in testhello')

@@ -12,6 +12,8 @@ import tornado.ioloop
 import tornado.locks
 import tornado.options
 import tornado.web
+import datetime
+import time
 # import unicodedata
 import asyncio
 
@@ -146,6 +148,8 @@ permissions = {
             'result_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'test_ratio': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         },
         'read': {
             'id': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
@@ -162,6 +166,8 @@ permissions = {
             'result_type': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'test_ratio': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
             'src_language': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'status': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
+            'score': (PERMISSIONLEVEL.NORMAL, PERMISSIONLEVEL.EVERYONE),
         }
     },
     'notices': {
@@ -184,10 +190,12 @@ permissions = {
 
 database_keys = {
     'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
-    'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices'],
+    'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices', 'start_time', 'end_time', ],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
-    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'test_language'],
-    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 'consume_time', 'consume_memory', 'src_size'],
+
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', 'user_id', 'test_language'],
+    'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 
+                'consume_time', 'consume_memory', 'src_size', 'record_type', 'result_type', 'test_ratio', 'src_language', 'status', 'score'],
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],
 }
 
@@ -269,6 +277,27 @@ class BaseDB:
             raise ValueError("Expected 1 result, got %d" % len(results))
         print(results[0])
         return results[0]
+
+    async def querylr(self, si_table_name, l , r):
+        stmt = 'SELECT * FROM {table_name} LIMIT {n} OFFSET {s}'.format(
+            n = r - l + 1,
+            s = l - 1,
+            table_name = si_table_name,
+        )
+        print('querylr: ', stmt)
+        res = await self.query(stmt)
+        for x in res:
+            for key, value in x.items():
+                print(key, isinstance(value, datetime.datetime))
+                if(isinstance(value, datetime.datetime)):
+                    x[key] = int(time.mktime(value.timetuple()))
+        print(res)
+
+        rtn = {}
+        rtn['count'] = len(await self.all(si_table_name))
+        rtn['list'] = res
+
+        return rtn
 
     async def any_author_exists(self):
         return bool(await self.query("SELECT * FROM authors LIMIT 1"))
@@ -383,9 +412,9 @@ class BaseTable:
             propkeys.append(str(key))
             propvalues.append(value)
 
-        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt});'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
+        str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt}) RETURNING *;'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
         print('fmt = ', str_fmt, propvalues)
-        await self.db.execute(str_fmt, *propvalues)
+        return await self.db.queryone(str_fmt, *propvalues)
 
     async def objectFilter(self, method, dic, user):
         # user = await self.get_current_user_object()
@@ -401,6 +430,29 @@ class BaseTable:
             print('object filter: user not loged in')
         print('permission: ', per_role, per_owner)
         return self.jsonFilter(method, dic, per_role, per_owner)
+
+    async def querylr(self, l , r):
+        pass
+        # si_table_name = self.table_name
+        # stmt = 'SELECT * FROM {table_name} LIMIT {n} OFFSET {s}'.format(
+        #     n = r - l + 1,
+        #     s = l - 1,
+        #     table_name = si_table_name,
+        # )
+        # print('querylr: ', stmt)
+        # res = await self.query(stmt)
+        # for x in res:
+        #     for key, value in x.items():
+        #         print(key, isinstance(value, datetime.datetime))
+        #         if(isinstance(value, datetime.datetime)):
+        #             x[key] = int(time.mktime(value.timetuple()))
+        # print(res)
+
+        # rtn = {}
+        # rtn['count'] = len(await self.all(si_table_name))
+        # rtn['list'] = res
+
+        # return rtn
 
     def jsonFilter(self, method, dic, per_role, per_owner):
         table_name = self.table_name

@@ -1,18 +1,19 @@
 import React, { Component } from 'react';
 
-import {Container, Col, Row} from 'react-bootstrap';
-
-import {Info, StudentLessonList} from "./lesson-component";
-
-import {ZeroPadding} from "./lesson-component";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
-//import "../mock//course-mock";
-//import "../mock//auth-mock";
-//import "../mock//notice-mock";
+import {withRouter, Link} from "react-router-dom";
 
-class StudentHomepageMiddle extends Component {
+import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge } from 'antd';
+const {Content} = Layout;
+const {Meta} = Card;
+
+// import "../mock/course-mock";
+// import "../mock/auth-mock";
+// import "../mock/notice-mock";
+
+class mStudentHomepageMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -21,6 +22,7 @@ class StudentHomepageMiddle extends Component {
         };
         this.infoitems = [];
         this.lessonlist = [];
+        this.userquery_result = {};
     }
     componentDidMount() {
         if(!this.props.state || this.props.id===undefined)
@@ -41,10 +43,11 @@ class StudentHomepageMiddle extends Component {
             return;
         }
         const user = result.data[0];
+        that.userquery_result = user;
         const lesson_ids = user.student_courses? user.student_courses:[];
         // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
-            ajax_post(api_list['query_course'], {id:lesson_id}, that, StudentHomepageMiddle.query_course_callback);
+            ajax_post(api_list['query_course'], {id:lesson_id, status:1}, that, StudentHomepageMiddle.query_course_callback);
         }
     }
     static query_course_callback(that, result) {
@@ -55,12 +58,16 @@ class StudentHomepageMiddle extends Component {
         const course = result.data[0];
         const name = course.name;
         const id = course.id;
+        const description = course.description;
         const notices = course.notices;
-        that.lessonlist.push({id:id, name:name});
-        for(let notice_id of notices) {
-            ajax_post(api_list['query_notice'],{id:notice_id}, that, StudentHomepageMiddle.query_notice_callback);
+        const homeworks = course.homeworks;
+        that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
+        // for(let notice_id of notices) {
+            // ajax_post(api_list['query_notice'],{id:notice_id}, that, StudentHomepageMiddle.query_notice_callback);
+        // }
+        if( that.userquery_result && that.lessonlist.length === that.userquery_result.student_courses.length) {
+            that.setState({lessonlist: that.lessonlist});
         }
-        that.setState({lessonlist:that.lessonlist});
     }
     static query_notice_callback(that, result) {
         if(result.data.length===0)
@@ -73,7 +80,7 @@ class StudentHomepageMiddle extends Component {
             title:title,
             content:content,
         });
-        that.setState({infoitems:that.infoitems});
+        // that.setState({infoitems:that.infoitems});
     }
     render() {
         this.lessonlist.sort(function(a, b) {
@@ -81,27 +88,54 @@ class StudentHomepageMiddle extends Component {
             const idb = b.id;
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
-        this.infoitems.sort(function(a, b) {
-            const ida = a.id;
-            const idb = b.id;
-            return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
-        });
+        // this.infoitems.sort(function(a, b) {
+        //     const ida = a.id;
+        //     const idb = b.id;
+        //     return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
+        // });
         return (
-            <div>
-            <Container fluid>
-                <Row>
-                    <Col lg={3} style={ZeroPadding}>
-                        <StudentLessonList state={this.props.state} id={this.props.id} role={this.props.role} lessonlist={this.lessonlist} />
-                    </Col>
-                    <Col style={ZeroPadding}>
-                        <Info infoitems={this.infoitems}/>
-                    </Col>
-                </Row>
-            </Container>
-            </div>
+            <Content style={{padding: '0 50px'}}>
+                <Breadcrumb style={{margin: '16px 0'}}>
+                    <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                </Breadcrumb>
+                <div style={{background: '#fff', padding: 24, minHeight: 640}}>
+                    <h2>本学期课程</h2>
+                    <Row gutter={16}>
+                    {this.state.lessonlist.map((lesson)=>
+                        <Col span={8}>
+                            <Card style={{width: '100%', marginTop: 16}}
+                                  actions={[
+                                            <Tooltip title="查看通知">
+                                                <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                <Icon type="notification" theme="twoTone" style={{padding: '0 5px'}} />
+                                                <Badge count={lesson.notices.length}
+                                                       style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />
+                                                </div>
+                                            </Tooltip>,
+                                            <Tooltip title="查看作业">
+                                                <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                <Icon type="edit" theme="twoTone" style={{padding: '0 5px'}} />
+                                                <Badge count={lesson.homeworks.length}
+                                                       style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />
+                                                </div>
+                                            </Tooltip>,
+                                            <Tooltip title="查看课程信息">
+                                                <Icon type="info-circle" theme="twoTone"
+                                                      onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
+                                            </Tooltip>]}>
+                                <Meta title={<Link to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                      description={lesson.description}/>
+                            </Card>
+                        </Col>
+                    )}
+                    </Row>
+                </div>
+            </Content>
         )
     }
 }
+
+const StudentHomepageMiddle = withRouter(mStudentHomepageMiddle);
 
 class StudentHomepage extends Component {
     render() {
