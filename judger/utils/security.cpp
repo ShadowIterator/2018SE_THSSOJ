@@ -447,6 +447,9 @@ void init_config(const RunConfig& runConfig) {
 		readable.insert(string(readable_default[i]));
 	}
 
+	for (int i = 0; i < runConfig.argArr.size(); ++i)
+		add_permission(runConfig.argArr[i], STAT);
+
 	statable.insert("/tmp");
 	statable.insert("/usr");
 	statable.insert("/lib");

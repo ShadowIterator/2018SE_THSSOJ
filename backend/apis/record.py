@@ -72,7 +72,7 @@ class APIRecordHandler(base.BaseHandler):
                        'Time Limit Exceed': 3,
                        'Memory Limit Exceed': 4,
                        'Output Limit Exceed': 5,
-                       'Danger System Call': 6,
+                       'Dangerous System Call': 6,
                        'Judgement Failed': 7,
                        'Compile Error': 8,
                        'unknown': 9,
