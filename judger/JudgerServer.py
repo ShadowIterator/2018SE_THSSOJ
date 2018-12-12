@@ -20,6 +20,7 @@ from queue import Queue, Empty
 from threading import Thread
 
 define("port", default=12345, help="run on the given port", type=int)
+define("domain", default="http://localhost:8000/", help="backend domain", type=str)
 
 tradiQ = Queue()
 scriptQ = Queue()
@@ -64,7 +65,7 @@ def handleTraditionalJudger():
 					}
 			# judgerResult['id'] = record_id
 			print(jr)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
 			# print(r)
 			continue
 		judgerResult = {'res': {'Result': 'Judgement Failed',
@@ -72,7 +73,7 @@ def handleTraditionalJudger():
 						'memory': 0,
 						'Info': "No comment",},
 						'id': record_id}
-		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+		requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
 		print(judgerResult)
 		# self.write({'Result': 'Judgement Failed',
 		# 			'time': 0,
@@ -98,7 +99,7 @@ def handleScriptJudger():
 							'Info': "No comment",},
 							'id': record_id}
 			print(judgerResult)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
 			# self.write({'Score': 0,
 			# 			'time': 0,
 			# 			'memory': 0,
@@ -132,7 +133,7 @@ def handleScriptJudger():
 				  'id': record_id}
 			# judgerResult['id'] = record_id
 			print(jr)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
 			# self.write(judgerResult)
 			continue
 		judgerResult = {'res':{'Score': 0,
@@ -141,7 +142,7 @@ def handleScriptJudger():
 						'Info': "No comment",},
 						'id': record_id}
 		print(judgerResult)
-		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+		requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
 		# self.write({'Score': 0,
 		# 			'time': 0,
 		# 			'memory': 0,
@@ -280,6 +281,10 @@ if __name__ == "__main__":
 	# 							], stdout=subprocess.PIPE)
 	# time.sleep(1)
 	# judger.kill()
+	tornado.options.parse_command_line()
+	options.parse_config_file('configs.py')
+	print(options.domain)
+
 	traditioanlJudgerThread = Thread(target=handleTraditionalJudger)
 	scriptJudgerJudgerThread = Thread(target=handleScriptJudger)
 	traditioanlJudgerThread.start()

@@ -47,3 +47,4 @@ result.*
 
 # python
 __pycache__
+configs.py

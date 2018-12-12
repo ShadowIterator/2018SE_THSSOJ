@@ -53,11 +53,13 @@ class APINoticeHandler(base.BaseHandler):
         res_dict = {}
         course_id = self.args['course_id']
         await self.db.createObject('notices', **self.args)
-        course = await self.db.getObject('courses',cur_user=self.get_current_user_object(), id = course_id)
+        course = (await self.db.getObject('courses',cur_user=self.get_current_user_object(), id = course_id))[0]
         notice = (await self.db.getObject('notices',cur_user=self.get_current_user_object(), **self.args))[0]
-        course['notices'].append(notice.id)
+        print('notice_create: ', notice)
+        course['notices'].append(notice['id'])
         course['notices'] = list(set(course['notices']))
         self.set_res_dict(res_dict, code=0, msg='notice created')
+        await self.db.saveObject('courses', course)
         return res_dict
         # self.write(json.dumps({'code': 0}).encode())
 
