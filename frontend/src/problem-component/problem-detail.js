@@ -89,18 +89,22 @@ class ProblemDetailRecord extends Component {
         if(this.props.submit_record !== null) {
             const sub = this.props.submit_record;
             let result = '';
-            if(sub.result_type === 0) {
-                const result_id = sub.result;
-                if(isNaN(result_id)) {
-                    result = '找不到结果';
-                } else {
-                    result = this.result_arr[result_id];
-                }
+            if(sub.status === 0) {
+                result = '等待评测';
             } else {
-                if(isNaN(sub.score)) {
-                    result = '找不到结果';
+                if (sub.result_type === 0) {
+                    const result_id = sub.result;
+                    if (isNaN(result_id)) {
+                        result = '找不到结果';
+                    } else {
+                        result = this.result_arr[result_id];
+                    }
                 } else {
-                    result = sub.score.toString() + ' 分';
+                    if (isNaN(sub.score)) {
+                        result = '找不到结果';
+                    } else {
+                        result = sub.score.toString() + ' 分';
+                    }
                 }
             }
             body.push(
@@ -132,18 +136,22 @@ class ProblemDetailRecord extends Component {
                     continue;
                 console.log("inside table render for loop", re);
                 let result = '';
-                if(re.result_type === 0) {
-                    const result_id = re.result;
-                    if(isNaN(result_id)) {
-                        result = '找不到结果';
-                    } else {
-                        result = this.result_arr[result_id];
-                    }
+                if(re.status === 0) {
+                    result = '正在评测';
                 } else {
-                    if(isNaN(re.score)) {
-                        result = '找不到结果';
+                    if (re.result_type === 0) {
+                        const result_id = re.result;
+                        if (isNaN(result_id)) {
+                            result = '找不到结果';
+                        } else {
+                            result = this.result_arr[result_id];
+                        }
                     } else {
-                        result = re.score.toString() + ' 分';
+                        if (isNaN(re.score)) {
+                            result = '找不到结果';
+                        } else {
+                            result = re.score.toString() + ' 分';
+                        }
                     }
                 }
                 body.push(
