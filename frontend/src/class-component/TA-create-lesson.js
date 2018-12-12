@@ -1,16 +1,19 @@
 import React, {Component} from 'react';
-import {Button, Tag} from '@blueprintjs/core';
+import {Tag} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {withRouter, Link} from "react-router-dom"
-import {Form, Container, Row, Col} from "react-bootstrap"
+import {Container} from "react-bootstrap"
 
 import moment from "moment";
 
 import { Layout, Breadcrumb, DatePicker } from 'antd';
+import { Form, Input, Select, Row, Col, Checkbox, Button, Switch, Upload, Icon } from 'antd';
 const {Content} = Layout;
 const {RangePicker} = DatePicker;
-
+const Option = Select.Option;
+const {TextArea} = Input;
+const FormItem = Form.Item;
 
 // import "../mock/course-mock";
 // import "../mock/auth-mock";
@@ -76,43 +79,54 @@ class mLessonList extends Component {
     handleSubmit(e) {
         e.preventDefault();
         e.stopPropagation();
-        if (this.state.isCreating) {
-            const data = {
-                name: this.state.title,
-                description: this.state.description,
-                tas: this.state.ta_tags.map(ta => {
-                    return ta.id;
-                }),
-                students: this.state.stu_tags.map(stu => {
-                    return stu.id;
-                }),
-                notices: [],
-                start_time: this.state.date[0].unix(),
-                end_time: this.state.date[1].unix(),
-            };
-            if(!(this.props.id in data.tas)) {
-                data.tas.push(this.props.id);
+        console.log('handleSubmit');
+        this.props.form.validateFields((err, fieldsValue) => {
+            console.log('error: ', err);
+            console.log('value: ', fieldsValue);
+            if (err) {
+                return;
             }
-            console.log(data);
-            ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
-        } else
-        {
-            const data = {
-                id: parseInt(this.props.course_id),
-                name: this.state.title,
-                description: this.state.description,
-                tas: this.state.ta_tags.map(ta => {
-                    return ta.id;
-                }),
-                students: this.state.stu_tags.map(stu => {
-                    return stu.id;
-                }),
-                start_time: this.state.date[0].unix(),
-                end_time: this.state.date[1].unix(),
-            };
-            console.log(data);
-            ajax_post(api_list['update_course'], data, this, LessonList.submit_callback);
-        }
+            if (this.state.isCreating) {
+                const data = {
+                    name: this.state.title,
+                    description: this.state.description,
+                    tas: this.state.ta_tags.map(ta => {
+                        return ta.id;
+                    }),
+                    students: this.state.stu_tags.map(stu => {
+                        return stu.id;
+                    }),
+                    notices: [],
+                    start_time: this.state.date[0].unix(),
+                    end_time: this.state.date[1].unix(),
+                };
+                if(data.tas.indexOf(this.props.id) < 0) {
+                    console.log("this.props.id: ",this.props.id);
+                    console.log("data.tas: ",data.tas);
+                    data.tas.push(this.props.id);
+                }
+                console.log(data);
+                ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
+            } else
+            {
+                const data = {
+                    id: parseInt(this.props.course_id),
+                    name: this.state.title,
+                    description: this.state.description,
+                    tas: this.state.ta_tags.map(ta => {
+                        return ta.id;
+                    }),
+                    students: this.state.stu_tags.map(stu => {
+                        return stu.id;
+                    }),
+                    start_time: this.state.date[0].unix(),
+                    end_time: this.state.date[1].unix(),
+                };
+                console.log(data);
+                ajax_post(api_list['update_course'], data, this, LessonList.submit_callback);
+            }
+        });
+
     }
 
     static submit_callback(that, result) {
@@ -227,64 +241,126 @@ class mLessonList extends Component {
             );
         });
 
+        const { getFieldDecorator } = this.props.form;
+
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 24 },
+                sm: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 24 },
+                sm: { span: 20 },
+            },
+        };
+        const tailFormItemLayout = {
+            wrapperCol: {
+                xs: {
+                    span: 24,
+                    offset: 0,
+                },
+                sm: {
+                    span: 24,
+                    offset: 0,
+                },
+            },
+        };
+
         return (
             <div>
             <Form onSubmit={this.handleSubmit}>
-                <Form.Group as={Row} controlId="title">
-                    <Form.Label column lg="2">课程名称</Form.Label>
-                    <Col lg="10">
-                        <Form.Control value={this.state.title} onChange={this.changeTitle} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="description">
-                    <Form.Label column lg="2">课程简介</Form.Label>
-                    <Col lg="10">
-                        <Form.Control as="textarea" value={this.state.description} onChange={this.changeDescription} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="data">
-                    <Form.Label column lg="2">起止时间</Form.Label>
-                    <Col lg="10">
+                <FormItem
+                    {...formItemLayout}
+                    label="课程名称"
+                    hasFeedback
+                >
+                    {getFieldDecorator('title', {
+                        initialValue: this.state.title,
+                        rules: [{
+                            required: true, message: '请输入课程名！',
+                        }],
+                    })(
+                        <Input onChange={this.changeTitle}/>
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="课程简介"
+                    hasFeedback
+                >
+                    {getFieldDecorator('description', {
+                        initialValue: this.state.description,
+                        rules: [{
+                            required: true, message: '请输入课程简介！',
+                        }],
+                    })(
+                        <Input.TextArea onChange={this.changeDescription}/>
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="起止时间"
+                    hasFeedback
+                >
+                    {getFieldDecorator('timerange', {
+                        rules: [{
+                            required: true, message: '请选择课程有效时间段！',
+                        }],
+                    })(
+
                         <RangePicker value={this.state.date}
                                      size="large"
                                      style={{width: '100%', outline: 0}}
                                      placeholder={['开课时间','结课时间']}
                                      onChange={(date) => {
-                                        console.log(date);
-                                        this.setState({date: date});
-                        }}/>
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="tas">
-                    <Form.Label column lg="2">添加助教</Form.Label>
-                    <Col lg="8">
-                        <Form.Control value={this.state.newta} onChange={this.changeNewta} />
-                    </Col>
-                    <Col lg="2">
-                        <Button onClick={()=>{
-                            ajax_post(api_list['query_user'], {username: this.state.newta}, this, LessonList.add_ta_callback);
-                        }}>提交</Button>
-                    </Col>
-                </Form.Group>
+                                         console.log(date);
+                                         this.setState({date: date});
+                                     }}/>
+                    )}
+
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="添加助教"
+                >
+                    {getFieldDecorator('tas', {
+                        initialValue: this.state.newta
+                    })(
+                        <Input onChange={this.changeNewta}
+                               onPressEnter={(event) => {
+                                   event.preventDefault();
+                                   event.stopPropagation();
+                                   ajax_post(api_list['query_user'], {username: this.state.newta}, this, LessonList.add_ta_callback);
+                               }}/>
+                    )}
+                </FormItem>
                 <Container style={{paddingBottom: '10px'}}>
                     {tatagElements}
                 </Container>
-                <Form.Group as={Row} controlId="students">
-                    <Form.Label column lg="2">添加学生</Form.Label>
-                    <Col lg="8">
-                        <Form.Control value={this.state.newstu} onChange={this.changeNewstu} />
-                    </Col>
-                    <Col lg="2">
-                        <Button onClick={()=>{
-                            ajax_post(api_list['query_user'], {username: this.state.newstu}, this, LessonList.add_stu_callback);
-                        }}>提交</Button>
-                    </Col>
-                </Form.Group>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="添加学生"
+                >
+                    {getFieldDecorator('students', {
+                        initialValue: this.state.newstu
+                    })(
+                        <Input onChange={this.changeNewstu}
+                               onPressEnter={(event) => {
+                                   event.preventDefault();
+                                   event.stopPropagation();
+                                   ajax_post(api_list['query_user'], {username: this.state.newstu}, this, LessonList.add_stu_callback);
+                               }}/>
+                    )}
+                </FormItem>
                 <Container style={{paddingBottom: '10px'}}>
                     {stutagElements}
                 </Container>
                 <Container>
-                    <Button style={{margin: '10px'}} variant="primary" type="submit">暂存</Button>
+                    <Button style={{margin: '10px'}} type="primary" htmlType="submit">暂存</Button>
                     <Button style={{margin: '10px'}} onClick={()=>{
                         this.props.history.push('/ta');
                     }}> 放弃 </Button>
@@ -297,6 +373,7 @@ class mLessonList extends Component {
 }
 
 const LessonList = withRouter(mLessonList);
+const WrappedLessonList = Form.create()(LessonList);
 
 class CreateLesson extends Component {
     render() {
@@ -309,7 +386,7 @@ class CreateLesson extends Component {
                 <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
                     <h3>创建课程</h3>
                     <Container>
-                        <LessonList username={this.props.username} id={this.props.id}/>
+                        <WrappedLessonList username={this.props.username} id={this.props.id}/>
                     </Container>
                 </div>
             </Content>

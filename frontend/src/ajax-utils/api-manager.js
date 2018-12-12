@@ -1,4 +1,4 @@
-const URL = 'http://localhost:80';
+const URL = 'http://localhost:8000';
 
 const api_list = {
     'login': '/api/user/login',
@@ -47,9 +47,9 @@ const api_list = {
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
 
-    'upload_code': '/api/problem/uploadCode',
-    'upload_case': '/api/problem/uploadCases',
-    'upload_script': '/api/problem/uploadScript',
+    'upload_code': '/api/upload/files',
+    'upload_case': '/api/upload/files',
+    'upload_script': '/api/upload/files',
 };
 
 export {URL, api_list}

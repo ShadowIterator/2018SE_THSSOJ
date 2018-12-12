@@ -67,14 +67,16 @@ class App extends Component {
     }
     static query_user_callback(that, result) {
         if(result.data.code===1) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         if(result.data.length===0) {
-            this.setState({
+            that.setState({
                 jumpToLogin: true,
             });
+            return;
         }
         const data = result.data[0];
         that.setState({
@@ -135,6 +137,8 @@ class App extends Component {
                             <Route path="/problembase" render={(props) => <ProblemBase {...this.state} />} />
                             <Route path="/problemcreate" render={(props) => <ProblemCreate {...this.state} />} />
                             <Route path="/myproblem" render={(props) => <MyProblem {...this.state} />} />
+                            <Route path="/problemedit/:id" render={(props) => <ProblemCreate {...this.state} isEditing={true}
+                                                                                             problem_id={props.match.params.id} />} />
                         </Layout>
                     </div>
                 </Router>

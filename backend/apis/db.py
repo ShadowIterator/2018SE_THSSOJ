@@ -190,7 +190,7 @@ database_keys = {
     'users': ['id', 'username', 'password', 'status', 'email', 'realname', 'student_id', 'validate_time', 'create_time', 'role', 'validate_code', 'gender', 'student_courses', 'ta_courses'],
     'courses': ['id', 'name', 'description', 'tas', 'students', 'status', 'homeworks', 'notices', 'start_time', 'end_time', ],
     'homeworks': ['id', 'name', 'deadline', 'problems', 'records'],
-    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', ],
+    'problems': ['id', 'title', 'time_limit', 'memory_limit', 'judge_method', 'records', 'openness', 'language', 'status', 'user_id', ],
     'records': ['id', 'description', 'submit_time', 'user_id', 'problem_id', 'homework_id', 'result', 'submit_status', 
                 'consume_time', 'consume_memory', 'src_size', 'record_type', 'result_type', 'test_ratio', 'src_language', 'status', 'score'],
     'notices': ['id', 'user_id', 'course_id', 'title', 'content'],

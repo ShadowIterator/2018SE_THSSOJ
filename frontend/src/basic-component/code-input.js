@@ -34,7 +34,7 @@ class CodeInput extends Component {
         switch(this.props.problem_info.language[0]) {
             case 1: lang_str='C'; lang_type='text/x-csrc'; break;
             case 2: lang_str='C++'; lang_type='text/x-c++src'; break;
-            case 3: lang_str='Javascript'; lang_type='text/javascript'; break;
+            case 3: lang_str='javascript'; lang_type='text/javascript'; break;
             case 4: lang_str='Python3'; lang_type='text/x-python'; break;
             default: break;
         }

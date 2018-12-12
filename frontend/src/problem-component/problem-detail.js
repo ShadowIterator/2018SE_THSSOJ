@@ -228,6 +228,7 @@ class ProblemDetail extends Component {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
         ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        this.update_record(this.props.id);
         if(this.props.lesson_id==='0')
             return;
         ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
@@ -238,6 +239,50 @@ class ProblemDetail extends Component {
             that.setState({lesson_name:course.name});
         });
     }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            this.update_record(nextProps.id);
+        }
+    }
+    update_record = (id) => {
+        if(this.props.lesson_id === '0') {
+            ajax_post(api_list['query_record'], {
+                user_id: id,
+                problem_id: parseInt(this.props.problem_id),
+                record_type: 0,
+            }, this, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({records: result.data});
+            });
+        } else {
+            ajax_post(api_list['query_record'], {
+                user_id: id,
+                problem_id: parseInt(this.props.problem_id),
+                homework_id: parseInt(this.props.homework_id),
+                record_type: 1,
+            }, this, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({records: result.data});
+            });
+            ajax_post(api_list['query_record'], {
+                user_id: id,
+                problem_id: parseInt(this.props.problem_id),
+                homework_id: parseInt(this.props.homework_id),
+                record_type: 2,
+            }, this, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({submit_record: result.data[0]});
+            })
+        }
+    };
     static query_problem_callback(that, result) {
         if(result.data.length===0)
             return;
@@ -251,41 +296,6 @@ class ProblemDetail extends Component {
             language: prob.language,
             // records: that.records,
         });
-        if(that.props.lesson_id === '0') {
-            ajax_post(api_list['query_record'], {
-                user_id: that.props.id,
-                problem_id: parseInt(that.props.problem_id),
-                record_type: 0,
-            }, that, (that, result) => {
-                if(result.data.length === 0) {
-                    return;
-                }
-                that.setState({records: result.data});
-            });
-        } else {
-            ajax_post(api_list['query_record'], {
-                user_id: that.props.id,
-                problem_id: parseInt(that.props.problem_id),
-                homework_id: parseInt(that.props.homework_id),
-                record_type: 1,
-            }, that, (that, result) => {
-                if(result.data.length === 0) {
-                    return;
-                }
-                that.setState({records: result.data});
-            });
-            ajax_post(api_list['query_record'], {
-                user_id: that.props.id,
-                problem_id: parseInt(that.props.problem_id),
-                homework_id: parseInt(that.props.homework_id),
-                record_type: 2,
-            }, that, (that, result) => {
-                if(result.data.length === 0) {
-                    return;
-                }
-                that.setState({submit_record: result.data[0]});
-            })
-        }
     }
     render() {
         return (

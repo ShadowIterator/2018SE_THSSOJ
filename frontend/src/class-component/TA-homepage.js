@@ -114,6 +114,8 @@ class mTAHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
+        console.log("this.state.uplesson: ", this.state.uplesson);
+        console.log("this.state.talesson: ", this.state.talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>

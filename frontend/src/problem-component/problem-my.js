@@ -15,8 +15,8 @@ class MyProblem extends Component {
             data: [],
         }
     }
-    componentDidMount() {
-        ajax_post(api_list['query_problem'], {user_id: this.props.id}, this, (that, result) => {
+    request_data = (id) => {
+        ajax_post(api_list['query_problem'], {user_id: id}, this, (that, result) => {
             if(result.data.code === 1) {
                 return;
             }
@@ -32,6 +32,16 @@ class MyProblem extends Component {
                 data: data,
             })
         });
+    };
+    componentDidMount() {
+        this.request_data(this.props.id);
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===undefined)
+            return;
+        if(nextProps.id !== this.props.id) {
+            this.request_data(nextProps.id);
+        }
     }
     columns = [
         {title: 'ID', dataIndex: 'id', key: 'id'},
@@ -49,7 +59,7 @@ class MyProblem extends Component {
         },
         {title: '操作', dataIndex: 'action', key: 'action', render: (text, prob) =>
                 <span>
-                    <Button style={{outline: 0}}><Link to={"/modifyproblem/"+prob.id}>修改</Link></Button>
+                    <Button style={{outline: 0}}><Link to={"/problemedit/"+prob.id}>修改</Link></Button>
                 </span>
         }
     ];
