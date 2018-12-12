@@ -294,7 +294,6 @@ class ProblemDetail extends Component {
             memory_limit: parseInt(prob.memory_limit),
             judge_method: parseInt(prob.judge_method),
             language: prob.language,
-            // records: that.records,
         });
     }
     render() {

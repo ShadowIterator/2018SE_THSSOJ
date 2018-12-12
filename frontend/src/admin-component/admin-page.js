@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ajax_post} from '../ajax-utils/ajax-method';
-import { Menu, Icon, Layout, Breadcrumb, Table, Button } from 'antd';
+import { Menu, Icon, Layout, Breadcrumb, Table, Button, message } from 'antd';
 import {api_list} from "../ajax-utils/api-manager";
 const { Sider, Content } = Layout;
 
@@ -34,7 +34,8 @@ class AdminTable extends Component {
                         <Button onClick={() => {
                             ajax_post(this.props.delete_api, {id: record.id}, this, (that, result) => {
                                 if (result.data.code === 1) {
-                                    alert("Delete Failed!");
+                                    // alert("Delete Failed!");
+                                    message.error("删除失败！");
                                 } else {
                                     this.updateTable(this.state.page);
                                 }
@@ -49,7 +50,8 @@ class AdminTable extends Component {
         }, this, (that, result)=>{
             that.data = [];
             if(result.data.code===1) {
-                alert("List failed.");
+                // alert("List failed.");
+                message.error("查询数据失败！")
                 return;
             }
             for(const d of result.data.list) {

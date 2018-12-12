@@ -11,6 +11,10 @@ const Option = Select.Option;
 const {TextArea} = Input;
 const FormItem = Form.Item;
 
+const mapper = {
+    '1': 'C', '2': 'C++', '3': 'Javascript', '4': 'Python3',
+};
+
 class RegistrationForm extends React.Component {
     constructor(props) {
         super(props);
@@ -18,8 +22,10 @@ class RegistrationForm extends React.Component {
             upload_code: {},
             upload_case: {},
             upload_script: {},
-            language_radio: [],
-            judge_method: 0,
+            language_radio: this.props.isEditing ? this.props.language.value.map((value) => {
+                return (<Radio value={value}>{mapper[value]}</Radio>);
+            }) : [],
+            judge_method: this.props.isEditing ? parseInt(this.props.judge_method.value) : 0,
         }
     }
     handleSubmit = (e) => {
@@ -209,9 +215,6 @@ class RegistrationForm extends React.Component {
                         <Checkbox.Group onChange={(value) => {
                             console.log("radio change:", value);
                             const language_radio = value.map((id) => {
-                                const mapper = {
-                                    '1': 'C', '2': 'C++', '3': 'Javascript', '4': 'Python3',
-                                };
                                 return (<Radio value={id}>{mapper[id]}</Radio>);
                             });
                             this.setState({language_radio: language_radio});
@@ -380,8 +383,6 @@ class RegistrationForm extends React.Component {
     }
 }
 
-// const WithRouteProblemCreateForm = withRouter(ProblemCreateForm);
-
 const ProblemCreateForm = Form.create({
     onFieldsChange(props, changedFields) {
         props.onChange(changedFields);
@@ -424,6 +425,10 @@ const ProblemCreateForm = Form.create({
                 ...props.upload_case,
                 value: props.upload_case.value,
             }),
+            upload_script: Form.createFormField({
+                ...props.upload_script,
+                value: props.upload_script.value,
+            }),
             code_lang: Form.createFormField({
                 ...props.code_lang,
                 value: props.code_lang.value,
@@ -456,7 +461,7 @@ class ProblemCreate extends Component {
                     value: ''
                 },
                 language: {
-                    value: ''
+                    value: []
                 },
                 switch: {
                     value: ''
@@ -467,10 +472,61 @@ class ProblemCreate extends Component {
                 upload_case: {
                     value: ''
                 },
+                upload_script: {
+                    value: ''
+                },
                 code_lang: {
                     value: ''
                 }
             }
+        }
+    }
+    componentDidMount() {
+        if(this.props.isEditing) {
+            const problem_id = parseInt(this.props.problem_id);
+            ajax_post(api_list['query_problem'], {id: problem_id}, this, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                const prob = result.data[0];
+                that.setState({
+                    fields: {
+                        title: {
+                            value: prob.title,
+                        },
+                        description: {
+                            value: prob.description,
+                        },
+                        time_limit: {
+                            value: prob.time_limit,
+                        },
+                        memory_limit: {
+                            value: prob.memory_limit,
+                        },
+                        judge_method: {
+                            value: prob.judge_method.toString(),
+                        },
+                        language: {
+                            value: prob.language.map((value) => value.toString()),
+                        },
+                        switch: {
+                            value: prob.openness.toString(),
+                        },
+                        upload_code: {
+                            value: ''
+                        },
+                        upload_case: {
+                            value: ''
+                        },
+                        upload_script: {
+                            value: ''
+                        },
+                        code_lang: {
+                            value: prob.test_language.toString(),
+                        }
+                    }
+                })
+             });
         }
     }
     handleFormChange = (changedFields) => {
@@ -479,7 +535,6 @@ class ProblemCreate extends Component {
         }));
     };
     render() {
-        // console.log("handleFormChange", this.state);
         return (
             <Content style={{ padding: '0 50px' }}>
                 <Breadcrumb style={{ margin: '16px 0' }}>

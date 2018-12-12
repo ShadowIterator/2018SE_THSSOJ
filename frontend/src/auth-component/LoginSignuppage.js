@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
-import { Button, Form, Card, Row, Col, Navbar, Nav, Dropdown, Container } from "react-bootstrap";
+import { Button, Form, Card, Row, Col, Container } from "react-bootstrap";
 import {
-    Link, Redirect, withRouter
+    Link, withRouter
 } from "react-router-dom";
 import PropTypes from 'prop-types';
-import {ajax_post, ajax_get} from "../ajax-utils/ajax-method";
+import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import Cookies from "js-cookie";
-
-// import "../mock/auth-mock"
+import {message} from 'antd';
 
 class Login extends Component
 {
@@ -58,7 +57,8 @@ class Login extends Component
                 that.context.router.history.push("/admin")
             }
         } else{
-            alert("Username or password incorrect.");
+            // alert("Username or password incorrect.");
+            message.error("用户名或密码错误！");
         }
     }
     render() {
@@ -128,7 +128,8 @@ class Signup extends Component {
             return;
         }
         if(this.checkvalidation() === false) {
-            alert("Two password do not match.");
+            // alert("Two password do not match.");
+            message.error("两次输入的密码不一致");
             return;
         }
         const signup_data = {
@@ -253,7 +254,8 @@ class mLoginPage extends Component {
             } else if(this.props.role === 3) {
                 this.props.history.push('/admin');
             } else {
-                    alert("Bad role number.");
+                // alert("Bad role number.");
+                message.error("Role数字不对！");
             }
         }
     }
@@ -269,7 +271,8 @@ class mLoginPage extends Component {
                 } else if(nextProps.role===3) {
                     this.props.history.push('/admin')
                 } else {
-                    alert("Bad role number.");
+                    // alert("Bad role number.");
+                    message.error("Role数字不对！");
                 }
             }
         }
@@ -295,7 +298,8 @@ class mSignupPage extends Component {
             } else if(this.props.role===3) {
                 this.props.history.push('/admin')
             } else {
-                alert("Bad role number.");
+                // alert("Bad role number.");
+                message.error("Role数字不对！");
             }
         }
     }
@@ -311,7 +315,8 @@ class mSignupPage extends Component {
                 } else if(nextProps.role===3) {
                     this.props.history.push('/admin')
                 } else {
-                    alert("Bad role number.");
+                    // alert("Bad role number.");
+                    message.error("Role数字不对！");
                 }
             }
         }
@@ -339,8 +344,10 @@ class mLogoutPage extends Component {
         if(code===0) {
             Cookies.remove('mid');
             // alert("Logout succeed.");
+            message.success("登出成功");
         } else {
-            alert("Logout failed.");
+            // alert("Logout failed.");
+            message.error("登出失败");
         }
         that.props.callback();
         that.props.history.push('/login');

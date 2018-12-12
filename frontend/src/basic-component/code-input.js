@@ -16,7 +16,7 @@ import '../../node_modules/codemirror/addon/hint/show-hint.css';
 import '../../node_modules/codemirror/addon/hint/show-hint.js';
 import '../../node_modules/codemirror/addon/selection/active-line'
 
-import {Select, Row, Col} from "antd";
+import {Select, Row, Col, message} from "antd";
 
 const Option = Select.Option;
 
@@ -123,9 +123,11 @@ class CodeInput extends Component {
 
     static submit_callback(that, result) {
         if(result.data.code===0) {
-            alert("Successfully submit your code.");
+            // alert("Successfully submit your code.");
+            message.success("您成功地提交了代码");
         } else {
-            alert("Something wrong while submitting your code.");
+            // alert("Something wrong while submitting your code.");
+            message.error("代码提交失败");
         }
     }
 
