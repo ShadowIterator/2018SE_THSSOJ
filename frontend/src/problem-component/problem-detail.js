@@ -228,6 +228,7 @@ class ProblemDetail extends Component {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
         ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        this.update_record(this.props.id);
         if(this.props.lesson_id==='0')
             return;
         ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
@@ -237,17 +238,16 @@ class ProblemDetail extends Component {
             const course = result.data[0];
             that.setState({lesson_name:course.name});
         });
-        this.update_record(this.props.id);
     }
     componentWillUpdate(nextProps) {
         if(nextProps.id===undefined)
             return;
         if(nextProps.id !== this.props.id) {
-            this.update_record(this.props.id);
+            this.update_record(nextProps.id);
         }
     }
     update_record = (id) => {
-        if(this.props.lesson_id === 0) {
+        if(this.props.lesson_id === '0') {
             ajax_post(api_list['query_record'], {
                 user_id: id,
                 problem_id: parseInt(this.props.problem_id),
