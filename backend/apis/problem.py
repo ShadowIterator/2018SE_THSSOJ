@@ -84,10 +84,11 @@ class APIProblemHandler(base.BaseHandler):
             os.makedirs(target_code_path)
         if not os.path.exists(target_zip_path):
             os.makedirs(target_zip_path)
-
+        problem_id = problem_in_db['id']
         # print("target_code_path ", target_code_path)
-        code_file_name = code_path.split('/')[-1]
-        shutil.copyfile(code_path, target_code_path+'/'+code_file_name)
+        # code_file_name = code_path.split('/')[-1]
+        shutil.copyfile(code_path, target_code_path+'/'+str(problem_id)+'.code')
+        shutil.cpoyfile(zip_path, target_zip_path + '/' + str(problem_id) + '.zip')
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
         config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')
