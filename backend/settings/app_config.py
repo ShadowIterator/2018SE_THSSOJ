@@ -5,6 +5,7 @@ from apis.course import *
 from apis.problem import *
 from apis.homework import *
 from apis.upload import *
+from apis.download import *
 
 scriptJudgerAddr = 'http://localhost:12345/scriptjudger'
 traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
@@ -16,6 +17,7 @@ RoutineList = [
                   (r'/api/problem/(.*)', APIProblemHandler),
                   (r'/api/homework/(.*)', APIHomeworkHandler),
                   (r'/api/upload/(.*)', APIUploadHandler),
+                  (r'/api/download/(.*)', APIDownloadHandler),
               ]
 
 AppConfig = {

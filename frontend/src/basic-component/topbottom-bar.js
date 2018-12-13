@@ -9,6 +9,7 @@ import {Alignment,
 } from "@blueprintjs/core";
 import {Layout} from 'antd';
 import {withRouter} from "react-router-dom";
+import {api_list} from "../ajax-utils/api-manager";
 
 const { Footer } = Layout;
 class mDropdown extends Component {
@@ -90,6 +91,7 @@ class mTopbar extends Component {
                             this.props.history.push('/problemcreate');
                         }} style={{outline: 0}} />
                     }
+                    <a href={api_list['download_test']} download={'test.test'}>点击下载</a>
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />
