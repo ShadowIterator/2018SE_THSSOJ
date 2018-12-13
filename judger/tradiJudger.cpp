@@ -28,7 +28,7 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						"-o",
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
-	
+
 	// chmod(Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(), 0x777);
 
 	if (cr.success){
@@ -127,7 +127,7 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 									outputfile.c_str(),
 									(judgerConfig.outputPre+errSuf).c_str(),
 									judgerConfig.Lang.c_str(),
-									target.c_str(),
+									"/usr/bin/python3.6", target.c_str(),
 									//"/usr/bin/python3.6",
 									//Pathjoin(judgerConfig.sourceDir, judgerConfig.source+string(".code")).c_str(),
 									NULL);
