@@ -36,3 +36,23 @@ class APIUploadHandler(base.BaseHandler):
             fd.write(data)
         return {'code': 0, 'uri': path}
 
+class APIDownloadHandler(base.BaseHandler):
+    def __init__(self, *args, **kw):
+        super(BaseHandler, self).__init__(*args, **kw)
+        self.db = self.application.db_instance
+        # self.getargs()
+        self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
+        self.set_header("Access-Control-Allow-Headers", "x-requested-with, Content-type, X-Requested-With")
+        self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
+        self.set_header("Access-Control-Allow-Credentials", 'true')
+
+        self.root_dir='root/'
+        # self.dir =  'tmp/'
+        # self.user = None
+        # print(self.request.body)
+    async def get(self, filename):
+        self.set_header('Content-Type', 'application/octet-stream')
+        self.set_header('Content-Disposition', 'attachment; filename=%s' % filename)
+        with open(self.root_dir + filename, 'rb') as fd:
+            data = fd.read()
+            self.write(data)

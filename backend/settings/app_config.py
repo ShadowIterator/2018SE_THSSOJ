@@ -16,6 +16,7 @@ RoutineList = [
                   (r'/api/problem/(.*)', APIProblemHandler),
                   (r'/api/homework/(.*)', APIHomeworkHandler),
                   (r'/api/upload/(.*)', APIUploadHandler),
+                  (r'/api/download/(.*)', APIDownloadHandler),
               ]
 
 AppConfig = {
