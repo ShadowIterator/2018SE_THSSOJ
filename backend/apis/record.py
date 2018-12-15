@@ -24,7 +24,7 @@ class APIRecordHandler(base.BaseHandler):
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     async def _list_post(self):
-        return await self.db.querylr('records', self.args['start'], self.args['end'])
+        return await self.db.querylr('records', self.args['start'], self.args['end'], **self.args)
 
     @tornado.web.authenticated
     async def _query_post(self):

@@ -19,7 +19,7 @@ class APICourseHandler(base.BaseHandler):
 
 
     async def _list_post(self):
-        return await self.db.querylr('courses', self.args['start'], self.args['end'])
+        return await self.db.querylr('courses', self.args['start'], self.args['end'], **self.args)
 
     # @tornado.web.authenticated
     async def _create_post(self):

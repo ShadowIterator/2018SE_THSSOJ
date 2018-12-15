@@ -29,7 +29,7 @@ class ProblemBase extends Component {
         }
     }
     componentDidMount() {
-        this.updateProblems(1);
+        this.updateProblems(1, 1);
     }
 
     componentWillUpdate(nextProps, nextStates) {
@@ -41,13 +41,22 @@ class ProblemBase extends Component {
         // }
         console.log('table will update:', nextStates);
         // console.log(,);
+        // this.updateProblems(1);
     }
 
-    updateProblems = (page) => {
-        ajax_post(api_list['list_problem'], {
+    updateProblems = (page, value) => {
+        this.setState({
+            loading: true,
+        });
+        let post_data = {
             start: (page-1)*this.state.item_per_page + 1,
             end: page*this.state.item_per_page,
-        }, this, (that, result)=>{
+            // judge_method: 1
+        };
+        if(value > 1) {
+            post_data['judge_method'] = value - 2;
+        }
+        ajax_post(api_list['list_problem'], post_data, this, (that, result)=>{
             that.data = [];
             if(result.data.code===1) {
                 // alert("List failed.");
@@ -73,6 +82,7 @@ class ProblemBase extends Component {
         });
     };
     handleTableChange = (pagination) => {
+        console.log("handleTableChange", pagination);
         const pager = { ...this.state.pagination };
         pager.current = pagination.current;
         this.setState({
@@ -88,7 +98,7 @@ class ProblemBase extends Component {
             loading: true,
             page: params.page,
         });
-        this.updateTable(params.page);
+        this.updateProblems(params.page, this.state.value);
     };
     render() {
         const radioStyle = {
@@ -104,11 +114,17 @@ class ProblemBase extends Component {
                 <Layout style={{ padding: '24px 0', background: '#fff' }}>
                     <Sider width={200} style={{ background: '#fff' }}>
                         <Card title="选择题目类型" style={{width: "100%", padding: "5px", marginLeft: "5px"}}>
-                            <Radio.Group onChange={(e)=>{this.setState({value:e.target.value})}} value={this.state.value}>
+                            <Radio.Group onChange={
+                                (e)=>{
+                                    let pager = this.state.pagination;
+                                    pager.current = 1;
+                                    this.setState({value:e.target.value, page: 1, pagination: pager});
+                                    this.updateProblems(1, e.target.value);
+                                }
+                            } value={this.state.value}>
                                 <Radio style={radioStyle} value={1}>全部题目</Radio>
                                 <Radio style={radioStyle} value={2}>传统IO评测</Radio>
                                 <Radio style={radioStyle} value={3}>Javascript</Radio>
-                                <Radio style={radioStyle} value={4}>HTML</Radio>
                             </Radio.Group>
                         </Card>
                     </Sider>
