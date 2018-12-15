@@ -28,10 +28,7 @@ export class TALesson extends Component {
 
         };
 
-        this.query_notice_callback = this.query_notice_callback.bind(this);
-        this.query_homework_callback = this.query_homework_callback.bind(this);
         this.newnotice_callback = this.newnotice_callback.bind(this);
-        this.append_homeworkItems_callback = this.append_homeworkItems_callback.bind(this);
         this.clickNewnotice = this.clickNewnotice.bind(this);
         this.clickInfoModifyCallback = this.clickInfoModifyCallback.bind(this);
     }
@@ -68,16 +65,17 @@ export class TALesson extends Component {
 
     query_data(course_id) {
         console.log(course_id);
-        ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
-        console.log("this.props ", this.props);
 
         this.setState({homeworkitems: []});
         this.setState({problemitems: []});
         this.homeworkitems = [];
         this.problemitems = [];
 
-        ajax_post(api_list['query_notice'], {course_id:course_id}, this, this.query_notice_callback);
-        ajax_post(api_list['query_course'], {id:course_id}, this, this.query_homework_callback);
+        ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
+        // console.log("this.props ", this.props);
+
+        // ajax_post(api_list['query_notice'], {course_id:course_id}, this, this.query_notice_callback);
+        // ajax_post(api_list['query_course'], {id:course_id}, this, this.query_homework_callback);
     }
 
     static query_course_callback(that, result) {
@@ -88,6 +86,36 @@ export class TALesson extends Component {
         that.setState({
             course_name: result.data[0].name,
         });
+
+        for (let index in result.data[0].notices) {
+            ajax_post(api_list['query_notice'], {id: result.data[0].notices[index]}, that, TALesson.query_notice_callback);
+        }
+        for (let index in result.data[0].homeworks) {
+            ajax_post(api_list['query_homework'], {}, that, )
+        }
+
+    }
+
+    static query_notice_callback(that, result) {
+        if (result.data.length === 0){
+            console.log("result.data.length === 0");
+            return;
+        }
+        let infolist = that.state.infoitems;
+        infolist.push({
+                        id: result.data[0].id,
+                        title: result.data[0].title,
+                        content: result.data[0].content
+                    });
+        that.setState({infoitems: infolist});
+    }
+
+    static query_homework_callback(that, result) {
+        if (result.data.length === 0){
+            console.log("result.data.length === 0");
+            return;
+        }
+
     }
 
     clickNewnotice(event){
@@ -104,68 +132,7 @@ export class TALesson extends Component {
         });
         const course_id = parseInt(this.props.lesson_id);
         console.log("newnotice_callback course_id: ", course_id);
-        ajax_post(api_list['query_notice'], {course_id: course_id}, this, this.query_notice_callback);
-    }
-
-    query_notice_callback(that, result) {
-        if (result.data.length === 0) {
-            console.log("No notice got!");
-            // return;
-        }
-
-        let infoItems = [];
-        for (let index in result.data) {
-            let item = {
-                id: result.data[index].id,
-                title: result.data[index].title,
-                content: result.data[index].content
-            };
-            infoItems.push(item);
-        }
-
-        that.setState( {infoitems: infoItems} );
-    }
-
-    query_homework_callback(that, result) {
-        console.log('require course ');
-        if(result.data.length === 0) {
-            console.log('No course');
-            return;
-        }
-        const data = result.data[0];
-        console.log('course data: ', data);
-        let homeworkIdList = data.homeworks;
-        console.log('homeworklist: ', homeworkIdList);
-        for(let hid in homeworkIdList) {
-            console.log('request hid: ', hid);
-            ajax_post(api_list['query_homework'], {id: homeworkIdList[hid]}, that, that.append_homeworkItems_callback);
-        }
-    }
-
-    append_homeworkItems_callback(that, result) {
-        if(result.data.length === 0) {
-            console.log('No items');
-            return ;
-        }
-        let homeworklist = that.state.homeworkitems;
-        const data = result.data[0];
-        const code = parseInt(data.code);
-        console.log('append homework: ', data);
-
-        let idx = homeworklist.length;
-        homeworklist.push({
-            id: data.id,
-            name: data.name,
-            deadline: data.deadline,
-            problem_ids: data.problems,
-            problems: [],
-        });
-        that.setState({homeworkitems: homeworklist});
-        that.homeworkitems = homeworklist;
-        console.log('append homeworkitems: ', that.homeworkitems);
-        for(let pid of data.problems) {
-            ajax_post(api_list['query_problem'], {id: pid}, that, TALesson.append_problem_callback_wraper(idx));
-        }
+        ajax_post(api_list['query_notice'], {course_id: course_id}, this, TALesson.query_notice_callback);
     }
 
     clickInfoModifyCallback() {
@@ -175,24 +142,6 @@ export class TALesson extends Component {
             // this.query_data(parseInt(this.props.lesson_id));
             this.setState({current_selected: '5'});
         }
-    }
-
-    static append_problem_callback_wraper(idx) {
-        return (function (that, result) {
-            if(result.data.code===1) {
-                return;
-            }
-            if(result.data.length===0)
-                return;
-            const title = result.data[0].title;
-            const id = result.data[0].id;
-            let homeworklist = that.state.homeworkitems;
-
-            homeworklist[idx].problems.push({id: id, title: title});
-            that.setState({homeworkitems: homeworklist});
-            that.homeworkitems = homeworklist;
-            console.log('append_prob: ', id, title, idx, that.homeworkitems);
-        });
     }
 
     render() {
@@ -254,6 +203,7 @@ export class TALesson extends Component {
                 <ModifyLesson {...this.props} clickModifyCallback={this.clickInfoModifyCallback}/>
             );
         }
+
         return (
             <>
             {/*<Container>*/}
