@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import {Button, Dialog, Classes} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
@@ -7,14 +6,11 @@ import {pwd_encrypt} from "./encrypt";
 import {Card, Container} from "react-bootstrap"
 
 import { Layout, Breadcrumb } from 'antd';
-import {
-    Form, Input, Select, Row, Col, AutoComplete, message
-} from 'antd';
+import { Form, Input, Select, Row, Col, message, Button, Modal } from 'antd';
 import {Link} from "react-router-dom";
 const {Content} = Layout;
 const FormItem = Form.Item;
 const Option = Select.Option;
-const AutoCompleteOption = AutoComplete.Option;
 
 class UserSettingsForm extends Component {
     constructor(props) {
@@ -41,12 +37,14 @@ class UserSettingsForm extends Component {
         this.activate_account = this.activate_account.bind(this);
         this.prev_id = -1;
     }
+
     fillInfo(id) {
         if(id===undefined)
             return;
         const query_data = {id: id};
         ajax_post(api_list['query_user'], query_data, this, UserSettingsForm.mount_callback);
     }
+
     componentDidMount() {
         this.setState({
             prev_props: {
@@ -59,6 +57,7 @@ class UserSettingsForm extends Component {
             this.fillInfo(this.props.id);
         }
     }
+
     componentWillUpdate(nextProps) {
         if(nextProps.id===undefined || nextProps.id===-1)
             return;
@@ -67,9 +66,9 @@ class UserSettingsForm extends Component {
             this.fillInfo(nextProps.id);
         }
     }
+
     static mount_callback(that, result) {
         const data = result.data[0];
-        // console.log(data);
         that.setState({
             username: data.username,
             email: data.email,
@@ -80,21 +79,13 @@ class UserSettingsForm extends Component {
             role: data.role? data.role:0
         });
     }
+
     handleChange(event) {
         this.setState({
             [event.target.id]: event.target.value
         });
     }
-    // handleGender(event) {
-    //     const gender_value = event.target.value;
-    //     if(gender_value==='0') {
-    //         this.setState({gender:0});
-    //     } else if(gender_value==='1') {
-    //         this.setState({gender: 1});
-    //     } else {
-    //         this.setState({gender: 2});
-    //     }
-    // }
+
     handleGender(value) {
         const gender_value = value;
         if(gender_value==='0') {
@@ -107,35 +98,39 @@ class UserSettingsForm extends Component {
     }
     handleSubmit(event) {
         event.preventDefault();
-        // event.stopPropagation();
-        console.log("handleSubmit");
-        this.setState({
-            isOpen: true,
+        this.props.form.validateFieldsAndScroll((err, value) => {
+            if(!err) {
+                this.setState({
+                    isOpen: true,
+                });
+            }
         });
     }
     handleSave(event) {
         event.preventDefault();
-        event.stopPropagation();
         this.setState({isOpen:false});
-        const update_data = {
-            id: this.props.id,
-            auth_password: pwd_encrypt(this.state.password),
-            email: this.state.email,
-            gender: this.state.gender,
-            realname: this.state.realname,
-            student_id: this.state.student_id,
-        };
-        console.log(update_data);
-        ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
+        this.props.form.validateFieldsAndScroll((err, values) => {
+            console.log(values);
+            if(!err) {
+                const update_data = {
+                    id: this.props.id,
+                    auth_password: pwd_encrypt(this.state.password),
+                    email: this.state.email,
+                    gender: this.state.gender,
+                    realname: this.state.realname,
+                    student_id: this.state.student_id,
+                };
+                console.log(update_data);
+                ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
+            }
+        });
     }
     static save_callback(that, result) {
         const code = result.data.code;
         that.setState({password:''});
         if(code === 0) {
-            // alert("Successfully update profile.");
             message.success("成功更新用户资料");
         } else {
-            // alert("Update failed.");
             message.error("更新失败");
         }
         that.fillInfo(that.props.id);
@@ -152,7 +147,6 @@ class UserSettingsForm extends Component {
                 validating: true,
             });
         } else {
-            // alert("Something went wrong while trying to send validate code.");
             message.error("发送校验码到邮箱失败");
         }
     }
@@ -173,15 +167,11 @@ class UserSettingsForm extends Component {
             });
             that.fillInfo(that.props.id);
         } else {
-            // alert("Validate code error.");
             message.error("校验码错误");
         }
     }
     render() {
-
         const { getFieldDecorator } = this.props.form;
-        // console.log(getFieldDecorator)
-
         const formItemLayout = {
             labelCol: {
                 xs: { span: 24 },
@@ -193,34 +183,25 @@ class UserSettingsForm extends Component {
             },
         };
 
-        const prefixSelector = getFieldDecorator('prefix', {
-            initialValue: '86',
-        })(
-            <Select style={{ width: 70 }}>
-                <Option value="86">+86</Option>
-                <Option value="87">+87</Option>
-            </Select>
-        );
-
         let role = "学生";
         if(this.state.role === 2) {
             role = "助教";
         }
 
         const gender = this.state.gender.toString();
-        console.log('gender: ', gender);
+        // console.log('gender: ', gender);
 
         let status_html;
         if(!this.state.validating) {
             if (this.state.status) {
-                status_html = (<Form.Label>已激活</Form.Label>);
+                status_html = (<span className="ant-form-text">已激活</span>);
             } else {
                 status_html = (
                     <Row>
-                        <Col lg="8">
-                            <Form.Label>未激活</Form.Label>
+                        <Col span={16}>
+                            <span className="ant-form-text">未激活</span>
                         </Col>
-                        <Col lg="4">
+                        <Col span={8}>
                             <Button onClick={this.validate_account}>
                                 发送验证码
                             </Button>
@@ -230,43 +211,43 @@ class UserSettingsForm extends Component {
             }
         } else {
             status_html = (
-                <Form.Group as={Row} controlId="validate_code">
-                    <Col lg="8">
+                <Row>
+                    <Col span={16}>
                         <Form.Control value={this.state.validate_code} onChange={this.handleChange} />
                     </Col>
-                    <Col lg="4">
+                    <Col span={8}>
                         <Button onClick={this.activate_account}>
                             激活
                         </Button>
                     </Col>
-                </Form.Group>
+                </Row>
             )
         }
 
         return(
             <div>
-            <Form onSubmit={this.handleSubmit}>
+            <Form onSubmit={this.handleSave}>
                 <FormItem
                     {...formItemLayout}
-                    label="username"
+                    label="用户名"
                 >
                     {getFieldDecorator('username', {
                         initialValue: this.state.username,
-                        rules: [{ required: false, message: 'Please input your username!' }],
+                        rules: [{ required: true, message: '请输入您的用户名' }],
                     })(
                         <Input style={{ width: '100%' }} onChange={this.handleChange} />
                     )}
                 </FormItem>
                 <FormItem
                     {...formItemLayout}
-                    label="E-mail"
+                    label="电子邮箱"
                 >
                     {getFieldDecorator('email', {
                         initialValue: this.state.email,
                         rules: [{
-                            type: 'email', message: 'The input is not valid E-mail!',
+                            type: 'email', message: '输入邮箱格式有误',
                         }, {
-                            required: false, message: 'Please input your E-mail!',
+                            required: true, message: '请输入您的邮箱',
                         }],
                     })(
                         <Input onChange={this.handleChange} disabled={true}/>
@@ -275,10 +256,11 @@ class UserSettingsForm extends Component {
 
                 <FormItem
                     {...formItemLayout}
-                    label="gender"
+                    label="性别"
                 >
                     {getFieldDecorator('gender', {
                         initialValue: gender,
+                        rules: [{required: true, message: '请选择您的性别'}],
                     })(
                     <Select onChange={this.handleGender}>
                         <Option value="0">男</Option>
@@ -290,11 +272,11 @@ class UserSettingsForm extends Component {
 
                 <FormItem
                     {...formItemLayout}
-                    label="Real Name"
+                    label="真实姓名"
                 >
                     {getFieldDecorator('realname', {
                         initialValue: this.state.realname,
-                        rules: [{ required: false, message: 'Please input your real name!' }],
+                        rules: [{ required: true, message: '请输入您的真实姓名' }],
                     })(
                         <Input style={{ width: '100%' }} onChange={this.handleChange} />
                     )}
@@ -302,11 +284,11 @@ class UserSettingsForm extends Component {
 
                 <FormItem
                     {...formItemLayout}
-                    label="Student ID"
+                    label="学号"
                 >
                     {getFieldDecorator('student_id', {
                         initialValue: this.state.student_id,
-                        rules: [{ required: false, message: 'Please input your student ID!' }],
+                        rules: [{ required: true, message: '请输入您的学号' }],
                     })(
                         <Input style={{ width: '100%' }} onChange={this.handleChange} />
                     )}
@@ -314,92 +296,30 @@ class UserSettingsForm extends Component {
 
                 <FormItem
                     {...formItemLayout}
-                    label="Role"
+                    label="身份"
                 >
                     <span className="ant-form-text">{role}</span>
                 </FormItem>
-
-                {/*<FormItem*/}
-                    {/*{...formItemLayout}*/}
-                    {/*label="status"*/}
-                {/*>*/}
-                    {/*/!*<span className="ant-form-text">{role}</span>*!/*/}
-                    {/*{status_html}*/}
-                {/*</FormItem>*/}
-
-                {/*<Form.Group as={Row} controlId="username">*/}
-                    {/*<Form.Label column lg="3">Username</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Control value={this.state.username} onChange={this.handleChange} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="email">*/}
-                    {/*<Form.Label column lg="3">Email</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Control type="email" value={this.state.email} onChange={this.handleChange} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="gender">*/}
-                    {/*<Form.Label column lg="3">Gender</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<HTMLSelect onChange={this.handleGender} fill>*/}
-                        {/*<option value={'male'} selected={gender === 0}>男</option>*/}
-                        {/*<option value={'female'} selected={gender === 1}>女</option>*/}
-                        {/*<option value={'unknown'} selected={gender === 2}>未知</option>*/}
-                        {/*</HTMLSelect>*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="realname">*/}
-                    {/*<Form.Label column lg="3">Real Name</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Control value={this.state.realname} onChange={this.handleChange} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="student_id">*/}
-                    {/*<Form.Label column lg="3">Student ID</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                          {/*<Form.Control value={this.state.student_id} onChange={this.handleChange} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="role">*/}
-                    {/*<Form.Label column lg="3">Role</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Label>{role}</Form.Label>*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="status">*/}
-                    {/*<Form.Label column lg="3">Status</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*{status_html}*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                <Button variant="primary" type="submit">
-                    Save
+                <FormItem
+                    {...formItemLayout}
+                    label="激活状态"
+                >
+                    {status_html}
+                </FormItem>
+                <Button type="primary" htmlType="submit">
+                    保存
                 </Button>
             </Form>
-            <Dialog
-                icon="info-sign"
-                onClose={()=>{this.setState({isOpen:false});}}
-                title="Confirm"
-                isOpen={this.state.isOpen}
-            >
-                <div className={Classes.DIALOG_BODY}>
-                    <Form onSubmit={(e)=>{e.preventDefault();
-                        e.stopPropagation();}}>
-                    <Form.Group as={Row} controlId="password">
-                        <Form.Label>Password</Form.Label>
-                        <Form.Control type="password" value={this.state.password} placeholder="Please enter your password to confirm."
-                        onChange={this.handleChange}/>
-                    </Form.Group>
-                    </Form>
-                </div>
-                <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={this.handleSave}>Save</Button>
-                        <Button onClick={()=>{this.setState({isOpen:false});}}>Cancel</Button>
-                    </div>
-                </div>
-            </Dialog>
+                <Modal
+                    title="请输入确认密码"
+                    visible={this.state.isOpen}
+                    onOk={this.handleSave}
+                    onCancel={()=>{this.setState({isOpen: false})}}
+                >
+                    <Input value={this.state.password}
+                           onChange={(e)=>{console.log("password:", e.target.value);
+                                    this.setState({password: e.target.value})}} />
+                </Modal>
             </div>
         );
     }

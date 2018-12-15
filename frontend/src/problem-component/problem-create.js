@@ -30,14 +30,15 @@ class RegistrationForm extends React.Component {
             codeFileList: [],
             caseFileList: [],
             scriptFileList: [],
+            reupload_code: false,
+            reupload_case: false,
+            reupload_script: false,
         }
     }
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
-            if (!err) {
-                console.log('Received values of form: ', values);
-                console.log('this.state', this.state);
+            if (!err && !this.props.isEditing) {
                 let data = {};
                 if(this.state.judge_method === 0) {
                     data = {
@@ -76,13 +77,69 @@ class RegistrationForm extends React.Component {
                         user_id: this.props.id,
                     }
                 }
-                console.log("create_problem_data", data);
+                console.log("Create problem", data);
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
-                        message.success("成功创建问题");
+                        message.success("成功创建题目");
                         this.props.history.push('/myproblem');
                     } else {
-                        message.error("创建问题失败");
+                        message.error("创建题目失败");
+                    }
+                });
+            } else if(!err && this.props.isEditing) {
+                let data={};
+                if(this.state.judge_method === 0) {
+                    data ={
+                        title: values.title,
+                        description: values.description,
+                        time_limit: parseInt(values.time_limit),
+                        memory_limit: parseInt(values.memory_limit),
+                        judge_method: parseInt(values.judge_method),
+                        language: values.language.map((lang) => parseInt(lang)),
+                        openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
+                        user_id: this.props.id,
+                        test_language: parseInt(values.code_lang),
+                    };
+                    if(this.state.reupload_code) {
+                        data.code_uri = this.state.upload_code.uri;
+                    }
+                    if(this.state.reupload_case) {
+                        data.case_uri = this.state.upload_case.uri;
+                    }
+                } else if(this.state.judge_method === 1) {
+                    data = {
+                        title: values.title,
+                        description: values.description,
+                        time_limit: parseInt(values.time_limit),
+                        memory_limit: parseInt(values.memory_limit),
+                        judge_method: parseInt(values.judge_method),
+                        language: values.language.map((lang) => parseInt(lang)),
+                        openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
+                        user_id: this.props.id,
+                        test_language: parseInt(values.code_lang),
+                    };
+                    if(this.state.reupload_code) {
+                        data.code_uri = this.state.upload_code.uri;
+                    }
+                    if(this.state.reupload_script) {
+                        data.script_uri = this.state.upload_script;
+                    }
+                } else if(this.state.judge_method === 2) {
+                    data = {
+                        title: values.title,
+                        description: values.description,
+                        judge_method: parseInt(values.judge_method),
+                        openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
+                        user_id: this.props.id,
+                    }
+                }
+                console.log("Updating problem",data);
+                ajax_post(api_list['update_problem'], data, this, (that, result) => {
+                    if(result.data.code === 0) {
+                        message.success("成功编辑该题目");
+                        this.props.history.push('/myproblem');
+                    } else {
+                        message.error("编辑题目失败");
                     }
                 });
             }
@@ -288,13 +345,59 @@ class RegistrationForm extends React.Component {
                     )}
                 </FormItem>
                 }
-                {this.props.isEditing &&
-                    <FormItem
-                        {...formItemLayout}
-                        label="上传标准程序"
-                    >
-                        <a href={api_list['download_code']} download={'DSDS'}></a>
-                    </FormItem>
+                {this.props.isEditing && !this.state.reupload_code &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传标准程序"
+                >
+                    <a href={api_list['download_code']} download={'standard_code.code'}
+                       style={{marginLeft: 5, marginRight: 5}}>下载标准程序</a>
+                    <Button onClick={()=>this.setState({reupload_code: true})}
+                            style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
+                </FormItem>
+                }
+                {this.state.reupload_code &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传标准程序"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_code', {
+                            rules: [{required: true, message: '请上传标准程序'}],
+                            valuePropName: 'code',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="file" fileList={this.state.codeFileList}
+                                            action={URL + api_list['upload_code']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log("upload_code:", fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.uri = file.response.uri;
+                                    }
+                                    return file;
+                                });
+
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+
+                                this.setState({upload_code: fileList[0], codeFileList: fileList});
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox"/>
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传标准程序</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>
                 }
                 {!this.props.isEditing && this.state.judge_method !== 2 &&
                 <FormItem
@@ -339,6 +442,60 @@ class RegistrationForm extends React.Component {
                     </div>
                 </FormItem>
                 }
+                {this.props.isEditing && !this.state.reupload_case && this.state.judge_method === 0 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试数据"
+                >
+                    <a href={api_list['download_case']} download={'case.zip'}
+                       style={{marginLeft: 5, marginRight: 5}}>下载测试数据</a>
+                    <Button onClick={()=>this.setState({reupload_case: true})}
+                            style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
+                </FormItem>
+                }
+                {this.props.isEditing && this.state.reupload_case && this.state.judge_method === 0 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试数据"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_case', {
+                            rules: [{required: true, message: '请上传测试数据'}],
+                            valuePropName: 'cases',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="file" fileList={this.state.caseFileList}
+                                            action={URL + api_list['upload_case']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log("upload_case", fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.uri = file.response.uri;
+                                    }
+                                    return file;
+                                });
+
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+
+                                this.setState({upload_case: fileList[0], caseFileList: fileList});
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox"/>
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传测试数据</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>
+                }
                 {!this.props.isEditing && this.state.judge_method === 0 &&
                 <FormItem
                     {...formItemLayout}
@@ -371,6 +528,58 @@ class RegistrationForm extends React.Component {
                                 });
 
                                 this.setState({upload_case: fileList[0], caseFileList: fileList});
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox"/>
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传测试数据</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>
+                }
+                {this.props.isEditing && !this.state.reupload_script && this.state.judge_method === 1 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试脚本"
+                >
+                    <a href={api_list['download_script']} download={'test.sh'}
+                       style={{marginLeft: 5, marginRight: 5}}>下载测试脚本</a>
+                    <Button onClick={()=>this.setState({reupload_script: true})}
+                            style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
+                </FormItem>
+                }
+                {!this.props.isEditing && this.state.judge_method === 1 && this.state.reupload_script &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试脚本"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_script', {
+                            rules: [{required: true, message: '请上传测试数据'}],
+                            valuePropName: 'cases',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="file" fileList={this.state.scriptFileList}
+                                            action={URL + api_list['upload_script']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log("upload_script", fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.uri = file.response.uri;
+                                    }
+                                    return file;
+                                });
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+                                this.setState({upload_script: fileList[0], scriptFileList: fileList});
                             }}>
                                 <p className="ant-upload-drag-icon">
                                     <Icon type="inbox"/>

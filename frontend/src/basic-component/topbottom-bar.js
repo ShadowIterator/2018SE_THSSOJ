@@ -91,7 +91,6 @@ class mTopbar extends Component {
                             this.props.history.push('/problemcreate');
                         }} style={{outline: 0}} />
                     }
-                    <a href={api_list['download_test']} download={'test.test'}>点击下载</a>
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />

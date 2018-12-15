@@ -21,7 +21,7 @@ const { SubMenu } = Menu;
     未提交但是可以补交 issue 红 "未提交"
     已提交但未批改 saved 绿 首先得要是提交过的，然后查询作业中的score_openness来判断是否已经公开成绩 "已提交"
     已提交且已批改 confirm 绿 如果已经公开成绩，则查询记录中的对应项 "{给分数就好了}"
- */
+*/
 
 
 class mStudentHomeworkCard extends Component {

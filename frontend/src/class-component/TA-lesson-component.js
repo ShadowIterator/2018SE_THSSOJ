@@ -8,7 +8,6 @@ import {api_list} from "../ajax-utils/api-manager";
 import {Info} from './lesson-component';
 
 import { Layout, Form, Input, Select, Button, message, Icon } from 'antd';
-const {Content} = Layout;
 const FormItem = Form.Item;
 
 

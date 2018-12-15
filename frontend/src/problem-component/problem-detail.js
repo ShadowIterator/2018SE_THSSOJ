@@ -14,22 +14,21 @@ import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
 import "./problem_tab.css";
 
-import { Layout, Breadcrumb, Tabs, Modal } from 'antd';
+import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
-
-// import {Tab, Tabs} from "@blueprintjs/core"
-
-// import "../mock//course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-// import "../mock/homework-mock";
-// import "../mock/problem-mock";
 
 // TODO: 公共题库题目的筛选功能
 // TODO: 请求题目的API不能使用LIST方法，因为不能显示非公开的题目
 
 class ProblemDetailBody extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            file: null,
+            fileList: [],
+        }
+    }
     render() {
         return (
             <div>
@@ -38,14 +37,64 @@ class ProblemDetailBody extends Component {
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
-                        <CodeInput state={this.props.state} role={this.props.role}
-                                   id={this.props.id} problem_id={this.props.probleminfo.id}
-                                   problem_info={this.props.probleminfo}
-                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                        {this.probleminfo.judge_method !== 4 &&
+                            <CodeInput state={this.props.state} role={this.props.role}
+                                       id={this.props.id} problem_id={this.props.probleminfo.id}
+                                       problem_info={this.props.probleminfo}
+                                       homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                        }
+                        {this.probleminfo.judge_method === 4 &&
+                        <Upload.Dragger name="file" multiple={false} action={api_list['upload_html']}
+                                        onChange={(info) => {
+                                            let fileList = info.fileList;
+                                            console.log("upload_script", fileList);
+                                            fileList = fileList.slice(-1);
+                                            fileList = fileList.map((file) => {
+                                                if (file.response) {
+                                                    file.uri = file.response.uri;
+                                                }
+                                                return file;
+                                            });
+                                            fileList = fileList.filter((file) => {
+                                                if (file.response) {
+                                                    return file.response.code === 0;
+                                                }
+                                                return true;
+                                            });
+                                            this.setState({file: fileList[0], fileList: fileList});
+                                        }}>
+                            <p className="ant-upload-drag-icon">
+                                <Icon type="inbox" />
+                            </p>
+                            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                            <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
+                        </Upload.Dragger>
+                        }
+                        {this.probleminfo.judge_method === 4 &&
+                        <Button type={"primary"} onClick={() => {
+                            if(this.state.file===null) {
+                                message.error("请上传你的作业");
+                            }
+                            ajax_post(api_list['submit_problem'], {
+                                user_id: this.props.id,
+                                problem_id: this.props.probleminfo.id,
+                                homework_id: this.props.homework_id,
+                                record_type: 4,
+                                src_code: this.state.file.uri,
+                            }, this, (that, result) => {
+                                if(result.data.code === 0) {
+                                    message.success("上传成功");
+                                } else {
+                                    message.error("上传失败");
+                                }
+                            });
+                        }}>上传</Button>
+                        }
                     </TabPane>
                     <TabPane tab="查看结果" key="3">
                         <ProblemDetailRecord records={this.props.records} submit_record={this.props.submit_record}
-                                             lesson_id={this.props.lesson_id} />
+                                             lesson_id={this.props.lesson_id} html_record={this.props.html_record}
+                                             judge_method={this.props.probleminfo.judge_method} />
                     </TabPane>
                 </Tabs>
             </div>
@@ -86,8 +135,8 @@ class ProblemDetailRecord extends Component {
     }
     render() {
         let body = [];
-        if(this.props.submit_record !== null) {
-            const sub = this.props.submit_record;
+        if(this.props.submit_record !== null || this.props.html_record !== null) {
+            const sub = this.props.submit_record===null ? this.props.html_record : this.props.submit_record;
             let result = '';
             if(sub.status === 0) {
                 result = '等待评测';
@@ -200,6 +249,7 @@ class ProblemDetailRecord extends Component {
                 <Modal
                     title="Basic Modal"
                     visible={this.state.visible}
+                    width='40%'
                     onOk={()=>{this.setState({visible: false})}}
                     onCancel={()=>{this.setState({visible: false})}}
                 >
@@ -207,7 +257,7 @@ class ProblemDetailRecord extends Component {
                         // mode: this.state.language,
                         theme: 'neat',
                         lineNumbers: true,
-                        readOnly: true
+                        readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
             </div>
@@ -228,6 +278,7 @@ class ProblemDetail extends Component {
             records: [],
             lesson_name: '',
             submit_record: null,
+            html_record: null,
             language: []
         };
         this.records = [];
@@ -288,7 +339,18 @@ class ProblemDetail extends Component {
                     return;
                 }
                 that.setState({submit_record: result.data[0]});
-            })
+            });
+            ajax_post(api_list['query_record'], {
+                user_id: id,
+                problem_id: parseInt(this.props.problem_id),
+                homework_id: parseInt(this.props.homework_id),
+                record_type: 4,
+            }, this, (that, result) => {
+                if(result.data.length === 0) {
+                    return;
+                }
+                that.setState({html_record: result.data[0]});
+            });
         }
     };
     static query_problem_callback(that, result) {
@@ -328,7 +390,8 @@ class ProblemDetail extends Component {
                                                id={this.props.id} probleminfo={this.state}
                                                homework_id={parseInt(this.props.homework_id)}
                                                records={this.state.records} lesson_id={this.props.lesson_id}
-                                               submit_record={this.state.submit_record}/>
+                                               submit_record={this.state.submit_record}
+                                               html_record={this.state.html_record}/>
                         </Container>
                     </Card.Body>
                 </Card>
