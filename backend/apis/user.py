@@ -20,7 +20,7 @@ class APIUserHandler(base.BaseHandler):
             self.args['validate_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
 
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.db.getObject('users', cur_user = self.get_current_user_object(), **self.args)
@@ -174,7 +174,7 @@ class APIUserHandler(base.BaseHandler):
     #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
-        return await self.db.querylr('users', self.args['start'], self.args['end'])
+        return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
         #
         # if(type == 'create'):
         #     print('post create')

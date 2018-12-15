@@ -45,6 +45,7 @@ def async_aquire_db(func):
     @tornado.testing.gen_test
     async def wrapper(self, *args, **kw):
         await self.set_application_db()
+        await self._app.async_init()
         await self.prepare()
         return await func(self, *args, **kw)
     return wrapper

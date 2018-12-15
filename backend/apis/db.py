@@ -39,6 +39,9 @@ class BaseDB:
         self.tables['records'] = Homeworks(self, 'records')
         self.tables['notices'] = Homeworks(self, 'notices')
 
+    async def async_init(self):
+        for name, table in self.tables.items():
+            await table.async_init()
         # self.table_name = si_table_name
 
     @staticmethod
@@ -96,26 +99,8 @@ class BaseDB:
         print(results[0])
         return results[0]
 
-    async def querylr(self, si_table_name, l , r):
-        stmt = 'SELECT * FROM {table_name} LIMIT {n} OFFSET {s}'.format(
-            n = r - l + 1,
-            s = l - 1,
-            table_name = si_table_name,
-        )
-        print('querylr: ', stmt)
-        res = await self.query(stmt)
-        for x in res:
-            for key, value in x.items():
-                print(key, isinstance(value, datetime.datetime))
-                if(isinstance(value, datetime.datetime)):
-                    x[key] = int(time.mktime(value.timetuple()))
-        print(res)
-
-        rtn = {}
-        rtn['count'] = len(await self.all(si_table_name))
-        rtn['list'] = res
-
-        return rtn
+    async def querylr(self, si_table_name, l , r, **kw):
+        return await self.tables[si_table_name].querylr(l, r, **kw)
 
     async def any_author_exists(self):
         return bool(await self.query("SELECT * FROM authors LIMIT 1"))
@@ -152,6 +137,17 @@ class BaseTable:
         self.db = db
         # self.table_name = self.__class__.__name__.lower()
         self.table_name = si_table_name
+        self.database_keys = []
+        # loop = asyncio.get_event_loop()
+        # loop.run_until_complete(self.async_init())
+        # loop.close()
+
+    async def async_init(self):
+        database_keys = await self.db.query(
+            'SELECT column_name FROM information_schema.columns WHERE table_schema = %s and table_name = %s', 'public',
+            self.table_name)
+        self.database_keys = list(map(lambda item: item['column_name'], database_keys))
+        print(self.database_keys)
 
     async def saveObject(self, object, cur_user = None):
         si_table_name = self.table_name
@@ -218,7 +214,7 @@ class BaseTable:
     async def createObject(self, **kw):
         si_table_name = self.table_name
         print('createObject: kw = ', kw)
-        # kw = self.filterKeys(kw)
+        kw = self.filterKeys(kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
         # propfmt = []
@@ -248,29 +244,46 @@ class BaseTable:
         # print('permission: ', per_role, per_owner)
         # return self.jsonFilter(method, dic, per_role, per_owner)
 
-    async def querylr(self, l , r):
-        pass
-        # si_table_name = self.table_name
-        # stmt = 'SELECT * FROM {table_name} LIMIT {n} OFFSET {s}'.format(
-        #     n = r - l + 1,
-        #     s = l - 1,
-        #     table_name = si_table_name,
-        # )
-        # print('querylr: ', stmt)
-        # res = await self.query(stmt)
-        # for x in res:
-        #     for key, value in x.items():
-        #         print(key, isinstance(value, datetime.datetime))
-        #         if(isinstance(value, datetime.datetime)):
-        #             x[key] = int(time.mktime(value.timetuple()))
-        # print(res)
+    async def querylr(self, l , r, **kw):
+        si_table_name = self.table_name
+        plst = []
+        valuelist = []
+        kw = self.filterKeys(kw)
+        for key, value in kw.items():
+            plst.append(str(key) + ' = %s')
+            valuelist.append(value)
+        if (plst):
+            slst = 'WHERE ' + ' AND '.join(plst)
+        else:
+            slst = ''
+        print("slst = ", slst)
+        # slst = ''
 
-        # rtn = {}
-        # rtn['count'] = len(await self.all(si_table_name))
-        # rtn['list'] = res
+        stmt = 'SELECT * FROM {table_name} {conditions} LIMIT {n} OFFSET {s}'.format(
+            n = r - l + 1,
+            s = l - 1,
+            table_name = si_table_name,
+            conditions = slst
+        )
 
-        # return rtn
+        print('querylr: ', stmt, *valuelist)
+        res = await self.db.query(stmt, *valuelist)
+        for x in res:
+            for key, value in x.items():
+                # print(key, isinstance(value, datetime.datetime))
+                if (isinstance(value, datetime.datetime)):
+                    x[key] = int(time.mktime(value.timetuple()))
+        print(res)
 
+
+        rtn = {}
+        rtn['count'] = (await self.db.query('SELECT COUNT(*) FROM {table_name} {conditions}'.format(
+            table_name=si_table_name,
+            conditions=slst
+        ), *valuelist))[0]['count']
+        rtn['list'] = res
+
+        return rtn
     def jsonFilter(self, method, dic, per_role, per_owner):
         # table_name = self.table_name
         # rtn = {}
@@ -287,15 +300,15 @@ class BaseTable:
         return dic
 
     def filterKeys(self, kw):
-        # si_table_name = self.table_name
-        # # print('filterKeys: ', kw)
-        # rtn = {}
-        # keyslist = self.database_keys
-        # for key, value in kw.items():
-        #     if (key in keyslist):
-        #         rtn[key] = value
-        # return rtn
-        return kw
+        si_table_name = self.table_name
+        # print('filterKeys: ', kw)
+        rtn = {}
+        keyslist = self.database_keys
+        for key, value in kw.items():
+            if (key in keyslist):
+                rtn[key] = value
+        return rtn
+        # return kw
 
 class Users(BaseTable):
     pass

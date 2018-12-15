@@ -46,12 +46,13 @@ async def main():
             dbname=options.db_database) as db:
         await maybe_create_tables(db, 'sql/schema.sql')
         rdb = BaseDB(db)
-        await rdb.createObject('users', username = 'hfz', password = '1234')
+        # await rdb.createObject('users', username = 'hfz', password = '1234')
         app = Application(rdb,
                           options.RoutineList,
                           **options.AppConfig
                           )
         app.listen(options.port)
+        await app.async_init()
 
         # In this demo the server will simply run until interrupted
         # with Ctrl-C, but if you want to shut down more gracefully,
