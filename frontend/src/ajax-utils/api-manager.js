@@ -55,6 +55,8 @@ const api_list = {
     'download_code': '/api/download/code',
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
+
+    'judger_status': '/judgestates/create'
 };
 
 export {URL, api_list}

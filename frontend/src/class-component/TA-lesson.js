@@ -142,6 +142,40 @@ export class TALesson extends Component {
         that.setState({homeworkitems: homeworklist});
         for (let index in result.data[0].problems) {
             ajax_post(api_list['query_problem'], {id: result.data[0].problems[index]}, that, TALesson.query_problem_callback);
+            ajax_post(api_list['judger_status'], {homework_id: result.data[0].id, problem_id: result.data[0].problems[index]}, that,
+                (that, res) => {
+                    let problemset = that.state.problemitems;
+                    const id_str = result.data[0].problems[index].toString();
+                    let problemitem;
+
+                    if (res.data.length === 1) {    // get data
+                        if (id_str in problemset) {
+                            problemitem = problemset[id_str];
+                        } else
+                        {
+                            problemitem = { id: result.data[0].problems[index] };
+                        }
+                        if (res.data[0].total === res.data[0].judged)
+                            problemitem['judger_status'] = 2;   // finished
+                        else
+                            problemitem['judger_status'] = 1;   // judging
+                    } else      // no data gotten
+                    {
+                        if (id_str in problemset) {
+                            problemitem = problemset[id_str];
+
+                        } else
+                        {
+                            problemitem = { id: result.data[0].problems[index] };
+                        }
+                        problemitem['judger_status'] = 0;   // NoStarted
+                    }
+
+                    problemset[id_str] = problemitem;
+                    that.setState({
+                        problemitems: problemset
+                    });
+                });
         }
     }
 
@@ -151,20 +185,32 @@ export class TALesson extends Component {
             return;
         }
         let problemset = that.state.problemitems;
-        let problemitem = {
-            id: result.data[0].id,
-            title: result.data[0].title,
-            description: result.data[0].description,
-            time_limit: result.data[0].time_limit,
-            memory_limit: result.data[0].memory_limit,
-            judge_method: result.data[0].judge_method,
-            language: result.data[0].language,
-            openness: result.data[0].openness,
-            status: result.data[0].status,
-            user_id: result.data[0].user_id,
-            test_language: result.data[0].test_language
-        };
-        problemset[result.data[0].id.toString()] = problemitem;
+        const id_str = result.data[0].id.toString();
+        let problemitem;
+
+        if (id_str in problemset) {
+            problemitem = problemset[id_str];
+            for (let key in result.data[0]) {
+                problemitem[key] = result.data[0][key];
+            }
+        } else
+        {
+            problemitem = {
+                id: result.data[0].id,
+                title: result.data[0].title,
+                description: result.data[0].description,
+                time_limit: result.data[0].time_limit,
+                memory_limit: result.data[0].memory_limit,
+                judge_method: result.data[0].judge_method,
+                language: result.data[0].language,
+                openness: result.data[0].openness,
+                status: result.data[0].status,
+                user_id: result.data[0].user_id,
+                test_language: result.data[0].test_language
+            };
+        }
+
+        problemset[id_str] = problemitem;
         that.setState({problemitems: problemset});
     }
 
@@ -203,7 +249,7 @@ export class TALesson extends Component {
     }
 
     render() {
-        // console.log('clickNewhomework ', this.state.clickNewhomework);
+        console.log('problems ', this.state.problems);
         let breadcrumb;
         let content;
         const all_homework = this.state.homeworkitems;

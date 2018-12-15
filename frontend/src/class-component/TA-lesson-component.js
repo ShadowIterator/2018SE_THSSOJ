@@ -223,8 +223,18 @@ class mTAHomeworkCard extends Component {
                         bordered
                         dataSource={this.props.problems}
                         renderItem={item => {
+                            let judger_button;
+                            if (item['judger_status'] == 0) {
+                                judger_button = (<Button>开始评测</Button>);
+                            } else
+                            if (item['judger_status'] == 1) {
+                                judger_button = (<Button disabled={true}>正在评测...</Button>);
+                            } else
+                            if (item['judger_status'] == 2) {
+                                judger_button = (<Button>重新评测</Button>);
+                            }
                             return (
-                                <List.Item key={item.id} actions={[<Button>查看详情</Button>, <Button>开始评测</Button>]}>
+                                <List.Item key={item.id} actions={[<Button>查看详情</Button>, (judger_button)]}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
                                     <List.Item.Meta title={item.title} />
                                     {/*{item.status.flag === 0 && <div>未完成</div>}*/}
