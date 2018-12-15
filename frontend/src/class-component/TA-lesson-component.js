@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 
-import {Container, Col, Row, Form} from 'react-bootstrap';
+import {Container, Col, Row} from 'react-bootstrap';
 
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {withRouter} from "react-router";
-import {Button, Tag, Card} from "@blueprintjs/core";
+import {Tag, Card} from "@blueprintjs/core";
 
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
-import {message} from 'antd';
+import { Layout, Form, Input, Select, Button, message, Icon } from 'antd';
+const {Content} = Layout;
+const FormItem = Form.Item;
 
 class AddNewNotice extends Component {
     constructor(props) {
@@ -28,16 +30,20 @@ class AddNewNotice extends Component {
     submitHandler(e){
         e.preventDefault();
         e.stopPropagation();
-
         console.log("submitHandler");
-        const data = {
-            title: this.state.title,
-            content: this.state.content,
-            course_id: this.props.course_id,
-            user_id: this.props.stu_id
-        };
-        console.log(data);
-        ajax_post(api_list['create_notice'], data, this, this.submitCallback);
+        this.props.form.validateFields((err, fieldsValue) => {
+            if (err) {
+                return;
+            }
+            const data = {
+                title: this.state.title,
+                content: this.state.content,
+                course_id: this.props.course_id,
+                user_id: this.props.stu_id
+            };
+            console.log(data);
+            ajax_post(api_list['create_notice'], data, this, this.submitCallback);
+        });
     }
 
     submitCallback(that, result){
@@ -65,22 +71,77 @@ class AddNewNotice extends Component {
     }
 
     render(){
+        const { getFieldDecorator } = this.props.form;
+
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 24 },
+                sm: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 24 },
+                sm: { span: 20 },
+            },
+        };
+        const tailFormItemLayout = {
+            wrapperCol: {
+                xs: {
+                    span: 24,
+                    offset: 0,
+                },
+                sm: {
+                    span: 24,
+                    offset: 0,
+                },
+            },
+        };
+
         return (
             <Card interactive={false} className="text-center">
             <Form onSubmit={this.submitHandler}>
-                <Form.Group as={Row} controlId="title">
-                    <Form.Label column lg="3">通知名称</Form.Label>
-                    <Col lg="9">
-                        <Form.Control value={this.state.title} onChange={this.changeTitle} />
-                    </Col>
-                </Form.Group>
-                <Form.Group as={Row} controlId="description">
-                    <Form.Label column lg="3">通知内容</Form.Label>
-                    <Col lg="9">
-                        <Form.Control as="textarea" value={this.state.content} onChange={this.changeContent} />
-                    </Col>
-                </Form.Group>
-                <Button variant="primary" type="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
+                <FormItem
+                    {...formItemLayout}
+                    label="通知名称"
+                    hasFeedback
+                >
+                    {getFieldDecorator('title', {
+                        initialValue: this.state.title,
+                        rules: [{
+                            required: true, message: '请输入通知名！',
+                        }],
+                    })(
+                        <Input onChange={this.changeTitle}/>
+                    )}
+                </FormItem>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="通知内容"
+                    hasFeedback
+                >
+                    {getFieldDecorator('description', {
+                        initialValue: this.state.content,
+                        rules: [{
+                            required: true, message: '请输入通知内容！',
+                        }],
+                    })(
+                        <Input.TextArea onChange={this.changeContent}/>
+                    )}
+                </FormItem>
+
+                {/*<Form.Group as={Row} controlId="title">*/}
+                    {/*<Form.Label column lg="3">通知名称</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Control value={this.state.title} onChange={this.changeTitle} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                {/*<Form.Group as={Row} controlId="description">*/}
+                    {/*<Form.Label column lg="3">通知内容</Form.Label>*/}
+                    {/*<Col lg="9">*/}
+                        {/*<Form.Control as="textarea" value={this.state.content} onChange={this.changeContent} />*/}
+                    {/*</Col>*/}
+                {/*</Form.Group>*/}
+                <Button type="primary" htmlType="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
                 <Button onClick={this.props.cancel_callback} style={{marginLeft:"10px", marginRight:"10px"}}>放弃</Button>
             </Form>
             </Card>
@@ -88,11 +149,13 @@ class AddNewNotice extends Component {
     }
 }
 
+const WrappedAddNewNotice = Form.create()(AddNewNotice);
+
 class TANoticeList extends Component {
     render() {
         return(
             <Card interactive={false}>
-                <Button icon="add" onClick={this.props.newNotice}>新建通知</Button>
+                <Button icon="plus-circle" type="primary" onClick={this.props.newNotice}>新建通知</Button>
                 {this.props.infoitems.map((item)=>(
                     <InfoItem title={item.title} content={item.content} type="通知" />
                 ))}
@@ -117,4 +180,4 @@ class InfoItem extends Component {
     }
 }
 
-export {AddNewNotice, TANoticeList};
+export {WrappedAddNewNotice, TANoticeList};
