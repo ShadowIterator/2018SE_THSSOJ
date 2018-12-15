@@ -46,12 +46,14 @@ const api_list = {
     'update_problem': '/api/problem/update',
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
+    'judge_all': '/api/problem/judgeAll',
+    'judge_html': '/api/problem/judgeHTML',
 
     'upload_code': '/api/upload/files',
     'upload_case': '/api/upload/files',
     'upload_script': '/api/upload/files',
+    'upload_html': '/api/upload/files',
 
-    'download_test': '/api/download/test',
     'download_code': '/api/download/code',
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
