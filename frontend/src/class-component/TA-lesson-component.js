@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 
-import {Container, Col, Row, Form} from 'react-bootstrap';
+import { Col, Row, Form} from 'react-bootstrap';
 
-import {ZeroPadding, Spacing} from "./lesson-component";
-import {withRouter} from "react-router";
 import {Button, Tag, Card} from "@blueprintjs/core";
 
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
 import {message} from 'antd';
+
+import {Info} from './lesson-component';
 
 class AddNewNotice extends Component {
     constructor(props) {
@@ -18,7 +18,7 @@ class AddNewNotice extends Component {
         this.state = {
             title: "",
             content: ""
-        }
+        };
         this.submitHandler = this.submitHandler.bind(this);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeContent = this.changeContent.bind(this);
@@ -93,27 +93,12 @@ class TANoticeList extends Component {
         return(
             <Card interactive={false}>
                 <Button icon="add" onClick={this.props.newNotice}>新建通知</Button>
-                {this.props.infoitems.map((item)=>(
-                    <InfoItem title={item.title} content={item.content} type="通知" />
-                ))}
+                {/*{this.props.infoitems.map((item)=>(*/}
+                    {/*<InfoItem title={item.title} content={item.content} type="通知" />*/}
+                {/*))}*/}
+                <Info infoitems={this.props.infoitems} />
             </Card>
         );
-    }
-}
-
-const InfoItemStyle = {
-    "margin-top": "6px",
-    "margin-bottom": "6px"
-};
-
-class InfoItem extends Component {
-    render() {
-        return (
-            <Card interactive={true} style={InfoItemStyle}>
-                <h5>{this.props.title} <Tag key={this.props.type}>{this.props.type}</Tag></h5>
-                <p>{this.props.content}</p>
-            </Card>
-        )
     }
 }
 
