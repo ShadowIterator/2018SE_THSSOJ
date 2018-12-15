@@ -48,6 +48,7 @@ class APIRecordHandler(base.BaseHandler):
         content = open(src_file_path, mode='rb').read().decode()
         self.set_res_dict(res_dict, code=0, src_code=content)
         return res_dict
+
     # @tornado.web.authenticated
     async def _delete_post(self):
         # for condition in self.args:
