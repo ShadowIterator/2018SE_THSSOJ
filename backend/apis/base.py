@@ -191,3 +191,13 @@ class BaseHandler(tornado.web.RequestHandler):
         for each_char in src:
             tgt+=chr(each_char)
         return tgt
+
+    def property_filter(self, object_selected, allowed_properties, abandoned_properties):
+        if allowed_properties == None:
+            for each_property in object_selected.keys():
+                if each_property in abandoned_properties:
+                    del object_selected[each_property]
+        else:
+            for each_property in object_selected.keys():
+                if not each_property in allowed_properties:
+                    del object_selected[each_property]

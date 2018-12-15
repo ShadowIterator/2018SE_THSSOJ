@@ -39,8 +39,13 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
-        description=bytearray()
+        # authority check
+        role = (await self.get_current_user_object())['role']
+        if role < 2:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
 
+        description=bytearray()
         if not self.check_input('title', 'description', 'time_limit', 'memory_limit',
                                 'judge_method', 'openness', 'code_uri', 'test_language'):
             self.set_res_dict(res_dict, code=1, msg='lack parameters')
@@ -175,6 +180,13 @@ class APIProblemHandler(base.BaseHandler):
     async def _delete_post(self):
         res_dict={}
         problem_id = self.args['id']
+        # authority check
+        cur_user = await self.get_current_user_object()
+        problem = (await self.db.getObject('problems', id=problem_id))[0]
+        if cur_user['role']<3 and problem['user_id']!=cur_user['id']:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+
         target_path = self.root_dir + '/' + str(problem_id)
         os.remove(target_path + '/' + str(problem_id) + '.md')
         os.removedirs(target_path)
@@ -197,7 +209,14 @@ class APIProblemHandler(base.BaseHandler):
         res_dict = {}
         problem_id = self.args['id']
         target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
-        target_homework = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
+        target_problem = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
+
+        # authority check
+        cur_user = self.get_current_user_object()
+        if target_problem['user_id'] != cur_user['id'] or 'status' in self.args.keys():
+            self.set_res_dict(res_dict, code=1, msg='not authorized')
+            return res_dict
+        # ---------------------------------------------------------------------
 
         if 'description' in self.args.keys():
             description = bytearray()
@@ -211,8 +230,8 @@ class APIProblemHandler(base.BaseHandler):
         for key in self.args.keys():
             if key == 'id':
                 continue
-            target_homework[key] = self.args[key]
-        await self.db.saveObject('problems', cur_user = self.get_current_user_object(), object=target_homework)
+            target_problem[key] = self.args[key]
+        await self.db.saveObject('problems', cur_user = self.get_current_user_object(), object=target_problem)
         self.set_res_dict(res_dict, code=0, msg='problem updated')
         return res_dict
 
@@ -292,11 +311,23 @@ class APIProblemHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
-        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type', 'src_language'):
+        if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type'):
             print(self.args)
             self.set_res_dict(res_dict, code=1, msg='submit post not enough params')
             # self.return_json(res_dict)
             return res_dict
+
+        # authority check
+        record_type = self.args['record_type']
+        if record_type == 1 or record_type == 2 or record_type == 4:
+            cur_user = await self.get_current_user_object()
+            # problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
+            homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+            course = (await self.db.getObject('courses', id=homework['course_id']))[0]
+            if cur_user['id'] not in course['students']:
+                self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+                return res_dict
+        # -----------------------------------
 
         current_time = datetime.datetime.now()
         cur_timestamp = int(time.mktime(current_time.timetuple()))
