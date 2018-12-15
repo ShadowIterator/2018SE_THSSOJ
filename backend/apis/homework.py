@@ -95,6 +95,21 @@ class APIHomeworkHandler(base.BaseHandler):
                 if all_judged:
                     each_res['status'] = 2
                     await self.db.saveObject('homeworks', object=each_res, cur_user=self.get_current_user_object())
+
+        # TODO: **********************************************************************
+        fstres = res_list[0]
+        if (fstres['id'] < 5):
+            fstres['judged'] = 0
+        else:
+            fstres['judged'] = 1
+
+        if(fstres['id'] < 2 or fstres['id']> 7):
+            fstres['submited'] = 0
+        else:
+            fstres['submited'] = 1
+
+        # ****************************
+
         return res_list
 
     # @tornado.web.authenticated
