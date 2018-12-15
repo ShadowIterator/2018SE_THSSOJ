@@ -21,7 +21,10 @@ class APIHomeworkHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
-        await self.db.createObject('homeworks', **self.args)
+        obj = await self.db.createObject('homeworks', **self.args)
+        course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
+        course['homeworks'].append(obj['id'])
+        await self.db.saveObject('courses', course)
         self.set_res_dict(res_dict, code=0, msg='homework created')
         return res_dict
         # try:

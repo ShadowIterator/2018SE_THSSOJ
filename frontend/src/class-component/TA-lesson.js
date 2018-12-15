@@ -9,7 +9,7 @@ import {AnchorButton, Card, Code, H5, Intent, Menu as blueMenu, Switch} from "@b
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {ShowLesson, ModifyLesson} from "./TA-create-lesson";
-
+import moment from 'moment';
 import { Layout, Breadcrumb, Menu, Icon, message, Button } from 'antd';
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
@@ -206,6 +206,9 @@ export class TALesson extends Component {
         // console.log('clickNewhomework ', this.state.clickNewhomework);
         let breadcrumb;
         let content;
+        const all_homework = this.state.homeworkitems;
+        const before_ddl_homework = all_homework.filter(item => item.deadline >= moment().format('X'));
+        const after_ddl_homework = all_homework.filter(item => item.deadline < moment().format('X'));
         const course_id = parseInt(this.props.lesson_id);
         if (this.state.clickNewhomework === -1) {
             breadcrumb = (
@@ -215,35 +218,50 @@ export class TALesson extends Component {
                 </>
             );
             content = (
-                <TACreateHomework course_id={course_id}
-                                  isEditing={false}
-                                  id={this.props.id}
-                                  clickCallback={this.clickHomeworkCallback}
-                />
+                <div>
+                    <center><h3>新建作业</h3></center>
+                    <TACreateHomework course_id={course_id}
+                                      isEditing={false}
+                                      id={this.props.id}
+                                      clickCallback={this.clickHomeworkCallback}
+                    />
+                </div>
             );
         } else if (this.state.clickNewhomework !== -2) {
             const homeworkInfo = this.state.homeworkitems.filter(item => item.id===this.state.clickNewhomework)[0];
-            // console.log("homeworkInfo", homeworkInfo);
-            breadcrumb = (
-                <>
-                    <Breadcrumb.Item>作业</Breadcrumb.Item>
-                    <Breadcrumb.Item>编辑作业{homeworkInfo.name}</Breadcrumb.Item>
-                </>
-            );
-            const problems = Object.values(this.state.problemitems).filter(item=>homeworkInfo.problems.indexOf(item.id)>=0);
-            // console.log("problems", problems);
-            content = (
-                <TACreateHomework course_id={course_id}
-                                  isEditing={true}
-                                  id={this.props.id}
-                                  homework_id={homeworkInfo.id}
-                                  name={homeworkInfo.name}
-                                  description={homeworkInfo.description}
-                                  deadline={homeworkInfo.deadline}
-                                  problems={problems}
-                                  clickCallback={this.clickHomeworkCallback}
-                />
-            );
+            if (homeworkInfo === undefined) {
+                breadcrumb = (
+                    <>
+                        <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    </>
+                );
+                content = (
+                    <div></div>
+                )
+            } else {
+                breadcrumb = (
+                    <>
+                        <Breadcrumb.Item>作业</Breadcrumb.Item>
+                        <Breadcrumb.Item>编辑作业<i>{homeworkInfo.name}</i></Breadcrumb.Item>
+                    </>
+                );
+                const problems = Object.values(this.state.problemitems).filter(item => homeworkInfo.problems.indexOf(item.id) >= 0);
+                content = (
+                    <div>
+                        <center><h3>编辑作业<i>{homeworkInfo.name}</i></h3></center>
+                        <TACreateHomework course_id={course_id}
+                                          isEditing={true}
+                                          id={this.props.id}
+                                          homework_id={homeworkInfo.id}
+                                          name={homeworkInfo.name}
+                                          description={homeworkInfo.description}
+                                          deadline={homeworkInfo.deadline}
+                                          problems={problems}
+                                          clickCallback={this.clickHomeworkCallback}
+                        />
+                    </div>
+                );
+            }
         } else
         if (this.state.current_selected === '1') {
             breadcrumb = (
@@ -252,7 +270,73 @@ export class TALesson extends Component {
                 <Breadcrumb.Item>未截止作业</Breadcrumb.Item>
                 </>
             );
-            if (this.state.homeworkitems.length === 0) {
+            if (before_ddl_homework.length === 0) {
+                content = (
+                    <div>
+                        <h3>没有未截止的作业QAQ</h3>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                    </div>
+                );
+            } else {
+                content = (
+                    <div>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                        <TAHomeworkPanel homeworkitems={before_ddl_homework}
+                                         problemitems={Object.values(this.state.problemitems)}
+                                         course_id={parseInt(this.props.lesson_id)}
+                                         clickEditCallback={(homework_id)=>{
+                                             this.setState({
+                                                 clickNewhomework: homework_id
+                                             });
+                                         }}
+                        />
+                    </div>
+                );
+            }
+        } else if (this.state.current_selected === '2') {
+            breadcrumb = (
+                <>
+                    <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>已截止作业</Breadcrumb.Item>
+                </>
+            );
+            if (after_ddl_homework.length === 0) {
+                content = (
+                    <div>
+                        <h3>没有已截止作业QAQ</h3>
+                    </div>
+                );
+            } else {
+                content = (
+                    <div>
+                        <TAHomeworkPanel homeworkitems={after_ddl_homework}
+                                         problemitems={Object.values(this.state.problemitems)}
+                                         course_id={parseInt(this.props.lesson_id)}
+                                         clickEditCallback={(homework_id)=>{
+                                             this.setState({
+                                                 clickNewhomework: homework_id
+                                             });
+                                         }}
+                        />
+                    </div>
+                );
+            }
+        } else if (this.state.current_selected === '3') {
+            breadcrumb = (
+                <>
+                    <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>全部作业</Breadcrumb.Item>
+                </>
+            );
+            if (all_homework.length === 0) {
                 content = (
                     <div>
                         <h3>没有作业QAQ</h3>
@@ -271,12 +355,10 @@ export class TALesson extends Component {
                             event.stopPropagation();
                             this.setState({clickNewhomework: -1});
                         }}>新建作业</Button>
-                        <TAHomeworkPanel homeworkitems={this.state.homeworkitems}
+                        <TAHomeworkPanel homeworkitems={all_homework}
                                          problemitems={Object.values(this.state.problemitems)}
                                          course_id={parseInt(this.props.lesson_id)}
                                          clickEditCallback={(homework_id)=>{
-                                             // event.preventDefault();
-                                             // event.stopPropagation();
                                              this.setState({
                                                  clickNewhomework: homework_id
                                              });
@@ -285,22 +367,6 @@ export class TALesson extends Component {
                     </div>
                 );
             }
-        } else if (this.state.current_selected === '2') {
-            breadcrumb = (
-                <>
-                    <Breadcrumb.Item>作业</Breadcrumb.Item>
-                    <Breadcrumb.Item>未批改作业</Breadcrumb.Item>
-                </>
-            );
-            content = <h3>未批改作业</h3>;
-        } else if (this.state.current_selected === '3') {
-            breadcrumb = (
-                <>
-                    <Breadcrumb.Item>作业</Breadcrumb.Item>
-                    <Breadcrumb.Item>已批改作业</Breadcrumb.Item>
-                </>
-            );
-            content = <h3>已批改作业</h3>;
         } else if (this.state.current_selected === '4') {
             breadcrumb = (
                     <Breadcrumb.Item>通知</Breadcrumb.Item>
@@ -355,8 +421,8 @@ export class TALesson extends Component {
                             >
                                 <SubMenu key="sub1" title={<span><Icon type="edit" />作业</span>}>
                                     <Menu.Item key="1">未截止作业</Menu.Item>
-                                    <Menu.Item key="2">未批改作业</Menu.Item>
-                                    <Menu.Item key="3">已批改作业</Menu.Item>
+                                    <Menu.Item key="2">已截止作业</Menu.Item>
+                                    <Menu.Item key="3">全部作业</Menu.Item>
                                 </SubMenu>
                                 <Menu.Item key="4"><Icon type="notification" />通知</Menu.Item>
                                 <Menu.Item key="5"><Icon type="info-circle" />课程信息</Menu.Item>
