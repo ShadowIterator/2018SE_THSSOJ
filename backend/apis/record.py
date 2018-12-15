@@ -24,7 +24,7 @@ class APIRecordHandler(base.BaseHandler):
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     async def _list_post(self):
-        return await self.db.querylr('records', self.args['start'], self.args['end'])
+        return await self.db.querylr('records', self.args['start'], self.args['end'], **self.args)
 
     @tornado.web.authenticated
     async def _query_post(self):
@@ -73,6 +73,7 @@ class APIRecordHandler(base.BaseHandler):
         content = open(src_file_path, mode='rb').read().decode()
         self.set_res_dict(res_dict, code=0, src_code=content)
         return res_dict
+
     # @tornado.web.authenticated
     async def _delete_post(self):
         # for condition in self.args:

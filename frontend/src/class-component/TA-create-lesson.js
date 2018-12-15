@@ -22,37 +22,40 @@ const FormItem = Form.Item;
 class mLessonList extends Component {
     constructor(props) {
         super(props);
-        this.changeTitle = this.changeTitle.bind(this);
-        this.changeDescription = this.changeDescription.bind(this);
-        this.changeNewstu = this.changeNewstu.bind(this);
-        this.changeNewta = this.changeNewta.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
 
-        if (this.props.course_id === undefined) {
+        if (this.props.course_id === undefined) {   // create
             this.state = {
                 isCreating: true,
-                title: "",
-                description: "",
-                newstu: "",
-                newta: "",
-                stu_tags: [],
-                ta_tags: [],
-                date: [],
             }
-        } else
+        } else  // edit
         {
-            console.log(this.props.course_id);
             this.state = {
                 isCreating: false,
-                title: "",
-                description: "",
-                newstu: "",
-                newta: "",
-                stu_tags: [],
-                ta_tags: [],
-                date: [],
             };
-            ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, LessonList.editLesson_callback);
+        }
+    }
+
+    componentDidMount() {
+        if (this.props.id === -1)
+            return;
+        if (this.props.course_id !== undefined)
+            ajax_post(api_list['query_course'], {id:parseInt(this.props.course_id)}, this, mLessonList.editLesson_callback);
+    }
+
+    componentWillUpdate(nextProps) {
+        if(nextProps.id===-1)
+            return;
+        if(nextProps.id !== this.props.id ||
+            nextProps.course_id !== this.props.course_id ||
+            nextProps.readOnly !== this.props.readOnly) {
+            console.log('componentWillUpdate: ', nextProps)
+            if (nextProps.course_id !== undefined) {
+                this.state = {
+                    isCreating: false,
+                };
+                ajax_post(api_list['query_course'], {id: parseInt(nextProps.course_id)}, this, mLessonList.editLesson_callback);
+            }
         }
     }
 
@@ -62,16 +65,17 @@ class mLessonList extends Component {
             message.error("未找到课程");
             return;
         }
-        that.setState({
+        console.log("editLesson_callback ", result);
+        that.props.form.setFieldsValue({
             title: result.data[0].name,
             description: result.data[0].description,
             date: [moment.unix(result.data[0].start_time), moment.unix(result.data[0].end_time)],
         });
         for (let index in result.data[0].tas){
-            ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, LessonList.add_ta_callback);
+            ajax_post(api_list['query_user'], {id:result.data[0].tas[index]}, that, mLessonList.add_ta_callback);
         }
         for (let index in result.data[0].students){
-            ajax_post(api_list['query_user'], {id:result.data[0].students[index]}, that, LessonList.add_stu_callback)
+            ajax_post(api_list['query_user'], {id:result.data[0].students[index]}, that, mLessonList.add_stu_callback)
         }
     }
 
@@ -80,24 +84,27 @@ class mLessonList extends Component {
         e.stopPropagation();
         console.log('handleSubmit');
         this.props.form.validateFields((err, fieldsValue) => {
-            console.log('error: ', err);
-            console.log('value: ', fieldsValue);
+            // console.log('error: ', err);
+            // console.log('value: ', fieldsValue);
             if (err) {
                 return;
             }
+            if (this.props.readOnly) {
+                this.props.clickModifyCallback();
+            } else
             if (this.state.isCreating) {
                 const data = {
-                    name: this.state.title,
-                    description: this.state.description,
-                    tas: this.state.ta_tags.map(ta => {
+                    name: fieldsValue.title,
+                    description: fieldsValue.description,
+                    tas: this.props.ta_tags.value.map(ta => {
                         return ta.id;
                     }),
-                    students: this.state.stu_tags.map(stu => {
+                    students: this.props.stu_tags.value.map(stu => {
                         return stu.id;
                     }),
                     notices: [],
-                    start_time: this.state.date[0].unix(),
-                    end_time: this.state.date[1].unix(),
+                    start_time: fieldsValue.date[0].unix(),
+                    end_time: fieldsValue.date[1].unix(),
                 };
                 if(data.tas.indexOf(this.props.id) < 0) {
                     console.log("this.props.id: ",this.props.id);
@@ -105,116 +112,104 @@ class mLessonList extends Component {
                     data.tas.push(this.props.id);
                 }
                 console.log(data);
-                ajax_post(api_list['create_course'], data, this, LessonList.submit_callback);
+                ajax_post(api_list['create_course'], data, this, mLessonList.submit_callback);
             } else
             {
                 const data = {
                     id: parseInt(this.props.course_id),
-                    name: this.state.title,
-                    description: this.state.description,
-                    tas: this.state.ta_tags.map(ta => {
+                    name: fieldsValue.title,
+                    description: fieldsValue.description,
+                    tas: this.props.ta_tags.value.map(ta => {
                         return ta.id;
                     }),
-                    students: this.state.stu_tags.map(stu => {
+                    students: this.props.stu_tags.value.map(stu => {
                         return stu.id;
                     }),
-                    start_time: this.state.date[0].unix(),
-                    end_time: this.state.date[1].unix(),
+                    start_time: fieldsValue.date[0].unix(),
+                    end_time: fieldsValue.date[1].unix(),
                 };
                 console.log(data);
-                ajax_post(api_list['update_course'], data, this, LessonList.submit_callback);
+                ajax_post(api_list['update_course'], data, this, mLessonList.submit_callback);
             }
         });
 
     }
 
     static submit_callback(that, result) {
-        if (result.data.code !== 0){
-            // alert('暂存失败');
+        if (result.data.code !== 0) {
             message.error("暂存失败");
             return;
         }
-        that.props.history.push('/ta');
-    }
 
-    changeTitle(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.setState({title: e.target.value});
-    }
-
-    changeDescription(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.setState({description: e.target.value});
-    }
-
-    changeNewstu(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.setState({newstu: e.target.value});
-    }
-
-    changeNewta(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        this.setState({newta: e.target.value});
+        if (that.props.published !== true) {
+            message.success("暂存成功");
+            that.props.history.push('/ta');
+        } else {
+            message.success("保存成功");
+            that.props.clickModifyCallback();
+        }
     }
 
     static add_stu_callback(that, result) {
         if (result.data.length===0) {
-            // alert("stu Not found");
             message.error("未找到该学生");
             return;
         }
-        if (result.data[0].role !== 1){
-            // alert("stu Not found");
+        if (result.data[0].role !== 1) {
             message.error("未找到该学生");
             return;
         }
-        // console.log(result.data);
-        let stu_tags = that.state.stu_tags;
+        let stu_tags = that.props.stu_tags.value;
         const tmp_name = result.data[0].username;
         for(let stu of stu_tags) {
             if(tmp_name === stu.username) {
-                // alert("You already added student "+tmp_name+".");
                 message.warning("你已经添加了学生 "+tmp_name);
                 return;
             }
         }
         stu_tags.push({username: result.data[0].username, id: result.data[0].id});
-        that.setState({stu_tags: stu_tags});
-        that.setState({newstu: ""});
+        that.props.form.setFieldsValue({
+            stu_tags: stu_tags,
+            newstu: ""
+        });
+        // that.setState({stu_tags: stu_tags});
+        // that.setState({newstu: ""});
     }
 
     static add_ta_callback(that, result) {
         if (result.data.length===0) {
-            // alert("ta Not found");
             message.error("未找到该助教");
             return;
         }
-        if (result.data[0].role === 1){
-            // alert("ta Not found");
+        if (result.data[0].role === 1) {
             message.error("未找到该助教");
             return;
         }
-        let ta_tags = that.state.ta_tags;
+        let ta_tags = that.props.ta_tags.value;
         const tmp_name = result.data[0].username;
-        for(let stu of ta_tags) {
-            if(tmp_name === stu.username) {
-                // alert("You already added TA "+tmp_name+".");
+        for(let ta of ta_tags) {
+            if(tmp_name === ta.username) {
                 message.warning("你已经添加了助教 "+tmp_name);
                 return;
             }
         }
         ta_tags.push({username: result.data[0].username, id: result.data[0].id});
-        that.setState({ta_tags: ta_tags});
-        that.setState({newta: ""});
+        // console.log(ta_tags);
+        that.props.form.setFieldsValue({
+            ta_tags: ta_tags,
+            newta: ""
+        });
+        // that.setState({ta_tags: ta_tags});
+        // that.setState({newta: ""});
     }
     render() {
-        const stutagElements = this.state.stu_tags.map(tag => {
+        console.log("render ", this.props)
+        const stutagElements = this.props.stu_tags.value.map(tag => {
             const onRemove = () => {
-                this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
+                this.props.form.setFieldsValue({
+                    stu_tags: this.props.stu_tags.value.filter(t => t.username !== tag.username)
+                });
+                // this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
             };
             return (
                 <Tag
@@ -227,14 +222,12 @@ class mLessonList extends Component {
             );
         });
 
-        const tatagElements = this.state.ta_tags.map(tag => {
+        const tatagElements = this.props.ta_tags.value.map(tag => {
             const onRemove = () => {
-                // if(!this.state.isCreating) {
-                //     ajax_post(api_list['deleteTA_course'], {ta_id: tag.id, course_id: this.props.course_id},
-                //         this, this.deleteTA_callback_closure(tag));
-                // } else {
-                    this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
-                // }
+                this.props.form.setFieldsValue({
+                    ta_tags: this.props.ta_tags.value.filter(t => t.username !== tag.username)
+                });
+                // this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
             };
             return (
                 <Tag
@@ -272,6 +265,37 @@ class mLessonList extends Component {
             },
         };
 
+        let submitButton;
+        if (!this.props.readOnly) {
+            if (this.props.published === true) {
+                submitButton = (
+                    <Container>
+                        <Button style={{margin: '10px'}} type="primary" htmlType="submit">保存</Button>
+                        <Button style={{margin: '10px'}} onClick={()=>{
+                            this.props.clickModifyCallback();
+                        }}> 放弃 </Button>
+                    </Container>
+                )
+            } else {
+                submitButton = (
+                    <Container>
+                        <Button style={{margin: '10px'}} type="primary" htmlType="submit">暂存</Button>
+                        <Button style={{margin: '10px'}} onClick={() => {
+                            this.props.history.push('/ta');
+                        }}> 放弃 </Button>
+                    </Container>
+                )
+            }
+        } else
+        {
+            submitButton = (
+                <Container>
+                    <Button style={{margin: '10px'}} type="primary" htmlType="submit">修改</Button>
+                </Container>
+            )
+
+        }
+
         return (
             <div>
             <Form onSubmit={this.handleSubmit}>
@@ -281,12 +305,11 @@ class mLessonList extends Component {
                     hasFeedback
                 >
                     {getFieldDecorator('title', {
-                        initialValue: this.state.title,
                         rules: [{
                             required: true, message: '请输入课程名！',
                         }],
                     })(
-                        <Input onChange={this.changeTitle}/>
+                        <Input disabled={this.props.readOnly}/>
                     )}
                 </FormItem>
 
@@ -296,12 +319,11 @@ class mLessonList extends Component {
                     hasFeedback
                 >
                     {getFieldDecorator('description', {
-                        initialValue: this.state.description,
                         rules: [{
                             required: true, message: '请输入课程简介！',
                         }],
                     })(
-                        <Input.TextArea onChange={this.changeDescription}/>
+                        <Input.TextArea disabled={this.props.readOnly}/>
                     )}
                 </FormItem>
 
@@ -310,20 +332,18 @@ class mLessonList extends Component {
                     label="起止时间"
                     hasFeedback
                 >
-                    {getFieldDecorator('timerange', {
+                    {getFieldDecorator('date', {
                         rules: [{
                             required: true, message: '请选择课程有效时间段！',
                         }],
                     })(
 
-                        <RangePicker value={this.state.date}
-                                     size="large"
+                        <RangePicker size="large"
                                      style={{width: '100%', outline: 0}}
                                      placeholder={['开课时间','结课时间']}
-                                     onChange={(date) => {
-                                         console.log(date);
-                                         this.setState({date: date});
-                                     }}/>
+                                     disabled={this.props.readOnly}
+
+                                     />
                     )}
 
                 </FormItem>
@@ -331,46 +351,61 @@ class mLessonList extends Component {
                 <FormItem
                     {...formItemLayout}
                     label="添加助教"
+                    help="输入助教，回车添加"
                 >
-                    {getFieldDecorator('tas', {
-                        initialValue: this.state.newta
+                    {getFieldDecorator('newta', {
                     })(
-                        <Input onChange={this.changeNewta}
+                        <Input disabled={this.props.readOnly}
                                onPressEnter={(event) => {
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   ajax_post(api_list['query_user'], {username: this.state.newta}, this, LessonList.add_ta_callback);
+                                   ajax_post(api_list['query_user'], {username: this.props.newta.value}, this, mLessonList.add_ta_callback);
                                }}/>
                     )}
                 </FormItem>
-                <Container style={{paddingBottom: '10px'}}>
-                    {tatagElements}
-                </Container>
+
+                <FormItem
+                    {...formItemLayout}
+                    label="已添加助教"
+                >
+                    {getFieldDecorator('ta_tags', {
+                    })(
+                        <Container style={{paddingBottom: '10px'}}>
+                            {tatagElements}
+                        </Container>
+                    )}
+                </FormItem>
 
                 <FormItem
                     {...formItemLayout}
                     label="添加学生"
+                    help="输入学生，回车添加"
                 >
-                    {getFieldDecorator('students', {
-                        initialValue: this.state.newstu
+                    {getFieldDecorator('newstu', {
+                        rules: [{
+                            disabled: this.props.readOnly,
+                        }]
                     })(
-                        <Input onChange={this.changeNewstu}
+                        <Input disabled={this.props.readOnly}
                                onPressEnter={(event) => {
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   ajax_post(api_list['query_user'], {username: this.state.newstu}, this, LessonList.add_stu_callback);
+                                   ajax_post(api_list['query_user'], {username: this.props.newstu.value}, this, mLessonList.add_stu_callback);
                                }}/>
                     )}
                 </FormItem>
-                <Container style={{paddingBottom: '10px'}}>
-                    {stutagElements}
-                </Container>
-                <Container>
-                    <Button style={{margin: '10px'}} type="primary" htmlType="submit">暂存</Button>
-                    <Button style={{margin: '10px'}} onClick={()=>{
-                        this.props.history.push('/ta');
-                    }}> 放弃 </Button>
-                </Container>
+                <FormItem
+                    {...formItemLayout}
+                    label="已添加学生"
+                >
+                    {getFieldDecorator('stu_tags', {
+                    })(
+                        <Container style={{paddingBottom: '10px'}}>
+                            {stutagElements}
+                        </Container>
+                    )}
+                </FormItem>
+                {submitButton}
             </Form>
 
             </div>
@@ -378,10 +413,83 @@ class mLessonList extends Component {
     }
 }
 
-const LessonList = withRouter(mLessonList);
-const WrappedLessonList = Form.create()(LessonList);
+const CreateLessonForm = Form.create({
+    onFieldsChange(props, changedFields) {
+        props.onChange(changedFields);
+    },
+    onValuesChange(_, values) {
+        console.log(values);
+    },
+    mapPropsToFields(props) {
+        return {
+            title: Form.createFormField({
+                ...props.title,
+                value: props.title.value,
+            }),
+            description: Form.createFormField({
+                ...props.description,
+                value: props.description.value,
+            }),
+            date: Form.createFormField({
+                ...props.date,
+                value: props.date.value,
+            }),
+            newta: Form.createFormField({
+                ...props.newta,
+                value: props.newta.value,
+            }),
+            newstu: Form.createFormField({
+                ...props.newstu,
+                value: props.newstu.value,
+            }),
+            ta_tags: Form.createFormField({
+                ...props.ta_tags,
+                value: props.ta_tags.value,
+            }),
+            stu_tags: Form.createFormField({
+                ...props.stu_tags,
+                value: props.stu_tags.value,
+            })
+        };
+    }
+})(withRouter(mLessonList));
 
 class CreateLesson extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            fields: {
+                title: {
+                    value: ''
+                },
+                description: {
+                    value: ''
+                },
+                date: {
+                    value: []
+                },
+                newta: {
+                    value: ''
+                },
+                newstu: {
+                    value: ''
+                },
+                ta_tags: {
+                    value: []
+                },
+                stu_tags: {
+                    value: []
+                }
+            }
+        }
+    }
+
+    handleFormChange = (changedFields) => {
+        this.setState(({ fields }) => ({
+            fields: { ...fields, ...changedFields },
+        }));
+    };
+
     render() {
         return (
             <Content style={{ padding: '0 50px' }}>
@@ -392,7 +500,13 @@ class CreateLesson extends Component {
                 <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
                     <h3>创建课程</h3>
                     <Container>
-                        <WrappedLessonList username={this.props.username} id={this.props.id}/>
+                        <CreateLessonForm username={this.props.username}
+                                            id={this.props.id}
+                                            readOnly={false}
+                                            published={false}
+                                            onChange={this.handleFormChange}
+                                            {...this.state.fields}
+                        />
                     </Container>
                 </div>
             </Content>
@@ -403,7 +517,38 @@ class CreateLesson extends Component {
 class EditLesson extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            fields: {
+                title: {
+                    value: ''
+                },
+                description: {
+                    value: ''
+                },
+                date: {
+                    value: []
+                },
+                newta: {
+                    value: ''
+                },
+                newstu: {
+                    value: ''
+                },
+                ta_tags: {
+                    value: []
+                },
+                stu_tags: {
+                    value: []
+                }
+            }
+        }
     }
+
+    handleFormChange = (changedFields) => {
+        this.setState(({ fields }) => ({
+            fields: { ...fields, ...changedFields },
+        }));
+    };
 
     render() {
         return (
@@ -415,7 +560,14 @@ class EditLesson extends Component {
                 <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
                     <h3>编辑课程信息</h3>
                     <Container>
-                        <LessonList course_id={this.props.lesson_id}/>
+                        <CreateLessonForm course_id={this.props.lesson_id}
+                                          username={this.props.username}
+                                          id={this.props.id}
+                                          readOnly={false}
+                                          published={false}
+                                          onChange={this.handleFormChange}
+                                          {...this.state.fields}
+                        />
                     </Container>
                 </div>
             </Content>
@@ -423,4 +575,114 @@ class EditLesson extends Component {
     }
 }
 
-export {CreateLesson, EditLesson};
+class ShowLesson extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            fields: {
+                title: {
+                    value: ''
+                },
+                description: {
+                    value: ''
+                },
+                date: {
+                    value: []
+                },
+                newta: {
+                    value: ''
+                },
+                newstu: {
+                    value: ''
+                },
+                ta_tags: {
+                    value: []
+                },
+                stu_tags: {
+                    value: []
+                }
+            }
+        }
+    }
+
+    handleFormChange = (changedFields) => {
+        this.setState(({ fields }) => ({
+            fields: { ...fields, ...changedFields },
+        }));
+    };
+
+    render() {
+        return (
+            <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                <Container>
+                    <CreateLessonForm course_id={this.props.lesson_id}
+                                      username={this.props.username}
+                                      id={this.props.id}
+                                      readOnly={true}
+                                      published={true}
+                                      onChange={this.handleFormChange}
+                                      clickModifyCallback={this.props.clickModifyCallback}
+                                      {...this.state.fields}
+                    />
+                </Container>
+            </div>
+        )
+    }
+}
+
+class ModifyLesson extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            fields: {
+                title: {
+                    value: ''
+                },
+                description: {
+                    value: ''
+                },
+                date: {
+                    value: []
+                },
+                newta: {
+                    value: ''
+                },
+                newstu: {
+                    value: ''
+                },
+                ta_tags: {
+                    value: []
+                },
+                stu_tags: {
+                    value: []
+                }
+            }
+        }
+    }
+
+    handleFormChange = (changedFields) => {
+        this.setState(({ fields }) => ({
+            fields: { ...fields, ...changedFields },
+        }));
+    };
+
+    render() {
+        return (
+            <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                <Container>
+                    <CreateLessonForm course_id={this.props.lesson_id}
+                                      username={this.props.username}
+                                      id={this.props.id}
+                                      readOnly={false}
+                                      published={true}
+                                      onChange={this.handleFormChange}
+                                      clickModifyCallback={this.props.clickModifyCallback}
+                                      {...this.state.fields}
+                    />
+                </Container>
+            </div>
+        )
+    }
+}
+
+export {CreateLesson, EditLesson, ShowLesson, ModifyLesson};

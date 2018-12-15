@@ -78,6 +78,9 @@ class Application(tornado.web.Application):
     def setDB(self, db):
         self.db_instance = db
 
+    async def async_init(self):
+        await self.db_instance.async_init()
+
 
 # class FormHandler(tornado.web.RequestHandler):
 #     def post(self):
