@@ -18,7 +18,7 @@ class ProblemBase extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            languages: [],
+            // languages: [],
             value: 1,
             page: 1,
             data: [],
@@ -31,6 +31,18 @@ class ProblemBase extends Component {
     componentDidMount() {
         this.updateProblems(1);
     }
+
+    componentWillUpdate(nextProps, nextStates) {
+        // if(nextProps.id===undefined || nextProps.id===-1)
+        //     return;
+        // if(nextProps.id !== this.prev_id) {
+        //     this.prev_id = nextProps.id;
+        //     this.fillInfo(nextProps.id);
+        // }
+        console.log('table will update:', nextStates);
+        // console.log(,);
+    }
+
     updateProblems = (page) => {
         ajax_post(api_list['list_problem'], {
             start: (page-1)*this.state.item_per_page + 1,
