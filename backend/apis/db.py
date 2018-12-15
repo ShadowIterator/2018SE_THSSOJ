@@ -295,7 +295,7 @@ class BaseTable:
         #     if (key in keyslist):
         #         rtn[key] = value
         # return rtn
-        return dic
+        return kw
 
 class Users(BaseTable):
     pass
