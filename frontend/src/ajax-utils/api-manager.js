@@ -51,7 +51,10 @@ const api_list = {
     'upload_case': '/api/upload/files',
     'upload_script': '/api/upload/files',
 
-    'download_test': '/api/download/test'
+    'download_test': '/api/download/test',
+    'download_code': '/api/download/code',
+    'download_data': '/api/download/data',
+    'download_script': '/api/download/script',
 };
 
 export {URL, api_list}

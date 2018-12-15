@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
 
-import {Container, Col, Row} from 'react-bootstrap';
-
-import {ZeroPadding, Spacing} from "./lesson-component";
-import {withRouter} from "react-router";
-import {Tag, Card} from "@blueprintjs/core";
+import {Card} from "@blueprintjs/core";
 
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
+import {Info} from './lesson-component';
+
 import { Layout, Form, Input, Select, Button, message, Icon } from 'antd';
 const {Content} = Layout;
 const FormItem = Form.Item;
+
 
 class AddNewNotice extends Component {
     constructor(props) {
@@ -20,7 +19,7 @@ class AddNewNotice extends Component {
         this.state = {
             title: "",
             content: ""
-        }
+        };
         this.submitHandler = this.submitHandler.bind(this);
         this.changeTitle = this.changeTitle.bind(this);
         this.changeContent = this.changeContent.bind(this);
@@ -128,19 +127,6 @@ class AddNewNotice extends Component {
                         <Input.TextArea onChange={this.changeContent}/>
                     )}
                 </FormItem>
-
-                {/*<Form.Group as={Row} controlId="title">*/}
-                    {/*<Form.Label column lg="3">通知名称</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Control value={this.state.title} onChange={this.changeTitle} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
-                {/*<Form.Group as={Row} controlId="description">*/}
-                    {/*<Form.Label column lg="3">通知内容</Form.Label>*/}
-                    {/*<Col lg="9">*/}
-                        {/*<Form.Control as="textarea" value={this.state.content} onChange={this.changeContent} />*/}
-                    {/*</Col>*/}
-                {/*</Form.Group>*/}
                 <Button type="primary" htmlType="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
                 <Button onClick={this.props.cancel_callback} style={{marginLeft:"10px", marginRight:"10px"}}>放弃</Button>
             </Form>
@@ -155,28 +141,10 @@ class TANoticeList extends Component {
     render() {
         return(
             <Card interactive={false}>
-                <Button icon="plus-circle" type="primary" onClick={this.props.newNotice}>新建通知</Button>
-                {this.props.infoitems.map((item)=>(
-                    <InfoItem title={item.title} content={item.content} type="通知" />
-                ))}
+                <Button icon="add" onClick={this.props.newNotice}>新建通知</Button>
+                <Info infoitems={this.props.infoitems} />
             </Card>
         );
-    }
-}
-
-const InfoItemStyle = {
-    "margin-top": "6px",
-    "margin-bottom": "6px"
-};
-
-class InfoItem extends Component {
-    render() {
-        return (
-            <Card interactive={true} style={InfoItemStyle}>
-                <h5>{this.props.title} <Tag key={this.props.type}>{this.props.type}</Tag></h5>
-                <p>{this.props.content}</p>
-            </Card>
-        )
     }
 }
 

@@ -5,15 +5,23 @@ import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {withRouter, Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Menu, Icon, List } from 'antd';
+import moment from 'moment';
+
+import { Layout, Breadcrumb, Menu, Icon, List, Row, Col } from 'antd';
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-// import "../mock/homework-mock";
-// import "../mock/problem-mock";
+/*
+将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
+未到截止日期：使用timestamp区分是否到达截止日期
+    未提交 issue 红 通过是否能够查询到record_type===2的记录来判断 "未提交"
+    已提交 saved 绿 "已提交"
+已过截止日期：
+    未提交且无法补交 heart-broken 白 通过是否查询到记录来判断是否已经提交 并且通过作业中的状态submitable来判断是否可以补交 "无法补交"
+    未提交但是可以补交 issue 红 "未提交"
+    已提交但未批改 saved 绿 首先得要是提交过的，然后查询作业中的score_openness来判断是否已经公开成绩 "已提交"
+    已提交且已批改 confirm 绿 如果已经公开成绩，则查询记录中的对应项 "{给分数就好了}"
+ */
 
 
 class mStudentHomeworkCard extends Component {
@@ -47,16 +55,25 @@ class mStudentHomeworkCard extends Component {
         }
     }
     render() {
-        console.log("questions:", this.props.questions);
+        console.log("questions:", this.props.deadline);
+        const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日');
         return (
             <div style={{margin: '20px'}}>
                 <List
-                    header={<h5>{this.props.name}</h5>}
-                    footer={<div>截止日期</div>}
+                    header={
+                        <Row type="flex" justify="space-around" align="middle">
+                            <Col span={18}>
+                                <h4>{this.props.name}</h4>
+                            </Col>
+                            <Col span={6} style={{textAlign: 'right'}}>
+                                <span>截止日期：{ddl_str}</span>
+                            </Col>
+                        </Row>
+                    }
                     bordered
                     dataSource={this.props.questions}
                     renderItem={item => {
-                        console.log(item);
+                        console.log("check homework item", item);
                         if(item.status === undefined) {
                             item.status = {};
                         }
@@ -76,9 +93,6 @@ class mStudentHomeworkCard extends Component {
 const StudentHomeworkCard = withRouter(mStudentHomeworkCard);
 
 class StudentHomeworkPanel extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         let homework2prob = {};
         for(let hw of this.props.homeworkitems) {
@@ -97,7 +111,9 @@ class StudentHomeworkPanel extends Component {
         return (
             <div>
                 {this.props.homeworkitems.map((hw)=>(
-                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id} course_id={this.props.course_id} />
+                    <StudentHomeworkCard name={hw.name} questions={homework2prob[hw.id.toString()]} homework_id={hw.id}
+                                         course_id={this.props.course_id}
+                                         deadline={hw.deadline === undefined ? 0 : hw.deadline} />
                 ))}
             </div>
         )
@@ -327,7 +343,7 @@ class mStudentLessonMiddle extends Component {
                         break;
                     }
                 }
-                if(flag === 1) {
+                if(flag === 1 || homework.status === 2) {
                     judged_homeworkitems.push(homework);
                     for(const prob_id of homework.problem_ids) {
                         for(const prob_item of this.problemitems) {
