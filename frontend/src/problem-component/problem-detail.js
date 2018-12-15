@@ -37,13 +37,13 @@ class ProblemDetailBody extends Component {
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
-                        {this.probleminfo.judge_method !== 4 &&
+                        {this.props.probleminfo.judge_method !== 2 &&
                             <CodeInput state={this.props.state} role={this.props.role}
                                        id={this.props.id} problem_id={this.props.probleminfo.id}
                                        problem_info={this.props.probleminfo}
                                        homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
                         }
-                        {this.probleminfo.judge_method === 4 &&
+                        {this.props.probleminfo.judge_method === 2 &&
                         <Upload.Dragger name="file" multiple={false} action={api_list['upload_html']}
                                         onChange={(info) => {
                                             let fileList = info.fileList;
@@ -70,7 +70,7 @@ class ProblemDetailBody extends Component {
                             <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
                         </Upload.Dragger>
                         }
-                        {this.probleminfo.judge_method === 4 &&
+                        {this.props.probleminfo.judge_method === 2 &&
                         <Button type={"primary"} onClick={() => {
                             if(this.state.file===null) {
                                 message.error("请上传你的作业");

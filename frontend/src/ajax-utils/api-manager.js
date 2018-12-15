@@ -46,6 +46,8 @@ const api_list = {
     'update_problem': '/api/problem/update',
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
+    'judge_all': '/api/problem/judgeAll',
+    'judge_html': '/api/problem/judgeHTML',
 
     'upload_code': '/api/upload/files',
     'upload_case': '/api/upload/files',

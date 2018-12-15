@@ -9,9 +9,8 @@ import {Alignment,
 } from "@blueprintjs/core";
 import {Layout} from 'antd';
 import {withRouter} from "react-router-dom";
-import {api_list} from "../ajax-utils/api-manager";
 
-const { Footer } = Layout;
+const { Header, Footer } = Layout;
 class mDropdown extends Component {
     render() {
         let menuItem;
@@ -78,7 +77,7 @@ class mTopbar extends Component {
     }
     render() {
         return (
-            <Navbar>
+            <Navbar style={{height: '6vh'}}>
                 <Navbar.Group align={Alignment.LEFT}>
                     <Navbar.Heading>THSSOJ</Navbar.Heading>
                     <Navbar.Divider />
@@ -112,7 +111,7 @@ class mTopbar extends Component {
 class Bottombar extends Component {
     render() {
         return (
-            <Footer style={{ textAlign: 'center' }}>
+            <Footer style={{ textAlign: 'center', height: '6vh' }}>
                 THSSOJ ©2018 Created by THSS
             </Footer>
         )

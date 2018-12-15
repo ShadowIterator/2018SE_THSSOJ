@@ -22,6 +22,8 @@ import {ProblemBase} from "./problem-base/problem-base";
 import {ProblemCreate} from "./problem-component/problem-create";
 import {MyProblem} from "./problem-component/problem-my";
 
+import {JudgeHTML} from "./problem-component/problem-judge-html";
+
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
 
@@ -128,7 +130,7 @@ class App extends Component {
                                                                                                lesson_id={props.match.params.id} />} />
                             <Route path="/usersettings" render={()=><UserSettings {...this.state} />} />
                             <Route path="/talesson/:id" render={(props)=><TALesson {...this.state} lesson_id={props.match.params.id} />} />
-                            <Route path="/problemdetail/:id/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.id}
+                            <Route path="/problemdetail/:pid/:hid/:lid" render={(props) => <ProblemDetail problem_id={props.match.params.pid}
                                                                                                          homework_id={props.match.params.hid}
                                                                                                          lesson_id={props.match.params.lid}
                                                                                                          {...this.state} />} />
@@ -139,6 +141,10 @@ class App extends Component {
                             <Route path="/myproblem" render={(props) => <MyProblem {...this.state} />} />
                             <Route path="/problemedit/:id" render={(props) => <ProblemCreate {...this.state} isEditing={true}
                                                                                              problem_id={props.match.params.id} />} />
+                            <Route path="/judgehtml/:cid/:hid/:pid" render={(props) => <JudgeHTML {...this.state}
+                                                                                                  course_id={props.match.params.cid}
+                                                                                                  homework_id={props.match.params.hid}
+                                                                                                  problem_id={props.match.params.pid}/>} />
                         </Layout>
                     </div>
                 </Router>

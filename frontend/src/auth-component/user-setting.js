@@ -189,7 +189,6 @@ class UserSettingsForm extends Component {
         }
 
         const gender = this.state.gender.toString();
-        // console.log('gender: ', gender);
 
         let status_html;
         if(!this.state.validating) {
@@ -337,12 +336,6 @@ export class UserSettings extends Component {
                 },
             },
         }
-    }
-
-    handleFormChange = (changedFields) => {
-        this.setState(({ fields }) => ({
-            fields: { ...fields, ...changedFields },
-        }));
     }
 
     render() {

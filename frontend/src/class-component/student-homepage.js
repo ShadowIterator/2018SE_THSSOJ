@@ -9,20 +9,13 @@ import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
 
-// import "../mock/course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-
 class mStudentHomepageMiddle extends Component {
     constructor(props) {
         super(props);
         this.state = {
             lessonlist: [],
-            infoitems: [],
         };
-        this.infoitems = [];
         this.lessonlist = [];
-        this.userquery_result = {};
     }
     componentDidMount() {
         if(!this.props.state || this.props.id===undefined)
@@ -45,7 +38,6 @@ class mStudentHomepageMiddle extends Component {
         const user = result.data[0];
         that.userquery_result = user;
         const lesson_ids = user.student_courses? user.student_courses:[];
-        // console.log(lesson_ids);
         for(let lesson_id of lesson_ids) {
             ajax_post(api_list['query_course'], {id:lesson_id, status:1}, that, StudentHomepageMiddle.query_course_callback);
         }
@@ -62,25 +54,7 @@ class mStudentHomepageMiddle extends Component {
         const notices = course.notices;
         const homeworks = course.homeworks;
         that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
-        // for(let notice_id of notices) {
-            // ajax_post(api_list['query_notice'],{id:notice_id}, that, StudentHomepageMiddle.query_notice_callback);
-        // }
-        if( that.userquery_result && that.lessonlist.length === that.userquery_result.student_courses.length) {
-            that.setState({lessonlist: that.lessonlist});
-        }
-    }
-    static query_notice_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        const title = result.data[0].title;
-        const content = result.data[0].content;
-        const id = result.data[0].id;
-        that.infoitems.push({
-            id:id,
-            title:title,
-            content:content,
-        });
-        // that.setState({infoitems:that.infoitems});
+        that.setState({lessonlist: that.lessonlist});
     }
     render() {
         this.lessonlist.sort(function(a, b) {
@@ -88,11 +62,6 @@ class mStudentHomepageMiddle extends Component {
             const idb = b.id;
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
-        // this.infoitems.sort(function(a, b) {
-        //     const ida = a.id;
-        //     const idb = b.id;
-        //     return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
-        // });
         return (
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
@@ -108,15 +77,15 @@ class mStudentHomepageMiddle extends Component {
                                             <Tooltip title="查看通知">
                                                 <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
                                                 <Icon type="notification" theme="twoTone" style={{padding: '0 5px'}} />
-                                                <Badge count={lesson.notices.length}
-                                                       style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />
+                                                {/*<Badge count={lesson.notices.length}*/}
+                                                       {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                 </div>
                                             </Tooltip>,
                                             <Tooltip title="查看作业">
                                                 <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
                                                 <Icon type="edit" theme="twoTone" style={{padding: '0 5px'}} />
-                                                <Badge count={lesson.homeworks.length}
-                                                       style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />
+                                                {/*<Badge count={lesson.homeworks.length}*/}
+                                                       {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                 </div>
                                             </Tooltip>,
                                             <Tooltip title="查看课程信息">
