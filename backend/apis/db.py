@@ -39,7 +39,7 @@ class BaseDB:
         self.tables['records'] = Records(self, 'records')
         self.tables['notices'] = Notices(self, 'notices')
         self.tables['judgestates'] = Judgestates(self, 'judgestates')
-
+        self.tables['ratios'] = Ratios(self, 'ratios')
     async def async_init(self):
         for name, table in self.tables.items():
             await table.async_init()
@@ -330,4 +330,7 @@ class Notices(BaseTable):
     pass
 
 class Judgestates(BaseTable):
+    pass
+
+class Ratios(BaseTable):
     pass

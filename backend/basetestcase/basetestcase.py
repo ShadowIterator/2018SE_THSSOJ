@@ -72,6 +72,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                 print('create pool done')
                 break
             except:
+                print("retrying to connect test database")
                 pass
         rdb = BaseDB(db)
         self.db = rdb

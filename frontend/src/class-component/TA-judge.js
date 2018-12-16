@@ -179,7 +179,7 @@ class TAJudge extends Component {
             this.state.current_key === '2' ||
             this.state.current_key === '3') {
             column = columns['1'];
-            for (const re_id of this.state.records) {
+            for (const re_id in this.state.records) {
                 const re = this.state.records[re_id];
                 if (re.submit_time <= this.state.homework_ddl) {
                     dataSourse.push({
@@ -278,7 +278,7 @@ class TAJudge extends Component {
         dataSourse = dataSourse.sort((a, b) => {
             return a.user_id - b.user_id;
         });
-        let panel = <Table dataSource={dataSourse} columns={column} />;
+        let panel = <Table dataSource={dataSourse} columns={column} pagination={false} />;
         let breadcrumb;
         switch (this.state.current_key) {
             case '1': breadcrumb = (<>

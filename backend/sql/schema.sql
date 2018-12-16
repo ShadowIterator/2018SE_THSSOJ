@@ -147,6 +147,17 @@ CREATE TABLE judgestates (
     -- TODO: 添加创建时间
 );
 
+DROP TABLE IF EXISTS ratios;
+CREATE TABLE ratios (
+    id SERIAL PRIMARY KEY,
+    homework_id INTEGER,
+    problem_id INTEGER,
+    user_id INTEGER,
+    ratio_one_used INTEGER,
+    ratio_two_used INTEGER,
+    ratio_three_used INTEGER
+);
+
 -- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
 
 -- create items
