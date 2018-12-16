@@ -602,12 +602,12 @@ class APIProblemHandler(base.BaseHandler):
             html_judge_path = os.getcwd()+'/'+self.root_dir.replace('problems', 'judge_html_temp')
             hash_src = str(problem['id'])+str(homework['id'])+cur_user['secret']
             md5 = hashlib.md5()
-            md5.update(hash_src)
+            md5.update(hash_src.encode(encoding='utf-8'))
             hash_path = md5.hexdigest()
             html_judge_path += '/'+hash_path
             uri='/judge_html_temp/'+hash_path
             if os.path.exists(html_judge_path):
-                os.removedirs(html_judge_path)
+                shutil.rmtree(html_judge_path)
             os.makedirs(html_judge_path)
             final_records = await self.db.getObject('records', record_type=4, homework_id=homework['id'],problem_id=problem['id'])
             for each_record in final_records:
@@ -617,6 +617,7 @@ class APIProblemHandler(base.BaseHandler):
                 os.makedirs(stu_judge_html_path)
                 file_zip = zipfile.ZipFile(src_zip_path)
                 file_zip.extractall(stu_judge_html_path)
+
 
         self.set_res_dict(res_dict, code=0, msg='problem judging', uri=uri)
         return res_dict

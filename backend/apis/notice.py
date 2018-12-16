@@ -19,6 +19,7 @@ class APINoticeHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.db.getObject('notices', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+        ret_list = []
         for notice in res:
             if 'create_time' in notice.keys() and notice['create_time'] is not None:
                 notice['create_time'] = int(time.mktime(notice['create_time'].timetuple()))
@@ -27,8 +28,11 @@ class APINoticeHandler(base.BaseHandler):
             if cur_user['role'] < 3:
                 course = (await self.db.getObject('notices', id=notice['course_id']))[0]
                 if course['id'] not in cur_user['student_courses'] and course['id'] not in cur_user['ta_courses']:
-                    res.remove(notice)
-
+                    pass
+                else:
+                    ret_list.append(notice)
+            else:
+                ret_list.append(notice)
             # ---------------------------------------------------------------------
         return res
         # self.write(json.dumps(res).encode())

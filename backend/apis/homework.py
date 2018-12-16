@@ -112,7 +112,6 @@ class APIHomeworkHandler(base.BaseHandler):
                 return res_dict
             # ---------------------------------------------------------------------
 
-            each_res['deadline'] = int(time.mktime(each_res['deadline'].timetuple()))
             if each_res['status'] == 1:
                 final_records = await self.db.getObject('records',
                                                   cur_user=self.get_current_user_object(),
@@ -127,6 +126,8 @@ class APIHomeworkHandler(base.BaseHandler):
                 if all_judged:
                     each_res['status'] = 2
                     await self.db.saveObject('homeworks', object=each_res, cur_user=self.get_current_user_object())
+
+            each_res['deadline'] = int(time.mktime(each_res['deadline'].timetuple()))
 
         # TODO: **********************************************************************
         # fstres = res_list[0]
