@@ -24,6 +24,12 @@ class APICourseHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
+        # authority check
+        role = (await self.get_current_user_object())['role']
+        if role < 2:
+            self.set_res_dict(res_dict, code=0, msg='you are not allowed')
+            return res_dict
+
         await self.db.createObject('courses', **self.args)
         course_created = (await self.db.getObject('courses', **self.args))[0]
         course_id = course_created['id']
@@ -68,6 +74,12 @@ class APICourseHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _delete_post(self):
         res_dict = {}
+        # authority check
+        role = (await self.get_current_user_object())['role']
+        if role < 3:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+
         await self.db.deleteObject('courses', id=self.args['id'])
         self.set_res_dict(res_dict, code=0, msg='course deleted')
         return res_dict
@@ -83,7 +95,12 @@ class APICourseHandler(base.BaseHandler):
     @catch_exception_write
     async def _update_post(self):
         res_dict = {}
-
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['role'] < 3 and self.args['id'] not in cur_user['ta_courses']:
+            self.set_res_dict(res_dict, code=1, msg='not authorized')
+            return res_dict
+        # ---------------------------------------------------------------------
         target_course = (await self.db.getObject('courses', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
         for key in self.args.keys():
             if key == 'id':
@@ -115,11 +132,21 @@ class APICourseHandler(base.BaseHandler):
     async def _query_post(self):
         # print('query = ', self.args)
         res = await self.db.getObject('courses', cur_user = self.get_current_user_object(), **self.args)
+        cur_user = await self.get_current_user_object()
         for course in res:
             if 'start_time' in course.keys() and course['start_time'] is not None:
                 course['start_time'] = int(time.mktime(course['start_time'].timetuple()))
             if 'end_time' in course.keys() and course['end_time'] is not None:
                 course['end_time'] = int(time.mktime(course['end_time'].timetuple()))
+            # authority check
+            if cur_user['role'] < 1:
+                res.remove[course]
+            elif cur_user['role'] == 1:
+                self.property_filter(course, None, ['course_spell', 'students'])
+                if course['status'] == 0:
+                    res.remove(course)
+
+            # ---------------------------------------------------------------------
         return res
         # self.return_json(res)
 

@@ -22,7 +22,7 @@
 
 -- (x, y)
 -- x:
-    -- 0 : normal 
+    -- 0 : normal
     -- 1 : student
     -- 2 : ta
     -- 3 : admin
@@ -45,7 +45,8 @@ CREATE TABLE users (
     validate_code INTEGER,          --
     gender INTEGER DEFAULT 2,                 --
     student_courses INTEGER[] DEFAULT '{}',      --
-    ta_courses INTEGER[] DEFAULT '{}'            --
+    ta_courses INTEGER[] DEFAULT '{}',            --
+    secret TEXT
 );
 
 DROP TABLE IF EXISTS courses;
@@ -73,7 +74,9 @@ CREATE TABLE homeworks (
     problems INTEGER[] DEFAULT '{}',
     records INTEGER[] DEFAULT '{}',
     score_openness INTEGER DEFAULT 0,
-    submitable INTEGER DEFAULT 1
+    submitable INTEGER DEFAULT 0,
+    course_id INTEGER
+
     -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
 );
 
@@ -90,7 +93,13 @@ CREATE TABLE problems (
     records INTEGER[] DEFAULT '{}',
     openness INTEGER DEFAULT 0,
     status INTEGER DEFAULT 0,
-    test_language INTEGER
+    test_language INTEGER,
+    ratio_one INTEGER,
+    ratio_one_limit INTEGER,
+    ratio_two INTEGER,
+    ratio_two_limit INTEGER,
+    ratio_three INTEGER,
+    ratio_three_limit INTEGER
 
 );
 
@@ -124,8 +133,8 @@ CREATE TABLE notices (
     user_id INTEGER,
     course_id INTEGER,
     title VARCHAR(128),
-    content TEXT
-   	-- TODO: 添加创建时间
+    content TEXT,
+    create_time TIMESTAMP DEFAULT current_timestamp
 );
 
 DROP TABLE IF EXISTS judgestates;

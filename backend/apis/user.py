@@ -23,20 +23,50 @@ class APIUserHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
-        res = await self.db.getObject('users', cur_user = self.get_current_user_object(), **self.args)
+        res = await self.db.getObject('users', **self.args)
         print('query res = ', res)
+        cur_user = await self.get_current_user_object()
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
             if 'validate_time' in user.keys() and user['validate_time'] is not None:
                 user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
+            # authority check
+            if cur_user['role'] == 1:
+                if user['role'] == 2 or cur_user['id'] == user['id']:
+                    self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                else:
+                    res.remove(user)
+            elif cur_user['role'] == 2:
+                if user['role'] < 3:
+                    self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                else:
+                    res.remove(user)
+            elif cur_user['role'] == 3:
+                pass
+            else:
+                res.remove(res)
+            # ---------------------------------------------------------------------
+
         # self.write(json.dumps(res).encode())
+        print('query_return: ', res)
         return res
 
     @tornado.web.authenticated
     # @check_password
     async def _delete_post(self):
         # for condition in self.args:
+        res_dict = {}
+        # authority check
+        role = (await self.get_current_user_object())['role']
+        if role < 3:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+
         await self.deleteObject('users', **self.args)
         return {'code': 0}
 
@@ -44,6 +74,13 @@ class APIUserHandler(base.BaseHandler):
     # @check_password
     async def _update_post(self):
         print('si_update: ', self.args)
+        res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if self.args['id'] != cur_user['id'] and cur_user['role'] < 3:
+            self.set_res_dict(res_dict, code=1, msg='not authorized')
+            return res_dict
+        # ---------------------------------------------------------------------
         await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
@@ -115,6 +152,12 @@ class APIUserHandler(base.BaseHandler):
     async def _validate_post(self):
         id = self.args['id']
         res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot validate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             user_qualified = (await self.getObject('users', id=id))[0]
             email = user_qualified['email']
@@ -144,6 +187,12 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     async def _activate_post(self):
         res_dict = {}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot activate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             id = self.args['id']
             validate_code = self.args['validate_code']
