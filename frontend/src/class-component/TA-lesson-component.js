@@ -238,6 +238,7 @@ class mTAHomeworkCard extends Component {
                                                 return;
                                             }
                                             message.success("已开始评测");
+                                            this.props.refreshCallback(this.props.course_id);
                                         });
                                     }}>
                                         开始评测
@@ -261,6 +262,7 @@ class mTAHomeworkCard extends Component {
                                                 return;
                                             }
                                             message.success("已开始评测");
+                                            this.props.refreshCallback(this.props.course_id);
                                         });
                                     }}>
                                         重新评测
@@ -295,6 +297,7 @@ class TAHomeworkPanel extends Component {
                                     homework_id={homework.id}
                                     course_id={this.props.course_id}
                                     deadline={homework.deadline === undefined ? 0 : homework.deadline}
+                                    refreshCallback={this.props.refreshCallback}
                                     clickEditCallback={this.props.clickEditCallback}
                     />
                 ))}

@@ -35,6 +35,7 @@ export class TALesson extends Component {
         this.clickNewnotice = this.clickNewnotice.bind(this);
         this.clickInfoModifyCallback = this.clickInfoModifyCallback.bind(this);
         this.clickHomeworkCallback = this.clickHomeworkCallback.bind(this);
+        this.query_data = this.query_data.bind(this);
     }
 
     componentDidMount() {
@@ -265,6 +266,7 @@ export class TALesson extends Component {
                     <TACreateHomework course_id={course_id}
                                       isEditing={false}
                                       id={this.props.id}
+                                      refreshCallback={this.query_data}
                                       clickCallback={this.clickHomeworkCallback}
                     />
                 </div>
@@ -299,6 +301,7 @@ export class TALesson extends Component {
                                           description={homeworkInfo.description}
                                           deadline={homeworkInfo.deadline}
                                           problems={problems}
+                                          refreshCallback={this.query_data}
                                           clickCallback={this.clickHomeworkCallback}
                         />
                     </div>
@@ -334,6 +337,7 @@ export class TALesson extends Component {
                         <TAHomeworkPanel homeworkitems={before_ddl_homework}
                                          problemitems={Object.values(this.state.problemitems)}
                                          course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
                                          clickEditCallback={(homework_id)=>{
                                              this.setState({
                                                  clickNewhomework: homework_id
@@ -362,6 +366,7 @@ export class TALesson extends Component {
                         <TAHomeworkPanel homeworkitems={after_ddl_homework}
                                          problemitems={Object.values(this.state.problemitems)}
                                          course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
                                          clickEditCallback={(homework_id)=>{
                                              this.setState({
                                                  clickNewhomework: homework_id
@@ -400,6 +405,7 @@ export class TALesson extends Component {
                         <TAHomeworkPanel homeworkitems={all_homework}
                                          problemitems={Object.values(this.state.problemitems)}
                                          course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
                                          clickEditCallback={(homework_id)=>{
                                              this.setState({
                                                  clickNewhomework: homework_id

@@ -140,7 +140,7 @@ CREATE TABLE judgestates (
 INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
 
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38');
+INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1,2}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin1','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin2','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
@@ -158,7 +158,8 @@ INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('
 INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework3', 'homework3_desc', TIMESTAMP '2020-05-16 15:36:38', '{1}', '{}');
 INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework4', 'homework4_desc', TIMESTAMP '2018-05-16 15:36:38', '{2}', '{}');
 
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{1,2,3}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{1,2,3}', TIMESTAMP '2018-05-16 15:36:38', TIMESTAMP '2019-05-16 15:36:38');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software2', 'gggggggggggg', '{2}', '{1}', 1, '{1}', '{}', TIMESTAMP '2018-05-16 15:36:38', TIMESTAMP '2018-05-17 15:36:38');
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 -- INSERT INTO problems (title, judge_method, records, openness, user_id, status) VALUES ('html test', 2, '{1}', 1, 2, 1);

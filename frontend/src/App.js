@@ -23,6 +23,7 @@ import {ProblemCreate} from "./problem-component/problem-create";
 import {MyProblem} from "./problem-component/problem-my";
 
 import {JudgeHTML} from "./problem-component/problem-judge-html";
+import {allLesson} from "./class-component/TA-allLesson";
 
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
@@ -145,6 +146,7 @@ class App extends Component {
                                                                                                   course_id={props.match.params.cid}
                                                                                                   homework_id={props.match.params.hid}
                                                                                                   problem_id={props.match.params.pid}/>} />
+                            <Route path="/alllesons" render={(props) => <allLesson {...this.state} />}/>
                         </Layout>
                     </div>
                 </Router>
