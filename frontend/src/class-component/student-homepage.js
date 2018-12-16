@@ -4,7 +4,7 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 
 import {withRouter, Link} from "react-router-dom";
-
+import moment from "moment"
 import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
@@ -48,12 +48,13 @@ class mStudentHomepageMiddle extends Component {
             return;
         }
         const course = result.data[0];
-        const name = course.name;
-        const id = course.id;
-        const description = course.description;
-        const notices = course.notices;
-        const homeworks = course.homeworks;
-        that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
+        // const name = course.name;
+        // const id = course.id;
+        // const description = course.description;
+        // const notices = course.notices;
+        // const homeworks = course.homeworks;
+        // that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
+        that.lessonlist.push(course);
         that.setState({lessonlist: that.lessonlist});
     }
     render() {
@@ -62,6 +63,8 @@ class mStudentHomepageMiddle extends Component {
             const idb = b.id;
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
+        const now = moment().format('X');
+        const running_lesson = this.state.lessonlist.filter(item=> now >= item.start_time && now <= item.end_time);
         return (
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
@@ -70,7 +73,7 @@ class mStudentHomepageMiddle extends Component {
                 <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                     <h2>本学期课程</h2>
                     <Row gutter={16}>
-                    {this.state.lessonlist.map((lesson)=>
+                    {running_lesson.map((lesson)=>
                         <Col span={8}>
                             <Card style={{width: '100%', marginTop: 16}}
                                   actions={[
