@@ -113,7 +113,7 @@ class TAJudge extends Component {
         this.fetchData();
     }
     fetchData = () => {
-        ajax_post(api_list[''], {
+        ajax_post(api_list['query_judgestates'], {
             problem_id: this.problem_id,
             homework_id: this.homework_id,
         }, this, (that, result) => {

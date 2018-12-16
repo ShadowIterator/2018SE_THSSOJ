@@ -267,3 +267,6 @@ class APICourseHandler(base.BaseHandler):
         await self.db.saveObject('courses', cur_user=self.get_current_user_object(), object=course)
         self.set_res_dict(res_dict, code=0, msg='student added into courses')
         return res_dict
+
+# course_created = (await self.db.getObject('courses', username = '2134', password = '123'))[0]
+# course_created = (await self.db.getObject('courses', **{'username': '2134', 'password' : '123'}))[0]

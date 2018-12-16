@@ -225,13 +225,47 @@ class mTAHomeworkCard extends Component {
                         renderItem={item => {
                             let judger_button;
                             if (item['judger_status'] == 0) {
-                                judger_button = (<Button>开始评测</Button>);
+                                judger_button = (
+                                    <Button onClick={()=>{
+                                        let data = {
+                                            homework_id: this.props.homework_id,
+                                            problem_id: item.id
+                                        };
+                                        // console.log('judge_all data', data);
+                                        ajax_post(api_list['judge_all'], data, this, (that, result)=>{
+                                            if (result.data.code !== 0) {
+                                                message.error("开始评测失败");
+                                                return;
+                                            }
+                                            message.success("已开始评测");
+                                        });
+                                    }}>
+                                        开始评测
+                                    </Button>
+                                );
                             } else
                             if (item['judger_status'] == 1) {
                                 judger_button = (<Button disabled={true}>正在评测...</Button>);
                             } else
                             if (item['judger_status'] == 2) {
-                                judger_button = (<Button>重新评测</Button>);
+                                judger_button = (
+                                    <Button onClick={()=>{
+                                        let data = {
+                                            homework_id: this.props.homework_id,
+                                            problem_id: item.id
+                                        };
+                                        // console.log('judge_all data', data);
+                                        ajax_post(api_list['judge_all'], data, this, (that, result)=>{
+                                            if (result.data.code !== 0) {
+                                                message.error("开始评测失败");
+                                                return;
+                                            }
+                                            message.success("已开始评测");
+                                        });
+                                    }}>
+                                        重新评测
+                                    </Button>
+                                );
                             }
                             return (
                                 <List.Item key={item.id} actions={[<Button>查看详情</Button>, (judger_button)]}>
