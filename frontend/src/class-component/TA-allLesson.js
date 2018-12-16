@@ -9,7 +9,7 @@ import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, message, Divider } f
 const {Content} = Layout;
 const {Meta} = Card;
 
-class allLesson extends Component {
+class AllLesson extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -18,6 +18,7 @@ class allLesson extends Component {
     }
 
     componentDidMount() {
+        console.log("id ", this.props.id);
         if (this.props.id === -1 || this.props.id === undefined){
             return;
         }
@@ -25,6 +26,7 @@ class allLesson extends Component {
     }
 
     componentWillUpdate(nextProps) {
+        console.log("id", nextProps.id);
         if (nextProps.id === -1 || nextProps.id === undefined){
             return;
         }
@@ -48,7 +50,7 @@ class allLesson extends Component {
             console.log("user ", user);
             if (user.role === 1) {
                 for (let index in user.student_courses) {
-                    ajax_post(api_list['query_lesson'], {id: user.student_courses[index]}, that, (that, res) => {
+                    ajax_post(api_list['query_course'], {id: user.student_courses[index]}, that, (that, res) => {
                         if (res.data.length === 0) {
                             return;
                         }
@@ -63,7 +65,7 @@ class allLesson extends Component {
             } else
             if (user.role === 2 || user.role === 3) {
                 for (let index in user.ta_courses) {
-                    ajax_post(api_list['query_lesson'], {id: user.ta_courses[index]}, that, (that, res) => {
+                    ajax_post(api_list['query_course'], {id: user.ta_courses[index]}, that, (that, res) => {
                         if (res.data.length === 0) {
                             return;
                         }
@@ -81,6 +83,7 @@ class allLesson extends Component {
 
     render() {
         console.log("this.state.lessons ", this.state.lessons);
+        console.log("role", this.props.role);
         let ret;
         if (this.props.role === 2 || this.props.role === 3) {
             ret = (
@@ -125,9 +128,62 @@ class allLesson extends Component {
                     </div>
                 </Content>
             );
+        } else
+        if (this.props.role === 1) {
+            ret = (
+                <Content style={{padding: '0 50px'}}>
+                    <Breadcrumb style={{margin: '16px 0'}}>
+                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                    </Breadcrumb>
+                    <div style={{background: '#fff', padding: 24, minHeight: 640}}>
+                        <h2>全部</h2>
+                        <Row gutter={16}>
+                            {this.state.lessons.map((lesson)=>
+                                <Col span={8}>
+                                    <Card style={{width: '100%', marginTop: 16}}
+                                          actions={[
+                                              <Tooltip title="查看通知">
+                                                  <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                      <Icon type="notification" theme="twoTone" style={{padding: '0 5px'}} />
+                                                      {/*<Badge count={lesson.notices.length}*/}
+                                                      {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="查看作业">
+                                                  <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                      <Icon type="edit" theme="twoTone" style={{padding: '0 5px'}} />
+                                                      {/*<Badge count={lesson.homeworks.length}*/}
+                                                      {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
+                                                  </div>
+                                              </Tooltip>,
+                                              <Tooltip title="查看课程信息">
+                                                  <Icon type="info-circle" theme="twoTone"
+                                                        onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
+                                              </Tooltip>]}>
+                                        <Meta title={<Link to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={lesson.description}/>
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
+                    </div>
+                </Content>
+            );
+        } else
+        {
+            return (
+                <Content style={{padding: '0 50px'}}>
+                    <Breadcrumb style={{margin: '16px 0'}}>
+                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                    </Breadcrumb>
+                    <div style={{background: '#fff', padding: 24, minHeight: 640}}>
+                        <h2>全部</h2>
+                    </div>
+                </Content>
+            );
         }
         return ret;
     }
 }
 
-export {allLesson};
+export {AllLesson};

@@ -19,7 +19,8 @@ class mDropdown extends Component {
                 <div>
                     {this.props.role !== 3 &&
                     <Menu.Item text="全部课程" onClick={() => {
-                        alert("Jump to all classes");
+                        // alert("Jump to all classes");
+                        this.props.history.push("/alllessons");
                     }}/>
                     }
                     {this.props.role === 2 &&
