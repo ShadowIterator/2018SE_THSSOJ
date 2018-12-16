@@ -71,7 +71,9 @@ CREATE TABLE homeworks (
     deadline TIMESTAMP,
     status INTEGER DEFAULT 0,
     problems INTEGER[] DEFAULT '{}',
-    records INTEGER[] DEFAULT '{}'
+    records INTEGER[] DEFAULT '{}',
+    score_openness INTEGER DEFAULT 0,
+    submitable INTEGER DEFAULT 1
     -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
 );
 
@@ -114,6 +116,8 @@ CREATE TABLE records (
 	-- TODO: 把泽神返回的所有结果存起来，并且更新一下Wiki上的API返回值等信息
 );
 
+
+
 DROP TABLE IF EXISTS notices;
 CREATE TABLE notices (
     id SERIAL PRIMARY KEY,
@@ -141,13 +145,14 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 2.', 'This is notice 2 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 3.', 'This is notice 3 content.');
 
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{}');
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework2', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,4}', '{}');
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework3', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{3,4,5}', '{}');
-INSERT INTO homeworks (name, description, deadline, problems, records) VALUES ('homework4', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{6,7,8}', '{}');
+INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{}', 1, 0);
+INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework2', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,4}', '{}', 0, 0);
+INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework3', 'homework1_desc', TIMESTAMP '2021-05-16 15:36:38', '{1,2,5}', '{}', 0, 1);
+INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework4', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,6,7,8}', '{}', 1, 0);
+INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework5', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,5,7}', '{}', 1, 1);
 
 
-INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1,2,3,4}', '{1,2,3}');
+INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1, 2, 3, 4, 5}', '{1,2,3}');
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B1', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
@@ -167,5 +172,18 @@ INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, op
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B8', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort8', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 1, 2, 2, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 1, 2, 1, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 2, 2, 2, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 2, 2, 1, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 3, 2, 2, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 3, 2, 1, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 4, 2, 2, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 4, 2, 1, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 5, 2, 1, 0, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 3, 5, 2, 1, 1, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 5, 5, 2, 1, 2, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 7, 5, 2, 1, 3, 100);
+INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 5, 2, 2, 0, 100);
 
 -- INSERT INTO records (user_id, problem_id, homework_id, submit_time, score, result, consume_time, consume_memory, src_size) VALUES (2, 1, 1, TIMESTAMP '2011-05-16 15:36:38', 0, 211, 10, 5);

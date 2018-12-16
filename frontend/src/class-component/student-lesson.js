@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import {Info} from "./lesson-component";
+
+import {Icon as Blueicon} from '@blueprintjs/core';
 
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
@@ -7,11 +8,22 @@ import {withRouter, Link} from "react-router-dom";
 
 // import moment from 'moment';
 
-import { Layout, Breadcrumb, Menu, Icon, List, Row, Col } from 'antd';
+import { Layout, Breadcrumb, Menu, List, Row, Col, Icon } from 'antd';
 import moment from 'moment'
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
+const result_arr = ['Accepted',
+    'Wrong Answer',
+    'Runtime Error',
+    'Time Limit Exceed',
+    'Memory Limit Exceed',
+    'Output Limit Exceed',
+    'Danger System Call',
+    'Judgement Failed',
+    'Compile Error',
+    'unknown',
+];
 /*
 将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
 未到截止日期：使用timestamp区分是否到达截止日期
@@ -58,6 +70,9 @@ class mStudentHomeworkCard extends Component {
     render() {
         console.log("questions:", this.props.deadline);
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日');
+        // let xicon =
+
+        console.log('krender-homework: ', this.props);
         return (
             <div style={{margin: '20px'}}>
                 <List
@@ -75,20 +90,98 @@ class mStudentHomeworkCard extends Component {
                     dataSource={this.props.questions}
                     renderItem={item => {
                         // console.log("check homework item", item);
+                        /*
+                        将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
+                        未到截止日期：使用timestamp区分是否到达截止日期
+                            未提交 issue 红 通过是否能够查询到record_type===2的记录来判断 "未提交"
+                            已提交 saved 绿 "已提交"
+                        已过截止日期：
+                            未提交且无法补交 heart-broken 白 通过是否查询到记录来判断是否已经提交 并且通过作业中的状态submitable来判断是否可以补交 "无法补交"
+                            未提交但是可以补交 issue 红 "未提交"
+                            已提交但未批改 saved 绿 首先得要是提交过的，然后查询作业中的score_openness来判断是否已经公开成绩 "已提交"
+                            已提交且已批改 confirm 绿 如果已经公开成绩，则查询记录中的对应项 "{给分数就好了}"
+                         */
+                        const now = moment().unix();
+                        const delayed = (now >  this.props['deadline']);
+                        const submitable = (this.props['submitable'] === undefined ? false : this.props['submitable']);
+                        const judged = (this.props['score_openness'] === undefined ? false : this.props['score_openness']);
+                        const submitted = (item.result_type !== -1);
+                        console.log('render-problems: ', item, delayed, submitable, judged, submitted);
+                        let problem_res = '没有结果';
+                        let problem_info = '未知的作业状态';
+                        let icon_name = 'issue';
+                        let icon_intent = 'Danger';
                         if(item.status === undefined) {
                             item.status = {};
+                        }
+                        if(item.result_type === undefined)
+                        {
+                            item.status = 0;
+                        }
+                        else
+                        {
+                            if(item.result_type === 1) {
+                                problem_res = result_arr[item.result];
+                            }
+                            else if(item.result_type === 2) {
+                                problem_res = item.score.toString();
+                            }
+                            if( (!submitted) && (!delayed)) // 未提交未到截止日期
+                            {
+                                item.status = 1;
+                                problem_info = '未提交未到截止日期';
+                                icon_name = 'issue';
+                                icon_intent = 'Danger';
+                            }
+                            else if((!!submitted) && (!delayed)) //已提交未到截止日期
+                            {
+                                item.status = 2;
+                                problem_info = '已提交未到截止日期';
+                                icon_name = 'saved';
+                                icon_intent = 'Success';
+                            }
+                            else if((!submitted) && (!!delayed) && (!submitable)) //未提交无法补交
+                            {
+                                item.status = 3;
+                                problem_info = '未提交无法补交'
+                                icon_name = 'heart-broken';
+                                icon_intent = 'None';
+                            }
+                            else if((!submitted) && (!!delayed) && (!!submitable)) //未提交可以补交
+                            {
+                                item.status = 4;
+                                problem_info = '未提交可以补交';
+                                icon_name = 'issue';
+                                icon_intent = 'Danger';
+                            }
+                            else if((!!submitted) && (!!delayed) && (!judged)) //已提交未批改
+                            {
+                                item.status = 5;
+                                problem_info = '已提交未批改';
+                                icon_name = 'saved';
+                                icon_intent = 'Success';
+                            }
+                            else if((!!submitted) && (judged) && (!!delayed)) //已提交已批改
+                            {
+                                problem_info = problem_res;
+                                icon_name = 'confirm';
+                                icon_intent = 'Warning';
+                                if(problem_info === '100' || problem_info === 'Accepted')
+                                {
+                                    icon_intent = 'Success';
+                                }
+                            }
+
                         }
                         return (
                             <List.Item key={item.id}>
                                 <List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />
-                                {item.status === 0 && <div>未完成</div>}
-                                {item.status === 1 && <div>已完成</div>}
-                                {item.status === 2 && <div>已批改</div>}
+                                {<div><Blueicon icon={icon_name} intent={icon_intent} /><span style={{marginLeft: 5}}>{problem_info}</span></div>}
                             </List.Item>);
                     }}
                 />
             </div>
-        )
+        );
 
         // {item.status.flag === 0 && <div>未完成</div>}
         // {item.status.flag===1 && <div>已完成</div>}
@@ -127,7 +220,10 @@ class StudentHomeworkPanel extends Component {
                 {this.props.homeworkitems.map((hw)=>(
                     <StudentHomeworkCard name={hw.name} questions={hw['problem_list']} homework_id={hw.id}
                                          course_id={this.props.course_id}
-                                         deadline={hw.deadline === undefined ? 0 : hw.deadline} />
+                                         deadline={hw.deadline === undefined ? 0 : hw.deadline}
+                                         submitable = {hw['submitable']}
+                                         score_openness = {hw['score_openness']}/>
+
                 ))}
             </div>
         )
@@ -184,24 +280,18 @@ class mStudentLessonMiddle extends Component {
         //     }
         //   const  now = moment();
         const now = moment().unix();
-        console.log('checkhw: ',hw, selected, now, !!hw['submited'], (now < hw['deadline']), (!!hw['submited']) && (now < hw['deadline']));
+        // console.log('checkhw: ',hw, selected, now, !!hw['submited'], (now < hw['deadline']), (!!hw['submited']) && (now < hw['deadline']));
 
         switch (selected) {
           case '1':
-              console.log('checkhw case1: ', (!!hw['submited']) && (now < hw['deadline']));
-              return (!!hw['submited']) && now < hw['deadline'];
+              // console.log('checkhw case1: ', (!!hw['submited']) && (now < hw['deadline']));
+              return (now < hw['deadline']);
               // break;
           case '2':
-              return (!hw['submited']) && now < hw['deadline'];
+              return (now >= hw['deadline']);
               // break;
-          case '7':
-              return (now >= hw['deadline']) && (!hw['submited']) && (!hw['submitable']);
-          case '8':
-              return (now >= hw['deadline']) && (!hw['submited']) && (hw['submitable']);
-          case '9':
-              return (now >= hw['deadline']) && (hw['submited']) && (!hw['judged']);
-          case '10':
-              return (now >= hw['deadline']) && (hw['submited']) && (hw['judged']);
+          case '3':
+              return true;
           default:
               return false;
         }
@@ -227,6 +317,7 @@ class mStudentLessonMiddle extends Component {
                     console.log('query_homework: succeed');
 
                     hw['problem_list'] = [];
+                    hw['type_key'] = that.state.current_selected;
                     // homework_items[homework_id.toString()] = hw;
                     homework_items.push(hw);
                     const problem_ids = hw['problems'];
@@ -236,8 +327,37 @@ class mStudentLessonMiddle extends Component {
                             console.log('query_problem: ', problem_id, result.data);
                             hw['problem_list'].push(prob);
                             console.log('query_problem: ', homework_items);
-                            that.setState({homeworkitems: homework_items});
                             console.log('query_problems_after_setstate: ', that.state.homeworkitems);
+                            ajax_post(api_list['query_record'],
+                                {
+                                        user_id: this.props.id,
+                                        homework_id: homework_id,
+                                        problem_id: problem_id,
+                                        record_type: 2,
+                                    },
+                                that,
+                                (that, result) => {
+                                    if(result.data.length > 0) {
+                                        const data = result.data[0];
+                                        prob['result_type'] = data['result_type'];
+                                        prob['result'] = data['result'];
+                                        prob['score'] = data['score'];
+                                    }
+                                    else prob['result_type'] = -1;
+                                    that.setState({homeworkitems: homework_items});
+                            });
+                            /*
+                            将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
+                            未到截止日期：使用timestamp区分是否到达截止日期
+                                未提交 issue 红 通过是否能够查询到record_type===2的记录来判断 "未提交"
+                                已提交 saved 绿 "已提交"
+                            已过截止日期：
+                                未提交且无法补交 heart-broken 白 通过是否查询到记录来判断是否已经提交 并且通过作业中的状态submitable来判断是否可以补交 "无法补交"
+                                未提交但是可以补交 issue 红 "未提交"
+                                已提交但未批改 saved 绿 首先得要是提交过的，然后查询作业中的score_openness来判断是否已经公开成绩 "已提交"
+                                已提交且已批改 confirm 绿 如果已经公开成绩，则查询记录中的对应项 "{给分数就好了}"
+                             */
+
                         });
                     }
                 });
@@ -513,15 +633,10 @@ class mStudentLessonMiddle extends Component {
                             defaultOpenKeys={['sub1']}
                             style={{ height: '100%' }}
                         >
-              <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />未到截止日期作业</span>}>
-                                <Menu.Item key="1">已提交作业</Menu.Item>
-                                <Menu.Item key="2">未提交作业</Menu.Item>
-                            </SubMenu>
-                            <SubMenu key="sub2" title={<span><Icon type="edit" theme="twoTone" />已到截止日期作业</span>}>
-                                <Menu.Item key="7">未提交且无法补交</Menu.Item>
-                                <Menu.Item key="8">未提交但是可以补交</Menu.Item>
-                                <Menu.Item key="9">已提交但未批改</Menu.Item>
-                                <Menu.Item key="10">已提交且已批改</Menu.Item>
+              <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />作业</span>}>
+                                <Menu.Item key="1">未到截止日期作业</Menu.Item>
+                                <Menu.Item key="2">已到截止日期作业</Menu.Item>
+                                <Menu.Item key="3">全部</Menu.Item>
                             </SubMenu>
                             <Menu.Item key="5"><Icon type="notification" theme="twoTone" />通知</Menu.Item>
                             <Menu.Item key="6"><Icon type="info-circle" theme="twoTone" />课程信息</Menu.Item>
