@@ -26,6 +26,7 @@ class APIUserHandler(base.BaseHandler):
         res = await self.db.getObject('users', **self.args)
         print('query res = ', res)
         cur_user = await self.get_current_user_object()
+        ret_list = []
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
@@ -37,19 +38,21 @@ class APIUserHandler(base.BaseHandler):
                     self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
                 else:
-                    res.remove(user)
+                    pass
             elif cur_user['role'] == 2:
                 if user['role'] < 3:
                     self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
                 else:
-                    res.remove(user)
+                    pass
             elif cur_user['role'] == 3:
-                pass
+                ret_list.append(user)
             else:
-                res.remove(res)
+                pass
             # ---------------------------------------------------------------------
 
         # self.write(json.dumps(res).encode())
