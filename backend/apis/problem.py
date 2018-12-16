@@ -218,7 +218,7 @@ class APIProblemHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
-        未到截止日期作业
+
         if 'description' in self.args.keys():
             description = bytearray()
             byte_content = bytearray()
@@ -273,7 +273,8 @@ class APIProblemHandler(base.BaseHandler):
         print('query-problem: ', self.args)
         res = await self.db.getObject('problems', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
-        print('query-problem-results: ', res)
+        ret_list=[]
+
         for problem in res:
             problem_id = problem['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
@@ -293,18 +294,20 @@ class APIProblemHandler(base.BaseHandler):
             # authority check
             if problem['openness'] == 0:
                 if problem['user_id'] == cur_user['id']:
-                    pass
+                    ret_list.append(problem)
                 elif 'homework_id' not in self.args and 'course_id' not in self.args:
-                    res.remove(problem)
+                    pass
                 else:
                     homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
                     course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
                     if problem['id'] in homework['problems'] and homework['id'] in course['homeworks']:
-                        pass
+                        ret_list.append(problem)
                     else:
-                        res.remove(problem)
+                        pass
+            else:
+                ret_list.append(problem)
             # ---------------------------------------------------------------------
-        return res
+        return ret_list
 
         # try:
         #     res = await self.db.getObject('problems', secure=1, **self.args)
@@ -386,6 +389,7 @@ class APIProblemHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=0, msg='html submitted')
             return res_dict
         # ---------------------------------------------------------------------
+
         record_created = await self.db.createObject('records', **self.args)
                                 # user_id=self.args['user_id'],
                                 # problem_id=self.args['problem_id'],
@@ -431,6 +435,10 @@ class APIProblemHandler(base.BaseHandler):
             if not os.path.exists('test'):
                 os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
+            case_path = os.getcwd()+'/'+self.root_dir+'/'+str(problem_of_code['id'])+'/case'
+            config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
+            config_info = json.load(config_file)
+            config_file.close()
             judge_req = {}
             judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
@@ -446,10 +454,10 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['Language'] = 'C++'
             elif self.args['src_language'] == 4:
                 judge_req['Language'] = 'Python'
-            judge_req['DATA_DIR'] = os.getcwd() + '/test'
+            judge_req['DATA_DIR'] = case_path
             judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = 'ncmp'
-            judge_req['NTESTS'] = 2
+            judge_req['NTESTS'] = int(config_info['NTESTS']*self.args['test_ratio']/100)
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
@@ -458,6 +466,10 @@ class APIProblemHandler(base.BaseHandler):
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
+            script_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem_of_code['id']) + '/script'
+            config_file = open(script_path + '/config.json', mode='r', encoding='utf8')
+            config_info = json.load(config_file)
+            config_file.close()
             judge_req = {}
             judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
@@ -466,7 +478,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req['OTHERS'] = os.getcwd() + 'judge_script/fake-node/fake-node-linux ' + 'test.js ' + str_id + '.code'
+            judge_req['OTHERS'] = './judge.sh -r {}'.format(self.args['test_ratio'])
 
             # requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
             requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
@@ -557,11 +569,11 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['INSUF'] = 'in'
                 judge_req['OUTPRE'] = 'test'
                 judge_req['OUTSUF'] = 'out'
-                if self.args['src_language'] == 1:
+                if src_language == 1:
                     judge_req['Language'] = 'C'
-                elif self.args['src_language'] == 2:
+                elif src_language == 2:
                     judge_req['Language'] = 'C++'
-                elif self.args['src_language'] == 4:
+                elif src_language == 4:
                     judge_req['Language'] = 'Python'
                 judge_req['DATA_DIR'] = case_path
                 judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'

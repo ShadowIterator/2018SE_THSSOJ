@@ -161,6 +161,7 @@ class APICourseHandler(base.BaseHandler):
         # print('query = ', self.args)
         res = await self.db.getObject('courses', cur_user = self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+        ret_list=[]
         for course in res:
             if 'start_time' in course.keys() and course['start_time'] is not None:
                 course['start_time'] = int(time.mktime(course['start_time'].timetuple()))
@@ -168,14 +169,18 @@ class APICourseHandler(base.BaseHandler):
                 course['end_time'] = int(time.mktime(course['end_time'].timetuple()))
             # authority check
             if cur_user['role'] < 1:
-                res.remove[course]
+                pass
             elif cur_user['role'] == 1:
-                self.property_filter(course, None, ['course_spell', 'students'])
-                if course['status'] == 0:
-                    res.remove(course)
-
+                if course['status'] == 1 and cur_user['id'] in course['students']:
+                    self.property_filter(course, None, ['course_spell', 'students'])
+                    ret_list.append(course)
+            elif cur_user['role'] == 2:
+                if cur_user['id'] in course['tas']:
+                    ret_list.append(course)
+            elif cur_user['role'] == 3:
+                ret_list.append(course)
             # ---------------------------------------------------------------------
-        return res
+        return ret_list
         # self.return_json(res)
 
     # @tornado.web.authenticated
