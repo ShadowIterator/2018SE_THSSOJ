@@ -7,6 +7,7 @@ from apis.homework import *
 from apis.upload import *
 from apis.download import *
 from apis.judgestates import *
+from apis.ratio import *
 
 scriptJudgerAddr = 'http://localhost:12345/scriptjudger'
 traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
@@ -20,6 +21,7 @@ RoutineList = [
                   (r'/api/upload/(.*)', APIUploadHandler),
                   (r'/api/download/(.*)', APIDownloadHandler),
                   (r'/api/judgestates/(.*)', APIJudgestatesHandler),
+                  (r'/api/ratio/(.*)', APIRatioHandler),
               ]
 
 AppConfig = {
