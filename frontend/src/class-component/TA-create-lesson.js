@@ -240,6 +240,34 @@ class mLessonList extends Component {
             );
         });
 
+        // const table_columns = [
+        //     {title: 'ID', dataIndex: 'id',width: 150, key: 'id'},
+        //     {title: '用户名', dataIndex: 'username', key: 'username', width: 300},
+        //     {title: '测试方法', dataIndex: 'language', key: 'language', width: 300, render: (data)=>{
+        //             return <span>{data.map(lang=>{
+        //                 switch(lang) {
+        //                     case 1: return 'C;';
+        //                     case 2: return 'C++;';
+        //                     case 3: return 'Javascript;';
+        //                     case 4: return 'Python3;';
+        //                     default: return '未知语言';
+        //                 }
+        //             })}</span>;
+        //         }},
+        //     {title: 'Action', dataIndex: '', key: 'x', render: (text, record) => {
+        //             return (
+        //                 <Button type="danger" onClick={()=>{
+        //                     let problist = this.state.problems;
+        //                     this.setState({
+        //                         problems: problist.filter(item => record.id!==item.id)
+        //                     });
+        //                 }}>
+        //                     Delete
+        //                 </Button>
+        //             );
+        //         }},
+        // ];
+
         const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
