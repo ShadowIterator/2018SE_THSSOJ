@@ -35,9 +35,10 @@ class BaseDB:
         self.tables['users'] = Users(self, 'users')
         self.tables['courses'] = Courses(self, 'courses')
         self.tables['homeworks'] = Homeworks(self, 'homeworks')
-        self.tables['problems'] = Homeworks(self, 'problems')
-        self.tables['records'] = Homeworks(self, 'records')
-        self.tables['notices'] = Homeworks(self, 'notices')
+        self.tables['problems'] = Problems(self, 'problems')
+        self.tables['records'] = Records(self, 'records')
+        self.tables['notices'] = Notices(self, 'notices')
+        self.tables['judgestates'] = Judgestates(self, 'judgestates')
 
     async def async_init(self):
         for name, table in self.tables.items():
@@ -326,4 +327,7 @@ class Records(BaseTable):
     pass
 
 class Notices(BaseTable):
+    pass
+
+class Judgestates(BaseTable):
     pass

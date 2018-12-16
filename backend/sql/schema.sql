@@ -124,6 +124,16 @@ CREATE TABLE notices (
    	-- TODO: 添加创建时间
 );
 
+DROP TABLE IF EXISTS judgestates;
+CREATE TABLE judgestates (
+    id SERIAL PRIMARY KEY,
+    homework_id INTEGER,
+    problem_id INTEGER,
+    total INTEGER,
+    judged INTEGER
+    -- TODO: 添加创建时间
+);
+
 -- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
 
 -- create items

@@ -75,10 +75,6 @@ export class TALesson extends Component {
                         infoitems: [],
                         problemitems: {}
                     });
-
-        // this.homeworkitems = [];
-        // this.problemitems = [];
-
         ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
     }
 
@@ -142,7 +138,7 @@ export class TALesson extends Component {
         that.setState({homeworkitems: homeworklist});
         for (let index in result.data[0].problems) {
             ajax_post(api_list['query_problem'], {id: result.data[0].problems[index]}, that, TALesson.query_problem_callback);
-            ajax_post(api_list['judger_status'], {homework_id: result.data[0].id, problem_id: result.data[0].problems[index]}, that,
+            ajax_post(api_list['query_judgestates'], {homework_id: result.data[0].id, problem_id: result.data[0].problems[index]}, that,
                 (that, res) => {
                     let problemset = that.state.problemitems;
                     const id_str = result.data[0].problems[index].toString();
