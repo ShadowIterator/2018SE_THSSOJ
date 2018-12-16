@@ -32,6 +32,7 @@ class APIRecordHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+
         ret_list = []
         for record in res:
             timepoint = int(record['submit_time'].timestamp())
@@ -39,6 +40,8 @@ class APIRecordHandler(base.BaseHandler):
 
             # authority check
             if record['record_type'] == 0:
+                pass
+            elif record['record_type'] == 1:
                 pass
             # if cur_user['role'] == 1:
             #     if not js['user_id']==cur_user['id']:
@@ -108,9 +111,10 @@ class APIRecordHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _returnresult_post(self):
-        if secret in self.args and \
-            self.args['secret'] != options.judgerSecret:
-            return
+        # if 'secret' in self.args.keys() and \
+        #     self.args['secret'] != options.judgerSecret:
+        #     return {'code': }
+        assert(options.judgerSecret == self.args['secret'])
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
         result_dict = {'Accept': 0,
                        'Wrong Answer': 1,

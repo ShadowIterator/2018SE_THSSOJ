@@ -215,4 +215,5 @@ class BaseHandler(tornado.web.RequestHandler):
             for key, value in object_selected.keys():
                 if(key not in abandoned_properties):
                     rtn[key] = value
+        object_selected = rtn
         return rtn

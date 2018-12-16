@@ -91,7 +91,7 @@ const char *readable_default[] = {
 };
 
 string toStdPath(const string& path) {	// make path endwith '/'
-	if (path.back() == '/')
+	if (path.length() > 0 && path[path.length() - 1] == '/')
 		return path;
 	return path+'/';
 }
