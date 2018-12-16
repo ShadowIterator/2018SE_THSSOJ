@@ -270,14 +270,17 @@ class APIProblemHandler(base.BaseHandler):
         if 'description' in self.args.keys():
             del self.args['description']
 
+        print('query-problem: ', self.args)
         res = await self.db.getObject('problems', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+        print('query-problem-results: ', res)
         for problem in res:
             problem_id = problem['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
             description_file = open(target_path, mode='rb')
             description = description_file.read()
             description_file.close()
+            print('query-problem-desc-tar-path: ', target_path)
             # encoded_content = base64.b64encode(description)
             encoded_content = description
             # des_str = self.bytes_to_str(encoded_content)
@@ -294,8 +297,8 @@ class APIProblemHandler(base.BaseHandler):
                 elif 'homework_id' not in self.args and 'course_id' not in self.args:
                     res.remove(problem)
                 else:
-                    homework = (await self.db.getObject('homework_id', id=self.args['homework_id']))[0]
-                    course = (await self.db.getObject('course_id', id=self.args['course_id']))[0]
+                    homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+                    course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
                     if problem['id'] in homework['problems'] and homework['id'] in course['homeworks']:
                         pass
                     else:
@@ -376,23 +379,23 @@ class APIProblemHandler(base.BaseHandler):
             if not os.path.exists(stu_homework_path):
                 os.makedirs(stu_homework_path)
             shutil.copyfile(src_zip_path, target_record_path+'/'+str(html_record['id'])+'.zip')
-            shutil.copyfile(src_zip_path, stu_homework_path+'/'+self.args['problem_id']+'.zip')
+            shutil.copyfile(src_zip_path, stu_homework_path+'/'+str(self.args['problem_id'])+'.zip')
             os.remove(src_zip_path)
             html_record['submit_time'] = submit_time
             await self.db.saveObject('records', object=html_record)
             self.set_res_dict(res_dict, code=0, msg='html submitted')
             return res_dict
         # ---------------------------------------------------------------------
-        await self.db.createObject('records', **self.args)
+        record_created = await self.db.createObject('records', **self.args)
                                 # user_id=self.args['user_id'],
                                 # problem_id=self.args['problem_id'],
                                 # homework_id=self.args['homework_id'],
                                 # submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
 
-        record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
-                                                user_id=self.args['user_id'],
-                                                submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
-                                               ))[0]
+        # record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
+        #                                         user_id=self.args['user_id'],
+        #                                         submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
+        #                                        ))[0]
 
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
         problem_of_code['records'].append(record_created['id'])
@@ -527,7 +530,7 @@ class APIProblemHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
         problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
-        course = (await self.db.getObject('courses', id=self.args['course_is']))[0]
+        course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
 
         #authority check
         if cur_user['role']<3 and cur_user['id'] not in course['tas']:

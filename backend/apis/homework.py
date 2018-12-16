@@ -27,8 +27,12 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='you are not allowed to use this')
             return res_dict
 
-        await self.db.createObject('homeworks', **self.args)
-
+        created_homework = await self.db.createObject('homeworks', **self.args)
+        course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
+        print('create_homeworks: ', course)
+        course['homeworks'].append(created_homework['id'])
+        course['homeworks'] = list(set(course['homeworks']))
+        await self.db.saveObject('courses', course)
         self.set_res_dict(res_dict, code=0, msg='homework created')
         return res_dict
         # try:
@@ -110,7 +114,7 @@ class APIHomeworkHandler(base.BaseHandler):
 
             each_res['deadline'] = int(time.mktime(each_res['deadline'].timetuple()))
             if each_res['status'] == 1:
-                final_records = self.db.getObject('records',
+                final_records = await self.db.getObject('records',
                                                   cur_user=self.get_current_user_object(),
                                                   homework_id=each_res['id'],
                                                   record_type=2

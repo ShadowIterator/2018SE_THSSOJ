@@ -32,10 +32,19 @@ class APIRecordHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+        if('homework_id' in self.args.keys()):
+            hw = (await self.db.getObject('homeworks',  id = self.args['homework_id']))
+        else:
+            hw = []
+        if(len(hw)):
+            hw = hw[0]
+        else:
+            hw = {'score_openness': 0, 'homework_id': 0}
+
         for js in res:
             timepoint = int(js['submit_time'].timestamp())
             js['submit_time'] = timepoint
-
+            js['score_openness'] = hw['score_openness']
             # authority check
             if cur_user['role'] == 1:
                 if not js['user_id']==cur_user['id']:
@@ -104,9 +113,10 @@ class APIRecordHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _returnresult_post(self):
-        if secret in self.args and \
-            self.args['secret'] != options.judgerSecret:
-            return
+        # if 'secret' in self.args.keys() and \
+        #     self.args['secret'] != options.judgerSecret:
+        #     return {'code': }
+        assert(options.judgerSecret == self.args['secret'])
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
         result_dict = {'Accept': 0,
                        'Wrong Answer': 1,

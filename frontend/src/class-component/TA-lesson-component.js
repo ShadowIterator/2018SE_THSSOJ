@@ -229,7 +229,8 @@ class mTAHomeworkCard extends Component {
                                     <Button onClick={()=>{
                                         let data = {
                                             homework_id: this.props.homework_id,
-                                            problem_id: item.id
+                                            problem_id: item.id,
+                                            course_id: this.props.course_id,
                                         };
                                         // console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
@@ -253,7 +254,8 @@ class mTAHomeworkCard extends Component {
                                     <Button onClick={()=>{
                                         let data = {
                                             homework_id: this.props.homework_id,
-                                            problem_id: item.id
+                                            problem_id: item.id,
+                                            course_id: this.props.course_id
                                         };
                                         // console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
@@ -631,6 +633,10 @@ class TACreateHomework extends Component {
     };
 
     render() {
+        let problems = []
+        if (this.props.isEditing) {
+            problems = this.props.problems;
+        }
         return (
             <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
                 <CreateHomeworkForm isEditing={this.props.isEditing}
@@ -638,7 +644,7 @@ class TACreateHomework extends Component {
                                     course_id={this.props.course_id}
                                     onChange={this.handleFormChange}
                                     clickCallback={this.props.clickCallback}
-                                    problems={this.props.problems}
+                                    problems={problems}
                                     {...this.state.fields}
                 />
             </div>

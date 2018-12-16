@@ -21,7 +21,7 @@ class APINoticeHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         for notice in res:
             if 'create_time' in notice.keys() and notice['create_time'] is not None:
-                notice['create_time'] = int(time.mktime(notice['create_time'].time_tuple()))
+                notice['create_time'] = int(time.mktime(notice['create_time'].timetuple()))
 
             # authority check
             if cur_user['role'] < 3:
