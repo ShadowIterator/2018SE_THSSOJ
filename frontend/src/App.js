@@ -23,6 +23,7 @@ import {ProblemCreate} from "./problem-component/problem-create";
 import {MyProblem} from "./problem-component/problem-my";
 
 import {JudgeHTML} from "./problem-component/problem-judge-html";
+import {TAJudge} from "./class-component/TA-judge";
 
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
@@ -145,6 +146,10 @@ class App extends Component {
                                                                                                   course_id={props.match.params.cid}
                                                                                                   homework_id={props.match.params.hid}
                                                                                                   problem_id={props.match.params.pid}/>} />
+                            <Route path="/tajudge/:cid/:hid/:pid" render={(props) => <TAJudge {...this.state}
+                                                                                              course_id={props.match.params.cid}
+                                                                                              homework_id={props.match.params.hid}
+                                                                                              problem_id={props.match.params.pid} />} />
                         </Layout>
                     </div>
                 </Router>
