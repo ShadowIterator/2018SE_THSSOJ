@@ -17,9 +17,9 @@ function ajax_post(url,data,that,callback){
     }).catch(function(error){
         // alert('post失败');
         message.error("post方法失败");
-        console.log(error);
-        console.log(URL+url);
-        console.log(data);
+        console.log("Post error -> Error message", error);
+        console.log("Post error -> Request url", URL+url);
+        console.log("Post error -> Submit data", data);
     });
 }
 function ajax_get(url,data,that,callback){

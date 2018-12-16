@@ -128,11 +128,23 @@ CREATE TABLE notices (
    	-- TODO: 添加创建时间
 );
 
+DROP TABLE IF EXISTS judgestates;
+CREATE TABLE judgestates (
+    id SERIAL PRIMARY KEY,
+    homework_id INTEGER,
+    problem_id INTEGER,
+    total INTEGER,
+    judged INTEGER
+    -- TODO: 添加创建时间
+);
+
 -- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
 
 -- create items
+INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
+
 INSERT INTO users (username, password, email, role, student_courses) VALUES ('st','1234','siro@163.com', 1, '{1}');
-INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38');
+INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('ta','1234','zyw@wzy.com', 2, '{1,2}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin1','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin2','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
@@ -145,6 +157,7 @@ INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is 
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 2.', 'This is notice 2 content.');
 INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 3.', 'This is notice 3 content.');
 
+
 INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2}', '{}', 1, 0);
 INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework2', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,4}', '{}', 0, 0);
 INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework3', 'homework1_desc', TIMESTAMP '2021-05-16 15:36:38', '{1,2,5}', '{}', 0, 1);
@@ -153,24 +166,10 @@ INSERT INTO homeworks (name, description, deadline, problems, records, score_ope
 
 
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1, 2, 3, 4, 5}', '{1,2,3}');
+
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B1', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort1', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B2', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort2', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B3', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort3', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B4', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort4', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B5', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort5', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B6', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort6', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B7', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort7', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B8', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort8', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
+-- INSERT INTO problems (title, judge_method, records, openness, user_id, status) VALUES ('html test', 2, '{1}', 1, 2, 1);
 
 INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 1, 2, 2, 0, 100);
 INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 1, 1, 2, 1, 0, 100);

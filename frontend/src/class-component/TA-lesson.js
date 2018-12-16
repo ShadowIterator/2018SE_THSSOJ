@@ -4,13 +4,13 @@ import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
 
 import {ZeroPadding, Spacing} from "./lesson-component";
 import {withRouter, Link} from "react-router-dom";
-import {WrappedAddNewNotice, TANoticeList} from "./TA-lesson-component";
-import {AnchorButton, Button, Card, Code, H5, Intent, Menu as blueMenu, Switch} from "@blueprintjs/core";
+import {WrappedAddNewNotice, TANoticeList, TAHomeworkPanel, TACreateHomework} from "./TA-lesson-component";
+import {AnchorButton, Card, Code, H5, Intent, Menu as blueMenu, Switch} from "@blueprintjs/core";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {ShowLesson, ModifyLesson} from "./TA-create-lesson";
-
-import { Layout, Breadcrumb, Menu, Icon, message } from 'antd';
+import moment from 'moment';
+import { Layout, Breadcrumb, Menu, Icon, message, Button } from 'antd';
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
@@ -22,18 +22,20 @@ export class TALesson extends Component {
             current_selected: '1',
 
             clickNewnotice: false,
+            clickNewhomework: -2,   // -2     not click
+                                    // -1     click new-homework
+                                    // others click edit-homework
             infoitems: [],
             homeworkitems: [],
-            problemitems: [],
+            problemitems: {},
 
         };
 
-        this.query_notice_callback = this.query_notice_callback.bind(this);
-        this.query_homework_callback = this.query_homework_callback.bind(this);
         this.newnotice_callback = this.newnotice_callback.bind(this);
-        this.append_homeworkItems_callback = this.append_homeworkItems_callback.bind(this);
         this.clickNewnotice = this.clickNewnotice.bind(this);
         this.clickInfoModifyCallback = this.clickInfoModifyCallback.bind(this);
+        this.clickHomeworkCallback = this.clickHomeworkCallback.bind(this);
+        this.query_data = this.query_data.bind(this);
     }
 
     componentDidMount() {
@@ -68,16 +70,13 @@ export class TALesson extends Component {
 
     query_data(course_id) {
         console.log(course_id);
+
+        this.setState({
+                        homeworkitems: [],
+                        infoitems: [],
+                        problemitems: {}
+                    });
         ajax_post(api_list['query_course'], {id:course_id}, this, TALesson.query_course_callback);
-        console.log("this.props ", this.props);
-
-        this.setState({homeworkitems: []});
-        this.setState({problemitems: []});
-        this.homeworkitems = [];
-        this.problemitems = [];
-
-        ajax_post(api_list['query_notice'], {course_id:course_id}, this, this.query_notice_callback);
-        ajax_post(api_list['query_course'], {id:course_id}, this, this.query_homework_callback);
     }
 
     static query_course_callback(that, result) {
@@ -88,6 +87,128 @@ export class TALesson extends Component {
         that.setState({
             course_name: result.data[0].name,
         });
+
+        for (let index in result.data[0].notices) {
+            ajax_post(api_list['query_notice'], {id: result.data[0].notices[index]}, that, TALesson.query_notice_callback);
+        }
+        for (let index in result.data[0].homeworks) {
+            ajax_post(api_list['query_homework'], {id: result.data[0].homeworks[index]}, that, TALesson.query_homework_callback);
+        }
+    }
+
+    static query_notice_callback(that, result) {
+        if (result.data.length === 0){
+            console.log("result.data.length === 0");
+            return;
+        }
+        let infolist = that.state.infoitems;
+        infolist.push({
+                        id: result.data[0].id,
+                        title: result.data[0].title,
+                        content: result.data[0].content,
+                        time: result.data[0].create_time
+                    });
+        infolist = infolist.sort((a,b)=>{
+            if (a.time !== undefined && b.time !== undefined)
+                return a.time-b.time;
+            return 0;
+        });
+        that.setState({infoitems: infolist});
+    }
+
+    static query_homework_callback(that, result) {
+        if (result.data.length === 0){
+            console.log("result.data.length === 0");
+            return;
+        }
+        let homeworklist = that.state.homeworkitems;
+        homeworklist.push({
+            id: result.data[0].id,
+            name: result.data[0].name,
+            description: result.data[0].description,
+            deadline: result.data[0].deadline,
+            problems: result.data[0].problems,
+            score_openness: result.data[0].score_openness,
+            submitable: result.data[0].submitable
+        });
+        homeworklist = homeworklist.sort((a,b)=>{
+            if (a.deadline !== undefined && b.deadline !== undefined)
+                return a.deadline-b.deadline;
+            return 0;
+        });
+        that.setState({homeworkitems: homeworklist});
+        for (let index in result.data[0].problems) {
+            ajax_post(api_list['query_problem'], {id: result.data[0].problems[index]}, that, TALesson.query_problem_callback);
+            ajax_post(api_list['query_judgestates'], {homework_id: result.data[0].id, problem_id: result.data[0].problems[index]}, that,
+                (that, res) => {
+                    let problemset = that.state.problemitems;
+                    const id_str = result.data[0].problems[index].toString();
+                    let problemitem;
+
+                    if (res.data.length === 1) {    // get data
+                        if (id_str in problemset) {
+                            problemitem = problemset[id_str];
+                        } else
+                        {
+                            problemitem = { id: result.data[0].problems[index] };
+                        }
+                        if (res.data[0].total === res.data[0].judged)
+                            problemitem['judger_status'] = 2;   // finished
+                        else
+                            problemitem['judger_status'] = 1;   // judging
+                    } else      // no data gotten
+                    {
+                        if (id_str in problemset) {
+                            problemitem = problemset[id_str];
+
+                        } else
+                        {
+                            problemitem = { id: result.data[0].problems[index] };
+                        }
+                        problemitem['judger_status'] = 0;   // NoStarted
+                    }
+
+                    problemset[id_str] = problemitem;
+                    that.setState({
+                        problemitems: problemset
+                    });
+                });
+        }
+    }
+
+    static query_problem_callback(that, result) {
+        if (result.data.length === 0){
+            console.log("result.data.length === 0");
+            return;
+        }
+        let problemset = that.state.problemitems;
+        const id_str = result.data[0].id.toString();
+        let problemitem;
+
+        if (id_str in problemset) {
+            problemitem = problemset[id_str];
+            for (let key in result.data[0]) {
+                problemitem[key] = result.data[0][key];
+            }
+        } else
+        {
+            problemitem = {
+                id: result.data[0].id,
+                title: result.data[0].title,
+                description: result.data[0].description,
+                time_limit: result.data[0].time_limit,
+                memory_limit: result.data[0].memory_limit,
+                judge_method: result.data[0].judge_method,
+                language: result.data[0].language,
+                openness: result.data[0].openness,
+                status: result.data[0].status,
+                user_id: result.data[0].user_id,
+                test_language: result.data[0].test_language
+            };
+        }
+
+        problemset[id_str] = problemitem;
+        that.setState({problemitems: problemset});
     }
 
     clickNewnotice(event){
@@ -103,69 +224,8 @@ export class TALesson extends Component {
             clickNewnotice: false,
         });
         const course_id = parseInt(this.props.lesson_id);
-        console.log("newnotice_callback course_id: ", course_id);
-        ajax_post(api_list['query_notice'], {course_id: course_id}, this, this.query_notice_callback);
-    }
-
-    query_notice_callback(that, result) {
-        if (result.data.length === 0) {
-            console.log("No notice got!");
-            // return;
-        }
-
-        let infoItems = [];
-        for (let index in result.data) {
-            let item = {
-                id: result.data[index].id,
-                title: result.data[index].title,
-                content: result.data[index].content
-            };
-            infoItems.push(item);
-        }
-
-        that.setState( {infoitems: infoItems} );
-    }
-
-    query_homework_callback(that, result) {
-        console.log('require course ');
-        if(result.data.length === 0) {
-            console.log('No course');
-            return;
-        }
-        const data = result.data[0];
-        console.log('course data: ', data);
-        let homeworkIdList = data.homeworks;
-        console.log('homeworklist: ', homeworkIdList);
-        for(let hid in homeworkIdList) {
-            console.log('request hid: ', hid);
-            ajax_post(api_list['query_homework'], {id: homeworkIdList[hid]}, that, that.append_homeworkItems_callback);
-        }
-    }
-
-    append_homeworkItems_callback(that, result) {
-        if(result.data.length === 0) {
-            console.log('No items');
-            return ;
-        }
-        let homeworklist = that.state.homeworkitems;
-        const data = result.data[0];
-        const code = parseInt(data.code);
-        console.log('append homework: ', data);
-
-        let idx = homeworklist.length;
-        homeworklist.push({
-            id: data.id,
-            name: data.name,
-            deadline: data.deadline,
-            problem_ids: data.problems,
-            problems: [],
-        });
-        that.setState({homeworkitems: homeworklist});
-        that.homeworkitems = homeworklist;
-        console.log('append homeworkitems: ', that.homeworkitems);
-        for(let pid of data.problems) {
-            ajax_post(api_list['query_problem'], {id: pid}, that, TALesson.append_problem_callback_wraper(idx));
-        }
+        // console.log("newnotice_callback course_id: ", course_id);
+        this.query_data(course_id);
     }
 
     clickInfoModifyCallback() {
@@ -177,52 +237,184 @@ export class TALesson extends Component {
         }
     }
 
-    static append_problem_callback_wraper(idx) {
-        return (function (that, result) {
-            if(result.data.code===1) {
-                return;
-            }
-            if(result.data.length===0)
-                return;
-            const title = result.data[0].title;
-            const id = result.data[0].id;
-            let homeworklist = that.state.homeworkitems;
-
-            homeworklist[idx].problems.push({id: id, title: title});
-            that.setState({homeworkitems: homeworklist});
-            that.homeworkitems = homeworklist;
-            console.log('append_prob: ', id, title, idx, that.homeworkitems);
+    clickHomeworkCallback() {
+        const course_id = parseInt(this.props.lesson_id);
+        this.query_data(course_id);
+        this.setState({
+            clickNewhomework: -2,
         });
     }
 
     render() {
+        console.log('problems ', this.state.problems);
         let breadcrumb;
         let content;
+        const all_homework = this.state.homeworkitems;
+        const before_ddl_homework = all_homework.filter(item => item.deadline >= moment().format('X'));
+        const after_ddl_homework = all_homework.filter(item => item.deadline < moment().format('X'));
         const course_id = parseInt(this.props.lesson_id);
+        if (this.state.clickNewhomework === -1) {
+            breadcrumb = (
+                <>
+                    <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>新建作业</Breadcrumb.Item>
+                </>
+            );
+            content = (
+                <div>
+                    <center><h3>新建作业</h3></center>
+                    <TACreateHomework course_id={course_id}
+                                      isEditing={false}
+                                      id={this.props.id}
+                                      refreshCallback={this.query_data}
+                                      clickCallback={this.clickHomeworkCallback}
+                    />
+                </div>
+            );
+        } else if (this.state.clickNewhomework !== -2) {
+            const homeworkInfo = this.state.homeworkitems.filter(item => item.id===this.state.clickNewhomework)[0];
+            if (homeworkInfo === undefined) {
+                breadcrumb = (
+                    <>
+                        <Breadcrumb.Item>作业</Breadcrumb.Item>
+                    </>
+                );
+                content = (
+                    <div></div>
+                )
+            } else {
+                breadcrumb = (
+                    <>
+                        <Breadcrumb.Item>作业</Breadcrumb.Item>
+                        <Breadcrumb.Item>编辑作业<i>{homeworkInfo.name}</i></Breadcrumb.Item>
+                    </>
+                );
+                const problems = Object.values(this.state.problemitems).filter(item => homeworkInfo.problems.indexOf(item.id) >= 0);
+                content = (
+                    <div>
+                        <center><h3>编辑作业<i>{homeworkInfo.name}</i></h3></center>
+                        <TACreateHomework course_id={course_id}
+                                          isEditing={true}
+                                          id={this.props.id}
+                                          homework_id={homeworkInfo.id}
+                                          name={homeworkInfo.name}
+                                          description={homeworkInfo.description}
+                                          deadline={homeworkInfo.deadline}
+                                          problems={problems}
+                                          refreshCallback={this.query_data}
+                                          clickCallback={this.clickHomeworkCallback}
+                        />
+                    </div>
+                );
+            }
+        } else
         if (this.state.current_selected === '1') {
             breadcrumb = (
                 <>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>未截至作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未截止作业</Breadcrumb.Item>
                 </>
             );
-            content = <h3>未截至作业</h3>;
+            if (before_ddl_homework.length === 0) {
+                content = (
+                    <div>
+                        <h3>没有未截止的作业QAQ</h3>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                    </div>
+                );
+            } else {
+                content = (
+                    <div>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                        <TAHomeworkPanel homeworkitems={before_ddl_homework}
+                                         problemitems={Object.values(this.state.problemitems)}
+                                         course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
+                                         clickEditCallback={(homework_id)=>{
+                                             this.setState({
+                                                 clickNewhomework: homework_id
+                                             });
+                                         }}
+                        />
+                    </div>
+                );
+            }
         } else if (this.state.current_selected === '2') {
             breadcrumb = (
                 <>
                     <Breadcrumb.Item>作业</Breadcrumb.Item>
-                    <Breadcrumb.Item>未批改作业</Breadcrumb.Item>
+                    <Breadcrumb.Item>已截止作业</Breadcrumb.Item>
                 </>
             );
-            content = <h3>未批改作业</h3>;
+            if (after_ddl_homework.length === 0) {
+                content = (
+                    <div>
+                        <h3>没有已截止作业QAQ</h3>
+                    </div>
+                );
+            } else {
+                content = (
+                    <div>
+                        <TAHomeworkPanel homeworkitems={after_ddl_homework}
+                                         problemitems={Object.values(this.state.problemitems)}
+                                         course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
+                                         clickEditCallback={(homework_id)=>{
+                                             this.setState({
+                                                 clickNewhomework: homework_id
+                                             });
+                                         }}
+                        />
+                    </div>
+                );
+            }
         } else if (this.state.current_selected === '3') {
             breadcrumb = (
                 <>
                     <Breadcrumb.Item>作业</Breadcrumb.Item>
-                    <Breadcrumb.Item>作业成绩</Breadcrumb.Item>
+                    <Breadcrumb.Item>全部作业</Breadcrumb.Item>
                 </>
             );
-            content = <h3>作业成绩</h3>;
+            if (all_homework.length === 0) {
+                content = (
+                    <div>
+                        <h3>没有作业QAQ</h3>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                    </div>
+                );
+            } else {
+                content = (
+                    <div>
+                        <Button htmlType='button' onClick={(event) => {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            this.setState({clickNewhomework: -1});
+                        }}>新建作业</Button>
+                        <TAHomeworkPanel homeworkitems={all_homework}
+                                         problemitems={Object.values(this.state.problemitems)}
+                                         course_id={parseInt(this.props.lesson_id)}
+                                         refreshCallback={this.query_data}
+                                         clickEditCallback={(homework_id)=>{
+                                             this.setState({
+                                                 clickNewhomework: homework_id
+                                             });
+                                         }}
+                        />
+                    </div>
+                );
+            }
         } else if (this.state.current_selected === '4') {
             breadcrumb = (
                     <Breadcrumb.Item>通知</Breadcrumb.Item>
@@ -254,6 +446,7 @@ export class TALesson extends Component {
                 <ModifyLesson {...this.props} clickModifyCallback={this.clickInfoModifyCallback}/>
             );
         }
+
         return (
             <>
             {/*<Container>*/}
@@ -275,9 +468,9 @@ export class TALesson extends Component {
                                 style={{ height: '100%' }}
                             >
                                 <SubMenu key="sub1" title={<span><Icon type="edit" />作业</span>}>
-                                    <Menu.Item key="1">未截至作业</Menu.Item>
-                                    <Menu.Item key="2">未批改作业</Menu.Item>
-                                    <Menu.Item key="3">作业成绩</Menu.Item>
+                                    <Menu.Item key="1">未截止作业</Menu.Item>
+                                    <Menu.Item key="2">已截止作业</Menu.Item>
+                                    <Menu.Item key="3">全部作业</Menu.Item>
                                 </SubMenu>
                                 <Menu.Item key="4"><Icon type="notification" />通知</Menu.Item>
                                 <Menu.Item key="5"><Icon type="info-circle" />课程信息</Menu.Item>

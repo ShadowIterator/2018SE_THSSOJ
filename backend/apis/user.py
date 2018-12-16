@@ -41,7 +41,7 @@ class APIUserHandler(base.BaseHandler):
         return {'code': 0}
 
     @tornado.web.authenticated
-    @check_password
+    # @check_password
     async def _update_post(self):
         print('si_update: ', self.args)
         await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
