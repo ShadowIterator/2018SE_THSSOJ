@@ -32,31 +32,35 @@ class APIRecordHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
-        for js in res:
-            timepoint = int(js['submit_time'].timestamp())
-            js['submit_time'] = timepoint
+        ret_list = []
+        for record in res:
+            timepoint = int(record['submit_time'].timestamp())
+            record['submit_time'] = timepoint
 
             # authority check
-            if cur_user['role'] == 1:
-                if not js['user_id']==cur_user['id']:
-                    res.remove(js)
-                elif (js['record_type'] == 2 or js['record_type'] == 4) and js['score_openness'] == 0:
-                    self.property_filter(js, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
-            elif cur_user['role'] == 2:
-                if js['record_type'] == 0 and js['user_id'] != cur_user['id']:
-                    res.remove(js)
-                elif js['record_type'] == 1 or js['record_type'] == 2 or js['record_type'] == 4:
-                    course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
-                    if not course['id'] in cur_user['ta_courses']:
-                        res.remove(js)
-                elif js['record_type'] == 3:
-                    problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
-                    if not problem['user_id'] == cur_user['id']:
-                        res.remove(js)
-            elif cur_user['role'] == 3:
+            if record['record_type'] == 0:
                 pass
-            else:
-                res.remove(js)
+            # if cur_user['role'] == 1:
+            #     if not js['user_id']==cur_user['id']:
+            #         res.remove(js)
+            #     elif (js['record_type'] == 2 or js['record_type'] == 4) and js['score_openness'] == 0:
+            #         self.property_filter(js, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
+            # elif cur_user['role'] == 2:
+            #     if js['record_type'] == 0 and js['user_id'] != cur_user['id']:
+            #         res.remove(js)
+            #     elif js['record_type'] == 1 or js['record_type'] == 2 or js['record_type'] == 4:
+            #         course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
+            #         if not course['id'] in cur_user['ta_courses']:
+            #             res.remove(js)
+            #     elif js['record_type'] == 3:
+            #         problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
+            #         if not problem['user_id'] == cur_user['id']:
+            #             res.remove(js)
+            # elif cur_user['role'] == 3:
+            #     pass
+            # else:
+            #     res.remove(js)
+
             # ---------------------------------------------------------------------
 
         return res
