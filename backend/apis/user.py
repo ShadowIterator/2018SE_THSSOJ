@@ -151,6 +151,12 @@ class APIUserHandler(base.BaseHandler):
     async def _validate_post(self):
         id = self.args['id']
         res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot validate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             user_qualified = (await self.getObject('users', id=id))[0]
             email = user_qualified['email']
@@ -180,6 +186,12 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     async def _activate_post(self):
         res_dict = {}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot activate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             id = self.args['id']
             validate_code = self.args['validate_code']

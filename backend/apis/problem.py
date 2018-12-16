@@ -270,6 +270,7 @@ class APIProblemHandler(base.BaseHandler):
             del self.args['description']
 
         res = await self.db.getObject('problems', cur_user=self.get_current_user_object(), **self.args)
+        cur_user = await self.get_current_user_object()
         for problem in res:
             problem_id = problem['id']
             target_path = self.root_dir + '/' + str(problem_id) + '/' + str(problem_id) + '.md'
@@ -281,9 +282,24 @@ class APIProblemHandler(base.BaseHandler):
             # des_str = self.bytes_to_str(encoded_content)
             des_str = encoded_content.decode(encoding='utf-8')
             problem['description'] = des_str
-            print('query_problem_loop', problem)
-            print('path', target_path)
-            print('description', description)
+            # print('query_problem_loop', problem)
+            # print('path', target_path)
+            # print('description', description)
+
+            # authority check
+            if problem['openness'] == 0:
+                if problem['user_id'] == cur_user['id']:
+                    pass
+                elif 'homework_id' not in self.args and 'course_id' not in self.args:
+                    res.remove(problem)
+                else:
+                    homework = (await self.db.getObject('homework_id', id=self.args['homework_id']))[0]
+                    course = (await self.db.getObject('course_id', id=self.args['course_id']))[0]
+                    if problem['id'] in homework['problems'] and homework['id'] in course['homeworks']:
+                        pass
+                    else:
+                        res.remove(problem)
+            # ---------------------------------------------------------------------
         return res
 
         # try:
