@@ -428,3 +428,12 @@ class APIProblemHandler(base.BaseHandler):
         for each_problem in all_problems:
             if key_word in each_problem:
                 search_res.append(each_problem['id'])
+
+    async def _judgeHTML_post(self):
+        cur_user = await self.get_current_user_object()
+        course = (await self.db.getObject('users', id=self.args['user_course_id']))[0]
+        try:
+            course['tas'].index(self.args['record_id'])
+        except:
+            return {'code': 1, "msg": 'You have no permission!'}
+        return await self.db.saveObject('records', id=self.args['record_id'], score=self.args['score'])
