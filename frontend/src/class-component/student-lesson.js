@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-
 import {Icon as Blueicon} from '@blueprintjs/core';
 
 import {api_list} from "../ajax-utils/api-manager";
@@ -10,6 +9,7 @@ import {withRouter, Link} from "react-router-dom";
 
 import { Layout, Breadcrumb, Menu, List, Row, Col, Icon } from 'antd';
 import moment from 'moment'
+import {Info} from "./lesson-component";
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
@@ -89,6 +89,8 @@ class mStudentHomeworkCard extends Component {
                     bordered
                     dataSource={this.props.questions}
                     renderItem={item => {
+                        if(item === undefined)
+                            return (<> </>);
                         // console.log("check homework item", item);
                         /*
                         将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
@@ -143,7 +145,7 @@ class mStudentHomeworkCard extends Component {
                             else if((!submitted) && (!!delayed) && (!submitable)) //未提交无法补交
                             {
                                 item.status = 3;
-                                problem_info = '未提交无法补交'
+                                problem_info = '未提交无法补交';
                                 icon_name = 'heart-broken';
                                 icon_intent = 'None';
                             }
@@ -263,30 +265,12 @@ class mStudentLessonMiddle extends Component {
     }
 
     check_homework = (hw, selected) => {
-        // 未截止日期作业
-        //     {/*<Menu.Item key="1">已提交作业</Menu.Item>*/}
-        //     {/*<Menu.Item key="2">未提交作业</Menu.Item>*/}
-        // {/*</SubMenu>*/}
-        // {/*<SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />已到截止日期作业</span>}>*/}
-        // {/*<Menu.Item key="7">未提交且无法补交</Menu.Item>*/}
-        //     {/*<Menu.Item key="8">未提交但是可以补交</Menu.Item>*/}
-        //     {/*<Menu.Item key="9">已提交但未批改</Menu.Item>*/}
-        //     {/*<Menu.Item key="10">已提交且已批改</Menu.Item>*/}
-        //     if(that.state.current_selected === 1) {
-        //         ajax_post(api_list['query_record'], {
-        //             user_id: ,
-        //
-        //         })
-        //     }
-        //   const  now = moment();
+
         const now = moment().unix();
-        // console.log('checkhw: ',hw, selected, now, !!hw['submited'], (now < hw['deadline']), (!!hw['submited']) && (now < hw['deadline']));
 
         switch (selected) {
           case '1':
-              // console.log('checkhw case1: ', (!!hw['submited']) && (now < hw['deadline']));
               return (now < hw['deadline']);
-              // break;
           case '2':
               return (now >= hw['deadline']);
               // break;
@@ -305,151 +289,83 @@ class mStudentLessonMiddle extends Component {
             that.setState({lesson_name:result.data[0].name});
             const notice_ids = result.data[0].notices;
             const homework_ids = result.data[0].homeworks;
-            let homework_items = [];
-            for(let homework_id of homework_ids) {
-                ajax_post(api_list['query_homework'], {id:homework_id}, that, (that, result) => {
-                    console.log('query_homework: ', homework_id);
-                    let hw = result.data[0];
-                    if(!this.check_homework(hw, that.state.current_selected)) {
-                        console.log('query_homework: returned');
-                        return ;
-                    }
-                    console.log('query_homework: succeed');
+            if(that.state.current_selected === '5')
+            {
+                let info_list = [];
+                for(let notice_id of notice_ids) {
+                    ajax_post(api_list['query_notice'], {id:notice_id}, that, (that, result) => {
+                        console.log('query_notice: ', notice_id);
+                        if(result.data.length===0)
+                            return;
+                        const title = result.data[0].title;
+                        const content = result.data[0].content;
+                        const id = result.data[0].id;
+                        info_list.push({id:id, title:title, content:content});
+                        that.setState({infoitems: info_list});
+                    });
+                }
+            }
+            else if(that.state.current_selected === '6')
+            {
 
-                    hw['problem_list'] = [];
-                    hw['type_key'] = that.state.current_selected;
-                    // homework_items[homework_id.toString()] = hw;
-                    homework_items.push(hw);
-                    const problem_ids = hw['problems'];
-                    for(let problem_id of problem_ids) {
-                        ajax_post(api_list['query_problem'], {id: problem_id}, that, (that, result) => {
-                            let prob = result.data[0];
-                            console.log('query_problem: ', problem_id, result.data);
-                            hw['problem_list'].push(prob);
-                            console.log('query_problem: ', homework_items);
-                            console.log('query_problems_after_setstate: ', that.state.homeworkitems);
-                            ajax_post(api_list['query_record'],
-                                {
-                                        user_id: this.props.id,
-                                        homework_id: homework_id,
-                                        problem_id: problem_id,
-                                        record_type: 2,
-                                    },
-                                that,
-                                (that, result) => {
-                                    if(result.data.length > 0) {
-                                        const data = result.data[0];
-                                        prob['result_type'] = data['result_type'];
-                                        prob['result'] = data['result'];
-                                        prob['score'] = data['score'];
-                                    }
-                                    else prob['result_type'] = -1;
-                                    that.setState({homeworkitems: homework_items});
+            }
+            else
+            {
+                let homework_items = [];
+                for(let homework_id of homework_ids) {
+                    ajax_post(api_list['query_homework'], {id:homework_id}, that, (that, result) => {
+                        console.log('query_homework: ', homework_id);
+                        let hw = result.data[0];
+                        if(!this.check_homework(hw, that.state.current_selected)) {
+                            console.log('query_homework: returned');
+                            return ;
+                        }
+                        console.log('query_homework: succeed');
+
+                        hw['problem_list'] = [];
+                        hw['type_key'] = that.state.current_selected;
+                        // homework_items[homework_id.toString()] = hw;
+                        homework_items.push(hw);
+                        const problem_ids = hw['problems'];
+                        for(let problem_id of problem_ids) {
+                            ajax_post(api_list['query_problem'], {id: problem_id}, that, (that, result) => {
+                                let prob = result.data[0];
+                                console.log('query_problem: ', problem_id, result.data);
+                                hw['problem_list'].push(prob);
+                                console.log('query_problem: ', homework_items);
+                                console.log('query_problems_after_setstate: ', that.state.homeworkitems);
+                                ajax_post(api_list['query_record'],
+                                    {
+                                            user_id: this.props.id,
+                                            homework_id: homework_id,
+                                            problem_id: problem_id,
+                                            record_type: 2,
+                                        },
+                                    that,
+                                    (that, result) => {
+                                        if(result.data.length > 0) {
+                                            const data = result.data[0];
+                                            prob['result_type'] = data['result_type'];
+                                            prob['result'] = data['result'];
+                                            prob['score'] = data['score'];
+                                        }
+                                        else prob['result_type'] = -1;
+                                        that.setState({homeworkitems: homework_items});
+                                });
                             });
-                            /*
-                            将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
-                            未到截止日期：使用timestamp区分是否到达截止日期
-                                未提交 issue 红 通过是否能够查询到record_type===2的记录来判断 "未提交"
-                                已提交 saved 绿 "已提交"
-                            已过截止日期：
-                                未提交且无法补交 heart-broken 白 通过是否查询到记录来判断是否已经提交 并且通过作业中的状态submitable来判断是否可以补交 "无法补交"
-                                未提交但是可以补交 issue 红 "未提交"
-                                已提交但未批改 saved 绿 首先得要是提交过的，然后查询作业中的score_openness来判断是否已经公开成绩 "已提交"
-                                已提交且已批改 confirm 绿 如果已经公开成绩，则查询记录中的对应项 "{给分数就好了}"
-                             */
-
-                        });
-                    }
-                });
+                        }
+                    });
+                }
             }
 
         });
     };
-    static query_course_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        that.setState({lesson_name:result.data[0].name});
-        const notice_ids = result.data[0].notices;
-        const homework_ids = result.data[0].homeworks;
-        for(let notice_id of notice_ids) {
-            ajax_post(api_list['query_notice'], {id:notice_id}, that, StudentLessonMiddle.query_notice_callback);
-        }
-        for(let homework_id of homework_ids) {
-            ajax_post(api_list['query_homework'], {id:homework_id}, that, StudentLessonMiddle.query_homework_callback);
-        }
-    }
-    static query_homework_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        const hw = result.data[0];
-        const id = hw.id;
-        const name = hw.name;
-        const deadline = hw.deadline;
-        const problem_ids = hw.problems;
-        that.homeworkitems.push({
-            id:id,
-            name:name,
-            deadline:deadline,
-            problem_ids:problem_ids,
-        });
-        that.homeworkstatus[id.toString()] = {};
-        that.setState({homeworkitems:that.homeworkitems});
-        for(let prob_id of problem_ids) {
-            ajax_post(api_list['query_record'], {
-                user_id: that.props.id,
-                problem_id: prob_id,
-                homework_id: id,
-                record_type: 2,
-            }, that, (that, result)=>{
-                if(result.data.length === 0) {
-                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
-                        flag: 0,
-                        record: null,
-                    };
-                } else if(result.data[0].status === 0) {
-                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
-                        flag: 1,
-                        record: result.data[0],
-                    };
-                } else {
-                    that.homeworkstatus[id.toString()][prob_id.toString()] = {
-                        flag: 1,
-                        record: result.data[0],
-                    };
-                }
-                that.setState({homeworkstatus: that.homeworkstatus});
-            });
-        }
-        for(let prob_id of problem_ids) {
-            ajax_post(api_list['query_problem'], {id:prob_id}, that, StudentLessonMiddle.query_problem_callback);
-        }
-    }
-    static query_notice_callback(that, result) {
-        if(result.data.length===0)
-            return;
-        const title = result.data[0].title;
-        const content = result.data[0].content;
-        const id = result.data[0].id;
-        that.infoitems.push({id:id, title:title, content:content});
-        that.setState({infoitems:that.infoitems});
-    }
-    static query_problem_callback(that, result) {
-        if(result.data.code===1) {
-            return;
-        }
-        if(result.data.length===0)
-            return;
-        const title = result.data[0].title;
-        const id = result.data[0].id;
-        that.problemitems.push({id:id, title:title});
-        console.log("query_problem_callback", that.problemitems);
-        that.setState({problemitems:that.problemitems});
-    }
+
     render() {
         // console.log("problem items", this.problemitems);
         // console.log("homework items", this.homeworkitems);
         // console.log("homework status", this.homeworkstatus);
-        console.log('render-homework: ', this.state.homeworkitems);
+        console.log('render-homework: ', this.state.homeworkitems, this.state.infoitems);
         // this.infoitems.sort(function(a, b) {
         //     const ida = a.id;
         //     const idb = b.id;
@@ -597,12 +513,73 @@ class mStudentLessonMiddle extends Component {
         //     breadcrumb = (<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
         //     panel = (<div>TODO: 课程信息</div>)
         // }
-        breadcrumb=(<Breadcrumb.Item>通知</Breadcrumb.Item>);
-        if(this.state.homeworkitems.length !== 0) {
-            panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
-                                      course_id={this.props.course_id}/>);
-        } else {
-            panel = (<h3>您当前没有作业</h3>)
+        // breadcrumb=(<Breadcrumb.Item>通知</Breadcrumb.Item>);
+        // if(this.state.homeworkitems.length !== 0) {
+        //     panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
+        //                               course_id={this.props.course_id}/>);
+        // } else {
+        //     panel = (<h3>您当前没有通知</h3>)
+        // }
+        if(this.state.current_selected === '1')
+        {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未到截止日期作业</Breadcrumb.Item>
+            </>);
+            if(this.state.homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有作业</h3>)
+            }
+        }
+        else if(this.state.current_selected === '2')
+        {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已到截止日期作业</Breadcrumb.Item>
+            </>);
+            if(this.state.homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有作业</h3>)
+            }
+        }
+        else if(this.state.current_selected === '3')
+        {
+            breadcrumb=(<>
+                <Breadcrumb.Item>作业</Breadcrumb.Item>
+                <Breadcrumb.Item>全部作业</Breadcrumb.Item>
+            </>);
+            if(this.state.homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有作业</h3>)
+            }
+        }
+        else if(this.state.current_selected === '5')
+        {
+            if(this.state.infoitems.length > 0)
+            {
+                breadcrumb = (<Breadcrumb.Item>通知</Breadcrumb.Item>);
+                panel = (<Info infoitems={this.state.infoitems}/>);
+            }
+            else
+            {
+                panel = (<h3>您当前没有通知</h3>)
+            }
+        }
+        else
+        {
+            breadcrumb=(<Breadcrumb.Item>none</Breadcrumb.Item>);
+            if(this.state.homeworkitems.length !== 0) {
+                panel = (<StudentHomework homeworkitems={this.state.homeworkitems} problemitems={this.problemitems}
+                                          course_id={this.props.course_id}/>);
+            } else {
+                panel = (<h3>您当前没有作业</h3>)
+            }
         }
         return (
             <Content style={{ padding: '0 50px' }}>
