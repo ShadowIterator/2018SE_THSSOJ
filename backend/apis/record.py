@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.header import Header
 from . import base
 from .base import *
+from tornado.options import define, options
 
 # TODO: to return code in every request
 
@@ -103,6 +104,9 @@ class APIRecordHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _returnresult_post(self):
+        if secret in self.args and \
+            self.args['secret'] != options.judgerSecret:
+            return
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
         result_dict = {'Accept': 0,
                        'Wrong Answer': 1,

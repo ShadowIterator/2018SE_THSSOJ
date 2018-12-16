@@ -512,7 +512,6 @@ class APIProblemHandler(base.BaseHandler):
                 search_res.append(each_problem['id'])
         return search_res
 
-
     async def _judgeHTML_post(self):
         cur_user = await self.get_current_user_object()
         course = (await self.db.getObject('users', id=self.args['user_course_id']))[0]

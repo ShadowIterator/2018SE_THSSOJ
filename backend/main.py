@@ -28,6 +28,7 @@ define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
 define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
+define('judgerSecret', default='no_secret', help='secret', type=str)
 
 async def main():
     tornado.options.parse_command_line()
