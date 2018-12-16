@@ -50,7 +50,7 @@ class JudgeHTML extends Component {
         ajax_post(api_list['query_record'], {
             problem_id: this.problem_id,
             homework_id: this.homework_id,
-            // course_id: this.course_id,
+            course_id: this.course_id,
             record_type: 4,
         }, this, (that, result) => {
             if(result.data.length === 0) {
