@@ -131,7 +131,7 @@ class APIHomeworkHandler(base.BaseHandler):
         homework_to_judge['status'] = 1
         await self.db.saveObject('homeworks', object=homework_to_judge, cur_user=self.get_current_user_object())
         homework_id = self.args['id']
-        final_records = await self.db.getObject('records', cur_user=self.get_current_user_object(), id=homework_id)
+        final_records = await self.db.getObject('records', cur_user=self.get_current_user_object(), homework_id=homework_id)
         for each_record in final_records:
             problem_of_code = (await self.db.getObject('problems',
                                                        cur_user=self.get_current_user_object(),
