@@ -59,25 +59,31 @@ def handleTraditionalJudger():
 		print('id: ', record_id, stdoutdata.decode())
 		judger.wait()
 
-		with open("result.json", "r", encoding='utf-8') as f:
-			judgerResult = json.load(f)
-			jr = { 'res': judgerResult,
-					'id': record_id,
-					'secret': options.secret
-					}
-			# judgerResult['id'] = record_id
-			print(jr)
-			requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
-			# print(r)
-			continue
-		judgerResult = {'res': {'Result': 'Judgement Failed',
-						'time': 0,
-						'memory': 0,
-						'Info': "No comment",},
+		try:
+			with open("result.json", "r", encoding='utf-8') as f:
+				judgerResult = json.load(f)
+				jr = { 'res': judgerResult,
 						'id': record_id,
-						'secret': options.secret}
-		requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
-		print(judgerResult)
+						'secret': options.secret
+						}
+				try:
+					with open(jr['res']['Info'], "r", encoding='utf-8') as res:
+						jr['res']['Info'] = res.read(500)
+				except:
+					pass
+				judgerResult['id'] = record_id
+				print(jr)
+				requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
+				# print(r)
+		except:
+			judgerResult = {'res': {'Result': 'Judgement Failed',
+							'time': 0,
+							'memory': 0,
+							'Info': "No comment",},
+							'id': record_id,
+							'secret': options.secret}
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
+			print(judgerResult)
 		# self.write({'Result': 'Judgement Failed',
 		# 			'time': 0,
 		# 			'memory': 0,
@@ -134,33 +140,39 @@ def handleScriptJudger():
 		judger.wait()
 
 		os.remove(targetFile)
-		with open("result.json", "r", encoding='utf-8') as f:
-			# judgerResult = json.dumps(json.load(f))
-			judgerResult = json.load(f)
-			jr = {'res': judgerResult,
-				  'id': record_id,
-				  'secret': options.secret}
-			# judgerResult['id'] = record_id
-			print(jr)
-			requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
-			# self.write(judgerResult)
-			continue
-		judgerResult = {
-					'res':  {
-								'Score': 0,
-								'time': 0,
-								'memory': 0,
-								'Info': "No comment",
-							},
-					'id': record_id,
-					'secret': options.secret
-					}
-		print(judgerResult)
-		requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
-		# self.write({'Score': 0,
-		# 			'time': 0,
-		# 			'memory': 0,
-		# 			'Info': "No comment"})
+
+		try:
+			with open("result.json", "r", encoding='utf-8') as f:
+				# judgerResult = json.dumps(json.load(f))
+				judgerResult = json.load(f)
+				jr = {'res': judgerResult,
+					  'id': record_id,
+					  'secret': options.secret}
+				try:
+					with open(jr['res']['Info'], "r", encoding='utf-8') as res:
+						js['res']['Info'] = res.read(500)
+				except:
+					pass
+				# print(jr)
+				requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
+				# self.write(judgerResult)
+		except:
+			judgerResult = {
+						'res':  {
+									'Score': 0,
+									'time': 0,
+									'memory': 0,
+									'Info': "No comment",
+								},
+						'id': record_id,
+						'secret': options.secret
+						}
+			print(judgerResult)
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
+			# self.write({'Score': 0,
+			# 			'time': 0,
+			# 			'memory': 0,
+			# 			'Info': "No comment"})
 
 
 class traditionalJudger(tornado.web.RequestHandler):

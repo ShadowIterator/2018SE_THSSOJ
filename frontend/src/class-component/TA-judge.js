@@ -182,12 +182,14 @@ class TAJudge extends Component {
             for (const re_id in this.state.records) {
                 const re = this.state.records[re_id];
                 if (re.submit_time <= this.state.homework_ddl) {
+                    let stu = this.state.student_info[re.user_id.toString()];
+                    stu = stu === undefined ? {} : stu;
                     dataSourse.push({
                         record_id: re.id,
                         user_id: re.user_id,
-                        username: this.state.student_info[re.user_id.toString()].username,
-                        realname: this.state.student_info[re.user_id.toString()].realname,
-                        student_id: this.state.student_info[re.user_id.toString()].student_id,
+                        username: stu.username,
+                        realname: stu.realname,
+                        student_id: stu.student_id,
                         judge_state: re.status === 0 ? '未评测' :
                             (re.result_type === 0 ? result_arr[re.result] : re.score.toString() + '分'),
                         action: re.status === 0 ? 0 : 1,
@@ -196,11 +198,11 @@ class TAJudge extends Component {
             }
             if (this.state.current_key === '2') {
                 dataSourse = dataSourse.filter((item) => {
-                    if (item.judge_state === '未评测') return false;
+                    return item.judge_state !== '未评测';
                 });
             } else if (this.state.current_key === '3') {
                 dataSourse = dataSourse.filter((item) => {
-                    if (item.judge_state === '未评测') return true;
+                    return item.judge_state === '未评测';
                 });
             }
         } else if (this.state.current_key === '4' ||
@@ -210,12 +212,14 @@ class TAJudge extends Component {
             for (const re_id in this.state.records) {
                 const re = this.state.records[re_id];
                 if (re.submit_time > this.state.homework_ddl) {
+                    let stu = this.state.student_info[re.user_id.toString()];
+                    stu = stu === undefined ? {} : stu;
                     dataSourse.push({
                         record_id: re.id,
                         user_id: re.user_id,
-                        username: this.state.student_info[re.user_id.toString()].username,
-                        realname: this.state.student_info[re.user_id.toString()].realname,
-                        student_id: this.state.student_info[re.user_id.toString()].student_id,
+                        username: stu.username,
+                        realname: stu.realname,
+                        student_id: stu.student_id,
                         judge_state: re.status === 0 ? '未评测' :
                             (re.result_type === 0 ? result_arr[re.result] : re.score.toString() + '分'),
                         action: re.status === 0 ? 0 : 1,
@@ -225,18 +229,19 @@ class TAJudge extends Component {
             }
             if (this.state.current_key === '5') {
                 dataSourse = dataSourse.filter((item) => {
-                    if (item.judge_state === '未评测') return false;
+                    return item.judge_state !== '未评测';
                 });
             } else if (this.state.current_key === '6') {
                 dataSourse = dataSourse.filter((item) => {
-                    if (item.judge_state === '未评测') return true;
+                    return item.judge_state === '未评测';
                 });
             }
         } else if (this.state.current_key === '7') {
             column = columns['3'];
             for (const id of this.state.student_id) {
                 if (this.state.records[id.toString()] === undefined) {
-                    const stu = this.state.student_info[id.toString()];
+                    let stu = this.state.student_info[id.toString()];
+                    stu = stu === undefined ? {} : stu;
                     dataSourse.push({
                         user_id: id,
                         username: stu.username,
@@ -248,7 +253,8 @@ class TAJudge extends Component {
         } else if (this.state.current_key === '8') {
             column = columns['4'];
             for (const id of this.state.student_id) {
-                const stu = this.state.student_info[id.toString()];
+                let stu = this.state.student_info[id.toString()];
+                stu = stu === undefined ? {} : stu;
                 if(this.state.records[id.toString()] === undefined) {
                     dataSourse.push({
                         record_id: -1,
@@ -271,6 +277,7 @@ class TAJudge extends Component {
                         judge_state: re.status === 0 ? '未评测' :
                             (re.result_type === 0 ? result_arr[re.result] : re.score.toString() + '分'),
                         action: re.status === 0 ? 0 : 1,
+                        submit_time: re.submit_time,
                     })
                 }
             }

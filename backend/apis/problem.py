@@ -360,7 +360,9 @@ class APIProblemHandler(base.BaseHandler):
         self.args['status'] = 0
         # for html submit
         if self.args['record_type'] == 4:
-            old_record = await self.db.getObject('records', user_id=self.args['user_id'])
+            # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
+            old_record = await self.db.getObject('records', **self.args)
+            print('submit_html: ', old_record)
             if len(old_record) == 0:
                 html_record = await self.db.createObject('records', **self.args)
                 problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(),
@@ -444,10 +446,10 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
-            judge_req['INPRE'] = 'test'
-            judge_req['INSUF'] = 'in'
-            judge_req['OUTPRE'] = 'test'
-            judge_req['OUTSUF'] = 'out'
+            judge_req['INPRE'] = config_info['INPRE']
+            judge_req['INSUF'] = config_info['INSUF']
+            judge_req['OUTPRE'] = config_info['OUTPRE']
+            judge_req['OUTSUF'] = config_info['OUTSUF']
             if self.args['src_language'] == 1:
                 judge_req['Language'] = 'C'
             elif self.args['src_language'] == 2:
@@ -566,10 +568,10 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['TIME_LIMIT'] = problem['time_limit']
                 judge_req['MEMORY_LIMIT'] = problem['memory_limit']
                 judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['INPRE'] = 'test'
-                judge_req['INSUF'] = 'in'
-                judge_req['OUTPRE'] = 'test'
-                judge_req['OUTSUF'] = 'out'
+                judge_req['INPRE'] = config_info['INPRE']
+                judge_req['INSUF'] = config_info['INSUF']
+                judge_req['OUTPRE'] = config_info['OUTPRE']
+                judge_req['OUTSUF'] = config_info['OUTSUF']
                 if src_language == 1:
                     judge_req['Language'] = 'C'
                 elif src_language == 2:

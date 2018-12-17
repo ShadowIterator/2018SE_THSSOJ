@@ -65,8 +65,8 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 					judgerResult.result = "Wrong Answer";
 					oss.clear();
 					oss.str("");
-					oss << "TESTCASE #" << i << ": ";
-					judgerResult.info = oss.str()+cr.info;
+					oss << "Wrong Answer at TESTCASE #" << i << ": ";
+					judgerResult.info = oss.str();
 					break;
 				}
 
@@ -148,8 +148,9 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 					judgerResult.result = "Wrong Answer";
 					oss.clear();
 					oss.str("");
-					oss << "TESTCASE #" << i << ": ";
-					judgerResult.info = oss.str()+cr.info;
+					oss << "Wrong Answer at TESTCASE #" << i << ": ";
+//					judgerResult.info = oss.str()+cr.info;
+					judgerResult.info = oss.str();
 					break;
 				}
 			} else

@@ -178,8 +178,7 @@ class mTAHomeworkCard extends Component {
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span>
-                                    <Button htmlType={'button'}
+                                    <span>截止日期：{ddl_str}</span><Button htmlType={'button'}
                                             onClick={()=>{
                                                 this.props.clickEditCallback(this.props.homework_id);
                                             }}>
@@ -272,7 +271,10 @@ class mTAHomeworkCard extends Component {
                                 );
                             }
                             return (
-                                <List.Item key={item.id} actions={[<Button>查看详情</Button>, (judger_button)]}>
+                                <List.Item key={item.id} actions={[<Button　onClick={() => {
+                                    this.props.history.push("/tajudge/"+this.props.course_id.toString()+"/"+
+                                        this.props.homework_id+"/"+item.id.toString());
+                                }}>查看详情</Button>, (judger_button)]}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
                                     <List.Item.Meta title={item.title} />
                                     {/*{item.status.flag === 0 && <div>未完成</div>}*/}
@@ -499,9 +501,9 @@ class mHomeworkForm extends Component {
                                 placeholder="截止时间"
                                 size="large"
                                 style={{width: '100%', outline: 0}}
-                                disabledDate={(current)=>{
-                                    return current && current <= moment().startOf('day');
-                                }}
+                                // disabledDate={(current)=>{
+                                //     return current && current <= moment().startOf('day');
+                                // }}
                             />
                         )}
                     </FormItem>
