@@ -1546,6 +1546,7 @@ private:
         else
         {
             c = undoChars.back();
+//            c = undoChars[undoChars.length() - 1];
             undoChars.pop_back();
         }
 

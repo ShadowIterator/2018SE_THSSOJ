@@ -13,13 +13,19 @@ function ajax_post(url,data,that,callback){
     }).then(function(res){
         console.log('Post请求到:\t'+url);
         console.log(res);
+        if(res.data.code !== undefined && res.data.code !==0) {
+            message.error("code: 1");
+            message.error("error_url", url);
+            console.log("code = 1; error_args", data, url);
+            return;
+        }
         callback(that,res);
     }).catch(function(error){
         // alert('post失败');
         message.error("post方法失败");
-        console.log(error);
-        console.log(URL+url);
-        console.log(data);
+        console.log("Post error -> Error message", error);
+        console.log("Post error -> Request url", URL+url);
+        console.log("Post error -> Submit data", data);
     });
 }
 function ajax_get(url,data,that,callback){

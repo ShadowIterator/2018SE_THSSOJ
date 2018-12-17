@@ -1,3 +1,0 @@
-/usr/src/app/root/records/4/4.code:2:1: error: expected '=', ',', ';', 'asm' or '__attribute__' at end of input
- fadasd
- ^~~~~~

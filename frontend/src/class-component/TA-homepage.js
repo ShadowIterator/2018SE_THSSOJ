@@ -4,6 +4,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "../basic-component/auth-context";
 import {Link, withRouter} from "react-router-dom"
 import {Button} from "@blueprintjs/core";
+import moment from "moment"
 import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, message, Divider } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
@@ -60,6 +61,7 @@ class mTAHomepageMiddle extends Component {
             ajax_post(api_list['query_course'], {id:id}, that, mTAHomepageMiddle.query_ta_course_callback);
         }
     }
+
     static query_stu_course_callback(that, result) {
         if(result.data.length===0) {
             console.log("Cannot find course.");
@@ -71,7 +73,8 @@ class mTAHomepageMiddle extends Component {
         const description = course.description;
         const notice_ids = course.notices;
         const homeworks = course.homeworks;
-        that.stulesson.push({id:id, name:name, description:description, notices:notice_ids, homeworks: homeworks});
+        // that.stulesson.push({id:id, name:name, description:description, notices:notice_ids, homeworks: homeworks});
+        that.stulesson.push(course);
         for(let notice_id of notice_ids) {
             ajax_post(api_list['query_notice'], {id:notice_id}, that, mTAHomepageMiddle.query_notice_callback);
         }
@@ -82,7 +85,7 @@ class mTAHomepageMiddle extends Component {
             console.log("Cannot find course.");
             return;
         }
-        console.log(result.data);
+        // console.log(result.data);
         const course = result.data[0];
         const name = course.name;
         const id = course.id;
@@ -93,10 +96,12 @@ class mTAHomepageMiddle extends Component {
             ajax_post(api_list['query_notice'], {id:notice_id}, that, TAHomepageMiddle.query_notice_callback);
         }
         if(status) {
-            that.talesson.push({id:id, name:name, description:description});
+            that.talesson.push(course);
+            // that.talesson.push({id:id, name:name, description:description});
             that.setState({talesson:that.talesson});
         } else {
-            that.uplesson.push({id:id, name:name, description:description});
+            that.uplesson.push(course);
+            // that.uplesson.push({id:id, name:name, description:description});
             that.setState({uplesson:that.uplesson});
         }
     }
@@ -116,15 +121,19 @@ class mTAHomepageMiddle extends Component {
     render() {
         console.log("this.state.uplesson: ", this.state.uplesson);
         console.log("this.state.talesson: ", this.state.talesson);
+        const now = moment().format('X');
+        const running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
+        console.log("now", now);
+        console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/ta">Home</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>我管理的课程</h2>
                         <Row gutter={16}>
-                            {this.state.talesson.map((lesson)=>
+                            {running_talesson.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
                                           actions={[
@@ -146,7 +155,9 @@ class mTAHomepageMiddle extends Component {
                                               <Tooltip title="查看课程信息">
                                                   <Icon type="info-circle" theme="twoTone"
                                                         onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
-                                              </Tooltip>]}>
+                                              </Tooltip>]}
+                                          hoverable={true}
+                                    >
                                         <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                               description={lesson.description}/>
                                     </Card>
@@ -198,7 +209,6 @@ class mTAHomepageMiddle extends Component {
                                                             ajax_post(api_list['delete_course'], {id: lesson.id},
                                                                 this, (that, result) => {
                                                                     if(result.data.code!==0) {
-                                                                        // alert("Delete failed.");
                                                                         message.error("删除课程失败");
                                                                         return;
                                                                     }
