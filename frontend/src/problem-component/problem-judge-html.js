@@ -97,7 +97,7 @@ class JudgeHTML extends Component {
         const selected_record = this.state.records[selected_key];
         console.log("selected_key", selected_key);
         console.log("selected_record", selected_record);
-        const iframe_src = URL+'/'+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
+        const iframe_src = URL+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
         // const iframe_src = 'https://www.qq.com';
         const content = (
             <div style={{height: '100%'}}>
