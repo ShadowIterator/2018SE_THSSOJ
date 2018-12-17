@@ -562,6 +562,7 @@ class APIProblemHandler(base.BaseHandler):
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
                 src_language = each_record['src_language']
                 judge_req = {}
+                judge_req['id'] = each_record['id']
                 judge_req['TIME_LIMIT'] = problem['time_limit']
                 judge_req['MEMORY_LIMIT'] = problem['memory_limit']
                 judge_req['OUTPUT_LIMIT'] = 64
