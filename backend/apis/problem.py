@@ -556,7 +556,7 @@ class APIProblemHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         course = (await self.db.getObject('courses', id=self.args['user_course_id']))[0]
         assert((cur_user['id'] in course['tas']) or cur_user['role'] >= Roles.ADMIN )
-        selectedobj = (await self.db.getObject('records', id = self.args['record_id']))
+        selectedobj = (await self.db.getObject('records', id = self.args['record_id']))[0]
         selectedobj['score'] = self.args['score']
         selectedobj['status'] = cur_user['id']
         await self.db.saveObject('records', selectedobj)
