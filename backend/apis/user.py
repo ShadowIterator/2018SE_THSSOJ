@@ -8,6 +8,8 @@ from email.mime.text import MIMEText
 from email.header import Header
 from . import base
 from .base import *
+import random
+import string
 
 # TODO: to return code in every request
 
@@ -104,11 +106,13 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
+        ran_str = ''.join(random.sample(string.ascii_letters + string.digits, 64))
         await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],
                                 email=self.args['email'],
-                                create_time=current_time)
+                                create_time=current_time,
+                                secret = ran_str)
         # print('created: ', result)
         # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
