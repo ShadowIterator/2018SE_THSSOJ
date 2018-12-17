@@ -122,8 +122,9 @@ class mTAHomepageMiddle extends Component {
         console.log("this.state.uplesson: ", this.state.uplesson);
         console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
-        // console.log("now", now);
         const running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
+        console.log("now", now);
+        console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
@@ -208,7 +209,6 @@ class mTAHomepageMiddle extends Component {
                                                             ajax_post(api_list['delete_course'], {id: lesson.id},
                                                                 this, (that, result) => {
                                                                     if(result.data.code!==0) {
-                                                                        // alert("Delete failed.");
                                                                         message.error("删除课程失败");
                                                                         return;
                                                                     }
