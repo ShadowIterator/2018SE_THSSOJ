@@ -122,10 +122,10 @@ class mStudentHomeworkCard extends Component {
                         }
                         else
                         {
-                            if(item.result_type === 1) {
+                            if(item.result_type === 0) {
                                 problem_res = result_arr[item.result];
                             }
-                            else if(item.result_type === 2) {
+                            else if(item.result_type === 1) {
                                 problem_res = item.score.toString();
                             }
                             if( (!submitted) && (!delayed)) // 未提交未到截止日期
@@ -328,8 +328,10 @@ class mStudentLessonMiddle extends Component {
                         homework_items.push(hw);
                         const problem_ids = hw['problems'];
                         for(let problem_id of problem_ids) {
-                            ajax_post(api_list['query_problem'], {id: problem_id}, that, (that, result) => {
+                            ajax_post(api_list['query_problem'], {id: problem_id, homework_id: homework_id, course_id: course_id}, that, (that, result) => {
+                                console.log('query-problem-callback: ',problem_id , result.data);
                                 let prob = result.data[0];
+                                prob['result_type'] = -1;
                                 console.log('query_problem: ', problem_id, result.data);
                                 hw['problem_list'].push(prob);
                                 console.log('query_problem: ', homework_items);
@@ -343,15 +345,48 @@ class mStudentLessonMiddle extends Component {
                                         },
                                     that,
                                     (that, result) => {
+                                        // console.log('student-record-query-data: ',result.data)
+                                        console.log('student-record-query-data: ', {
+                                            user_id: this.props.id,
+                                            homework_id: homework_id,
+                                            problem_id: problem_id,
+                                            record_type: 2,
+                                        }, result.data);
+
                                         if(result.data.length > 0) {
                                             const data = result.data[0];
                                             prob['result_type'] = data['result_type'];
                                             prob['result'] = data['result'];
                                             prob['score'] = data['score'];
                                         }
-                                        else prob['result_type'] = -1;
+                                        // else prob['result_type'] = -1;
                                         that.setState({homeworkitems: homework_items});
                                 });
+
+                                ajax_post(api_list['query_record'],
+                                    {
+                                        user_id: this.props.id,
+                                        homework_id: homework_id,
+                                        problem_id: problem_id,
+                                        record_type: 4,
+                                    },
+                                    that,
+                                    (that, result) => {
+                                        console.log('student-record-query-data: ', {
+                                            user_id: this.props.id,
+                                            homework_id: homework_id,
+                                            problem_id: problem_id,
+                                            record_type: 4,
+                                        }, result.data);
+                                        if(result.data.length > 0) {
+                                            const data = result.data[0];
+                                            prob['result_type'] = data['result_type'];
+                                            prob['result'] = data['result'];
+                                            prob['score'] = data['score'];
+                                        }
+                                        // else prob['result_type'] = -1;
+                                        that.setState({homeworkitems: homework_items});
+                                    });
                             });
                         }
                     });

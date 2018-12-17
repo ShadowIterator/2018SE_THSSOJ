@@ -8,6 +8,8 @@ from email.mime.text import MIMEText
 from email.header import Header
 from . import base
 from .base import *
+import random
+import string
 
 # TODO: to return code in every request
 
@@ -26,6 +28,7 @@ class APIUserHandler(base.BaseHandler):
         res = await self.db.getObject('users', **self.args)
         print('query res = ', res)
         cur_user = await self.get_current_user_object()
+        ret_list = []
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
@@ -37,19 +40,21 @@ class APIUserHandler(base.BaseHandler):
                     self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
                 else:
-                    res.remove(user)
+                    pass
             elif cur_user['role'] == 2:
                 if user['role'] < 3:
                     self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
                 else:
-                    res.remove(user)
+                    pass
             elif cur_user['role'] == 3:
-                pass
+                ret_list.append(user)
             else:
-                res.remove(res)
+                pass
             # ---------------------------------------------------------------------
 
         # self.write(json.dumps(res).encode())
@@ -81,6 +86,9 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
+        for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
+            if key in self.args:
+                del self.args[key]
         await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
@@ -101,11 +109,13 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
+        ran_str = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],
                                 email=self.args['email'],
-                                create_time=current_time)
+                                create_time=current_time,
+                                secret = ran_str)
         # print('created: ', result)
         # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())

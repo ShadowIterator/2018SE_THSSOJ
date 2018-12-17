@@ -9,6 +9,7 @@ from email.mime.text import MIMEText
 from email.header import Header
 from . import base
 from .base import *
+from tornado.options import define, options
 
 # TODO: to return code in every request
 
@@ -31,34 +32,59 @@ class APIRecordHandler(base.BaseHandler):
         print('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
-        for js in res:
-            timepoint = int(js['submit_time'].timestamp())
-            js['submit_time'] = timepoint
+
+        ret_list = []
+        for record in res:
+            timepoint = int(record['submit_time'].timestamp())
+            record['submit_time'] = timepoint
 
             # authority check
-            if cur_user['role'] == 1:
-                if not js['user_id']==cur_user['id']:
-                    res.remove(js)
-                elif (js['record_type'] == 2 or js['record_type'] == 4) and js['score_openness'] == 0:
-                    self.property_filter(js, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
-            elif cur_user['role'] == 2:
-                if js['record_type'] == 0 and js['user_id'] != cur_user['id']:
-                    res.remove(js)
-                elif js['record_type'] == 1 or js['record_type'] == 2 or js['record_type'] == 4:
-                    course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
-                    if not course['id'] in cur_user['ta_courses']:
-                        res.remove(js)
-                elif js['record_type'] == 3:
-                    problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
-                    if not problem['user_id'] == cur_user['id']:
-                        res.remove(js)
-            elif cur_user['role'] == 3:
-                pass
-            else:
-                res.remove(js)
+            if record['record_type'] == 0:
+                if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:
+                    pass
+                else:
+                    ret_list.append(record)
+            elif record['record_type'] == 1:
+                if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:
+                    pass
+                else:
+                    ret_list.append(record)
+            elif record['record_type'] == 2:
+                homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+                course = (await self.db.getObject('courses', id=homework['course_id']))[0]
+                if cur_user['role'] < 2:
+                    if cur_user['id'] != record['user_id']:
+                        continue
+                    if homework['score_openness'] == 0:
+                        self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
+                    ret_list.append(record)
+                elif cur_user['role'] == 2:
+                    if cur_user['id'] in course['tas']:
+                        ret_list.append(record)
+                elif cur_user['role'] == 3:
+                    ret_list.append(record)
+            elif record['record_type'] == 3:
+                if cur_user['role'] == 2 and cur_user['id'] == record['user_id']:
+                    ret_list.append(record)
+                elif cur_user['role'] == 3:
+                    ret_list.append(record)
+            elif record['record_type'] == 4:
+                homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+                course = (await self.db.getObject('courses', id=homework['course_id']))[0]
+                if cur_user['role'] < 2:
+                    if cur_user['id'] != record['user_id']:
+                        continue
+                    if homework['score_openness'] == 0:
+                        self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
+                    ret_list.append(record)
+                elif cur_user['role'] == 2:
+                    if cur_user['id'] in course['tas']:
+                        ret_list.append(record)
+                elif cur_user['role'] == 3:
+                    ret_list.append(record)
             # ---------------------------------------------------------------------
 
-        return res
+        return ret_list
 
     # @tornado.web.authenticated
     async def _srcCode_post(self):
@@ -103,6 +129,10 @@ class APIRecordHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _returnresult_post(self):
+        # if 'secret' in self.args.keys() and \
+        #     self.args['secret'] != options.judgerSecret:
+        #     return {'code': }
+        assert(options.judgerSecret == self.args['secret'])
         match_record = (await self.db.getObject('records', cur_user=self.get_current_user_object(), id=int(self.args['id'])))[0]
         result_dict = {'Accept': 0,
                        'Wrong Answer': 1,

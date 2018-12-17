@@ -178,8 +178,7 @@ class mTAHomeworkCard extends Component {
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span>
-                                    <Button htmlType={'button'}
+                                    <span>截止日期：{ddl_str}</span><Button htmlType={'button'}
                                             onClick={()=>{
                                                 this.props.clickEditCallback(this.props.homework_id);
                                             }}>
@@ -229,7 +228,8 @@ class mTAHomeworkCard extends Component {
                                     <Button onClick={()=>{
                                         let data = {
                                             homework_id: this.props.homework_id,
-                                            problem_id: item.id
+                                            problem_id: item.id,
+                                            course_id: this.props.course_id,
                                         };
                                         // console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
@@ -253,7 +253,8 @@ class mTAHomeworkCard extends Component {
                                     <Button onClick={()=>{
                                         let data = {
                                             homework_id: this.props.homework_id,
-                                            problem_id: item.id
+                                            problem_id: item.id,
+                                            course_id: this.props.course_id
                                         };
                                         // console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
@@ -270,7 +271,10 @@ class mTAHomeworkCard extends Component {
                                 );
                             }
                             return (
-                                <List.Item key={item.id} actions={[<Button>查看详情</Button>, (judger_button)]}>
+                                <List.Item key={item.id} actions={[<Button　onClick={() => {
+                                    this.props.history.push("/tajudge/"+this.props.course_id.toString()+"/"+
+                                        this.props.homework_id+"/"+item.id.toString());
+                                }}>查看详情</Button>, (judger_button)]}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
                                     <List.Item.Meta title={item.title} />
                                     {/*{item.status.flag === 0 && <div>未完成</div>}*/}
@@ -448,6 +452,8 @@ class mHomeworkForm extends Component {
                 }},
         ];
 
+        // console.log("current day", moment().endOf('day'));
+
         return (
             <div>
                 <Form onSubmit={this.handleSubmit}>
@@ -495,6 +501,9 @@ class mHomeworkForm extends Component {
                                 placeholder="截止时间"
                                 size="large"
                                 style={{width: '100%', outline: 0}}
+                                // disabledDate={(current)=>{
+                                //     return current && current <= moment().startOf('day');
+                                // }}
                             />
                         )}
                     </FormItem>
@@ -631,6 +640,10 @@ class TACreateHomework extends Component {
     };
 
     render() {
+        let problems = []
+        if (this.props.isEditing) {
+            problems = this.props.problems;
+        }
         return (
             <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
                 <CreateHomeworkForm isEditing={this.props.isEditing}
@@ -638,7 +651,7 @@ class TACreateHomework extends Component {
                                     course_id={this.props.course_id}
                                     onChange={this.handleFormChange}
                                     clickCallback={this.props.clickCallback}
-                                    problems={this.props.problems}
+                                    problems={problems}
                                     {...this.state.fields}
                 />
             </div>

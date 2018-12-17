@@ -86,7 +86,8 @@ CompileResult runCompiler(
 					(res.jr == Accept) && (res.ec == NoError));
 	if (!ret.success){
 		if (res.ec != NoError){
-			ret.getInfo(compileConfig.errorFileName.c_str());
+//			ret.getInfo(compileConfig.errorFileName.c_str());
+            ret.info = compileConfig.errorFileName;
 		} else
 		if (res.jr == JudgementFailed){
 			ret.info = "No Comment!";
@@ -164,7 +165,8 @@ CheckerResult runChecker(
 					(res.jr == Accept) && (res.ec == NoError));
 	if (!ret.success){
 		if (res.ec != NoError){
-			ret.getInfo(rptfile);
+//			ret.getInfo(rptfile);
+			ret.info = rptfile;
 		} else
 		if (res.jr == JudgementFailed){
 			ret.info = "No Comment!";

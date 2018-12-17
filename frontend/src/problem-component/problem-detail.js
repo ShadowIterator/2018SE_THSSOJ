@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-import {api_list} from "../ajax-utils/api-manager";
+import {api_list, URL} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
 import ReactMarkdown from '../../node_modules/react-markdown';
@@ -37,6 +37,7 @@ class ProblemDetailBody extends Component {
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
+                        <div>
                         {this.props.probleminfo.judge_method !== 2 &&
                             <CodeInput state={this.props.state} role={this.props.role}
                                        id={this.props.id} problem_id={this.props.probleminfo.id}
@@ -44,7 +45,7 @@ class ProblemDetailBody extends Component {
                                        homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
                         }
                         {this.props.probleminfo.judge_method === 2 &&
-                        <Upload.Dragger name="file" multiple={false} action={api_list['upload_html']}
+                        <Upload.Dragger name="file" multiple={false} action={URL+api_list['upload_html']}
                                         onChange={(info) => {
                                             let fileList = info.fileList;
                                             console.log("upload_script", fileList);
@@ -90,6 +91,7 @@ class ProblemDetailBody extends Component {
                             });
                         }}>上传</Button>
                         }
+                        </div>
                     </TabPane>
                     <TabPane tab="查看结果" key="3">
                         <ProblemDetailRecord records={this.props.records} submit_record={this.props.submit_record}
@@ -137,6 +139,7 @@ class ProblemDetailRecord extends Component {
         let body = [];
         if(this.props.submit_record !== null || this.props.html_record !== null) {
             const sub = this.props.submit_record===null ? this.props.html_record : this.props.submit_record;
+            console.log('submit_record', this.props);
             let result = '';
             if(sub.status === 0) {
                 result = '等待评测';
@@ -286,7 +289,11 @@ class ProblemDetail extends Component {
     componentDidMount() {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
-        ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        ajax_post(api_list['query_problem'], {
+            id:id,
+            homework_id: parseInt(this.props.homework_id),
+            course_id: parseInt(this.props.lesson_id),
+        }, this, ProblemDetail.query_problem_callback);
         this.update_record(this.props.id);
         if(this.props.lesson_id==='0')
             return;
@@ -324,7 +331,7 @@ class ProblemDetail extends Component {
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 1,
             }, this, (that, result) => {
-                if(result.data.length === 0) {
+                if(result.data.code === 1 || result.data.length === 0) {
                     return;
                 }
                 that.setState({records: result.data});
@@ -335,7 +342,7 @@ class ProblemDetail extends Component {
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 2,
             }, this, (that, result) => {
-                if(result.data.length === 0) {
+                if(result.data.code === 1 || result.data.length === 0) {
                     return;
                 }
                 that.setState({submit_record: result.data[0]});
@@ -346,7 +353,7 @@ class ProblemDetail extends Component {
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 4,
             }, this, (that, result) => {
-                if(result.data.length === 0) {
+                if(result.data.code === 1 || result.data.length === 0) {
                     return;
                 }
                 that.setState({html_record: result.data[0]});

@@ -5,6 +5,9 @@ import uuid
 from . import base
 from .base import *
 
+def sub_list(lista, listb):
+    return list(set(lista) - set(listb))
+
 class APICourseHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
@@ -102,11 +105,36 @@ class APICourseHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
         target_course = (await self.db.getObject('courses', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
+        tar_course_id = target_course['id']
+        if('students' in self.args.keys()):
+            src_stu_list = target_course['students']
+            tar_stu_list = self.args['students']
+            for add_stu_id in list(set(tar_stu_list) - set(src_stu_list)):
+                obj = (await self.db.getObject('users', id = add_stu_id))[0]
+                obj.student_courses.append(tar_course_id)
+                await self.db.saveObject('users', obj)
+            for sub_stu_id in list(set(src_stu_list) - set(tar_stu_list)):
+                obj = (await self.db.getObject('users', id = sub_stu_id))[0]
+                obj.student_courses = sub_list(obj.student_courses, [tar_course_id])
+                await self.db.saveObject('users', obj)
+        if('tas' in self.args.keys()):
+            src_ta_list = target_course['tas']
+            tar_ta_list = self.args['tas']
+            for add_ta_id in list(set(tar_ta_list) - set(src_ta_list)):
+                obj = (await self.db.getObject('users', id = add_ta_id))[0]
+                obj.ta_courses.append(tar_course_id)
+                await self.db.saveObject('users', obj)
+            for sub_ta_id in list(set(src_ta_list) - set(tar_ta_list)):
+                obj = (await self.db.getObject('users', id = sub_ta_id))[0]
+                obj.ta_courses = sub_list(obj.ta_courses, [tar_course_id])
+                await self.db.saveObject('users', obj)
+
         for key in self.args.keys():
             if key == 'id':
                 continue
             target_course[key] = self.args[key]
         await self.db.saveObject('courses', cur_user = self.get_current_user_object(), object=target_course)
+        # for student_id in target_course['']
         self.set_res_dict(res_dict, code=0, msg='course updated')
         return res_dict
 
@@ -133,6 +161,7 @@ class APICourseHandler(base.BaseHandler):
         # print('query = ', self.args)
         res = await self.db.getObject('courses', cur_user = self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
+        ret_list=[]
         for course in res:
             if 'start_time' in course.keys() and course['start_time'] is not None:
                 course['start_time'] = int(time.mktime(course['start_time'].timetuple()))
@@ -140,14 +169,18 @@ class APICourseHandler(base.BaseHandler):
                 course['end_time'] = int(time.mktime(course['end_time'].timetuple()))
             # authority check
             if cur_user['role'] < 1:
-                res.remove[course]
+                pass
             elif cur_user['role'] == 1:
-                self.property_filter(course, None, ['course_spell', 'students'])
-                if course['status'] == 0:
-                    res.remove(course)
-
+                if course['status'] == 1 and cur_user['id'] in course['students']:
+                    self.property_filter(course, None, ['course_spell', 'students'])
+                    ret_list.append(course)
+            elif cur_user['role'] == 2:
+                if cur_user['id'] in course['tas']:
+                    ret_list.append(course)
+            elif cur_user['role'] == 3:
+                ret_list.append(course)
             # ---------------------------------------------------------------------
-        return res
+        return ret_list
         # self.return_json(res)
 
     # @tornado.web.authenticated

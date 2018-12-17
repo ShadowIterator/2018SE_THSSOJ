@@ -13,6 +13,12 @@ function ajax_post(url,data,that,callback){
     }).then(function(res){
         console.log('Post请求到:\t'+url);
         console.log(res);
+        if(res.data.code !== undefined && res.data.code !==0) {
+            message.error("code: 1");
+            message.error("error_url", url);
+            console.log("code = 1; error_args", data, url);
+            return;
+        }
         callback(that,res);
     }).catch(function(error){
         // alert('post失败');

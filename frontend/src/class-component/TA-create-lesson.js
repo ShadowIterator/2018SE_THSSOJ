@@ -7,7 +7,7 @@ import {Container} from "react-bootstrap"
 
 import moment from "moment";
 
-import { Layout, Breadcrumb, DatePicker } from 'antd';
+import { Layout, Breadcrumb, DatePicker, Table} from 'antd';
 import { Form, Input, Select, Button, message } from 'antd';
 const {Content} = Layout;
 const {RangePicker} = DatePicker;
@@ -27,11 +27,15 @@ class mLessonList extends Component {
         if (this.props.course_id === undefined) {   // create
             this.state = {
                 isCreating: true,
+                tas: [],
+                stus: []
             }
         } else  // edit
         {
             this.state = {
                 isCreating: false,
+                tas: [],
+                stus: []
             };
         }
     }
@@ -96,22 +100,22 @@ class mLessonList extends Component {
                 const data = {
                     name: fieldsValue.title,
                     description: fieldsValue.description,
-                    tas: this.props.ta_tags.value.map(ta => {
+                    tas: this.state.tas.map(ta => {
                         return ta.id;
                     }),
-                    students: this.props.stu_tags.value.map(stu => {
+                    students: this.state.stus.map(stu => {
                         return stu.id;
                     }),
                     notices: [],
                     start_time: fieldsValue.date[0].unix(),
                     end_time: fieldsValue.date[1].unix(),
                 };
-                if(data.tas.indexOf(this.props.id) < 0) {
-                    console.log("this.props.id: ",this.props.id);
-                    console.log("data.tas: ",data.tas);
+                if (data.tas.indexOf(this.props.id) < 0) {
+                    // console.log("this.props.id: ",this.props.id);
+                    // console.log("data.tas: ",data.tas);
                     data.tas.push(this.props.id);
                 }
-                console.log(data);
+                // console.log(data);
                 ajax_post(api_list['create_course'], data, this, mLessonList.submit_callback);
             } else
             {
@@ -119,16 +123,19 @@ class mLessonList extends Component {
                     id: parseInt(this.props.course_id),
                     name: fieldsValue.title,
                     description: fieldsValue.description,
-                    tas: this.props.ta_tags.value.map(ta => {
+                    tas: this.state.tas.map(ta => {
                         return ta.id;
                     }),
-                    students: this.props.stu_tags.value.map(stu => {
+                    students: this.state.stus.map(stu => {
                         return stu.id;
                     }),
                     start_time: fieldsValue.date[0].unix(),
                     end_time: fieldsValue.date[1].unix(),
                 };
-                console.log(data);
+                // console.log(data);
+                if (data.tas.indexOf(this.props.id) < 0) {
+                    data.tas.push(this.props.id);
+                }
                 ajax_post(api_list['update_course'], data, this, mLessonList.submit_callback);
             }
         });
@@ -159,21 +166,25 @@ class mLessonList extends Component {
             message.error("未找到该学生");
             return;
         }
-        let stu_tags = that.props.stu_tags.value;
+        let stus = that.state.stus;
+        // let stu_tags = that.props.stu_tags.value;
         const tmp_name = result.data[0].username;
-        for(let stu of stu_tags) {
-            if(tmp_name === stu.username) {
-                message.warning("你已经添加了学生 "+tmp_name);
-                return;
-            }
+        if (stus.filter(item=>tmp_name===item.username).length > 0) {
+            message.warning("你已经添加了学生 " + tmp_name);
+            return;
         }
-        stu_tags.push({username: result.data[0].username, id: result.data[0].id});
-        that.props.form.setFieldsValue({
-            stu_tags: stu_tags,
-            newstu: ""
-        });
-        // that.setState({stu_tags: stu_tags});
-        // that.setState({newstu: ""});
+        // for (let stu of stus) {
+        //     if(tmp_name === stu.username) {
+        //         message.warning("你已经添加了学生 "+tmp_name);
+        //         return;
+        //     }
+        // }
+        stus.push(result.data[0]);
+        that.setState({stus: stus});
+        // that.props.form.setFieldsValue({
+        //     stu_tags: stu_tags,
+        //     newstu: ""
+        // });
     }
 
     static add_ta_callback(that, result) {
@@ -185,88 +196,107 @@ class mLessonList extends Component {
             message.error("未找到该助教");
             return;
         }
-        let ta_tags = that.props.ta_tags.value;
+        let tas = that.state.tas;
+        // let ta_tags = that.props.ta_tags.value;
         const tmp_name = result.data[0].username;
-        for(let ta of ta_tags) {
-            if(tmp_name === ta.username) {
-                message.warning("你已经添加了助教 "+tmp_name);
-                return;
-            }
+        if (tas.filter(item=>tmp_name===item.username).length > 0) {
+            message.warning("你已经添加了助教 "+tmp_name);
+            return;
         }
-        ta_tags.push({username: result.data[0].username, id: result.data[0].id});
-        // console.log(ta_tags);
-        that.props.form.setFieldsValue({
-            ta_tags: ta_tags,
-            newta: ""
-        });
-        // that.setState({ta_tags: ta_tags});
-        // that.setState({newta: ""});
+        // for(let ta of ta_tags) {
+        //     if(tmp_name === ta.username) {
+        //         message.warning("你已经添加了助教 "+tmp_name);
+        //         return;
+        //     }
+        // }
+        tas.push(result.data[0]);
+        that.setState({tas: tas});
+        // ta_tags.push({username: result.data[0].username, id: result.data[0].id});
+        // that.props.form.setFieldsValue({
+        //     ta_tags: ta_tags,
+        //     newta: ""
+        // });
     }
     render() {
-        console.log("render ", this.props)
-        const stutagElements = this.props.stu_tags.value.map(tag => {
-            const onRemove = () => {
-                this.props.form.setFieldsValue({
-                    stu_tags: this.props.stu_tags.value.filter(t => t.username !== tag.username)
-                });
-                // this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
-            };
-            return (
-                <Tag
-                    key={tag.username}
-                    large={true}
-                    onRemove={onRemove}
-                >
-                    {tag.username}
-                </Tag>
-            );
-        });
+        // const stutagElements = this.props.stu_tags.value.map(tag => {
+        //     const onRemove = () => {
+        //         this.props.form.setFieldsValue({
+        //             stu_tags: this.props.stu_tags.value.filter(t => t.username !== tag.username)
+        //         });
+        //         // this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
+        //     };
+        //     return (
+        //         <Tag
+        //             key={tag.username}
+        //             large={true}
+        //             onRemove={onRemove}
+        //         >
+        //             {tag.username}
+        //         </Tag>
+        //     );
+        // });
+        //
+        // const tatagElements = this.props.ta_tags.value.map(tag => {
+        //     const onRemove = () => {
+        //         this.props.form.setFieldsValue({
+        //             ta_tags: this.props.ta_tags.value.filter(t => t.username !== tag.username)
+        //         });
+        //         // this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
+        //     };
+        //     return (
+        //         <Tag
+        //             key={tag.username}
+        //             large={true}
+        //             onRemove={onRemove}
+        //         >
+        //             {tag.username}
+        //         </Tag>
+        //     );
+        // });
 
-        const tatagElements = this.props.ta_tags.value.map(tag => {
-            const onRemove = () => {
-                this.props.form.setFieldsValue({
-                    ta_tags: this.props.ta_tags.value.filter(t => t.username !== tag.username)
-                });
-                // this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
-            };
-            return (
-                <Tag
-                    key={tag.username}
-                    large={true}
-                    onRemove={onRemove}
-                >
-                    {tag.username}
-                </Tag>
-            );
-        });
+        const tas_table_columns = [
+            {title: 'ID', dataIndex: 'id',width: 100, key: 'id'},
+            {title: '用户名', dataIndex: 'username', key: 'username', width: 300},
+            {title: '邮箱', dataIndex: 'email', key: 'email', width: 300},
+            {title: 'Action', dataIndex: '', key: 'x', render: (text, record) => {
+                    return (
+                        <Button type="danger"
+                                disabled={this.props.readOnly}
+                                onClick={()=>{
+                                            let tas = this.state.tas;
+                                            this.setState({
+                                                tas: tas.filter(item => record.id!==item.id)
+                                            });
+                                        }}
+                        >
+                            Delete
+                        </Button>
+                    );
+                }},
+        ];
 
-        // const table_columns = [
-        //     {title: 'ID', dataIndex: 'id',width: 150, key: 'id'},
-        //     {title: '用户名', dataIndex: 'username', key: 'username', width: 300},
-        //     {title: '测试方法', dataIndex: 'language', key: 'language', width: 300, render: (data)=>{
-        //             return <span>{data.map(lang=>{
-        //                 switch(lang) {
-        //                     case 1: return 'C;';
-        //                     case 2: return 'C++;';
-        //                     case 3: return 'Javascript;';
-        //                     case 4: return 'Python3;';
-        //                     default: return '未知语言';
-        //                 }
-        //             })}</span>;
-        //         }},
-        //     {title: 'Action', dataIndex: '', key: 'x', render: (text, record) => {
-        //             return (
-        //                 <Button type="danger" onClick={()=>{
-        //                     let problist = this.state.problems;
-        //                     this.setState({
-        //                         problems: problist.filter(item => record.id!==item.id)
-        //                     });
-        //                 }}>
-        //                     Delete
-        //                 </Button>
-        //             );
-        //         }},
-        // ];
+        const stus_table_columns = [
+            {title: 'ID', dataIndex: 'id',width: 100, key: 'id'},
+            {title: '用户名', dataIndex: 'username', key: 'username', width: 200},
+            {title: '姓名', dataIndex: 'realname', key: 'realname', width: 150},
+            {title: '学号', dataIndex: 'student_id', key: 'student_id', width: 200},
+            {title: '邮箱', dataIndex: 'email', key: 'email', width: 200},
+            {title: 'Action', dataIndex: '', key: 'x', render: (text, record) => {
+                    return (
+                        <Button type="danger"
+                                disabled={this.props.readOnly}
+                                onClick={()=>{
+                                            let stus = this.state.stus;
+                                            this.setState({
+                                                stus: stus.filter(item => record.id!==item.id)
+                                            });
+                                        }}
+                        >
+                            Delete
+                        </Button>
+                    );
+                }},
+        ];
 
         const { getFieldDecorator } = this.props.form;
 
@@ -370,8 +400,10 @@ class mLessonList extends Component {
                                      style={{width: '100%', outline: 0}}
                                      placeholder={['开课时间','结课时间']}
                                      disabled={this.props.readOnly}
-
-                                     />
+                                     // disabledDate={(current)=>{
+                                     //     return current && current < moment().startOf('day');
+                                     // }}
+                        />
                     )}
 
                 </FormItem>
@@ -396,12 +428,16 @@ class mLessonList extends Component {
                     {...formItemLayout}
                     label="已添加助教"
                 >
-                    {getFieldDecorator('ta_tags', {
-                    })(
-                        <Container style={{paddingBottom: '10px'}}>
-                            {tatagElements}
-                        </Container>
-                    )}
+                    <Table dataSource={this.state.tas}
+                           columns={tas_table_columns}
+                           pagination={false}
+                    />
+                    {/*{getFieldDecorator('ta_tags', {*/}
+                    {/*})(*/}
+                        {/*<Container style={{paddingBottom: '10px'}}>*/}
+                            {/*{tatagElements}*/}
+                        {/*</Container>*/}
+                    {/*)}*/}
                 </FormItem>
 
                 <FormItem
@@ -426,12 +462,16 @@ class mLessonList extends Component {
                     {...formItemLayout}
                     label="已添加学生"
                 >
-                    {getFieldDecorator('stu_tags', {
-                    })(
-                        <Container style={{paddingBottom: '10px'}}>
-                            {stutagElements}
-                        </Container>
-                    )}
+                    <Table dataSource={this.state.stus}
+                           columns={stus_table_columns}
+                           pagination={false}
+                    />
+                    {/*{getFieldDecorator('stu_tags', {*/}
+                    {/*})(*/}
+                        {/*<Container style={{paddingBottom: '10px'}}>*/}
+                            {/*{stutagElements}*/}
+                        {/*</Container>*/}
+                    {/*)}*/}
                 </FormItem>
                 {submitButton}
             </Form>
@@ -470,14 +510,14 @@ const CreateLessonForm = Form.create({
                 ...props.newstu,
                 value: props.newstu.value,
             }),
-            ta_tags: Form.createFormField({
-                ...props.ta_tags,
-                value: props.ta_tags.value,
-            }),
-            stu_tags: Form.createFormField({
-                ...props.stu_tags,
-                value: props.stu_tags.value,
-            })
+            // ta_tags: Form.createFormField({
+            //     ...props.ta_tags,
+            //     value: props.ta_tags.value,
+            // }),
+            // stu_tags: Form.createFormField({
+            //     ...props.stu_tags,
+            //     value: props.stu_tags.value,
+            // })
         };
     }
 })(withRouter(mLessonList));
@@ -502,12 +542,12 @@ class CreateLesson extends Component {
                 newstu: {
                     value: ''
                 },
-                ta_tags: {
-                    value: []
-                },
-                stu_tags: {
-                    value: []
-                }
+                // ta_tags: {
+                //     value: []
+                // },
+                // stu_tags: {
+                //     value: []
+                // }
             }
         }
     }
@@ -562,12 +602,12 @@ class EditLesson extends Component {
                 newstu: {
                     value: ''
                 },
-                ta_tags: {
-                    value: []
-                },
-                stu_tags: {
-                    value: []
-                }
+                // ta_tags: {
+                //     value: []
+                // },
+                // stu_tags: {
+                //     value: []
+                // }
             }
         }
     }
@@ -623,12 +663,12 @@ class ShowLesson extends Component {
                 newstu: {
                     value: ''
                 },
-                ta_tags: {
-                    value: []
-                },
-                stu_tags: {
-                    value: []
-                }
+                // ta_tags: {
+                //     value: []
+                // },
+                // stu_tags: {
+                //     value: []
+                // }
             }
         }
     }
@@ -678,12 +718,12 @@ class ModifyLesson extends Component {
                 newstu: {
                     value: ''
                 },
-                ta_tags: {
-                    value: []
-                },
-                stu_tags: {
-                    value: []
-                }
+                // ta_tags: {
+                //     value: []
+                // },
+                // stu_tags: {
+                //     value: []
+                // }
             }
         }
     }
