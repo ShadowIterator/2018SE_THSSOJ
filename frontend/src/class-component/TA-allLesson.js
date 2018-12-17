@@ -89,10 +89,11 @@ class AllLesson extends Component {
             ret = (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/ta">Home</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/ta">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
-                        <h2>全部</h2>
+                        <h2>全部课程</h2>
                         <Row gutter={16}>
                             {this.state.lessons.map((lesson)=>
                                 <Col span={8}>
@@ -133,10 +134,10 @@ class AllLesson extends Component {
             ret = (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/student">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
-                        <h2>全部</h2>
+                        <h2>全部课程</h2>
                         <Row gutter={16}>
                             {this.state.lessons.map((lesson)=>
                                 <Col span={8}>
@@ -174,10 +175,10 @@ class AllLesson extends Component {
             return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/student">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
-                        <h2>全部</h2>
+                        <h2>全部课程</h2>
                     </div>
                 </Content>
             );

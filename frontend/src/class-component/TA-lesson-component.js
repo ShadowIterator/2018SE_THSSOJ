@@ -450,6 +450,8 @@ class mHomeworkForm extends Component {
                 }},
         ];
 
+        // console.log("current day", moment().endOf('day'));
+
         return (
             <div>
                 <Form onSubmit={this.handleSubmit}>
@@ -497,6 +499,9 @@ class mHomeworkForm extends Component {
                                 placeholder="截止时间"
                                 size="large"
                                 style={{width: '100%', outline: 0}}
+                                disabledDate={(current)=>{
+                                    return current && current <= moment().startOf('day');
+                                }}
                             />
                         )}
                     </FormItem>

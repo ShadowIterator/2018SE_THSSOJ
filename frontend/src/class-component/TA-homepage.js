@@ -128,7 +128,7 @@ class mTAHomepageMiddle extends Component {
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/ta">Home</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>我管理的课程</h2>
