@@ -40,6 +40,7 @@ class JudgeHTML extends Component {
         ajax_post(api_list['judge_all'], {
             homework_id: this.homework_id,
             problem_id: this.problem_id,
+            course_id: this.course_id,
         }, this, (that, result) => {
             if(result.data.code === 1) {
                 message.error("请求评测本次作业失败");
