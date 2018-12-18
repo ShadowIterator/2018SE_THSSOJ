@@ -129,8 +129,8 @@ class BaseDB:
     async def getObject(self, si_table_name, cur_user = None, **kw):
         return await self.tables[si_table_name].getObject(cur_user, **kw)
 
-    async def getObjectOne(self, si_table_name, cur_user = None, **kw):
-        return await self.tables[si_table_name].getObjectOne(cur_user, **kw)
+    async def getObjectOne(self, si_table_name, **kw):
+        return await self.tables[si_table_name].getObjectOne(**kw)
 
     async def deleteObject(self, si_table_name, **kw):
         return await self.tables[si_table_name].deleteObject(**kw)

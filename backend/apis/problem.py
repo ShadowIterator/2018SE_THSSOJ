@@ -381,7 +381,7 @@ class APIProblemHandler(base.BaseHandler):
                 # ****************update judgestates **********************
 
         if(self.args['record_type'] == 2 or self.args['record_type'] == 4):
-            old_record = self.db.getObject('records',
+            old_record = await self.db.getObject('records',
                                            problem_id = self.args['problem_id'],
                                            homework_id = self.args['homework_id'],
                                            record_type = self.args['record_type'])
@@ -439,11 +439,11 @@ class APIProblemHandler(base.BaseHandler):
         record_created = await self.db.createObject('records', **self.args)
 
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
-        problem_of_code['records'].append(record_created['id'])
+        # problem_of_code['records'].append(record_created['id'])
         await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
         if 'homework_id' in self.args:
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
-            matched_homework['records'].append(record_created['id'])
+            # matched_homework['records'].append(record_created['id'])
             await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id

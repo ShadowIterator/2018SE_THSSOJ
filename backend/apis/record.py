@@ -149,7 +149,7 @@ class APIRecordHandler(base.BaseHandler):
         # ******************************** update judgestates *********************************************
         if(match_record['record_type'] in [2, 4]):
             judge_state = await self.db.getObjectOne('judgestates', homework_id = match_record['homework_id'], problem_id = match_record['problem_id'])
-            judge_state['judge'] += 1
+            judge_state['judged'] += 1
             await self.db.saveObject('judgestates', judge_state)
 
         judge_result = self.args['res']
