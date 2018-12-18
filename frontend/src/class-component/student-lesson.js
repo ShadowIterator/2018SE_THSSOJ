@@ -31,7 +31,7 @@ class CourseInfo extends Component {
             {title: '邮箱', dataIndex: 'email',width: 150, key: 'email'}
         ];
         return (
-            <table>
+            <table class="bp3-html-table .modifier">
                 <tr>
                     <th>课程名</th>
                     <td>{this.props.name}</td>
