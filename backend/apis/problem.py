@@ -438,16 +438,50 @@ class APIProblemHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
 
+        problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
+        if self.args['record_type'] == 1:
+            ratios = await self.db.getObject('ratios',
+                                             user_id=self.args['user_id'],
+                                             problem_id=self.args['problem_id'],
+                                             homework_id=self.args['homework_id'])
+            if len(ratios) == 0:
+                check_ratio = await self.db.createObject('ratios',
+                                                         user_id=self.args['user_id'],
+                                                         problem_id=self.args['problem_id'],
+                                                         homework_id=self.args['homework_id'])
+            else:
+                check_ratio = ratios[0]
+
+            ratio_gear = self.args['test_ratio']
+            if ratio_gear == 1:
+                test_ratio_limit = problem_of_code['ratio_one_limit']
+                check_ratio['ratio_one_used'] += 1
+                ratio_used = check_ratio['ratio_one_used']
+                ratio_percent = problem_of_code['ratio_one']
+            elif ratio_gear == 2:
+                test_ratio_limit = problem_of_code['ratio_two_limit']
+                check_ratio['ratio_two_used'] += 1
+                ratio_used = check_ratio['ratio_two_used']
+                ratio_percent = problem_of_code['ratio_two']
+            elif ratio_gear == 3:
+                test_ratio_limit = problem_of_code['ratio_three_limit']
+                check_ratio['ratio_three_used'] += 1
+                ratio_used = check_ratio['ratio_three_used']
+                ratio_percent = problem_of_code['ratio_three']
+
+            if ratio_used > test_ratio_limit:
+                self.set_res_dict(res_dict, code=1, msg='exceeds limit')
+                return res_dict
+            self.db.saveObject('ratios', object=check_ratio)
 
         record_created = await self.db.createObject('records', **self.args)
 
-        problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
-        # problem_of_code['records'].append(record_created['id'])
-        await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
+        # await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
         if 'homework_id' in self.args:
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
             # matched_homework['records'].append(record_created['id'])
             await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
+
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         if not os.path.exists(record_dir):
@@ -465,6 +499,7 @@ class APIProblemHandler(base.BaseHandler):
         elif self.args['src_language'] == 3:
             record_created['result_type'] = 1
         await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+
         if self.args['record_type']==2:
             self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
             return res_dict
@@ -495,19 +530,21 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['DATA_DIR'] = case_path
             judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = 'ncmp'
-            judge_req['NTESTS'] = int(config_info['NTESTS']*self.args['test_ratio']/100)
+            if self.args['record_type'] == 0:
+                judge_req['NTESTS'] = config_info['NTESTS']
+            elif self.args['record_type'] == 1:
+                judge_req['NTESTS'] = int(config_info['NTESTS']*ratio_percent/100)
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            # requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
             requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
             if not os.path.exists('judge_script'):
                 os.makedirs('judge_script')
             script_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem_of_code['id']) + '/script'
-            config_file = open(script_path + '/config.json', mode='r', encoding='utf8')
-            config_info = json.load(config_file)
-            config_file.close()
+            # config_file = open(script_path + '/config.json', mode='r', encoding='utf8')
+            # config_info = json.load(config_file)
+            # config_file.close()
             judge_req = {}
             judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
@@ -516,9 +553,11 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req['OTHERS'] = './judge.sh -r {}'.format(self.args['test_ratio'])
+            if self.args['record_type'] == 0:
+                judge_req['OTHERS'] = './judge.sh -r 100'
+            elif self.args['record_type'] == 1:
+                judge_req['OTHERS'] = './judge.sh -r {}'.format(ratio_percent)
 
-            # requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
             requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='code successfully submitted')
