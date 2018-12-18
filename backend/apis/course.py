@@ -46,7 +46,7 @@ class APICourseHandler(base.BaseHandler):
             await self.db.saveObject('users', object=TA, cur_user = self.get_current_user_object())
         spell = str(uuid.uuid1())
         course_created['course_spell'] = spell
-        self.db.saveObject('courses', object=course_created, cur_user=self.get_current_user_object())
+        await self.db.saveObject('courses', object=course_created)
         self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
         return res_dict
         # try:

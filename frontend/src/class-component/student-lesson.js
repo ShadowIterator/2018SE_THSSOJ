@@ -32,10 +32,9 @@ class CourseInfo extends Component {
         ];
         return (
             <div style={{textAlign: 'center'}}>
-                <Row gutter={8}>
+                <Row gutter={8} type={"flex"} justify="start">
                     <Col span={4} style={{fontSize: '150%'}}>课程名</Col>
-                    <Col span={4} style={{fontSize: '150%'}}>{this.props.name}</Col>
-                    <Col span={12}/>
+                    <Col span={20} style={{fontSize: '150%'}}>{this.props.name}</Col>
                 </Row>
                 <Row gutter={8}>
                     <Col span={4} style={{fontSize: '150%'}}>课程名</Col>

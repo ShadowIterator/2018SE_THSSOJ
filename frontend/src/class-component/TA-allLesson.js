@@ -93,7 +93,7 @@ class mAllLesson extends Component {
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
                         <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
-                        <Breadcrumb.Item><Link to="/ta">全部课程</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/alllessons">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>全部课程</h2>
@@ -146,7 +146,8 @@ class mAllLesson extends Component {
             ret = (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/student">全部课程</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/alllessons">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <Row>
@@ -211,7 +212,8 @@ class mAllLesson extends Component {
             return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to="/student">全部课程</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to="/alllessons">全部课程</Link></Breadcrumb.Item>
                     </Breadcrumb>
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>全部课程</h2>
