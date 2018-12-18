@@ -318,11 +318,15 @@ class APICourseHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _addCourse_post(self):
         res_dict = {}
-        if not self.check_input('user_id', 'course_code'):
+        if not self.check_input('user_id', 'course_spell'):
             self.set_res_dict(res_dict, code=1, msg='invalid input params')
             return res_dict
+
         student = (await self.db.getObject('users', cur_user=self.get_current_user_object(), id=self.args['user_id']))[0]
-        course = (await self.db.getObject('courses', cur_user=self.get_current_user_object(), id=self.args['course_code']))[0]
+        course = (await self.db.getObject('courses', cur_user=self.get_current_user_object(), course_spell=self.args['course_spell']))[0]
+        if course['course_spell'] != self.args['course_spell']:
+            self.set_res_dict(res_dict, code=1, msg='course spell wrong')
+            return res_dict
         student['student_courses'].append(self.args['course_code'])
         course['students'].append(self.args['user_id'])
         await self.db.saveObject('users', cur_user=self.get_current_user_object(),object=student)
