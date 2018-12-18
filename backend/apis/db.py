@@ -40,6 +40,7 @@ class BaseDB:
         self.tables['notices'] = Notices(self, 'notices')
         self.tables['judgestates'] = Judgestates(self, 'judgestates')
         self.tables['ratios'] = Ratios(self, 'ratios')
+
     async def async_init(self):
         for name, table in self.tables.items():
             await table.async_init()
@@ -116,6 +117,9 @@ class BaseDB:
         rtn = globals()[si_table_name](self.db, si_table_name)
         return rtn
 
+    def getTable(self, si_table_name):
+        return self.tables[si_table_name]
+
     async def saveObject(self, si_table_name, object, cur_user = None):
         return await self.tables[si_table_name].saveObject(object, cur_user)
 
@@ -124,6 +128,9 @@ class BaseDB:
 
     async def getObject(self, si_table_name, cur_user = None, **kw):
         return await self.tables[si_table_name].getObject(cur_user, **kw)
+
+    async def getObjectOne(self, si_table_name, **kw):
+        return await self.tables[si_table_name].getObjectOne(**kw)
 
     async def deleteObject(self, si_table_name, **kw):
         return await self.tables[si_table_name].deleteObject(**kw)
@@ -177,6 +184,9 @@ class BaseTable:
             return rtn
         else:
             return res
+
+    async def getObjectOne(self, **kw):
+        return (await self.getObject(**kw))[0]
 
     async def getObject(self, cur_user = None, **kw):
         si_table_name = self.table_name
