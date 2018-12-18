@@ -66,11 +66,12 @@ class mStudentHomeworkCard extends Component {
         }
     }
     render() {
-        console.log("questions:", this.props.deadline);
+        // console.log("questions:", this.props.deadline);
+        const questions = this.props.questions.sort((a, b) => {
+            return a.id - b.id;
+        });
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日');
-        // let xicon =
-
-        console.log('krender-homework: ', this.props);
+        // console.log('krender-homework: ', this.props);
         return (
             <div style={{margin: '20px'}}>
                 <List
@@ -85,7 +86,7 @@ class mStudentHomeworkCard extends Component {
                         </Row>
                     }
                     bordered
-                    dataSource={this.props.questions}
+                    dataSource={questions}
                     renderItem={item => {
                         if(item === undefined)
                             return (<> </>);
@@ -215,7 +216,11 @@ class StudentHomeworkPanel extends Component {
         //         ))}
         //     </div>
         // )
+        const homeworkitems = this.props.homeworkitems.sort((a, b) => {
+            return a.deadline - b.deadline;
+        });
         return (
+
             <div>
                 {this.props.homeworkitems.map((hw)=>(
                     <StudentHomeworkCard name={hw.name} questions={hw['problem_list']} homework_id={hw.id}

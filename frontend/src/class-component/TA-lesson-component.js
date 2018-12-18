@@ -139,6 +139,9 @@ class TANoticeList extends Component {
 class mTAHomeworkCard extends Component {
     render() {
         console.log(this.props)
+        const problems = this.props.problems.sort((a, b) => {
+            return a.id - b.id;
+        });
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日 HH:mm:ss');
         let ret;
         if (this.props.deadline >= moment().format('X')) {
@@ -162,7 +165,7 @@ class mTAHomeworkCard extends Component {
                             </Row>
                         }
                         bordered
-                        dataSource={this.props.problems}
+                        dataSource={problems}
                         renderItem={item => {
                             // console.log("check homework item", item);
                             return (
@@ -194,7 +197,7 @@ class mTAHomeworkCard extends Component {
                             </Row>
                         }
                         bordered
-                        dataSource={this.props.problems}
+                        dataSource={problems}
                         renderItem={item => {
                             let judger_button;
                             if (item['judger_status'] == 0) {
@@ -267,9 +270,12 @@ const TAHomeworkCard = withRouter(mTAHomeworkCard);
 
 class TAHomeworkPanel extends Component {
     render() {
+        const homeworkitems = this.props.homeworkitems.sort((a, b) => {
+            return a.deadline - b.deadline;
+        });
         return (
             <div>
-                {this.props.homeworkitems.map((homework)=>(
+                {homeworkitems.map((homework)=>(
                     <TAHomeworkCard name={homework.name}
                                     problems={this.props.problemitems.filter(item => homework.problems.indexOf(item.id) >= 0)}
                                     homework_id={homework.id}
@@ -492,18 +498,31 @@ class mHomeworkForm extends Component {
                                onChange={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
+                                   console.log(event.target.value);
+                                   const num = parseInt(event.target.value);
+                                   if (Number.isNaN(num) || num < 0) {
+                                       return {
+                                           validateStatus: 'error',
+                                           errorMsg: '请输入大于等于0的整数',
+                                       }
+                                   }
                                    this.setState({
                                        newProb: event.target.value
                                    });
+                                   return {
+                                       validateStatus: 'success',
+                                       errorMsg: null,
+                                   }
                                }}
                                onPressEnter={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   if (this.state.problems.filter(item=>item.id===this.state.newProb).length > 0){
+                                   let newPronid = parseInt(this.state.newProb);
+                                   if (this.state.problems.filter(item=>item.id===newPronid).length > 0){
                                        message.error("题目已在列表中，请不要重复加题");
                                        return;
                                    }
-                                   ajax_post(api_list['query_problem'], {id: this.state.newProb}, this, (that, res) => {
+                                   ajax_post(api_list['query_problem'], {id: newPronid}, this, (that, res) => {
                                        if (res.data.length === 0) {
                                            message.error("未找到该题目");
                                            return;
@@ -511,6 +530,9 @@ class mHomeworkForm extends Component {
                                        message.success("成功添加题目");
                                        let problist = that.state.problems;
                                        problist.push(res.data[0]);
+                                       problist.sort((a, b)=>{
+                                           return a.id - b.id;
+                                       });
                                        that.setState({
                                            problems: problist,
                                            newProb: ""
