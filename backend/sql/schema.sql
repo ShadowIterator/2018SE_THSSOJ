@@ -54,7 +54,7 @@ CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
     description TEXT,
-    course_spell TEXT,
+    course_spell VARCHAR(16),
     tas INTEGER[] DEFAULT '{}',
     students INTEGER[] DEFAULT '{}',
     status INTEGER DEFAULT 0,
