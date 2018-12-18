@@ -20,7 +20,7 @@ class APIUploadHandler(base.BaseHandler):
         self.root_dir='root/'
         self.dir =  'tmp/'
         self.user = None
-        print(self.request.body)
+        # print(self.request.body)
 
     async def _files_post(self):
         print('in file post')
@@ -30,7 +30,7 @@ class APIUploadHandler(base.BaseHandler):
         # with open('''{dir}/{filename}.{suffix}'''.format(dir = self.dir, filename = filename, suffix = suffix), 'wb') as fd:
         path = '''{dir}{filename}.{suffix}'''.format(dir=self.dir, filename=filename, suffix=suffix)
         print('path: ', path)
-        print('data: ', data)
+        # print('data: ', data)
         print("self.root_dir + path ", self.root_dir + path)
         with open(self.root_dir + path, 'wb') as fd:
             fd.write(data)
