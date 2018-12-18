@@ -254,13 +254,12 @@ class mLoginPage extends Component {
             } else if(this.props.role === 3) {
                 this.props.history.push('/admin');
             } else {
-                // alert("Bad role number.");
                 message.error("Role数字不对！");
             }
         }
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
             if(nextProps.state && nextProps.role!==undefined) {
@@ -271,7 +270,6 @@ class mLoginPage extends Component {
                 } else if(nextProps.role===3) {
                     this.props.history.push('/admin')
                 } else {
-                    // alert("Bad role number.");
                     message.error("Role数字不对！");
                 }
             }
@@ -304,7 +302,7 @@ class mSignupPage extends Component {
         }
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
             if(nextProps.state && nextProps.role!==undefined) {

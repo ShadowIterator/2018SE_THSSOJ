@@ -83,19 +83,6 @@ class AddNewNotice extends Component {
                 sm: { span: 20 },
             },
         };
-        const tailFormItemLayout = {
-            wrapperCol: {
-                xs: {
-                    span: 24,
-                    offset: 0,
-                },
-                sm: {
-                    span: 24,
-                    offset: 0,
-                },
-            },
-        };
-
         return (
             <Card interactive={false} className="text-center">
             <Form onSubmit={this.submitHandler}>
@@ -150,19 +137,6 @@ class TANoticeList extends Component {
 }
 
 class mTAHomeworkCard extends Component {
-    handleClickId(id) {
-        return (event) => {
-            event.preventDefault();
-            const id_param = '/' + id.toString();
-            const homework_id = '/' + this.props.homework_id.toString();
-            const pathname = '/problemdetail';
-            const course_id = '/' + this.props.course_id.toString();
-            this.props.history.push({
-                pathname: pathname + id_param + homework_id + course_id,
-            });
-        }
-    }
-
     render() {
         console.log(this.props)
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日 HH:mm:ss');

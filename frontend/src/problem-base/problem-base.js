@@ -32,18 +32,6 @@ class ProblemBase extends Component {
         this.updateProblems(1, 1);
     }
 
-    componentWillUpdate(nextProps, nextStates) {
-        // if(nextProps.id===undefined || nextProps.id===-1)
-        //     return;
-        // if(nextProps.id !== this.prev_id) {
-        //     this.prev_id = nextProps.id;
-        //     this.fillInfo(nextProps.id);
-        // }
-        console.log('table will update:', nextStates);
-        // console.log(,);
-        // this.updateProblems(1);
-    }
-
     updateProblems = (page, value) => {
         this.setState({
             loading: true,
