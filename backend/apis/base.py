@@ -24,6 +24,12 @@ from tornado.options import define, options
 
 
 
+class Roles:
+    NOROLE = 0
+    STUDENT = 1
+    TA = 2
+    ADMIN = 3
+
 class NoResultError(Exception):
     pass
 
