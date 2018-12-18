@@ -2,6 +2,8 @@
 import datetime
 import time
 import uuid
+import random
+import string
 from . import base
 from .base import *
 
@@ -44,7 +46,7 @@ class APICourseHandler(base.BaseHandler):
             TA = (await self.db.getObject('users', cur_user = self.get_current_user_object(), id=TA_id))[0]
             TA['ta_courses'].append(course_id)
             await self.db.saveObject('users', object=TA, cur_user = self.get_current_user_object())
-        spell = str(uuid.uuid1())
+        spell = str(course_id) + ''.join(random.choice(string.ascii_letters + string.digits) for x in range(4))
         course_created['course_spell'] = spell
         await self.db.saveObject('courses', object=course_created)
         self.set_res_dict(res_dict, code=0, msg='courses creation succeed')

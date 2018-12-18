@@ -135,7 +135,6 @@ class BaseTestCase(AsyncHTTPTestCase):
     #     print(response.body)
     #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
 
-
     # @async_aquire_db
     # async def test_2(self):
     #     print('test_2')

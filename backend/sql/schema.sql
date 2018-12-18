@@ -153,9 +153,9 @@ CREATE TABLE ratios (
     homework_id INTEGER,
     problem_id INTEGER,
     user_id INTEGER,
-    ratio_one_used INTEGER,
-    ratio_two_used INTEGER,
-    ratio_three_used INTEGER
+    ratio_one_used INTEGER DEFAULT 0,
+    ratio_two_used INTEGER DEFAULT 0,
+    ratio_three_used INTEGER DEFAULT 0
 );
 
 -- TODO: 添加submission表，记录用户id，题目id，作业id，课程id，评测信息
