@@ -68,11 +68,12 @@ class mStudentHomeworkCard extends Component {
         }
     }
     render() {
-        console.log("questions:", this.props.deadline);
+        // console.log("questions:", this.props.deadline);
+        const questions = this.props.questions.sort((a, b) => {
+            return a.id - b.id;
+        });
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日');
-        // let xicon =
-
-        console.log('krender-homework: ', this.props);
+        // console.log('krender-homework: ', this.props);
         return (
             <div style={{margin: '20px'}}>
                 <List
@@ -87,7 +88,7 @@ class mStudentHomeworkCard extends Component {
                         </Row>
                     }
                     bordered
-                    dataSource={this.props.questions}
+                    dataSource={questions}
                     renderItem={item => {
                         if(item === undefined)
                             return (<> </>);
@@ -194,20 +195,20 @@ const StudentHomeworkCard = withRouter(mStudentHomeworkCard);
 
 class StudentHomeworkPanel extends Component {
     render() {
-        let homework2prob = {};
-        for(let hw of this.props.homeworkitems) {
-            homework2prob[hw.id.toString()] = [];
-            const prob_ids = hw.problem_ids;
-            for(let prob of this.props.problemitems) {
-                if(prob_ids.includes(prob.id)) {
-                    homework2prob[hw.id.toString()].push({
-                        id:prob.id,
-                        title:prob.title,
-                        status:prob.status,
-                    });
-                }
-            }
-        }
+        // let homework2prob = {};
+        // for(let hw of this.props.homeworkitems) {
+        //     homework2prob[hw.id.toString()] = [];
+        //     const prob_ids = hw.problem_ids;
+        //     for(let prob of this.props.problemitems) {
+        //         if(prob_ids.includes(prob.id)) {
+        //             homework2prob[hw.id.toString()].push({
+        //                 id:prob.id,
+        //                 title:prob.title,
+        //                 status:prob.status,
+        //             });
+        //         }
+        //     }
+        // }
         // return (
         //     <div>
         //         {this.props.homeworkitems.map((hw)=>(
@@ -217,7 +218,11 @@ class StudentHomeworkPanel extends Component {
         //         ))}
         //     </div>
         // )
+        const homeworkitems = this.props.homeworkitems.sort((a, b) => {
+            return a.deadline - b.deadline;
+        });
         return (
+
             <div>
                 {this.props.homeworkitems.map((hw)=>(
                     <StudentHomeworkCard name={hw.name} questions={hw['problem_list']} homework_id={hw.id}

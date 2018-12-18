@@ -74,7 +74,7 @@ class ProblemBase extends Component {
             pagination.total = result.data.count;
             pagination.pageSize = that.state.item_per_page;
             that.setState({
-                data: that.data,
+                data: that.data.sort((a,b)=>{return a.id-b.id}),
                 loading: false,
                 count: result.data.count,
                 pagination: pagination,
