@@ -24,6 +24,8 @@ class ProblemDetailBody extends Component {
         this.state = {
             file: null,
             fileList: [],
+            isEditing: this.props.submit_record !== null,
+            reupload: false,
         }
     }
     render() {
@@ -34,15 +36,16 @@ class ProblemDetailBody extends Component {
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
-                        <div>
+                        <div style={{textAlign: 'center'}}>
                         {this.props.probleminfo.judge_method !== 2 &&
-                            <CodeInput state={this.props.state} role={this.props.role}
-                                       id={this.props.id} problem_id={this.props.probleminfo.id}
-                                       problem_info={this.props.probleminfo}
-                                       homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                        <CodeInput state={this.props.state} role={this.props.role}
+                                   id={this.props.id} problem_id={this.props.probleminfo.id}
+                                   problem_info={this.props.probleminfo}
+                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
                         }
-                        {this.props.probleminfo.judge_method === 2 &&
+                        {!this.state.isEditing && this.props.probleminfo.judge_method === 2 &&
                         <Upload.Dragger name="file" multiple={false} action={URL+api_list['upload_html']}
+                                        fileList={this.state.fileList} style={{outline: 0}}
                                         onChange={(info) => {
                                             let fileList = info.fileList;
                                             console.log("upload_script", fileList);
@@ -64,29 +67,87 @@ class ProblemDetailBody extends Component {
                             <p className="ant-upload-drag-icon">
                                 <Icon type="inbox" />
                             </p>
-                            <p className="ant-upload-text">Click or drag file to this area to upload</p>
-                            <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
+                            <p className="ant-upload-text">点击这里或者将文件拖拽进来以上传</p>
+                            <p className="ant-upload-hint">请注意您的压缩包格式应为zip，压缩方式为进入您需要压缩的文件夹，全选所有文件后压缩</p>
                         </Upload.Dragger>
                         }
-                        {this.props.probleminfo.judge_method === 2 &&
-                        <Button type={"primary"} onClick={() => {
-                            if(this.state.file===null) {
-                                message.error("请上传你的作业");
-                            }
-                            ajax_post(api_list['submit_problem'], {
-                                user_id: this.props.id,
-                                problem_id: this.props.probleminfo.id,
-                                homework_id: this.props.homework_id,
-                                record_type: 4,
-                                src_code: this.state.file.uri,
-                            }, this, (that, result) => {
-                                if(result.data.code === 0) {
-                                    message.success("上传成功");
-                                } else {
-                                    message.error("上传失败");
+                        {!this.state.isEditing && this.props.probleminfo.judge_method === 2 &&
+                        <div style={{textAlign: 'center', marginTop: 15}}>
+                            <Button type={"primary"} onClick={() => {
+                                if(this.state.file===null) {
+                                    message.error("请上传你的作业");
                                 }
-                            });
-                        }}>上传</Button>
+                                ajax_post(api_list['submit_problem'], {
+                                    user_id: this.props.id,
+                                    problem_id: this.props.probleminfo.id,
+                                    homework_id: this.props.homework_id,
+                                    record_type: 4,
+                                    src_code: this.state.file.uri,
+                                }, this, (that, result) => {
+                                    if(result.data.code === 0) {
+                                        message.success("上传成功");
+                                    } else {
+                                        message.error("上传失败");
+                                    }
+                                });
+                            }}>上传</Button>
+                        </div>
+                        }
+                        {this.state.isEditing && this.props.probleminfo.judge_method === 2 && this.state.reupload &&
+                        <Upload.Dragger name="file" multiple={false} action={URL+api_list['upload_html']}
+                                        fileList={this.state.fileList} style={{outline: 0}}
+                            onChange={(info) => {
+                            let fileList = info.fileList;
+                            console.log("upload_script", fileList);
+                            fileList = fileList.slice(-1);
+                            fileList = fileList.map((file) => {
+                            if (file.response) {
+                            file.uri = file.response.uri;
+                        }
+                            return file;
+                        });
+                            fileList = fileList.filter((file) => {
+                            if (file.response) {
+                            return file.response.code === 0;
+                        }
+                            return true;
+                        });
+                            this.setState({file: fileList[0], fileList: fileList});
+                        }}>
+                            <p className="ant-upload-drag-icon">
+                            <Icon type="inbox" />
+                            </p>
+                            <p className="ant-upload-text">点击这里或者将文件拖拽进来以上传</p>
+                            <p className="ant-upload-hint">请注意您的压缩包格式应为zip，压缩方式为进入您需要压缩的文件夹，全选所有文件后压缩</p>
+                        </Upload.Dragger>
+                        }
+                        {this.state.isEditing && this.props.probleminfo.judge_method === 2 && this.state.reupload &&
+                        <div style={{textAlign: 'center', marginTop: 15}}>
+                            <Button type={"primary"} onClick={() => {
+                                if(this.state.file===null) {
+                                    message.error("请上传你的作业");
+                                }
+                                ajax_post(api_list['submit_problem'], {
+                                    user_id: this.props.id,
+                                    problem_id: this.props.probleminfo.id,
+                                    homework_id: this.props.homework_id,
+                                    record_type: 4,
+                                    src_code: this.state.file.uri,
+                                }, this, (that, result) => {
+                                    if(result.data.code === 0) {
+                                        message.success("上传成功");
+                                    } else {
+                                        message.error("上传失败");
+                                    }
+                                });
+                            }}>上传</Button>
+                        </div>
+                        }
+                        {this.state.isEditing && this.props.probleminfo.judge_method === 2 && !this.state.reupload &&
+                        <div>
+                            <a href={URL+api_list['download_html']+"?id="+this.props.submit_record.id.toString()} download={"html.zip"} />
+                            <Button onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
+                        </div>
                         }
                         </div>
                     </TabPane>
