@@ -324,9 +324,6 @@ class APICourseHandler(base.BaseHandler):
 
         student = (await self.db.getObject('users', id=self.args['user_id']))[0]
         course = (await self.db.getObject('courses', course_spell=self.args['course_spell']))[0]
-        if course['course_spell'] != self.args['course_spell']:
-            self.set_res_dict(res_dict, code=1, msg='course spell wrong')
-            return res_dict
         student['student_courses'].append(course['id'])
 
         course['students'].append(self.args['user_id'])
