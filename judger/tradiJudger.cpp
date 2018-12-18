@@ -29,6 +29,8 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
 
+	// chmod(Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(), 0x777);
+
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
 			ostringstream oss;
@@ -63,8 +65,8 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 					judgerResult.result = "Wrong Answer";
 					oss.clear();
 					oss.str("");
-					oss << "TESTCASE #" << i << ": ";
-					judgerResult.info = oss.str()+cr.info;
+					oss << "Wrong Answer at TESTCASE #" << i << ": ";
+					judgerResult.info = oss.str();
 					break;
 				}
 
@@ -125,7 +127,7 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 									outputfile.c_str(),
 									(judgerConfig.outputPre+errSuf).c_str(),
 									judgerConfig.Lang.c_str(),
-									target.c_str(),
+									"/usr/bin/python3.6", target.c_str(),
 									//"/usr/bin/python3.6",
 									//Pathjoin(judgerConfig.sourceDir, judgerConfig.source+string(".code")).c_str(),
 									NULL);
@@ -146,8 +148,9 @@ JudgerResult run_Python(const JudgerConfig& judgerConfig){
 					judgerResult.result = "Wrong Answer";
 					oss.clear();
 					oss.str("");
-					oss << "TESTCASE #" << i << ": ";
-					judgerResult.info = oss.str()+cr.info;
+					oss << "Wrong Answer at TESTCASE #" << i << ": ";
+//					judgerResult.info = oss.str()+cr.info;
+					judgerResult.info = oss.str();
 					break;
 				}
 			} else

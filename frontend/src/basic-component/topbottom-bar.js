@@ -10,7 +10,7 @@ import {Alignment,
 import {Layout} from 'antd';
 import {withRouter} from "react-router-dom";
 
-const { Footer } = Layout;
+const { Header, Footer } = Layout;
 class mDropdown extends Component {
     render() {
         let menuItem;
@@ -19,7 +19,8 @@ class mDropdown extends Component {
                 <div>
                     {this.props.role !== 3 &&
                     <Menu.Item text="全部课程" onClick={() => {
-                        alert("Jump to all classes");
+                        // alert("Jump to all classes");
+                        this.props.history.push("/alllessons");
                     }}/>
                     }
                     {this.props.role === 2 &&
@@ -77,7 +78,7 @@ class mTopbar extends Component {
     }
     render() {
         return (
-            <Navbar>
+            <Navbar style={{height: '6vh'}}>
                 <Navbar.Group align={Alignment.LEFT}>
                     <Navbar.Heading>THSSOJ</Navbar.Heading>
                     <Navbar.Divider />
@@ -111,7 +112,7 @@ class mTopbar extends Component {
 class Bottombar extends Component {
     render() {
         return (
-            <Footer style={{ textAlign: 'center' }}>
+            <Footer style={{ textAlign: 'center', height: '6vh' }}>
                 THSSOJ ©2018 Created by THSS
             </Footer>
         )

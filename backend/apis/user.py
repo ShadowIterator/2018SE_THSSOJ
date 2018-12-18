@@ -8,6 +8,8 @@ from email.mime.text import MIMEText
 from email.header import Header
 from . import base
 from .base import *
+import random
+import string
 
 # TODO: to return code in every request
 
@@ -20,30 +22,73 @@ class APIUserHandler(base.BaseHandler):
             self.args['validate_time'] = datetime.datetime.fromtimestamp(self.args['validate_time'])
 
 
-    @tornado.web.authenticated
+    # @tornado.web.authenticated
     async def _query_post(self):
         print('query = ', self.args)
-        res = await self.db.getObject('users', cur_user = self.get_current_user_object(), **self.args)
+        res = await self.db.getObject('users', **self.args)
         print('query res = ', res)
+        cur_user = await self.get_current_user_object()
+        ret_list = []
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
             if 'validate_time' in user.keys() and user['validate_time'] is not None:
                 user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
+            # authority check
+            if cur_user['role'] == 1:
+                if user['role'] == 2 or cur_user['id'] == user['id']:
+                    self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
+                else:
+                    pass
+            elif cur_user['role'] == 2:
+                if user['role'] < 3:
+                    self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                    ret_list.append(user)
+                else:
+                    pass
+            elif cur_user['role'] == 3:
+                ret_list.append(user)
+            else:
+                pass
+            # ---------------------------------------------------------------------
+
         # self.write(json.dumps(res).encode())
+        print('query_return: ', res)
         return res
 
     @tornado.web.authenticated
     # @check_password
     async def _delete_post(self):
         # for condition in self.args:
+        res_dict = {}
+        # authority check
+        role = (await self.get_current_user_object())['role']
+        if role < 3:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+
         await self.deleteObject('users', **self.args)
         return {'code': 0}
 
     @tornado.web.authenticated
-    @check_password
+    # @check_password
     async def _update_post(self):
         print('si_update: ', self.args)
+        res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if self.args['id'] != cur_user['id'] and cur_user['role'] < 3:
+            self.set_res_dict(res_dict, code=1, msg='not authorized')
+            return res_dict
+        # ---------------------------------------------------------------------
+        for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
+            if key in self.args:
+                del self.args[key]
         await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
@@ -64,11 +109,13 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
+        ran_str = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],
                                 email=self.args['email'],
-                                create_time=current_time)
+                                create_time=current_time,
+                                secret = ran_str)
         # print('created: ', result)
         # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
@@ -115,6 +162,12 @@ class APIUserHandler(base.BaseHandler):
     async def _validate_post(self):
         id = self.args['id']
         res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot validate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             user_qualified = (await self.getObject('users', id=id))[0]
             email = user_qualified['email']
@@ -144,6 +197,12 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     async def _activate_post(self):
         res_dict = {}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['id'] != self.args['id']:
+            self.set_res_dict(res_dict, code=1, msg='you cannot activate others')
+            return res_dict
+        # ---------------------------------------------------------------------
         try:
             id = self.args['id']
             validate_code = self.args['validate_code']
@@ -174,7 +233,7 @@ class APIUserHandler(base.BaseHandler):
     #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
-        return await self.db.querylr('users', self.args['start'], self.args['end'])
+        return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
         #
         # if(type == 'create'):
         #     print('post create')

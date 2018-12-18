@@ -37,6 +37,8 @@ services:
     #   - '3000:3000'
     # environment:
     #   - NODE_ENV=development
+    volumes:
+      - './backend/root/judge_html_temp:/usr/src/app/root/judge_html_temp'
     ports:
       - '80:80'
 
@@ -46,4 +48,5 @@ services:
       - "12345"
     volumes:
       - './backend/root:/usr/src/app/root'
+      - './backend/test:/usr/src/app/test'
       - './backend/judge_script:/usr/src/app/judge_script'

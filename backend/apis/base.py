@@ -24,6 +24,12 @@ from tornado.options import define, options
 
 
 
+class Roles:
+    NOROLE = 0
+    STUDENT = 1
+    TA = 2
+    ADMIN = 3
+
 class NoResultError(Exception):
     pass
 
@@ -77,6 +83,9 @@ class Application(tornado.web.Application):
 
     def setDB(self, db):
         self.db_instance = db
+
+    async def async_init(self):
+        await self.db_instance.async_init()
 
 
 # class FormHandler(tornado.web.RequestHandler):
@@ -191,3 +200,26 @@ class BaseHandler(tornado.web.RequestHandler):
         for each_char in src:
             tgt+=chr(each_char)
         return tgt
+
+    def property_filter(self, object_selected, allowed_properties, abandoned_properties):
+        # if allowed_properties == None:
+        #     for each_property in object_selected.keys():
+        #         if each_property in abandoned_properties:
+        #             del object_selected[each_property]
+        # else:
+        #     for each_property in object_selected.keys():
+        #         if not each_property in allowed_properties:
+        #             del object_selected[each_property]
+        rtn = {}
+        if (allowed_properties != None):
+            for key, value in object_selected.items():
+                if(key in allowed_properties):
+                    rtn[key] = value
+        object_selected = rtn
+        rtn = {}
+        if (abandoned_properties != None):
+            for key, value in object_selected.keys():
+                if(key not in abandoned_properties):
+                    rtn[key] = value
+        object_selected = rtn
+        return rtn

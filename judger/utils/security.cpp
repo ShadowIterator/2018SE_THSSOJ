@@ -91,7 +91,7 @@ const char *readable_default[] = {
 };
 
 string toStdPath(const string& path) {	// make path endwith '/'
-	if (path.back() == '/')
+	if (path.length() > 0 && path[path.length() - 1] == '/')
 		return path;
 	return path+'/';
 }
@@ -446,6 +446,9 @@ void init_config(const RunConfig& runConfig) {
 	for (int i = 0; readable_default[i] != NULL; ++i) {
 		readable.insert(string(readable_default[i]));
 	}
+
+	for (int i = 0; i < runConfig.argArr.size(); ++i)
+		add_permission(runConfig.argArr[i], STAT);
 
 	statable.insert("/tmp");
 	statable.insert("/usr");

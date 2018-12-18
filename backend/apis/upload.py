@@ -17,10 +17,10 @@ class APIUploadHandler(base.BaseHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        self.root_dir='root'
-        self.dir =  '/tmp'
+        self.root_dir='root/'
+        self.dir =  'tmp/'
         self.user = None
-        print(self.request.body)
+        # print(self.request.body)
 
     async def _files_post(self):
         print('in file post')
@@ -28,10 +28,11 @@ class APIUploadHandler(base.BaseHandler):
         suffix = self.request.files['file'][0]['filename'].split('.')[-1]
         data = self.request.files['file'][0]['body']
         # with open('''{dir}/{filename}.{suffix}'''.format(dir = self.dir, filename = filename, suffix = suffix), 'wb') as fd:
-        path = '''{dir}/{filename}.{suffix}'''.format(dir=self.dir, filename=filename, suffix=suffix)
+        path = '''{dir}{filename}.{suffix}'''.format(dir=self.dir, filename=filename, suffix=suffix)
         print('path: ', path)
-        print('data: ', data)
-        with open(path, 'wb') as fd:
+        # print('data: ', data)
+        print("self.root_dir + path ", self.root_dir + path)
+        with open(self.root_dir + path, 'wb') as fd:
             fd.write(data)
         return {'code': 0, 'uri': path}
 

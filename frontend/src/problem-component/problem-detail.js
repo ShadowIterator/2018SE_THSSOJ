@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
 import {Card, Container, Table} from 'react-bootstrap';
-import {api_list} from "../ajax-utils/api-manager";
+import {api_list, URL} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
 import ReactMarkdown from '../../node_modules/react-markdown';
@@ -14,22 +14,21 @@ import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
 import "./problem_tab.css";
 
-import { Layout, Breadcrumb, Tabs, Modal } from 'antd';
+import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
-
-// import {Tab, Tabs} from "@blueprintjs/core"
-
-// import "../mock//course-mock";
-// import "../mock/auth-mock";
-// import "../mock/notice-mock";
-// import "../mock/homework-mock";
-// import "../mock/problem-mock";
 
 // TODO: 公共题库题目的筛选功能
 // TODO: 请求题目的API不能使用LIST方法，因为不能显示非公开的题目
 
 class ProblemDetailBody extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            file: null,
+            fileList: [],
+        }
+    }
     render() {
         return (
             <div>
@@ -38,14 +37,66 @@ class ProblemDetailBody extends Component {
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
-                        <CodeInput state={this.props.state} role={this.props.role}
-                                   id={this.props.id} problem_id={this.props.probleminfo.id}
-                                   problem_info={this.props.probleminfo}
-                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                        <div>
+                        {this.props.probleminfo.judge_method !== 2 &&
+                            <CodeInput state={this.props.state} role={this.props.role}
+                                       id={this.props.id} problem_id={this.props.probleminfo.id}
+                                       problem_info={this.props.probleminfo}
+                                       homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                        }
+                        {this.props.probleminfo.judge_method === 2 &&
+                        <Upload.Dragger name="file" multiple={false} action={URL+api_list['upload_html']}
+                                        onChange={(info) => {
+                                            let fileList = info.fileList;
+                                            console.log("upload_script", fileList);
+                                            fileList = fileList.slice(-1);
+                                            fileList = fileList.map((file) => {
+                                                if (file.response) {
+                                                    file.uri = file.response.uri;
+                                                }
+                                                return file;
+                                            });
+                                            fileList = fileList.filter((file) => {
+                                                if (file.response) {
+                                                    return file.response.code === 0;
+                                                }
+                                                return true;
+                                            });
+                                            this.setState({file: fileList[0], fileList: fileList});
+                                        }}>
+                            <p className="ant-upload-drag-icon">
+                                <Icon type="inbox" />
+                            </p>
+                            <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                            <p className="ant-upload-hint">Support for a single or bulk upload. Strictly prohibit from uploading company data or other band files</p>
+                        </Upload.Dragger>
+                        }
+                        {this.props.probleminfo.judge_method === 2 &&
+                        <Button type={"primary"} onClick={() => {
+                            if(this.state.file===null) {
+                                message.error("请上传你的作业");
+                            }
+                            ajax_post(api_list['submit_problem'], {
+                                user_id: this.props.id,
+                                problem_id: this.props.probleminfo.id,
+                                homework_id: this.props.homework_id,
+                                record_type: 4,
+                                src_code: this.state.file.uri,
+                            }, this, (that, result) => {
+                                if(result.data.code === 0) {
+                                    message.success("上传成功");
+                                } else {
+                                    message.error("上传失败");
+                                }
+                            });
+                        }}>上传</Button>
+                        }
+                        </div>
                     </TabPane>
                     <TabPane tab="查看结果" key="3">
                         <ProblemDetailRecord records={this.props.records} submit_record={this.props.submit_record}
-                                             lesson_id={this.props.lesson_id} />
+                                             lesson_id={this.props.lesson_id} html_record={this.props.html_record}
+                                             judge_method={this.props.probleminfo.judge_method} />
                     </TabPane>
                 </Tabs>
             </div>
@@ -86,21 +137,26 @@ class ProblemDetailRecord extends Component {
     }
     render() {
         let body = [];
-        if(this.props.submit_record !== null) {
-            const sub = this.props.submit_record;
+        if(this.props.submit_record !== null || this.props.html_record !== null) {
+            const sub = this.props.submit_record===null ? this.props.html_record : this.props.submit_record;
+            console.log('submit_record', this.props);
             let result = '';
-            if(sub.result_type === 0) {
-                const result_id = sub.result;
-                if(isNaN(result_id)) {
-                    result = '找不到结果';
-                } else {
-                    result = this.result_arr[result_id];
-                }
+            if(sub.status === 0) {
+                result = '等待评测';
             } else {
-                if(isNaN(sub.score)) {
-                    result = '找不到结果';
+                if (sub.result_type === 0) {
+                    const result_id = sub.result;
+                    if (isNaN(result_id)) {
+                        result = '找不到结果';
+                    } else {
+                        result = this.result_arr[result_id];
+                    }
                 } else {
-                    result = sub.score.toString() + ' 分';
+                    if (isNaN(sub.score)) {
+                        result = '找不到结果';
+                    } else {
+                        result = sub.score.toString() + ' 分';
+                    }
                 }
             }
             body.push(
@@ -110,9 +166,9 @@ class ProblemDetailRecord extends Component {
                     <td>正式提交</td>
                     }
                     <td>{result}</td>
-                    <td>{sub.consume_time.toString() + 'ms'}</td>
-                    <td>{sub.consume_memory.toString() + ' kb'}</td>
-                    <td>{sub.src_size.toString() + ' B'}</td>
+                    <td>{sub.consume_time === null ? -1 : (sub.consume_time.toString() + 'ms')}</td>
+                    <td>{sub.consume_memory === null ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
+                    <td>{sub.src_size === null ? -1 : (sub.src_size.toString() + ' B')}</td>
                     <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
                     <td><a onClick={()=>{
                         ajax_post(api_list['srcCode_record'], {id: sub.id}, this, (that, result) => {
@@ -132,18 +188,22 @@ class ProblemDetailRecord extends Component {
                     continue;
                 console.log("inside table render for loop", re);
                 let result = '';
-                if(re.result_type === 0) {
-                    const result_id = re.result;
-                    if(isNaN(result_id)) {
-                        result = '找不到结果';
-                    } else {
-                        result = this.result_arr[result_id];
-                    }
+                if(re.status === 0) {
+                    result = '正在评测';
                 } else {
-                    if(isNaN(re.score)) {
-                        result = '找不到结果';
+                    if (re.result_type === 0) {
+                        const result_id = re.result;
+                        if (isNaN(result_id)) {
+                            result = '找不到结果';
+                        } else {
+                            result = this.result_arr[result_id];
+                        }
                     } else {
-                        result = re.score.toString() + ' 分';
+                        if (isNaN(re.score)) {
+                            result = '找不到结果';
+                        } else {
+                            result = re.score.toString() + ' 分';
+                        }
                     }
                 }
                 body.push(
@@ -153,9 +213,9 @@ class ProblemDetailRecord extends Component {
                         <td>{'测试' + re.test_ratio.toString() + '%数据'}</td>
                         }
                         <td>{result}</td>
-                        <td>{re.consume_time.toString() + ' ms'}</td>
-                        <td>{re.consume_memory.toString() + ' kb'}</td>
-                        <td>{re.src_size.toString() + ' B'}</td>
+                        <td>{re.consume_time === null ? -1 : (re.consume_time.toString() + ' ms')}</td>
+                        <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
+                        <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
                         <td><a onClick={()=>{
                             ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
@@ -192,6 +252,7 @@ class ProblemDetailRecord extends Component {
                 <Modal
                     title="Basic Modal"
                     visible={this.state.visible}
+                    width='40%'
                     onOk={()=>{this.setState({visible: false})}}
                     onCancel={()=>{this.setState({visible: false})}}
                 >
@@ -199,7 +260,7 @@ class ProblemDetailRecord extends Component {
                         // mode: this.state.language,
                         theme: 'neat',
                         lineNumbers: true,
-                        readOnly: true
+                        readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
             </div>
@@ -220,6 +281,7 @@ class ProblemDetail extends Component {
             records: [],
             lesson_name: '',
             submit_record: null,
+            html_record: null,
             language: []
         };
         this.records = [];
@@ -227,7 +289,11 @@ class ProblemDetail extends Component {
     componentDidMount() {
         const id = parseInt(this.props.problem_id);
         this.setState({id:id});
-        ajax_post(api_list['query_problem'], {id:id}, this, ProblemDetail.query_problem_callback);
+        ajax_post(api_list['query_problem'], {
+            id:id,
+            homework_id: parseInt(this.props.homework_id),
+            course_id: parseInt(this.props.lesson_id),
+        }, this, ProblemDetail.query_problem_callback);
         this.update_record(this.props.id);
         if(this.props.lesson_id==='0')
             return;
@@ -265,7 +331,7 @@ class ProblemDetail extends Component {
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 1,
             }, this, (that, result) => {
-                if(result.data.length === 0) {
+                if(result.data.code === 1 || result.data.length === 0) {
                     return;
                 }
                 that.setState({records: result.data});
@@ -276,11 +342,22 @@ class ProblemDetail extends Component {
                 homework_id: parseInt(this.props.homework_id),
                 record_type: 2,
             }, this, (that, result) => {
-                if(result.data.length === 0) {
+                if(result.data.code === 1 || result.data.length === 0) {
                     return;
                 }
                 that.setState({submit_record: result.data[0]});
-            })
+            });
+            ajax_post(api_list['query_record'], {
+                user_id: id,
+                problem_id: parseInt(this.props.problem_id),
+                homework_id: parseInt(this.props.homework_id),
+                record_type: 4,
+            }, this, (that, result) => {
+                if(result.data.code === 1 || result.data.length === 0) {
+                    return;
+                }
+                that.setState({html_record: result.data[0]});
+            });
         }
     };
     static query_problem_callback(that, result) {
@@ -294,7 +371,6 @@ class ProblemDetail extends Component {
             memory_limit: parseInt(prob.memory_limit),
             judge_method: parseInt(prob.judge_method),
             language: prob.language,
-            // records: that.records,
         });
     }
     render() {
@@ -321,7 +397,8 @@ class ProblemDetail extends Component {
                                                id={this.props.id} probleminfo={this.state}
                                                homework_id={parseInt(this.props.homework_id)}
                                                records={this.state.records} lesson_id={this.props.lesson_id}
-                                               submit_record={this.state.submit_record}/>
+                                               submit_record={this.state.submit_record}
+                                               html_record={this.state.html_record}/>
                         </Container>
                     </Card.Body>
                 </Card>

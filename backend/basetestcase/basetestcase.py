@@ -38,11 +38,14 @@ define("db_password", default="", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
 define('AppConfig', default=None, help='tornado settings file', type=dict)
+define('traditionalJudgerAddr', default=None, help='judger', type=str)
+define('scriptJudgerAddr', default=None, help='judger', type=str)
 
 def async_aquire_db(func):
     @tornado.testing.gen_test
     async def wrapper(self, *args, **kw):
         await self.set_application_db()
+        await self._app.async_init()
         await self.prepare()
         return await func(self, *args, **kw)
     return wrapper
@@ -69,6 +72,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                 print('create pool done')
                 break
             except:
+                print("retrying to connect test database")
                 pass
         rdb = BaseDB(db)
         self.db = rdb

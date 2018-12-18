@@ -20,6 +20,8 @@ from queue import Queue, Empty
 from threading import Thread
 
 define("port", default=12345, help="run on the given port", type=int)
+define("domain", default="http://localhost:8000/", help="backend domain", type=str)
+define("secret", default="no_secret", help="secret", type=str)
 
 tradiQ = Queue()
 scriptQ = Queue()
@@ -57,23 +59,31 @@ def handleTraditionalJudger():
 		print('id: ', record_id, stdoutdata.decode())
 		judger.wait()
 
-		with open("result.json", "r", encoding='utf-8') as f:
-			judgerResult = json.load(f)
-			jr = { 'res': judgerResult,
-					'id': record_id
-					}
-			# judgerResult['id'] = record_id
-			print(jr)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
-			# print(r)
-			continue
-		judgerResult = {'res': {'Result': 'Judgement Failed',
-						'time': 0,
-						'memory': 0,
-						'Info': "No comment",},
-						'id': record_id}
-		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
-		print(judgerResult)
+		try:
+			with open("result.json", "r", encoding='utf-8') as f:
+				judgerResult = json.load(f)
+				jr = { 'res': judgerResult,
+						'id': record_id,
+						'secret': options.secret
+						}
+				try:
+					with open(jr['res']['Info'], "r", encoding='utf-8') as res:
+						jr['res']['Info'] = res.read(500)
+				except:
+					pass
+				judgerResult['id'] = record_id
+				print(jr)
+				requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
+				# print(r)
+		except:
+			judgerResult = {'res': {'Result': 'Judgement Failed',
+							'time': 0,
+							'memory': 0,
+							'Info': "No comment",},
+							'id': record_id,
+							'secret': options.secret}
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
+			print(judgerResult)
 		# self.write({'Result': 'Judgement Failed',
 		# 			'time': 0,
 		# 			'memory': 0,
@@ -92,13 +102,18 @@ def handleScriptJudger():
 		sourceFile = os.path.join(data['SOURCE_PATH'], data['SOURCE']+'.code')
 		targetFile = os.path.join(data['WORK_PATH'], 'index.js')
 		if not os.path.isfile(sourceFile):
-			judgerResult = {'res':{'Score': 0,
-							'time': 0,
-							'memory': 0,
-							'Info': "No comment",},
-							'id': record_id}
+			judgerResult = {
+							'res': {
+										'Score': 0,
+										'time': 0,
+										'memory': 0,
+										'Info': "No comment",
+									},
+							'id': record_id,
+							'secret': options.secret
+							}
 			print(judgerResult)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
 			# self.write({'Score': 0,
 			# 			'time': 0,
 			# 			'memory': 0,
@@ -125,27 +140,39 @@ def handleScriptJudger():
 		judger.wait()
 
 		os.remove(targetFile)
-		with open("result.json", "r", encoding='utf-8') as f:
-			# judgerResult = json.dumps(json.load(f))
-			judgerResult = json.load(f)
-			jr = {'res': judgerResult,
-				  'id': record_id}
-			# judgerResult['id'] = record_id
-			print(jr)
-			requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(jr))
-			# self.write(judgerResult)
-			continue
-		judgerResult = {'res':{'Score': 0,
-						'time': 0,
-						'memory': 0,
-						'Info': "No comment",},
-						'id': record_id}
-		print(judgerResult)
-		requests.post('http://localhost:8000/api/record/returnresult', data = json.dumps(judgerResult))
-		# self.write({'Score': 0,
-		# 			'time': 0,
-		# 			'memory': 0,
-		# 			'Info': "No comment"})
+
+		try:
+			with open("result.json", "r", encoding='utf-8') as f:
+				# judgerResult = json.dumps(json.load(f))
+				judgerResult = json.load(f)
+				jr = {'res': judgerResult,
+					  'id': record_id,
+					  'secret': options.secret}
+				try:
+					with open(jr['res']['Info'], "r", encoding='utf-8') as res:
+						js['res']['Info'] = res.read(500)
+				except:
+					pass
+				# print(jr)
+				requests.post(options.domain+'api/record/returnresult', data = json.dumps(jr))
+				# self.write(judgerResult)
+		except:
+			judgerResult = {
+						'res':  {
+									'Score': 0,
+									'time': 0,
+									'memory': 0,
+									'Info': "No comment",
+								},
+						'id': record_id,
+						'secret': options.secret
+						}
+			print(judgerResult)
+			requests.post(options.domain+'api/record/returnresult', data = json.dumps(judgerResult))
+			# self.write({'Score': 0,
+			# 			'time': 0,
+			# 			'memory': 0,
+			# 			'Info': "No comment"})
 
 
 class traditionalJudger(tornado.web.RequestHandler):
@@ -280,6 +307,10 @@ if __name__ == "__main__":
 	# 							], stdout=subprocess.PIPE)
 	# time.sleep(1)
 	# judger.kill()
+	tornado.options.parse_command_line()
+	options.parse_config_file('configs.py')
+	# print(options.domain)
+
 	traditioanlJudgerThread = Thread(target=handleTraditionalJudger)
 	scriptJudgerJudgerThread = Thread(target=handleScriptJudger)
 	traditioanlJudgerThread.start()
