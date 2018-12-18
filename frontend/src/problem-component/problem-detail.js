@@ -14,6 +14,8 @@ import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
 import "./problem_tab.css";
 
+import moment from 'moment';
+
 import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
@@ -24,24 +26,41 @@ class ProblemDetailBody extends Component {
         this.state = {
             file: null,
             fileList: [],
-            isEditing: this.props.submit_record !== null,
+            isEditing: this.props.submit_record !== null || this.props.html_record !== null,
             reupload: false,
         }
     }
+    componentWillUpdate(nextProps) {
+        if(nextProps === this.props) {
+            return;
+        }
+        this.setState({
+            isEditing: nextProps.submit_record !== null || nextProps.html_record !== null,
+        })
+    }
     render() {
+        console.log("this.state", this.state);
+        console.log("this.props", this.props);
+        console.log("bool", this.props.submit_record !== null || this.props.html_record !== null);
         return (
             <div>
-                <Tabs defaultActiveKey="1" onChange={(e)=>{console.log(e.key)}} className='problem_tab'>
+                <Tabs defaultActiveKey="1" onChange={(e)=>{
+                    console.log(e.key);
+                    if(e.key==="3"){
+                        this.props.update_record(this.props.id);
+                    }}} className='problem_tab'>
                     <TabPane tab="题目详情" key="1">
                         <ReactMarkdown source={this.props.probleminfo.description} />
                     </TabPane>
                     <TabPane tab="提交代码" key="2">
-                        <div style={{textAlign: 'center'}}>
+                        <div>
                         {this.props.probleminfo.judge_method !== 2 &&
                         <CodeInput state={this.props.state} role={this.props.role}
                                    id={this.props.id} problem_id={this.props.probleminfo.id}
                                    problem_info={this.props.probleminfo}
-                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}/>
+                                   homework_id={this.props.homework_id} lesson_id={this.props.lesson_id}
+                                   homework_info={this.props.homework_info} ratio={this.props.ratio}
+                                   update_record={this.props.update_record}/>
                         }
                         {!this.state.isEditing && this.props.probleminfo.judge_method === 2 &&
                         <Upload.Dragger name="file" multiple={false} action={URL+api_list['upload_html']}
@@ -77,6 +96,34 @@ class ProblemDetailBody extends Component {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
+                                if(moment().unix() > this.props.homework_info.deadline) {
+                                    Modal.confirm({
+                                        title: '您确定要提交吗？',
+                                        content: '已过截止日期的提交可能会被助教扣除一些分数，您想要继续提交吗？',
+                                        okText: '确定',
+                                        okType: 'danger',
+                                        cancelText: '取消',
+                                        onOk: () => {
+                                            ajax_post(api_list['submit_problem'], {
+                                                user_id: this.props.id,
+                                                problem_id: this.props.probleminfo.id,
+                                                homework_id: this.props.homework_id,
+                                                record_type: 4,
+                                                src_code: this.state.file.uri,
+                                            }, this, (that, result) => {
+                                                if(result.data.code === 0) {
+                                                    message.success("上传成功");
+                                                } else {
+                                                    message.error("上传失败");
+                                                }
+                                            });
+                                        },
+                                        onCancel: () => {
+                                            console.log('Cancel');
+                                        },
+                                    });
+                                    return;
+                                }
                                 ajax_post(api_list['submit_problem'], {
                                     user_id: this.props.id,
                                     problem_id: this.props.probleminfo.id,
@@ -90,7 +137,7 @@ class ProblemDetailBody extends Component {
                                         message.error("上传失败");
                                     }
                                 });
-                            }}>上传</Button>
+                            }}>{moment().unix() > this.props.homework_info.deadline ? "补交" : "提交"}</Button>
                         </div>
                         }
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && this.state.reupload &&
@@ -127,6 +174,34 @@ class ProblemDetailBody extends Component {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
+                                if(moment().unix() > this.props.homework_info.deadline) {
+                                    Modal.confirm({
+                                        title: '您确定要提交吗？',
+                                        content: '已过截止日期的提交可能会被助教扣除一些分数，您想要继续提交吗？',
+                                        okText: '确定',
+                                        okType: 'danger',
+                                        cancelText: '取消',
+                                        onOk: () => {
+                                            ajax_post(api_list['submit_problem'], {
+                                                user_id: this.props.id,
+                                                problem_id: this.props.probleminfo.id,
+                                                homework_id: this.props.homework_id,
+                                                record_type: 4,
+                                                src_code: this.state.file.uri,
+                                            }, this, (that, result) => {
+                                                if(result.data.code === 0) {
+                                                    message.success("上传成功");
+                                                } else {
+                                                    message.error("上传失败");
+                                                }
+                                            });
+                                        },
+                                        onCancel: () => {
+                                            console.log('Cancel');
+                                        },
+                                    });
+                                    return;
+                                }
                                 ajax_post(api_list['submit_problem'], {
                                     user_id: this.props.id,
                                     problem_id: this.props.probleminfo.id,
@@ -140,13 +215,13 @@ class ProblemDetailBody extends Component {
                                         message.error("上传失败");
                                     }
                                 });
-                            }}>上传</Button>
+                            }}>{moment().unix() > this.props.homework_info.deadline ? "补交" : "提交"}</Button>
                         </div>
                         }
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && !this.state.reupload &&
-                        <div>
-                            <a href={URL+api_list['download_html']+"?id="+this.props.submit_record.id.toString()} download={"html.zip"} />
-                            <Button onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
+                        <div style={{textAlign: 'center'}}>
+                            <a href={URL+api_list['download_html']+"?id="+this.props.html_record.id.toString()} download={"html.zip"} >下载已上传文件</a><br/>
+                            <Button style={{marginTop: 15}} onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
                         </div>
                         }
                         </div>
@@ -197,7 +272,6 @@ class ProblemDetailRecord extends Component {
         let body = [];
         if(this.props.submit_record !== null || this.props.html_record !== null) {
             const sub = this.props.submit_record===null ? this.props.html_record : this.props.submit_record;
-            console.log('submit_record', this.props);
             let result = '';
             if(sub.status === 0) {
                 result = '等待评测';
@@ -340,7 +414,10 @@ class ProblemDetail extends Component {
             lesson_name: '',
             submit_record: null,
             html_record: null,
-            language: []
+            language: [],
+            homework_info: {},
+            problem_info: {},
+            ratio: {ratio_one_used: 10, ratio_two_used: 10, ratio_three_used: 10},
         };
         this.records = [];
     }
@@ -352,6 +429,20 @@ class ProblemDetail extends Component {
             homework_id: parseInt(this.props.homework_id),
             course_id: parseInt(this.props.lesson_id),
         }, this, ProblemDetail.query_problem_callback);
+        ajax_post(api_list['query_homework'], {
+            id: parseInt(this.props.homework_id),
+        }, this, (that, result) => {
+            if(result.data.code === 1) {
+                message.error("请求作业数据失败");
+                return;
+            }
+            if(result.data.length === 0) {
+                return;
+            }
+            that.setState({
+                homework_info: result.data[0],
+            })
+        });
         if(this.props.lesson_id==='0')
             return;
         ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
@@ -373,6 +464,8 @@ class ProblemDetail extends Component {
         }
     }
     update_record = (id) => {
+        if(id === -1)
+            return;
         if(this.props.lesson_id === '0') {
             ajax_post(api_list['query_record'], {
                 user_id: id,
@@ -385,6 +478,17 @@ class ProblemDetail extends Component {
                 that.setState({records: result.data});
             });
         } else {
+            ajax_post(api_list['query_ratio'], {
+                user_id: id,
+                homework_id: parseInt(this.props.homework_id),
+                problem_id: parseInt(this.props.problem_id),
+            }, this, (that, result) => {
+                if(result.data.code === 1 || result.data.length === 0) {
+                    message.error("请求剩余测试数据失败");
+                    return;
+                }
+                that.setState({ratio: result.data[0]});
+            });
             ajax_post(api_list['query_record'], {
                 user_id: id,
                 problem_id: parseInt(this.props.problem_id),
@@ -431,6 +535,7 @@ class ProblemDetail extends Component {
             memory_limit: parseInt(prob.memory_limit),
             judge_method: parseInt(prob.judge_method),
             language: prob.language,
+            problem_info: prob,
         });
     }
     render() {
@@ -454,11 +559,13 @@ class ProblemDetail extends Component {
                         <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
                         <Container>
                             <ProblemDetailBody state={this.props.state} role={this.props.role}
-                                               id={this.props.id} probleminfo={this.state}
+                                               id={this.props.id} probleminfo={this.state.problem_info}
                                                homework_id={parseInt(this.props.homework_id)}
                                                records={this.state.records} lesson_id={this.props.lesson_id}
                                                submit_record={this.state.submit_record}
-                                               html_record={this.state.html_record}/>
+                                               html_record={this.state.html_record}
+                                               homework_info={this.state.homework_info} ratio={this.state.ratio}
+                                               update_record={this.update_record}/>
                         </Container>
                     </Card.Body>
                 </Card>

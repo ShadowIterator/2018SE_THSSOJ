@@ -411,11 +411,11 @@ class APIProblemHandler(base.BaseHandler):
                 html_record = await self.db.createObject('records', **self.args)
                 problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(),
                                                            id=self.args['problem_id']))[0]
-                problem_of_code['records'].append(html_record['id'])
+                # problem_of_code['records'].append(html_record['id'])
                 await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
                 matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(),
                                                             id=self.args['homework_id']))[0]
-                matched_homework['records'].append(html_record['id'])
+                # matched_homework['records'].append(html_record['id'])
                 await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
 
 

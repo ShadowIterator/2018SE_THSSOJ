@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {UnControlled as CodeMirror} from '../../node_modules/react-codemirror2';
 
-import {Button} from '@blueprintjs/core';
+// import {Button} from '@blueprintjs/core';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {AuthContext} from "./auth-context";
@@ -16,7 +16,9 @@ import '../../node_modules/codemirror/addon/hint/show-hint.css';
 import '../../node_modules/codemirror/addon/hint/show-hint.js';
 import '../../node_modules/codemirror/addon/selection/active-line';
 
-import {Select, Row, Col, message} from "antd";
+import moment from 'moment';
+
+import {Select, message, Form, Button, Modal} from "antd";
 
 const Option = Select.Option;
 
@@ -26,7 +28,6 @@ const defaultcode = {'javascript': '// javascript code here',
                      'Python3': '# Python code here'};
 
 class CodeInput extends Component {
-
     constructor(props) {
         super(props);
         let lang_str = '';
@@ -42,6 +43,7 @@ class CodeInput extends Component {
             code: defaultcode[lang_str],
             mode: lang_str,
             language: lang_type,
+            submit_type: '4'
         };
         this.clickSubmit = this.clickSubmit.bind(this);
         this.clickTest = this.clickTest.bind(this);
@@ -72,16 +74,13 @@ class CodeInput extends Component {
             this.setState({
                 language: 'text/x-python',
             })
-
     }
 
     codeChange(editor, data, value){
         this.setState({code: value});
     }
 
-    clickSubmit(e){
-        e.preventDefault();
-        e.stopPropagation();
+    clickSubmit(){
         let lang;
         if (this.state.mode === 'javascript')
             lang = 3;
@@ -116,24 +115,36 @@ class CodeInput extends Component {
                 src_language: lang,
                 test_ratio: 100,
             };
+            if(moment().unix() > this.props.homework_info.deadline) {
+                Modal.confirm({
+                    title: '您确定要提交吗？',
+                    content: '已过截止日期的提交可能会被助教扣除一些分数，您想要继续提交吗？',
+                    okText: '确定',
+                    okType: 'danger',
+                    cancelText: '取消',
+                    onOk: () => {
+                        ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
+                    },
+                    onCancel: () => {
+                        console.log('Cancel');
+                    },
+                });
+                return;
+            }
         }
-        console.log(data);
+        console.log("intime_submit_data",data);
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
 
     static submit_callback(that, result) {
         if(result.data.code===0) {
-            // alert("Successfully submit your code.");
             message.success("您成功地提交了代码");
         } else {
-            // alert("Something wrong while submitting your code.");
             message.error("代码提交失败");
         }
     }
 
-    clickTest(e) {
-        e.preventDefault();
-        e.stopPropagation();
+    clickTest() {
         let lang;
         if (this.state.mode === 'javascript')
             lang = 3;
@@ -152,7 +163,7 @@ class CodeInput extends Component {
             record_type: 1,
             src_code: this.state.code,
             src_language: lang,
-            test_ratio: 100,
+            test_ratio: parseInt(this.state.submit_type),
         };
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
@@ -176,11 +187,52 @@ class CodeInput extends Component {
                 options.push(<Option value={"Python3"}>Python3</Option>);
             }
         }
+        let ratio_one_text, ratio_two_text, ratio_three_text;
+        if(this.props.lesson_id !== '0') {
+            ratio_one_text = "测试"+this.props.problem_info.ratio_one.toString()+
+                "%数据(剩余测试次数："+(this.props.problem_info.ratio_one_limit-this.props.ratio.ratio_one_used).toString()+")";
+            ratio_two_text = "测试"+this.props.problem_info.ratio_two.toString()+
+                "%数据(剩余测试次数："+(this.props.problem_info.ratio_two_limit-this.props.ratio.ratio_two_used).toString()+")";
+            ratio_three_text = "测试"+this.props.problem_info.ratio_three.toString()+
+                "%数据(剩余测试次数："+(this.props.problem_info.ratio_three_limit-this.props.ratio.ratio_three_used).toString()+")";
+        }
+        let submit_options = [];
+        if(this.props.lesson_id !== '0') {
+            submit_options.push(<Option value={"1"}>{ratio_one_text}</Option>);
+            submit_options.push(<Option value={"2"}>{ratio_two_text}</Option>);
+            submit_options.push(<Option value={"3"}>{ratio_three_text}</Option>);
+        }
+        submit_options.push(<Option value={"4"} key={"o4"}>提交</Option>);
         return (
             <div>
-                <Select onChange={this.modeChange} value={this.state.mode} style={{outline: 0, width: 120, marginBottom: 10}}>
-                    {options}
-                </Select>
+                <Form layout="inline" onSubmit={(e)=>{e.preventDefault();}}>
+                    <Form.Item label={"请选择提交语言"}>
+                        <Select onChange={this.modeChange} value={this.state.mode}
+                                style={{outline: 0, width: 150, marginBottom: 10}}>
+                            {options}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item label={"请选择提交类型"}>
+                        <Select onChange={(value)=>{this.setState({submit_type: value})}} value={this.state.submit_type}
+                                style={{outline: 0, width: 300, marginBottom: 10}}>
+                            {submit_options}
+                        </Select>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" icon="upload" onClick={(e) => {
+                            e.preventDefault();
+                            if(this.props.lesson_id === '0') {
+                                this.clickSubmit();
+                            } else if(this.state.submit_type === '4') {
+                                this.clickSubmit();
+                            } else {
+                                this.clickTest();
+                            }
+                        }}>
+                            {this.state.submit_type==='4' ? (moment().unix() > this.props.homework_info.deadline ? "补交":"提交") : "测试"}
+                        </Button>
+                    </Form.Item>
+                </Form>
                 <div style={{border: '1px solid grey'}}>
                     <CodeMirror options={{
                                     mode: this.state.language,
@@ -189,26 +241,10 @@ class CodeInput extends Component {
                                     extraKeys: {"Ctrl": "autocomplete"},
                                     smartIndent: true,
                                     matchBrackets: true,
-                                    // autofocus: true
                                 }}
                                 onChange={this.codeChange}
-                                // value={this.state.code}
                     />
                 </div>
-                <Row type="flex" justify="center">
-                    {this.props.lesson_id !== '0' &&
-                    <Col span={4}>
-                        <div style={{textAlign: 'center', marginTop: '10px'}}>
-                            <Button icon="build" onClick={this.clickTest} style={{outline: 0}}>测试</Button>
-                        </div>
-                    </Col>
-                    }
-                    <Col span={4}>
-                        <div style={{textAlign: 'center', marginTop: '10px'}}>
-                            <Button icon="upload" onClick={this.clickSubmit} style={{outline: 0}}>提交</Button>
-                        </div>
-                    </Col>
-                </Row>
             </div>
         )
     }

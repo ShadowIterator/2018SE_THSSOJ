@@ -139,6 +139,7 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
+            res_dict['username'] = userObj.username
 
         else:
             res_dict['code'] = 1

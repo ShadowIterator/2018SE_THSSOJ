@@ -60,6 +60,8 @@ const api_list = {
     'download_script': '/api/download/script',
     'download_html': '/api/download/html',
 
+    'query_ratio': '/api/ratio/query',
+
     'query_judgestates': '/api/judgestate/query',
 };
 
