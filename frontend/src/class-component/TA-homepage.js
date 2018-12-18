@@ -138,6 +138,7 @@ class mTAHomepageMiddle extends Component {
                             {running_talesson.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
+                                          // title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                           actions={[
                                               <Tooltip title="查看通知">
                                                   <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
@@ -159,9 +160,17 @@ class mTAHomepageMiddle extends Component {
                                                         onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
                                               </Tooltip>]}
                                           hoverable={true}
+
                                     >
-                                        <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                              description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={
+                                                  <div>
+                                                      <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
+                                                  </div>
+                                              }
+                                        />
                                     </Card>
                                 </Col>
                             )}

@@ -70,11 +70,12 @@ CREATE TABLE homeworks (
     name VARCHAR(128),
     description TEXT,
     deadline TIMESTAMP,
-    status INTEGER DEFAULT 0,
+--    status INTEGER DEFAULT 0,
     problems INTEGER[] DEFAULT '{}',
-    records INTEGER[] DEFAULT '{}',
-    score_openness INTEGER DEFAULT 0,
-    submitable INTEGER DEFAULT 0,
+--    records INTEGER[] DEFAULT '{}',
+-- TODO: 本来score_openness 应该默认0
+    score_openness INTEGER DEFAULT 1,
+    submitable INTEGER DEFAULT 1,
     course_id INTEGER
 
     -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
@@ -90,7 +91,7 @@ CREATE TABLE problems (
     memory_limit INTEGER DEFAULT 256000,  -- KB
     judge_method INTEGER DEFAULT 1,
     language INTEGER[] DEFAULT '{}',
-    records INTEGER[] DEFAULT '{}',
+--    records INTEGER[] DEFAULT '{}',
     openness INTEGER DEFAULT 0,
     status INTEGER DEFAULT 0,
     test_language INTEGER,
@@ -100,7 +101,6 @@ CREATE TABLE problems (
     ratio_two_limit INTEGER,
     ratio_three INTEGER,
     ratio_three_limit INTEGER
-
 );
 
 DROP TABLE IF EXISTS records;
@@ -142,9 +142,9 @@ CREATE TABLE judgestates (
     id SERIAL PRIMARY KEY,
     homework_id INTEGER,
     problem_id INTEGER,
-    total INTEGER,
-    judged INTEGER
-    -- TODO: 添加创建时间
+    total INTEGER DEFAULT 0,
+    judged INTEGER DEFAULT 0,
+    total_waiting INTEGER DEFAULT 0
 );
 
 DROP TABLE IF EXISTS ratios;
@@ -163,8 +163,8 @@ CREATE TABLE ratios (
 -- create items
 --INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
 
-INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{1}', 'liadf92wlfisajfli39alsdifj3isd');
-INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'faslidjf23453dsafads');
+INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{}', 'liadf92wlfisajfli39alsdifj3isd');
+INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('ta','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'faslidjf23453dsafads');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
 --INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin1','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 --INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin2','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
@@ -178,13 +178,16 @@ INSERT INTO users (username, password, email, role, TA_courses, student_courses,
 --INSERT INTO notices (user_id, course_id, title, content) VALUES (2, 1, 'This is notice 3.', 'This is notice 3 content.');
 --
 --
-INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable, course_id) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2020-05-16 15:36:38', '{1,2,3}', '{}', 1, 1, 1);
+INSERT INTO homeworks (name, description, deadline, problems, score_openness, submitable, course_id) VALUES ('homework1', 'homework1_desc', TIMESTAMP '2020-05-16 15:36:38', '{1,2,3}', 1, 1, 1);
 --INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework2', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,4}', '{}', 0, 0);
 --INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework3', 'homework1_desc', TIMESTAMP '2021-05-16 15:36:38', '{1,2,5}', '{}', 0, 1);
 --INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework4', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,6,7,8}', '{}', 1, 0);
 --INSERT INTO homeworks (name, description, deadline, problems, records, score_openness, submitable) VALUES ('homework5', 'homework1_desc', TIMESTAMP '2011-05-16 15:36:38', '{1,2,3,5,7}', '{}', 1, 1);
 --
+-- *************************** DELETED ******************************
+--INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{}', TIMESTAMP '2010-05-16 15:36:38', TIMESTAMP '2020-05-16 15:36:38');
 --
+
 INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{}', TIMESTAMP '2010-05-16 15:36:38', TIMESTAMP '2020-05-16 15:36:38');
 --
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);

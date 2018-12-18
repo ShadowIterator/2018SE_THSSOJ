@@ -92,7 +92,7 @@ class mStudentHomepageMiddle extends Component {
                                                 <Icon type="info-circle" theme="twoTone"
                                                       onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
                                             </Tooltip>]}>
-                                <Meta title={<Link to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                <Meta title={<Link style={{fontSize: '200%'}} to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                       description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                             </Card>
                         </Col>
