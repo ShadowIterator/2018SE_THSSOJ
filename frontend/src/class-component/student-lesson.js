@@ -5,7 +5,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {withRouter, Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Menu, List, Row, Col, Icon } from 'antd';
+import { Layout, Breadcrumb, Menu, List, Row, Col, Icon, Table } from 'antd';
 import moment from 'moment'
 import {Info} from "./lesson-component";
 const {Content, Sider} = Layout;
@@ -22,6 +22,35 @@ const result_arr = ['Accepted',
     'Compile Error',
     'unknown',
 ];
+
+class CourseInfo extends Component {
+    render() {
+        const ta_columns = [
+            {title: 'ID', dataIndex: 'id',width: 150, key: 'id'},
+            {title: '助教姓名', dataIndex: 'username',width: 150, key: 'username'},
+            {title: '邮箱', dataIndex: 'email',width: 150, key: 'email'}
+        ];
+        return (
+            <table>
+                <tr>
+                    <th>课程名</th>
+                    <td>{this.props.name}</td>
+                </tr>
+                <tr>
+                    <th>课程简介</th>
+                    <td>{this.props.description}</td>
+                </tr>
+                <tr>
+                    <th>助教</th>
+                    <td>
+                        <Table columns={ta_columns} dataSource={this.props.ta_list}/>
+                    </td>
+                </tr>
+            </table>
+        )
+    }
+}
+
 /*
 将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
 未到截止日期：使用timestamp区分是否到达截止日期
@@ -253,6 +282,12 @@ class mStudentLessonMiddle extends Component {
             // problemitems: [],
             lesson_name: '',
             current_selected: '1',
+            course_info: {
+                name: "",
+                description: "",
+                ta_list: []
+            }
+
             // homeworkstatus: {},
         };
         this.infoitems = [];
@@ -310,7 +345,20 @@ class mStudentLessonMiddle extends Component {
             }
             else if(that.state.current_selected === '6')
             {
-
+                let course_info = {
+                    name: result.data[0].name,
+                    description: result.data[0].description,
+                    ta_list: []
+                };
+                const tas = result.data[0].tas;
+                for (let ta of tas) {
+                    ajax_post(api_list['query_user'], {id: ta}, that, (that, result) => {
+                        if (result.data.length === 0)
+                            return;
+                        course_info.ta_list.push(result.data[0]);
+                        that.setState({course_info: course_info});
+                    })
+                }
             }
             else
             {
@@ -456,12 +504,13 @@ class mStudentLessonMiddle extends Component {
         else
         {
             breadcrumb=(<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
-            if(this.state.homeworkitems.length !== 0) {
-                panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
-                                          course_id={this.props.course_id}/>);
-            } else {
-                panel = (<h3>您当前没有作业</h3>)
-            }
+            panel = (<CourseInfo {...this.state.course_info}/>)
+            // if(this.state.homeworkitems.length !== 0) {
+            //     panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
+            //                               course_id={this.props.course_id}/>);
+            // } else {
+            //     panel = (<h3>您当前没有作业</h3>)
+            // }
         }
         return (
             <Content style={{ padding: '0 50px' }}>
