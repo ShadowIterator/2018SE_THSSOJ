@@ -20,15 +20,19 @@ class mStudentHomepageMiddle extends Component {
     componentDidMount() {
         if(!this.props.state || this.props.id===undefined || this.props.id === -1)
             return;
-        const id = this.props.id;
-        ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
+        // const id = this.props.id;
+        this.query_data(this.props.id);
+        // ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
         if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
-            ajax_post(api_list['query_user'], {id:nextProps.id}, this, StudentHomepageMiddle.query_user_callback);
+            this.query_data(nextProps.id);
         }
+    }
+    query_data(id) {
+        ajax_post(api_list['query_user'], {id: id}, this, StudentHomepageMiddle.query_user_callback);
     }
     static query_user_callback(that, result) {
         if(result.data.length === 0) {

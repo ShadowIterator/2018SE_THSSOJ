@@ -324,6 +324,20 @@ class mLessonList extends Component {
             );
         }
 
+        let show_course_spell;
+        if (this.state.isCreating) {
+            show_course_spell = (<></>);
+        } else
+        {
+            show_course_spell = (
+                <FormItem
+                    {...formItemLayout}
+                    label="课程暗号"
+                >
+                    <span className="ant-form-text"><strong>{this.state.course_spell}</strong></span>
+                </FormItem>
+            );
+        }
         return (
             <div>
             <Form onSubmit={this.handleSubmit}>
@@ -340,14 +354,7 @@ class mLessonList extends Component {
                         <Input disabled={this.props.readOnly}/>
                     )}
                 </FormItem>
-
-                <FormItem
-                    {...formItemLayout}
-                    label="课程暗号"
-                >
-                    <span className="ant-form-text"><strong>{this.state.course_spell}</strong></span>
-                </FormItem>
-
+                {show_course_spell}
                 <FormItem
                     {...formItemLayout}
                     label="课程简介"
