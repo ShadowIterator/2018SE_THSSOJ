@@ -11,6 +11,7 @@ const api_list = {
     'activate_user': '/api/user/activate',
     'validate_user': '/api/user/validate',
     'update_user': '/api/user/update',
+    'modifypwd_user': '/api/user/modifypwd',
 
     'list_course': '/api/course/list',
     'create_course': '/api/course/create',
