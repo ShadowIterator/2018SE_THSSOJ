@@ -415,6 +415,9 @@ class APIProblemHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
 
+        if self.args['record_type'] == 1:
+            pass
+
         record_created = await self.db.createObject('records', **self.args)
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
         problem_of_code['records'].append(record_created['id'])
