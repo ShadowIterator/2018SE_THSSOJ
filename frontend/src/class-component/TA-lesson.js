@@ -145,28 +145,41 @@ export class TALesson extends Component {
                     const id_str = result.data[0].problems[index].toString();
                     let problemitem;
 
-                    if (res.data.length === 1) {    // get data
-                        if (id_str in problemset) {
-                            problemitem = problemset[id_str];
-                        } else
-                        {
-                            problemitem = { id: result.data[0].problems[index] };
-                        }
-                        if (res.data[0].total === res.data[0].judged)
-                            problemitem['judger_status'] = 2;   // finished
-                        else
-                            problemitem['judger_status'] = 1;   // judging
-                    } else      // no data gotten
+                    if (id_str in problemset) {
+                        problemitem = problemitem[id_str];
+                    } else
                     {
-                        if (id_str in problemset) {
-                            problemitem = problemset[id_str];
-
-                        } else
-                        {
-                            problemitem = { id: result.data[0].problems[index] };
-                        }
-                        problemitem['judger_status'] = 0;   // NoStarted
+                        problemitem = {id: result.data[0].problems[index]};
                     }
+                    if (res.data[0].total_waiting < 0)      // not started
+                        problemitem['judger_status'] = 0;
+                    else
+                    if (res.data[0].total_waiting === res.data[0].judged)   // judging
+                        problemitem['judger_status'] = 1;
+                    else
+                        problemitem['judger_status'] = 2;   // finished
+                    // if (res.data.length === 1) {    // get data
+                    //     if (id_str in problemset) {
+                    //         problemitem = problemset[id_str];
+                    //     } else
+                    //     {
+                    //         problemitem = { id: result.data[0].problems[index] };
+                    //     }
+                    //     if (res.data[0].total === res.data[0].judged)
+                    //         problemitem['judger_status'] = 2;   // finished
+                    //     else
+                    //         problemitem['judger_status'] = 1;   // judging
+                    // } else      // no data gotten
+                    // {
+                    //     if (id_str in problemset) {
+                    //         problemitem = problemset[id_str];
+                    //
+                    //     } else
+                    //     {
+                    //         problemitem = { id: result.data[0].problems[index] };
+                    //     }
+                    //     problemitem['judger_status'] = 0;   // NoStarted
+                    // }
 
                     problemset[id_str] = problemitem;
                     that.setState({
