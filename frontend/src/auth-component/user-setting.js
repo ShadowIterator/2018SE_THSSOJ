@@ -110,7 +110,7 @@ const WrappedModifyPwdForm = Form.create({
         props.onChange(changedFields);
     },
     onValuesChange(_, values) {
-        console.log(values);
+        // console.log(values);
     },
     mapPropsToFields(props) {
         return {
@@ -488,9 +488,12 @@ export class UserSettings extends Component {
                 <Breadcrumb.Item>修改个人信息</Breadcrumb.Item>
             );
             content = (
-                <WrappedUserSettingsForm state={this.props.state}
-                                         id={this.props.id}
-                                         role={this.props.role}/>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                    <h3>修改个人信息</h3>
+                    <WrappedUserSettingsForm state={this.props.state}
+                                             id={this.props.id}
+                                             role={this.props.role}/>
+                </div>
             );
         } else
         if (this.state.status === 2) {
@@ -498,9 +501,12 @@ export class UserSettings extends Component {
                 <Breadcrumb.Item>修改密码</Breadcrumb.Item>
             );
             content = (
-                <WrappedModifyPwdForm id={this.props.id}
-                                      onChange={this.handleFormChange}
-                                      {...this.state.fields}/>
+                <div style={{ background: '#fff', padding: 24, minHeight: 280, textAlign: 'center' }}>
+                    <h3>修改密码</h3>
+                    <WrappedModifyPwdForm id={this.props.id}
+                                          onChange={this.handleFormChange}
+                                          {...this.state.fields}/>
+                </div>
             );
         }
         else {
@@ -516,6 +522,7 @@ export class UserSettings extends Component {
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
                     <Breadcrumb.Item><Link to={homelink}>Home</Link></Breadcrumb.Item>
+                    {breadcrumb}
                 </Breadcrumb>
 
                 <Layout style={{ padding: '24px 0', background: '#fff' }}>
@@ -537,42 +544,5 @@ export class UserSettings extends Component {
                 </Layout>
             </Content>
         );
-
-        if (this.state.status === 0) {
-            return (
-                <Content style={{padding: '0 50px'}}>
-                    <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to={homelink}>Home</Link></Breadcrumb.Item>
-                        <Breadcrumb.Item>修改个人信息</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <Card className="text-center">
-                        <Card.Body>
-                            <Card.Title><h2>修改个人信息</h2></Card.Title>
-                            <Container>
-
-                            </Container>
-                        </Card.Body>
-                    </Card>
-                </Content>
-            );
-        } else
-        {
-            return (
-                <Content style={{padding: '0 50px'}}>
-                    <Breadcrumb style={{margin: '16px 0'}}>
-                        <Breadcrumb.Item><Link to={homelink}>Home</Link></Breadcrumb.Item>
-                        <Breadcrumb.Item>修改密码</Breadcrumb.Item>
-                    </Breadcrumb>
-                    <Card className="text-center">
-                        <Card.Body>
-                            <Card.Title><h2>修改密码</h2></Card.Title>
-                            <Container>
-
-                            </Container>
-                        </Card.Body>
-                    </Card>
-                </Content>
-            );
-        }
     }
 }
