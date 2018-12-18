@@ -416,16 +416,6 @@ class APIProblemHandler(base.BaseHandler):
         # ---------------------------------------------------------------------
 
         record_created = await self.db.createObject('records', **self.args)
-                                # user_id=self.args['user_id'],
-                                # problem_id=self.args['problem_id'],
-                                # homework_id=self.args['homework_id'],
-                                # submit_time=datetime.datetime.fromtimestamp(cur_timestamp))
-
-        # record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(),
-        #                                         user_id=self.args['user_id'],
-        #                                         submit_time=datetime.datetime.fromtimestamp(cur_timestamp)
-        #                                        ))[0]
-
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
         problem_of_code['records'].append(record_created['id'])
         await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
@@ -433,6 +423,7 @@ class APIProblemHandler(base.BaseHandler):
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
             matched_homework['records'].append(record_created['id'])
             await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
+
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         if not os.path.exists(record_dir):
@@ -452,6 +443,7 @@ class APIProblemHandler(base.BaseHandler):
         elif self.args['src_language'] == 3:
             record_created['result_type'] = 1
         await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+
         if self.args['record_type']==2:
             self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
             return res_dict
