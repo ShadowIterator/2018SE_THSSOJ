@@ -559,6 +559,7 @@ class APIProblemHandler(base.BaseHandler):
         selectedobj = (await self.db.getObject('records', id = self.args['record_id']))[0]
         selectedobj['score'] = self.args['score']
         selectedobj['status'] = cur_user['id']
+        selectedobj['result_type'] = 1
         await self.db.saveObject('records', selectedobj)
         return {'code': 0}
 
