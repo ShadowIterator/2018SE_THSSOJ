@@ -167,6 +167,7 @@ class mTAHomepageMiddle extends Component {
                                                   <div>
                                                       <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
                                                       <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程暗号："+lesson.course_spell}</p>
                                                       <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
                                                   </div>
                                               }

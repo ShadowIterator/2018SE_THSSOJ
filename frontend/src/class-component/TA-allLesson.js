@@ -128,6 +128,7 @@ class mAllLesson extends Component {
                                                   <div>
                                                       <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
                                                       <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程暗号："+lesson.course_spell}</p>
                                                       <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
                                                   </div>
                                               }
@@ -163,8 +164,8 @@ class mAllLesson extends Component {
                                             user_id: this.props.id,
                                             course_spell: value
                                         }
-                                        api_list(api_list['add_course'], data, this, (that, result) => {
-                                            if (that.data.code === 1 || that.data.length === 0) {
+                                        ajax_post(api_list['add_course'], data, this, (that, result) => {
+                                            if (result.data.code === 1) {
                                                 message.error('未找到课程');
                                                 return;
                                             }
