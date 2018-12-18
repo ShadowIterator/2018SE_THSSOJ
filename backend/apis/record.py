@@ -146,6 +146,12 @@ class APIRecordHandler(base.BaseHandler):
                        'unknown': 9,
                        }
         print('returnresult: ', match_record)
+        # ******************************** update judgestates *********************************************
+        if(match_record['record_type'] in [2, 4]):
+            judge_state = await self.db.getObjectOne('judgestates', homework_id = match_record['homework_id'], problem_id = match_record['problem_id'])
+            judge_state['judged'] += 1
+            await self.db.saveObject('judgestates', judge_state)
+
         judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
             match_record['consume_time'] = judge_result['time']
