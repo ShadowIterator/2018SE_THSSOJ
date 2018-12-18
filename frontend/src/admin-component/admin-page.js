@@ -95,6 +95,9 @@ class AdminTable extends Component {
         this.updateTable(params.page);
     };
     componentDidMount() {
+        this.setState({
+            loading: true,
+        });
         this.updateTable(1);
     }
     componentDidUpdate(prevProps) {

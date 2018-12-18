@@ -53,7 +53,7 @@ class mLessonList extends Component {
         if(nextProps.id !== this.props.id ||
             nextProps.course_id !== this.props.course_id ||
             nextProps.readOnly !== this.props.readOnly) {
-            console.log('componentWillUpdate: ', nextProps)
+            console.log('componentWillUpdate: ', nextProps);
             if (nextProps.course_id !== undefined) {
                 this.state = {
                     isCreating: false,

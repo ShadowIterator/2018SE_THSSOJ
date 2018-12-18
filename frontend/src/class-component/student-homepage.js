@@ -18,13 +18,13 @@ class mStudentHomepageMiddle extends Component {
         this.lessonlist = [];
     }
     componentDidMount() {
-        if(!this.props.state || this.props.id===undefined)
+        if(!this.props.state || this.props.id===undefined || this.props.id === -1)
             return;
         const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
             ajax_post(api_list['query_user'], {id:nextProps.id}, this, StudentHomepageMiddle.query_user_callback);
@@ -48,12 +48,6 @@ class mStudentHomepageMiddle extends Component {
             return;
         }
         const course = result.data[0];
-        // const name = course.name;
-        // const id = course.id;
-        // const description = course.description;
-        // const notices = course.notices;
-        // const homeworks = course.homeworks;
-        // that.lessonlist.push({id:id, name:name, notices:notices, homeworks:homeworks, description: description});
         that.lessonlist.push(course);
         that.setState({lessonlist: that.lessonlist});
     }
@@ -64,7 +58,10 @@ class mStudentHomepageMiddle extends Component {
             return (ida<idb) ? -1 : (ida>idb) ? 1 : 0;
         });
         const now = moment().format('X');
-        const running_lesson = this.state.lessonlist.filter(item=> now >= item.start_time && now <= item.end_time);
+        let running_lesson = this.state.lessonlist.filter(item=> now >= item.start_time && now <= item.end_time);
+        running_lesson = running_lesson.sort((a, b) => {
+            return a.id < b.id;
+        });
         return (
             <Content style={{padding: '0 50px'}}>
                 <Breadcrumb style={{margin: '16px 0'}}>
@@ -96,7 +93,7 @@ class mStudentHomepageMiddle extends Component {
                                                       onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
                                             </Tooltip>]}>
                                 <Meta title={<Link to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                      description={lesson.description}/>
+                                      description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                             </Card>
                         </Col>
                     )}
