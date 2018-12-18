@@ -14,7 +14,7 @@ import '../../node_modules/codemirror/mode/clike/clike.js';
 import '../../node_modules/codemirror/mode/python/python.js';
 import '../../node_modules/codemirror/addon/hint/show-hint.css';
 import '../../node_modules/codemirror/addon/hint/show-hint.js';
-import '../../node_modules/codemirror/addon/selection/active-line'
+import '../../node_modules/codemirror/addon/selection/active-line';
 
 import {Select, Row, Col, message} from "antd";
 
@@ -187,10 +187,12 @@ class CodeInput extends Component {
                                     theme: 'neat',
                                     lineNumbers: true,
                                     extraKeys: {"Ctrl": "autocomplete"},
+                                    smartIndent: true,
+                                    matchBrackets: true,
                                     // autofocus: true
                                 }}
                                 onChange={this.codeChange}
-                                value={this.state.code}
+                                // value={this.state.code}
                     />
                 </div>
                 <Row type="flex" justify="center">
