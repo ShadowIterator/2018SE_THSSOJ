@@ -146,18 +146,18 @@ export class TALesson extends Component {
                     let problemitem;
 
                     if (id_str in problemset) {
-                        problemitem = problemitem[id_str];
+                        problemitem = problemset[id_str];
                     } else
                     {
                         problemitem = {id: result.data[0].problems[index]};
                     }
-                    if (res.data[0].total_waiting < 0)      // not started
+                    if (res.data[0].total_waiting <= 0)      // not started
                         problemitem['judger_status'] = 0;
                     else
                     if (res.data[0].total_waiting === res.data[0].judged)   // judging
-                        problemitem['judger_status'] = 1;
+                        problemitem['judger_status'] = 2;
                     else
-                        problemitem['judger_status'] = 2;   // finished
+                        problemitem['judger_status'] = 1;   // finished
                     // if (res.data.length === 1) {    // get data
                     //     if (id_str in problemset) {
                     //         problemitem = problemset[id_str];

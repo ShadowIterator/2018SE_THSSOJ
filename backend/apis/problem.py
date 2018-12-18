@@ -354,6 +354,10 @@ class APIProblemHandler(base.BaseHandler):
         #     self.set_res_dict(res_dict, code=1, msg='query failed')
         #     self.return_json(res_dict)
 
+
+    # async def __public_problem_submit(self):
+    #
+
     # @tornado.web.authenticated
     async def _submit_post(self):
         res_dict={}
@@ -374,6 +378,19 @@ class APIProblemHandler(base.BaseHandler):
                 self.set_res_dict(res_dict, code=1, msg='you are not allowed')
                 return res_dict
         # -----------------------------------
+                # ****************update judgestates **********************
+
+        if(self.args['record_type'] == 2 or self.args['record_type'] == 4):
+            old_record = await self.db.getObject('records',
+                                           problem_id = self.args['problem_id'],
+                                           homework_id = self.args['homework_id'],
+                                           record_type = self.args['record_type'])
+            if(not len(old_record)):
+                # old_record = old_record[0]
+                judge_state = await self.db.getObjectOne('judgestates', homework_id=self.args['homework_id'],
+                                                         problem_id=self.args['problem_id'])
+                judge_state['total'] += 1
+                await self.db.saveObject('judgestates', judge_state)
 
         current_time = datetime.datetime.now()
         cur_timestamp = int(time.mktime(current_time.timetuple()))
@@ -382,6 +399,7 @@ class APIProblemHandler(base.BaseHandler):
         submit_time = datetime.datetime.fromtimestamp(cur_timestamp)
         self.args['status'] = 0
         # for html submit
+
         if self.args['record_type'] == 4:
             # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
             old_record = await self.db.getObject('records', **self.args)
@@ -396,6 +414,8 @@ class APIProblemHandler(base.BaseHandler):
                                                             id=self.args['homework_id']))[0]
                 matched_homework['records'].append(html_record['id'])
                 await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
+
+
             else:
                 html_record = old_record[0]
             src_zip_path = self.root_dir.replace('problems', '')+self.args['src_code']
@@ -415,13 +435,15 @@ class APIProblemHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
 
+
         record_created = await self.db.createObject('records', **self.args)
+
         problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[0]
-        problem_of_code['records'].append(record_created['id'])
+        # problem_of_code['records'].append(record_created['id'])
         await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
         if 'homework_id' in self.args:
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
-            matched_homework['records'].append(record_created['id'])
+            # matched_homework['records'].append(record_created['id'])
             await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
 
         str_id = str(record_created['id'])
@@ -429,9 +451,7 @@ class APIProblemHandler(base.BaseHandler):
         if not os.path.exists(record_dir):
             os.makedirs(record_dir)
         src_file_path = record_dir + '/' + str_id + '.code'
-        # byte_content = bytearray()
-        # self.str_to_bytes(self.args['src_code'], byte_content)
-        # src_code = base64.b64decode(byte_content)
+
         src_file = open(src_file_path, mode='wb')
         src_file.write(self.args['src_code'].encode(encoding='utf-8'))
         src_file.close()
@@ -561,36 +581,52 @@ class APIProblemHandler(base.BaseHandler):
     async def _judgeAll_post(self):
         res_dict = {}
         cur_user = await self.get_current_user_object()
-        homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
-        problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
-        course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
+        # homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+        homework_id = self.args['homework_id']
+        problem_id = self.args['problem_id']
+        course_id = self.args['course_id']
+        problem = (await self.db.getObject('problems', id=problem_id))[0]
+        course = (await self.db.getObject('courses', id=course_id))[0]
 
         #authority check
-        if cur_user['role']<3 and cur_user['id'] not in course['tas']:
+        if cur_user['role']<Roles.ADMIN and cur_user['id'] not in course['tas']:
             self.set_res_dict(res_dict, code=1, msg='go away!')
             return res_dict
         # -------------------------------------------------------------
         uri=''
-        homework['status']=1
-        await self.db.saveObject('homeworks', object=homework)
+        # homework['status']=1
+        # await self.db.saveObject('homeworks', object=homework)
+
+
+
         if problem['judge_method'] == 0:
             case_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem['id']) + '/case'
             config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
             config_info = json.load(config_file)
-            final_records = await self.db.getObject('records', record_type=2, homework_id=homework['id'], problem_id=problem['id'])
+            final_records = await self.db.getObject('records', record_type=2, homework_id=homework_id, problem_id=problem_id)
+
+            judge_state = await self.db.getObjectOne('judgestates', homework_id=homework_id, problem_id=problem_id)
+            judge_state['judged'] = 0
+            judge_state['total_waiting'] = len(final_records)
+            await self.db.saveObject('judgestates', judge_state)
+
+            judge_req = {}
+            judge_req['TIME_LIMIT'] = problem['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['INPRE'] = config_info['INPRE']
+            judge_req['INSUF'] = config_info['INSUF']
+            judge_req['OUTPRE'] = config_info['OUTPRE']
+            judge_req['OUTSUF'] = config_info['OUTSUF']
+            judge_req['NTESTS'] = config_info['NTESTS']
+            judge_req['CHECKER'] = 'ncmp'
+
+
             for each_record in final_records:
                 str_id = str(each_record['id'])
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
                 src_language = each_record['src_language']
-                judge_req = {}
                 judge_req['id'] = each_record['id']
-                judge_req['TIME_LIMIT'] = problem['time_limit']
-                judge_req['MEMORY_LIMIT'] = problem['memory_limit']
-                judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['INPRE'] = config_info['INPRE']
-                judge_req['INSUF'] = config_info['INSUF']
-                judge_req['OUTPRE'] = config_info['OUTPRE']
-                judge_req['OUTSUF'] = config_info['OUTSUF']
                 if src_language == 1:
                     judge_req['Language'] = 'C'
                 elif src_language == 2:
@@ -599,30 +635,37 @@ class APIProblemHandler(base.BaseHandler):
                     judge_req['Language'] = 'Python'
                 judge_req['DATA_DIR'] = case_path
                 judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-                judge_req['CHECKER'] = 'ncmp'
-                judge_req['NTESTS'] = config_info['NTESTS']
                 judge_req['SOURCE_FILE'] = str_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
                 requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+
         elif problem['judge_method'] == 1:
-            final_records = await self.db.getObject('records', record_type=2, homework_id=homework['id'], problem_id=problem['id'])
+            final_records = await self.db.getObject('records', record_type=2, homework_id=homework_id, problem_id=problem['id'])
+
+            judge_state = await self.db.getObjectOne('judgestates', homework_id=homework_id, problem_id=problem_id)
+            judge_state['judged'] = 0
+            judge_state['total_waiting'] = len(final_records)
+            await self.db.saveObject('judgestates', judge_state)
+
             script_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem['id']) + '/script'
+            judge_req = {}
+            judge_req['TIME_LIMIT'] = problem['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['WORK_PATH'] = script_path
+            judge_req['OTHERS'] = './judge.sh -r 100'
+
             for each_record in final_records:
                 str_id = str(each_record['id'])
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
-                judge_req = {}
                 judge_req['id'] = each_record['id']
-                judge_req['TIME_LIMIT'] = self.args['time_limit']
-                judge_req['MEMORY_LIMIT'] = self.args['memory_limit']
-                judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['WORK_PATH'] = script_path
                 judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
                 judge_req['SOURCE'] = str_id
-                judge_req['OTHERS'] = './judge.sh -r 100'
                 requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+
         elif problem['judge_method'] == 2:
             html_judge_path = os.getcwd()+'/'+self.root_dir.replace('problems', 'judge_html_temp')
-            hash_src = str(problem['id'])+str(homework['id'])+cur_user['secret']
+            hash_src = str(problem['id'])+str(homework_id)+cur_user['secret']
             md5 = hashlib.md5()
             md5.update(hash_src.encode(encoding='utf-8'))
             hash_path = md5.hexdigest()
@@ -631,9 +674,15 @@ class APIProblemHandler(base.BaseHandler):
             if os.path.exists(html_judge_path):
                 shutil.rmtree(html_judge_path)
             os.makedirs(html_judge_path)
-            final_records = await self.db.getObject('records', record_type=4, homework_id=homework['id'],problem_id=problem['id'])
+            final_records = await self.db.getObject('records', record_type=4, homework_id=homework_id,problem_id=problem['id'])
+
+            judge_state = await self.db.getObjectOne('judgestates', homework_id=homework_id, problem_id=problem_id)
+            judge_state['judged'] = 0
+            judge_state['total_waiting'] = len(final_records)
+            await self.db.saveObject('judgestates', judge_state)
+
             for each_record in final_records:
-                src_zip_path = self.root_dir.replace('problems', 'homeworks') + '/' + str(homework['id']) +\
+                src_zip_path = self.root_dir.replace('problems', 'homeworks') + '/' + str(homework_id) +\
                                     '/' +str(problem['id']) + '/' + str(each_record['user_id']) + '/' + str(problem['id']) + '.zip'
                 stu_judge_html_path = html_judge_path+'/'+str(each_record['user_id'])
                 os.makedirs(stu_judge_html_path)
