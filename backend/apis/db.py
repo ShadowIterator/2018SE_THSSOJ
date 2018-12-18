@@ -16,7 +16,7 @@ import datetime
 import time
 # import unicodedata
 import asyncio
-
+from tornado.locks import Condition
 
 class NoResultError(Exception):
     pass
@@ -141,11 +141,13 @@ class BaseDB:
 
 class BaseTable:
 
-    def __init__(self, db, si_table_name):
+    def __init__(self, db, si_table_name, lock_cnt = 10):
         self.db = db
         # self.table_name = self.__class__.__name__.lower()
         self.table_name = si_table_name
         self.database_keys = []
+        self.lockN = lock_cnt
+        self.lock = [Condition() for i in range(lock_cnt)]
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.async_init())
         # loop.close()
@@ -156,6 +158,14 @@ class BaseTable:
             self.table_name)
         self.database_keys = list(map(lambda item: item['column_name'], database_keys))
         print(self.database_keys)
+
+    # to use this, u must
+    # I do not want to write a comment
+    async def acquire_lock(self, hash_id):
+        await self.lock[hash_id % self.lockN].wait()
+
+    async def release_lock(self, hash_id):
+        self.lock[hash_id % self.lockN].notify()
 
     async def saveObject(self, object, cur_user = None):
         si_table_name = self.table_name

@@ -503,7 +503,7 @@ class RegistrationForm extends React.Component {
                     {...formItemLayout}
                     label="上传标准程序"
                 >
-                    <a href={api_list['download_code']} download={'standard_code.code'}
+                    <a href={URL+api_list['download_code']+"?id="+this.props.problem_id.toString()} download={'standard_code.code'}
                        style={{marginLeft: 5, marginRight: 5}}>下载标准程序</a>
                     <Button onClick={()=>this.setState({reupload_code: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
@@ -600,7 +600,7 @@ class RegistrationForm extends React.Component {
                     {...formItemLayout}
                     label="上传测试数据"
                 >
-                    <a href={api_list['download_case']} download={'case.zip'}
+                    <a href={URL+api_list['download_data']+"?id="+this.props.problem_id.toString()} download={'case.zip'}
                        style={{marginLeft: 5, marginRight: 5}}>下载测试数据</a>
                     <Button onClick={()=>this.setState({reupload_case: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
@@ -697,7 +697,7 @@ class RegistrationForm extends React.Component {
                     {...formItemLayout}
                     label="上传测试脚本"
                 >
-                    <a href={api_list['download_script']} download={'test.sh'}
+                    <a href={URL+api_list['download_script']+"?id="+this.props.problem_id.toString()} download={'test.sh'}
                        style={{marginLeft: 5, marginRight: 5}}>下载测试脚本</a>
                     <Button onClick={()=>this.setState({reupload_script: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
@@ -887,6 +887,7 @@ class ProblemCreate extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            problem_id: -1,
             fields: {
                 title: {
                     value: ''
@@ -951,6 +952,7 @@ class ProblemCreate extends Component {
                 }
                 const prob = result.data[0];
                 that.setState({
+                    problem_id: prob.id,
                     fields: {
                         title: {
                             value: prob.title,
@@ -1037,7 +1039,8 @@ class ProblemCreate extends Component {
                     <Row>
                         <Col span={12} offset={6}>
                             <ProblemCreateForm {...this.state.fields} onChange={this.handleFormChange}
-                                               id={this.props.id} isEditing={this.props.isEditing} />
+                                               id={this.props.id} isEditing={this.props.isEditing}
+                                               problem_id={this.state.problem_id}/>
                         </Col>
                     </Row>
                 </div>
