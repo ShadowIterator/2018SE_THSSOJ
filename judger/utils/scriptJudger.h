@@ -83,7 +83,8 @@ ScriptJudgerResult runScript(const ScriptConfig& scriptConfig){
 	{
 		ret.load_Score_Info(runConfig.outputFileName);
 		if (res.ec != NoError){
-			ret.load_Info(runConfig.errorFileName);
+//			ret.load_Info(runConfig.errorFileName);
+			ret.info = runConfig.errorFileName;
 		}
 	}
 	return ret;

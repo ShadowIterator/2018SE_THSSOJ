@@ -40,6 +40,7 @@ class JudgeHTML extends Component {
         ajax_post(api_list['judge_all'], {
             homework_id: this.homework_id,
             problem_id: this.problem_id,
+            course_id: this.course_id,
         }, this, (that, result) => {
             if(result.data.code === 1) {
                 message.error("请求评测本次作业失败");
@@ -96,8 +97,8 @@ class JudgeHTML extends Component {
         const selected_record = this.state.records[selected_key];
         console.log("selected_key", selected_key);
         console.log("selected_record", selected_record);
-        // const iframe_src = URL+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
-        const iframe_src = 'https://www.qq.com';
+        const iframe_src = URL+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
+        // const iframe_src = 'https://www.qq.com';
         const content = (
             <div style={{height: '100%'}}>
                 {/*<Row>*/}

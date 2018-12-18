@@ -37,6 +37,29 @@ class APIProblemHandler(base.BaseHandler):
     async def _list_post(self):
         return await self.db.querylr('problems', self.args['start'], self.args['end'], **self.args)
 
+    async def _createHTML_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] >= Roles.TA)
+        createdobj = await self.db.createObject('problems',
+                                   title = self.args['title'],
+                                   judge_method = 2,
+                                   openness = 1,
+                                   test_language = -1,
+                                   ratio_one = -1,
+                                   ratio_one_limit = -1,
+                                   ratio_two = -1,
+                                   ratio_two_limit = -1,
+                                   ratio_three = -1,
+                                   ratio_three_limit = -1)
+        data = self.args['description']
+        pro_dir = self.root_dir + '/' + str(createdobj['id'])
+        os.mkdir(pro_dir)
+        with open('''{dir}/{problem_id}.md'''.format(dir = pro_dir, problem_id = createdobj['id']), 'wb') as fd:
+            byte_content = bytearray()
+            self.str_to_bytes(data, byte_content)
+            fd.write(byte_content)
+        return {'code': 0}
+
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict={}
@@ -360,7 +383,9 @@ class APIProblemHandler(base.BaseHandler):
         self.args['status'] = 0
         # for html submit
         if self.args['record_type'] == 4:
-            old_record = await self.db.getObject('records', user_id=self.args['user_id'])
+            # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
+            old_record = await self.db.getObject('records', **self.args)
+            print('submit_html: ', old_record)
             if len(old_record) == 0:
                 html_record = await self.db.createObject('records', **self.args)
                 problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(),
@@ -444,10 +469,10 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
-            judge_req['INPRE'] = 'test'
-            judge_req['INSUF'] = 'in'
-            judge_req['OUTPRE'] = 'test'
-            judge_req['OUTSUF'] = 'out'
+            judge_req['INPRE'] = config_info['INPRE']
+            judge_req['INSUF'] = config_info['INSUF']
+            judge_req['OUTPRE'] = config_info['OUTPRE']
+            judge_req['OUTSUF'] = config_info['OUTSUF']
             if self.args['src_language'] == 1:
                 judge_req['Language'] = 'C'
             elif self.args['src_language'] == 2:
@@ -529,12 +554,16 @@ class APIProblemHandler(base.BaseHandler):
 
     async def _judgeHTML_post(self):
         cur_user = await self.get_current_user_object()
-        course = (await self.db.getObject('users', id=self.args['user_course_id']))[0]
-        try:
-            course['tas'].index(self.args['record_id'])
-        except:
-            return {'code': 1, "msg": 'You have no permission!'}
-        return await self.db.saveObject('records', id=self.args['record_id'], score=self.args['score'])
+        course = (await self.db.getObject('courses', id=self.args['user_course_id']))[0]
+        assert((cur_user['id'] in course['tas']) or cur_user['role'] >= Roles.ADMIN )
+        selectedobj = (await self.db.getObject('records', id = self.args['record_id']))[0]
+        selectedobj['score'] = self.args['score']
+        selectedobj['status'] = cur_user['id']
+        selectedobj['result_type'] = 1
+        await self.db.saveObject('records', selectedobj)
+        return {'code': 0}
+
+
 
     # @tornado.web.authenticated
     async def _judgeAll_post(self):
@@ -562,13 +591,14 @@ class APIProblemHandler(base.BaseHandler):
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
                 src_language = each_record['src_language']
                 judge_req = {}
+                judge_req['id'] = each_record['id']
                 judge_req['TIME_LIMIT'] = problem['time_limit']
                 judge_req['MEMORY_LIMIT'] = problem['memory_limit']
                 judge_req['OUTPUT_LIMIT'] = 64
-                judge_req['INPRE'] = 'test'
-                judge_req['INSUF'] = 'in'
-                judge_req['OUTPRE'] = 'test'
-                judge_req['OUTSUF'] = 'out'
+                judge_req['INPRE'] = config_info['INPRE']
+                judge_req['INSUF'] = config_info['INSUF']
+                judge_req['OUTPRE'] = config_info['OUTPRE']
+                judge_req['OUTSUF'] = config_info['OUTSUF']
                 if src_language == 1:
                     judge_req['Language'] = 'C'
                 elif src_language == 2:

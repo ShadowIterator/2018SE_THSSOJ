@@ -109,7 +109,7 @@ class APIUserHandler(base.BaseHandler):
     async def _create_post(self):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
-        ran_str = ''.join(random.sample(string.ascii_letters + string.digits, 64))
+        ran_str = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         await self.db.createObject('users',
                                 username=self.args['username'],
                                 password=self.args['password'],

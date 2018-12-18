@@ -1,3 +1,2 @@
-/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/6/6.code:2:1: error: ‘fasdfasdfasdfsd’ does not name a type
- fasdfasdfasdfsd
- ^~~~~~~~~~~~~~~
+/home/shadowiterator/2018SE3_OJ/backend/root/records/6/6.code:3:76: fatal error: /home/shadowiterator/2018SE3_OJ/backend/settings/app_config.json: 没有那个文件或目录
+compilation terminated.
