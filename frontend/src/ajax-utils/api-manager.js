@@ -59,8 +59,7 @@ const api_list = {
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
 
-    // 'create_judgestates': '/api/judgestates/create',
-    'query_judgestates': '/api/judgestates/query',
+    'query_judgestates': '/api/judgestate/query',
 };
 
 export {URL, api_list}
