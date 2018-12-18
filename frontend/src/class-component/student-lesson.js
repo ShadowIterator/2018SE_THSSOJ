@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Icon as Blueicon} from '@blueprintjs/core';
+import {Icon as Blueicon, HTMLTable} from '@blueprintjs/core';
 
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
@@ -31,22 +31,37 @@ class CourseInfo extends Component {
             {title: '邮箱', dataIndex: 'email',width: 150, key: 'email'}
         ];
         return (
-            <table class="bp3-html-table .modifier">
-                <tr>
-                    <th>课程名</th>
-                    <td>{this.props.name}</td>
-                </tr>
-                <tr>
-                    <th>课程简介</th>
-                    <td>{this.props.description}</td>
-                </tr>
-                <tr>
-                    <th>助教</th>
-                    <td>
-                        <Table columns={ta_columns} dataSource={this.props.ta_list}/>
-                    </td>
-                </tr>
-            </table>
+            <div style={{textAlign: 'center'}}>
+                <Row gutter={8}>
+                    <Col span={4} style={{fontSize: '150%'}}>课程名</Col>
+                    <Col span={4} style={{fontSize: '150%'}}>{this.props.name}</Col>
+                    <Col span={12}/>
+                </Row>
+                <Row gutter={8}>
+                    <Col span={4} style={{fontSize: '150%'}}>课程名</Col>
+                    <Col span={8} style={{fontSize: '150%'}}>{this.props.name}</Col>
+                    <Col span={12}/>
+                </Row>
+                {/*<HTMLTable striped={true} bordered={true}>*/}
+                    {/*<tr>*/}
+                        {/*<th>课程名</th>*/}
+                        {/*<td>{this.props.name}</td>*/}
+                    {/*</tr>*/}
+                    {/*<tr>*/}
+                        {/*<th>课程简介</th>*/}
+                        {/*<td>{this.props.description}</td>*/}
+                    {/*</tr>*/}
+                    {/*<tr>*/}
+                        {/*<th>助教</th>*/}
+                        {/*<td>*/}
+                            {/*<Table columns={ta_columns}*/}
+                                   {/*dataSource={this.props.ta_list}*/}
+                                   {/*pagination={false}*/}
+                            {/*/>*/}
+                        {/*</td>*/}
+                    {/*</tr>*/}
+                {/*</HTMLTable>*/}
+            </div>
         )
     }
 }
@@ -503,7 +518,7 @@ class mStudentLessonMiddle extends Component {
         }
         else
         {
-            breadcrumb=(<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
+            breadcrumb = (<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
             panel = (<CourseInfo {...this.state.course_info}/>)
             // if(this.state.homeworkitems.length !== 0) {
             //     panel = (<StudentHomework homeworkitems={this.state.homeworkitems}

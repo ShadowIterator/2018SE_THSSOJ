@@ -17,6 +17,7 @@ const api_list = {
     'delete_course': '/api/course/delete',
     'update_course': '/api/course/update',
     'query_course': '/api/course/query',
+    'add_course': '/api/course/addCourse',
     'addStudent_course': '/api/course/addStudent',
     'addTA_course': '/api/course/addTA',
     'deleteStudent_course': '/api/course/deleteStudent',
