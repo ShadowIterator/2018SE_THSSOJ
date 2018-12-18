@@ -65,6 +65,12 @@ class RegistrationForm extends React.Component {
                         code_uri: this.state.upload_code.uri,
                         case_uri: this.state.upload_case.uri,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                 } else if(this.state.judge_method === 1) {
                     data = {
@@ -79,6 +85,12 @@ class RegistrationForm extends React.Component {
                         code_uri: this.state.upload_code.uri,
                         script_uri: this.state.upload_script.uri,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     }
                 } else if(this.state.judge_method === 2) {
                     data = {
@@ -118,6 +130,12 @@ class RegistrationForm extends React.Component {
                         openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                         user_id: this.props.id,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                     if(this.state.reupload_code) {
                         data.code_uri = this.state.upload_code.uri;
@@ -136,6 +154,12 @@ class RegistrationForm extends React.Component {
                         openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                         user_id: this.props.id,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                     if(this.state.reupload_code) {
                         data.code_uri = this.state.upload_code.uri;
@@ -368,6 +392,22 @@ class RegistrationForm extends React.Component {
                 {this.state.judge_method !== 2 &&
                 <FormItem
                     {...formItemLayout}
+                    label="标准程序使用语言"
+                >
+                    {getFieldDecorator('code_lang', {
+                        rules: [
+                            {required: true, message: '请选择您标准程序使用的语言'},
+                        ],
+                    })(
+                        <Radio.Group>
+                            {this.state.language_radio}
+                        </Radio.Group>
+                    )}
+                </FormItem>
+                }
+                {this.state.judge_method !== 2 &&
+                <FormItem
+                    {...formItemLayout}
                     label="是否公开"
                 >
                     {getFieldDecorator('switch', {
@@ -456,22 +496,6 @@ class RegistrationForm extends React.Component {
                             )}
                         </Col>
                     </Row>
-                </FormItem>
-                }
-                {this.state.judge_method !== 2 &&
-                <FormItem
-                    {...formItemLayout}
-                    label="标准程序使用语言"
-                >
-                    {getFieldDecorator('code_lang', {
-                        rules: [
-                            {required: true, message: '请选择您标准程序使用的语言'},
-                        ],
-                    })(
-                        <Radio.Group>
-                            {this.state.language_radio}
-                        </Radio.Group>
-                    )}
                 </FormItem>
                 }
                 {this.props.isEditing && !this.state.reupload_code && this.state.judge_method !== 2 &&
