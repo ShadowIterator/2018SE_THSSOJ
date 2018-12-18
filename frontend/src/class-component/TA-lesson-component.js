@@ -200,6 +200,19 @@ class mTAHomeworkCard extends Component {
                         dataSource={problems}
                         renderItem={item => {
                             let judger_button;
+                            if (item.judge_method === 2) {  // html judger
+                                judger_button = (
+                                    <Button onClick={()=> {
+                                        this.props.history.push("/judgehtml/" +
+                                                                this.props.course_id.toString() + "/" +
+                                                                this.props.homework_id.toString() + "/" +
+                                                                item.id.toString()
+                                        );
+                                    }}>
+                                        开始评测
+                                    </Button>
+                                );
+                            } else
                             if (item['judger_status'] == 0) {
                                 judger_button = (
                                     <Button onClick={()=>{
@@ -248,9 +261,12 @@ class mTAHomeworkCard extends Component {
                                 );
                             }
                             return (
-                                <List.Item key={item.id} actions={[<Button　onClick={() => {
-                                    this.props.history.push("/tajudge/"+this.props.course_id.toString()+"/"+
-                                        this.props.homework_id+"/"+item.id.toString());
+                                <List.Item key={item.id} actions={[<Button onClick={() => {
+                                    this.props.history.push("/tajudge/" +
+                                                            this.props.course_id.toString() + "/" +
+                                                            this.props.homework_id.toString() + "/" +
+                                                            item.id.toString()
+                                                            );
                                 }}>查看详情</Button>, (judger_button)]}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
                                     <List.Item.Meta title={item.title} />

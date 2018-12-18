@@ -118,15 +118,15 @@ class mTAHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
-        console.log("this.state.uplesson: ", this.state.uplesson);
-        console.log("this.state.talesson: ", this.state.talesson);
+        // console.log("this.state.uplesson: ", this.state.uplesson);
+        // console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
         let running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
         running_talesson = running_talesson.sort((a, b) => {
             return a.id < b.id;
         });
-        console.log("now", now);
-        console.log("running_talesson", running_talesson);
+        // console.log("now", now);
+        // console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
@@ -167,6 +167,7 @@ class mTAHomepageMiddle extends Component {
                                                   <div>
                                                       <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
                                                       <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程暗号："+lesson.course_spell}</p>
                                                       <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
                                                   </div>
                                               }

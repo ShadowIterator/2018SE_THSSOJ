@@ -243,6 +243,22 @@ class APIUserHandler(base.BaseHandler):
         # elif(type == 'modify'):
         #     print('post modify')
 
+    @tornado.web.authenticated
+    async def _modifypwd_post(self):
+        res_dict = {}
+        modified_user = (await self.db.getObject('users', id=self.args['id']))[0]
+        cur_user = await self.get_current_user_object()
+        if modified_user['id'] != cur_user['id']:
+            self.set_res_dict(res_dict, code=1, msg='you can only change your own password')
+            return res_dict
+        if self.args['old_pwd'] != modified_user['password']:
+            self.set_res_dict(res_dict, code=1, msg='wrong old password')
+            return res_dict
+        modified_user['password'] = self.args['new_pwd']
+        await self.db.saveObject('users', object=modified_user)
+        self.set_res_dict(res_dict, code=0, msg='password modified')
+        return res_dict
+
 # class UserLoginHandler(base.BaseHandler):
 #     async def post(self):
 #         username = self.args['username']
