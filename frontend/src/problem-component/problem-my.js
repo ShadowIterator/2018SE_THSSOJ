@@ -34,10 +34,13 @@ class MyProblem extends Component {
         });
     };
     componentDidMount() {
+        if(this.props.id === -1) {
+            return;
+        }
         this.request_data(this.props.id);
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===undefined || nextProps.id === -1)
             return;
         if(nextProps.id !== this.props.id) {
             this.request_data(nextProps.id);

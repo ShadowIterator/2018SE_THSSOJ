@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
-import {AuthContext} from "../basic-component/auth-context";
 import {Link, withRouter} from "react-router-dom"
-import {Button} from "@blueprintjs/core";
 import moment from "moment"
-import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, message, Divider } from 'antd';
+import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, message } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
 
-class AllLesson extends Component {
+class mAllLesson extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -82,9 +80,14 @@ class AllLesson extends Component {
     }
 
     render() {
-        console.log("this.state.lessons ", this.state.lessons);
-        console.log("role", this.props.role);
+        // console.log("this.state.lessons ", this.state.lessons);
+        // console.log("role", this.props.role);
         let ret;
+        const lesson_rank = this.state.lessons.sort((a, b) => {
+            const ida = a.id;
+            const idb = b.id;
+            return ida<idb;
+        });
         if (this.props.role === 2 || this.props.role === 3) {
             ret = (
                 <Content style={{padding: '0 50px'}}>
@@ -95,7 +98,7 @@ class AllLesson extends Component {
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>全部课程</h2>
                         <Row gutter={16}>
-                            {this.state.lessons.map((lesson)=>
+                            {lesson_rank.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
                                           actions={[
@@ -120,8 +123,17 @@ class AllLesson extends Component {
                                               </Tooltip>]}
                                           hoverable={true}
                                     >
-                                        <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={
+                                                  <div>
+                                                      <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
+                                                  </div>
+                                              }
+                                        />
+                                        {/*<Meta title={<Link style={{fontSize: '200%'}} to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}*/}
+                                              {/*description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>*/}
                                     </Card>
                                 </Col>
                             )}
@@ -139,7 +151,7 @@ class AllLesson extends Component {
                     <div style={{background: '#fff', padding: 24, minHeight: 640}}>
                         <h2>全部课程</h2>
                         <Row gutter={16}>
-                            {this.state.lessons.map((lesson)=>
+                            {lesson_rank.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
                                           actions={[
@@ -161,8 +173,8 @@ class AllLesson extends Component {
                                                   <Icon type="info-circle" theme="twoTone"
                                                         onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
                                               </Tooltip>]}>
-                                        <Meta title={<Link to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                        <Meta title={<Link style={{fontSize: '200%'}} to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                                     </Card>
                                 </Col>
                             )}
@@ -186,5 +198,7 @@ class AllLesson extends Component {
         return ret;
     }
 }
+
+const AllLesson = withRouter(mAllLesson);
 
 export {AllLesson};
