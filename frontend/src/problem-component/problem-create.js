@@ -33,7 +33,19 @@ class RegistrationForm extends React.Component {
             reupload_code: false,
             reupload_case: false,
             reupload_script: false,
+        };
+    }
+    componentWillUpdate(nextProps) {
+        if(nextProps.judge_method === this.props.judge_method) {
+            return;
         }
+        console.log("judge_method", nextProps);
+        this.setState({
+            language_radio: nextProps.isEditing ? nextProps.language.value.map((value) => {
+                return (<Radio value={value}>{mapper[value]}</Radio>);
+            }) : [],
+            judge_method: nextProps.isEditing ? parseInt(nextProps.judge_method.value) : 0,
+        });
     }
     handleSubmit = (e) => {
         e.preventDefault();
@@ -53,6 +65,12 @@ class RegistrationForm extends React.Component {
                         code_uri: this.state.upload_code.uri,
                         case_uri: this.state.upload_case.uri,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                 } else if(this.state.judge_method === 1) {
                     data = {
@@ -67,15 +85,28 @@ class RegistrationForm extends React.Component {
                         code_uri: this.state.upload_code.uri,
                         script_uri: this.state.upload_script.uri,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     }
                 } else if(this.state.judge_method === 2) {
                     data = {
                         title: values.title,
                         description: values.description,
-                        judge_method: parseInt(values.judge_method),
-                        openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
-                        user_id: this.props.id,
-                    }
+                    };
+                    console.log("Create HTML problem", data);
+                    ajax_post(api_list['create_html'], data, this, (that, result) => {
+                        if(result.data.code === 0) {
+                            message.success("成功创建题目");
+                            this.props.history.push('/myproblem');
+                        } else {
+                            message.error("创建题目失败");
+                        }
+                    });
+                    return;
                 }
                 console.log("Create problem", data);
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
@@ -99,6 +130,12 @@ class RegistrationForm extends React.Component {
                         openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                         user_id: this.props.id,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                     if(this.state.reupload_code) {
                         data.code_uri = this.state.upload_code.uri;
@@ -117,6 +154,12 @@ class RegistrationForm extends React.Component {
                         openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
                         user_id: this.props.id,
                         test_language: parseInt(values.code_lang),
+                        ratio_one: parseInt(values.ratio_one),
+                        ratio_two: parseInt(values.ratio_two),
+                        ratio_three: parseInt(values.ratio_three),
+                        ratio_one_limit: parseInt(values.ratio_one_limit),
+                        ratio_two_limit: parseInt(values.ratio_two_limit),
+                        ratio_three_limit: parseInt(values.ratio_three_limit),
                     };
                     if(this.state.reupload_code) {
                         data.code_uri = this.state.upload_code.uri;
@@ -128,10 +171,17 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         description: values.description,
-                        judge_method: parseInt(values.judge_method),
-                        openness: values.switch === '' ? 0 : (values.switch ? 1 : 0),
-                        user_id: this.props.id,
-                    }
+                    };
+                    console.log("Create HTML problem", data);
+                    ajax_post(api_list['create_html'], data, this, (that, result) => {
+                        if(result.data.code === 0) {
+                            message.success("成功创建题目");
+                            this.props.history.push('/myproblem');
+                        } else {
+                            message.error("创建题目失败");
+                        }
+                    });
+                    return;
                 }
                 console.log("Updating problem",data);
                 ajax_post(api_list['update_problem'], data, this, (that, result) => {
@@ -161,6 +211,26 @@ class RegistrationForm extends React.Component {
             callback('请输入一个合法的整数');
         } else if(value && parseInt(value)<=0) {
             callback('请输入一个大于零的整数');
+        } else {
+            callback();
+        }
+    };
+
+    validateRatio = (rule, value, callback) => {
+        if(value && isNaN(parseInt(value))) {
+            callback('请输入一个合法的整数');
+        } else if(value && parseInt(value)<=0) {
+            callback('请输入一个1到100之间的整数');
+        } else {
+            callback();
+        }
+    };
+
+    validateRatioLimit = (rule, value, callback) => {
+        if(value && isNaN(parseInt(value))) {
+            callback('请输入一个合法的整数');
+        } else if(value && parseInt(value)<-1) {
+            callback('请输入一个-1到100之间的整数');
         } else {
             callback();
         }
@@ -208,32 +278,6 @@ class RegistrationForm extends React.Component {
             <Form onSubmit={this.handleSubmit}>
                 <FormItem
                     {...formItemLayout}
-                    label="标题"
-                    hasFeedback
-                >
-                    {getFieldDecorator('title', {
-                        rules: [{
-                            required: true, message: '请输入一个标题！',
-                        }],
-                    })(
-                        <Input />
-                    )}
-                </FormItem>
-                <FormItem
-                    {...formItemLayout}
-                    label="题目描述"
-                    hasFeedback
-                >
-                    {getFieldDecorator('description', {
-                        rules: [{
-                            required: true, message: '请输入题目描述！',
-                        }],
-                    })(
-                        <TextArea />
-                    )}
-                </FormItem>
-                <FormItem
-                    {...formItemLayout}
                     label="评测方式"
                     hasFeedback
                 >
@@ -257,6 +301,32 @@ class RegistrationForm extends React.Component {
                             <Option value="1">脚本评测</Option>
                             <Option value="2">HTML手动评测</Option>
                         </Select>
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="标题"
+                    hasFeedback
+                >
+                    {getFieldDecorator('title', {
+                        rules: [{
+                            required: true, message: '请输入一个标题！',
+                        }],
+                    })(
+                        <Input />
+                    )}
+                </FormItem>
+                <FormItem
+                    {...formItemLayout}
+                    label="题目描述"
+                    hasFeedback
+                >
+                    {getFieldDecorator('description', {
+                        rules: [{
+                            required: true, message: '请输入题目描述！',
+                        }],
+                    })(
+                        <TextArea />
                     )}
                 </FormItem>
                 {this.state.judge_method !== 2 &&
@@ -319,16 +389,6 @@ class RegistrationForm extends React.Component {
                     )}
                 </FormItem>
                 }
-                <FormItem
-                    {...formItemLayout}
-                    label="是否公开"
-                >
-                    {getFieldDecorator('switch', {
-                        valuePropName: 'checked',
-                    })(
-                        <Switch />
-                    )}
-                </FormItem>
                 {this.state.judge_method !== 2 &&
                 <FormItem
                     {...formItemLayout}
@@ -345,18 +405,111 @@ class RegistrationForm extends React.Component {
                     )}
                 </FormItem>
                 }
-                {this.props.isEditing && !this.state.reupload_code &&
+                {this.state.judge_method !== 2 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="是否公开"
+                >
+                    {getFieldDecorator('switch', {
+                        valuePropName: 'checked',
+                    })(
+                        <Switch/>
+                    )}
+                </FormItem>
+                }
+                {this.state.judge_method !== 2 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="第一档测试数据比例"
+                >
+                    <Row gutter={10}>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_one', {
+                                rules: [
+                                    {required: true, message: '请填写测试比例'},
+                                    {validator: this.validateRatio}],
+                            })(
+                                <Input placeholder="请输入测试数据比例" />
+                            )}
+                        </Col>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_one_limit', {
+                                rules: [
+                                    {required: true, message: '请填写该测试比例对应的次数'},
+                                    {validator: this.validateRatioLimit}],
+                            })(
+                                <Input placeholder="请输入测试对应次数" />
+                            )}
+                        </Col>
+                    </Row>
+                </FormItem>
+                }
+                {this.state.judge_method !== 2 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="第二档测试数据比例"
+                >
+                    <Row gutter={10}>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_two', {
+                                rules: [
+                                    {required: true, message: '请填写测试比例'},
+                                    {validator: this.validateRatio}],
+                            })(
+                                <Input placeholder="请输入测试数据比例" />
+                            )}
+                        </Col>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_two_limit', {
+                                rules: [
+                                    {required: true, message: '请填写该测试比例对应的次数'},
+                                    {validator: this.validateRatioLimit}],
+                            })(
+                                <Input placeholder="请输入测试对应次数" />
+                            )}
+                        </Col>
+                    </Row>
+                </FormItem>
+                }
+                {this.state.judge_method !== 2 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="第三档测试数据比例"
+                >
+                    <Row gutter={10}>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_three', {
+                                rules: [
+                                    {required: true, message: '请填写测试比例'},
+                                    {validator: this.validateRatio}],
+                            })(
+                                <Input placeholder="请输入测试数据比例" />
+                            )}
+                        </Col>
+                        <Col span={12}>
+                            {getFieldDecorator('ratio_three_limit', {
+                                rules: [
+                                    {required: true, message: '请填写该测试比例对应的次数'},
+                                    {validator: this.validateRatioLimit}],
+                            })(
+                                <Input placeholder="请输入测试对应次数" />
+                            )}
+                        </Col>
+                    </Row>
+                </FormItem>
+                }
+                {this.props.isEditing && !this.state.reupload_code && this.state.judge_method !== 2 &&
                 <FormItem
                     {...formItemLayout}
                     label="上传标准程序"
                 >
-                    <a href={api_list['download_code']} download={'standard_code.code'}
+                    <a href={URL+api_list['download_code']+"?id="+this.props.problem_id.toString()} download={'standard_code.code'}
                        style={{marginLeft: 5, marginRight: 5}}>下载标准程序</a>
                     <Button onClick={()=>this.setState({reupload_code: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
                 </FormItem>
                 }
-                {this.state.reupload_code &&
+                {this.props.isEditing && this.state.reupload_code && this.state.judge_method !== 2 &&
                 <FormItem
                     {...formItemLayout}
                     label="上传标准程序"
@@ -447,7 +600,7 @@ class RegistrationForm extends React.Component {
                     {...formItemLayout}
                     label="上传测试数据"
                 >
-                    <a href={api_list['download_case']} download={'case.zip'}
+                    <a href={URL+api_list['download_data']+"?id="+this.props.problem_id.toString()} download={'case.zip'}
                        style={{marginLeft: 5, marginRight: 5}}>下载测试数据</a>
                     <Button onClick={()=>this.setState({reupload_case: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
@@ -544,7 +697,7 @@ class RegistrationForm extends React.Component {
                     {...formItemLayout}
                     label="上传测试脚本"
                 >
-                    <a href={api_list['download_script']} download={'test.sh'}
+                    <a href={URL+api_list['download_script']+"?id="+this.props.problem_id.toString()} download={'test.sh'}
                        style={{marginLeft: 5, marginRight: 5}}>下载测试脚本</a>
                     <Button onClick={()=>this.setState({reupload_script: true})}
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
@@ -699,6 +852,30 @@ const ProblemCreateForm = Form.create({
                 ...props.code_lang,
                 value: props.code_lang.value,
             }),
+            ratio_one: Form.createFormField({
+                ...props.ratio_one,
+                value: props.ratio_one.value,
+            }),
+            ratio_two: Form.createFormField({
+                ...props.ratio_two,
+                value: props.ratio_two.value,
+            }),
+            ratio_three: Form.createFormField({
+                ...props.ratio_three,
+                value: props.ratio_three.value,
+            }),
+            ratio_one_limit: Form.createFormField({
+                ...props.ratio_one_limit,
+                value: props.ratio_one_limit.value,
+            }),
+            ratio_two_limit: Form.createFormField({
+                ...props.ratio_two_limit,
+                value: props.ratio_two_limit.value,
+            }),
+            ratio_three_limit: Form.createFormField({
+                ...props.ratio_three_limit,
+                value: props.ratio_three_limit.value,
+            }),
         };
     },
     onValuesChange(_, values) {
@@ -710,6 +887,7 @@ class ProblemCreate extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            problem_id: -1,
             fields: {
                 title: {
                     value: ''
@@ -743,6 +921,24 @@ class ProblemCreate extends Component {
                 },
                 code_lang: {
                     value: ''
+                },
+                ratio_one: {
+                    value: ''
+                },
+                ratio_two: {
+                    value: ''
+                },
+                ratio_three: {
+                    value: ''
+                },
+                ratio_one_limit: {
+                    value: ''
+                },
+                ratio_two_limit: {
+                    value: ''
+                },
+                ratio_three_limit: {
+                    value: ''
                 }
             }
         }
@@ -756,6 +952,7 @@ class ProblemCreate extends Component {
                 }
                 const prob = result.data[0];
                 that.setState({
+                    problem_id: prob.id,
                     fields: {
                         title: {
                             value: prob.title,
@@ -789,6 +986,24 @@ class ProblemCreate extends Component {
                         },
                         code_lang: {
                             value: prob.test_language.toString(),
+                        },
+                        ratio_one: {
+                            value: prob.ratio_one.toString(),
+                        },
+                        ratio_two: {
+                            value: prob.ratio_two.toString(),
+                        },
+                        ratio_three: {
+                            value: prob.ratio_three.toString(),
+                        },
+                        ratio_one_limit: {
+                            value: prob.ratio_one_limit.toString(),
+                        },
+                        ratio_two_limit: {
+                            value: prob.ratio_two_limit.toString(),
+                        },
+                        ratio_three_limit: {
+                            value: prob.ratio_three_limit.toString(),
                         }
                     }
                 })
@@ -824,7 +1039,8 @@ class ProblemCreate extends Component {
                     <Row>
                         <Col span={12} offset={6}>
                             <ProblemCreateForm {...this.state.fields} onChange={this.handleFormChange}
-                                               id={this.props.id} isEditing={this.props.isEditing} />
+                                               id={this.props.id} isEditing={this.props.isEditing}
+                                               problem_id={this.state.problem_id}/>
                         </Col>
                     </Row>
                 </div>
