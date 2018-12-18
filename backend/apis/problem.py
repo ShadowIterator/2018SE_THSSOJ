@@ -50,14 +50,16 @@ class APIProblemHandler(base.BaseHandler):
                                    ratio_two = -1,
                                    ratio_two_limit = -1,
                                    ratio_three = -1,
-                                   ratio_three_limit = -1)
+                                   ratio_three_limit = -1,
+                                   user_id = cur_user['id'])
         data = self.args['description']
         pro_dir = self.root_dir + '/' + str(createdobj['id'])
-        os.mkdir(pro_dir)
-        with open('''{dir}/{problem_id}.md'''.format(dir = pro_dir, problem_id = createdobj['id']), 'wb') as fd:
-            byte_content = bytearray()
-            self.str_to_bytes(data, byte_content)
-            fd.write(byte_content)
+        if not os.path.exists(pro_dir):
+            os.mkdir(pro_dir)
+        with open('''{dir}/{problem_id}.md'''.format(dir = pro_dir, problem_id = createdobj['id']), 'w') as fd:
+            # byte_content = bytearray()
+            # self.str_to_bytes(data, byte_content)
+            fd.write(data)
         return {'code': 0}
 
     # @tornado.web.authenticated

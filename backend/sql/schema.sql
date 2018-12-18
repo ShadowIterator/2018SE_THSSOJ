@@ -190,15 +190,6 @@ INSERT INTO courses (name, description, TAs, students, status, homeworks, notice
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('A+B', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('HTML', 1000, 1024, 2, '{}', 0, '{}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('tcp_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('C+D', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('arp_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('C-D', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('udp_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('E+F', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('_sort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('E-F', 1000, 1024, 0, '{}', 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, records, openness, language, user_id, status) VALUES ('ort', 1000, 262144, 1, '{}', 1, '{3}', 2, 1);
 ---- INSERT INTO problems (title, judge_method, records, openness, user_id, status) VALUES ('html test', 2, '{1}', 1, 2, 1);
 --
 --INSERT INTO records (description, user_id, problem_id, homework_id, record_type, result_type, result, score) VALUES ('XX', 1, 2, 1, 2, 2, 0, 100);

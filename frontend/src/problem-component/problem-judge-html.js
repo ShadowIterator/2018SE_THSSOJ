@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list, URL} from "../ajax-utils/api-manager";
 import {Layout, Menu, Breadcrumb, message, Row, Col, Input, Button} from 'antd';
+import {Link} from 'react-router-dom';
 
 const { Content, Sider } = Layout;
 
@@ -12,7 +13,10 @@ class JudgeHTML extends Component {
             records: {},
             uri: '',
             current_selected: '',
-            current_score: ''
+            current_score: '',
+            course_info: {},
+            homework_info: {},
+            problem_info: {},
         };
         this.course_id = parseInt(this.props.course_id);
         this.homework_id = parseInt(this.props.homework_id);
@@ -20,23 +24,52 @@ class JudgeHTML extends Component {
         console.log("course_id", this.course_id);
         console.log("homework_id", this.homework_id);
         console.log("problem_id", this.problem_id);
+
+        this.changed = false;
     }
     componentDidMount() {
         if(this.props.id === -1) {
             return;
         }
+        this.props.callback(true);
         this.fetchData(this.props.id);
     }
     componentWillUpdate(nextProps) {
+        // if(this.changed === false) {
+        //     this.props.callback(true);
+        //     this.changed = true;
+        // }
         if(nextProps.id === -1) {
             return;
         } else if(nextProps.id === this.props.id) {
             return;
         }
+        this.props.callback(true);
         this.fetchData(nextProps.id);
     }
     fetchData = (id) => {
         console.log("fetching data...");
+        ajax_post(api_list['query_course'], {id: this.course_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求课程信息失败");
+                return;
+            }
+            that.setState({course_info: result.data[0]});
+        });
+        ajax_post(api_list['query_homework'], {id: this.homework_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求作业信息失败");
+                return;
+            }
+            that.setState({homework_info: result.data[0]});
+        });
+        ajax_post(api_list['query_problem'], {id: this.problem_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求问题信息失败");
+                return;
+            }
+            that.setState({problem_info: result.data[0]});
+        });
         ajax_post(api_list['judge_all'], {
             homework_id: this.homework_id,
             problem_id: this.problem_id,
@@ -159,6 +192,13 @@ class JudgeHTML extends Component {
                 </Sider>
                 <Layout style={{ marginLeft: 200, height: '88vh' }}>
                     <Breadcrumb style={{ margin: '16px 0' }}>
+                        <Breadcrumb.Item><Link to='/ta' onClick={this.props.callback(false)}>主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to={'/talesson/'+this.course_id.toString()}
+                                               onClick={this.props.callback(false)}>{this.state.course_info.name}
+                                               </Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.homework_info.name}</Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.problem_info.title}</Breadcrumb.Item>
                         <Breadcrumb.Item>HTML批改</Breadcrumb.Item>
                         <Breadcrumb.Item>{selected_record.user_info.realname === '' ?
                             selected_record.user_info.username:selected_record.user_info.realname}</Breadcrumb.Item>
