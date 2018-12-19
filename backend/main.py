@@ -62,6 +62,8 @@ async def main():
         app.listen(options.port)
         await app.async_init()
 
+        print('get user:', await rdb.getObjectOne('users', id = 1))
+
         # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted
         # with Ctrl-C, but if you want to shut down more gracefully,
