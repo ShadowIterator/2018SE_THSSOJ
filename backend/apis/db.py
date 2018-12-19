@@ -138,6 +138,14 @@ class BaseDB:
     async def createObject(self, si_table_name, **kw):
         return await self.tables[si_table_name].createObject(**kw)
 
+    async def acquire_lock(self, si_table_name, hash_id):
+        return await self.tables[si_table_name].acquire_lock(hash_id)
+
+    async def release_lock(self, si_table_name, hash_id):
+        return await self.tables[si_table_name].release_lock(hash_id)
+
+
+condition = Condition()
 
 class BaseTable:
 
@@ -148,6 +156,8 @@ class BaseTable:
         self.database_keys = []
         self.lockN = lock_cnt
         self.lock = [Condition() for i in range(lock_cnt)]
+
+        self.locker = Condition()
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.async_init())
         # loop.close()
@@ -163,9 +173,12 @@ class BaseTable:
     # I do not want to write a comment
     async def acquire_lock(self, hash_id):
         await self.lock[hash_id % self.lockN].wait()
-
+        print('before_ac lock')
+        # await condition.wait()
     async def release_lock(self, hash_id):
         self.lock[hash_id % self.lockN].notify()
+        print('release lock lock')
+        # condition.notify()
 
     async def saveObject(self, object, cur_user = None):
         si_table_name = self.table_name
