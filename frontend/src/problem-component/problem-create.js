@@ -62,7 +62,7 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -83,7 +83,7 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -104,7 +104,7 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                     };
                     console.log("Create HTML problem", data);
                     ajax_post(api_list['create_html'], data, this, (that, result) => {
@@ -132,7 +132,7 @@ class RegistrationForm extends React.Component {
                     data ={
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -157,7 +157,7 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -182,7 +182,7 @@ class RegistrationForm extends React.Component {
                     data = {
                         title: values.title,
                         // description: values.description,
-                        description: this.props.mde_description,
+                        description: this.state.mde_description,
                     };
                     console.log("Create HTML problem", data);
                     ajax_post(api_list['create_html'], data, this, (that, result) => {

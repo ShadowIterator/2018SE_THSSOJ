@@ -554,7 +554,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
             if self.args['record_type'] == 0:
-                judge_req['OTHERS'] = './judge.sh -r 100'
+                judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
             elif self.args['record_type'] == 1:
                 judge_req['OTHERS'] = '/bin/bash ./judge.sh -r {}'.format(ratio_percent)
 
