@@ -373,13 +373,9 @@ class ProblemDetailRecord extends Component {
                         <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
                         <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
-<<<<<<< HEAD
                         <td>{language[re.src_language-1]}</td>
-                        <td><a onClick={()=>{
-=======
                         {this.props.judge_method !== 2 &&
                         <td><a onClick={() => {
->>>>>>> 52baada2fbb2fee5ac68fb82bbe426daa0802367
                             ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
                                 that.setState({src_code: result.data.src_code});
                             });
