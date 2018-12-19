@@ -1,4 +1,4 @@
 /home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/4/4.code: In function ‘main’:
-/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/4/4.code:5:3: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
-   scanf("%d%d",&a,&b);
-   ^~~~~~~~~~~~~~~~~~~
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/4/4.code:5:2: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+  scanf("%d%d", &a, &b);
+  ^~~~~~~~~~~~~~~~~~~~~

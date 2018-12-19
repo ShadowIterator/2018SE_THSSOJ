@@ -44,9 +44,9 @@ class ProblemDetailBody extends Component {
         console.log("bool", this.props.submit_record !== null || this.props.html_record !== null);
         return (
             <div>
-                <Tabs defaultActiveKey="1" onChange={(e)=>{
-                    console.log(e.key);
-                    if(e.key==="3"){
+                <Tabs defaultActiveKey="1" onChange={(value)=>{
+                    console.log(value);
+                    if(value==="3"){
                         this.props.update_record(this.props.id);
                     }}} className='problem_tab'>
                     <TabPane tab="题目详情" key="1">
@@ -269,6 +269,7 @@ class ProblemDetailRecord extends Component {
         return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min + ':' + sec;
     }
     render() {
+        const language = ['C', 'C++', 'Javascript', 'Python'];
         let body = [];
         if(this.props.submit_record !== null || this.props.html_record !== null) {
             const sub = this.props.submit_record===null ? this.props.html_record : this.props.submit_record;
@@ -302,6 +303,7 @@ class ProblemDetailRecord extends Component {
                     <td>{sub.consume_memory === null ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
                     <td>{sub.src_size === null ? -1 : (sub.src_size.toString() + ' B')}</td>
                     <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
+                    <td>{language[sub.src_language-1]}</td>
                     <td><a onClick={()=>{
                         ajax_post(api_list['srcCode_record'], {id: sub.id}, this, (that, result) => {
                             that.setState({src_code: result.data.src_code});
@@ -315,7 +317,10 @@ class ProblemDetailRecord extends Component {
         if(this.props.records[0]!==undefined && this.props.records[0].consume_time!==undefined) {
             console.log('inside table render', this.props.records);
             let counter = 1;
-            for (const re of this.props.records) {
+            const records = this.props.records.sort((a, b)=>{
+                return b.id-a.id;
+            });
+            for (const re of records) {
                 if(re.consume_time===undefined)
                     continue;
                 console.log("inside table render for loop", re);
@@ -349,6 +354,7 @@ class ProblemDetailRecord extends Component {
                         <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
                         <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
+                        <td>{language[re.src_language-1]}</td>
                         <td><a onClick={()=>{
                             ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
                                 that.setState({src_code: result.data.src_code});
@@ -374,6 +380,7 @@ class ProblemDetailRecord extends Component {
                         <th>所占空间</th>
                         <th>文件大小</th>
                         <th>提交时间</th>
+                        <th>语言</th>
                         <th>操作</th>
                     </tr>
                     </thead>
