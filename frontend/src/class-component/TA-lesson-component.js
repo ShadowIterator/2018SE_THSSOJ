@@ -575,26 +575,30 @@ class mHomeworkForm extends Component {
                                onChange={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   console.log(event.target.value);
-                                   const num = parseInt(event.target.value);
-                                   if (Number.isNaN(num) || num < 0) {
-                                       return {
-                                           validateStatus: 'error',
-                                           errorMsg: '请输入大于等于0的整数',
-                                       }
-                                   }
+                                   // console.log(event.target.value);
+                                   // const num = parseInt(event.target.value);
+                                   // if (Number.isNaN(num) || num < 0) {
+                                   //     return {
+                                   //         validateStatus: 'error',
+                                   //         errorMsg: '请输入大于等于0的整数',
+                                   //     }
+                                   // }
                                    this.setState({
                                        newProb: event.target.value
                                    });
-                                   return {
-                                       validateStatus: 'success',
-                                       errorMsg: null,
-                                   }
+                                   // return {
+                                   //     validateStatus: 'success',
+                                   //     errorMsg: null,
+                                   // }
                                }}
                                onPressEnter={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
                                    let newPronid = parseInt(this.state.newProb);
+                                   if (isNaN(newPronid) || newPronid < 0) {
+                                       message.error("请输入大于等于0的整数");
+                                       return;
+                                   }
                                    if (this.state.problems.filter(item=>item.id===newPronid).length > 0){
                                        message.error("题目已在列表中，请不要重复加题");
                                        return;

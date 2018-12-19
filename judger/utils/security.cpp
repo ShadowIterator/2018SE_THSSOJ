@@ -553,6 +553,7 @@ void init_config(const RunConfig& runConfig) {
 
 		readable.insert("/usr/bin/nodejs");
 		readable.insert("/usr/lib/nodejs/");
+		readable.insert("/usr/share/locale/");
 
 		statable.insert("/usr");
 		statable.insert("/usr/bin");

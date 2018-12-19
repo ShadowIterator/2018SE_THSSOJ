@@ -50,7 +50,7 @@ class RegistrationForm extends React.Component {
                 return (<Radio value={value}>{mapper[value]}</Radio>);
             }) : [],
             judge_method: nextProps.isEditing ? parseInt(nextProps.judge_method.value) : 0,
-            med_description: nextProps.description.value,
+            mde_description: nextProps.description.value,
         });
     }
     handleSubmit = (e) => {
@@ -130,6 +130,7 @@ class RegistrationForm extends React.Component {
                 let data={};
                 if(this.state.judge_method === 0) {
                     data ={
+                        id: this.props.problem_id,
                         title: values.title,
                         // description: values.description,
                         description: this.state.mde_description,
@@ -155,6 +156,7 @@ class RegistrationForm extends React.Component {
                     }
                 } else if(this.state.judge_method === 1) {
                     data = {
+                        id: this.props.problem_id,
                         title: values.title,
                         // description: values.description,
                         description: this.state.mde_description,
@@ -180,6 +182,7 @@ class RegistrationForm extends React.Component {
                     }
                 } else if(this.state.judge_method === 2) {
                     data = {
+                        id: this.props.problem_id,
                         title: values.title,
                         // description: values.description,
                         description: this.state.mde_description,

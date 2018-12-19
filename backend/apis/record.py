@@ -188,7 +188,7 @@ class APIRecordHandler(base.BaseHandler):
                 matched_problem['status'] = 1
                 await self.db.saveObject('problems', cur_user=self.get_current_user_object(), object=matched_problem)
 
-        record_path = self.root_dir+'/'+str(match_record['id'])+'/'+str(match_record)+'.json'
+        record_path = self.root_dir+'/'+str(match_record['id'])+'/'+str(match_record['id'])+'.json'
         record_file = open(record_path, mode='w')
         json.dump(judge_result, record_file)
         record_file.close()

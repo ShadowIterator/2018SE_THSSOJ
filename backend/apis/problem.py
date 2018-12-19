@@ -239,19 +239,19 @@ class APIProblemHandler(base.BaseHandler):
         target_problem = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), id=self.args['id']))[0]
 
         # authority check
-        cur_user = self.get_current_user_object()
+        cur_user = await self.get_current_user_object()
         if target_problem['user_id'] != cur_user['id'] or 'status' in self.args.keys():
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
 
         if 'description' in self.args.keys():
-            description = bytearray()
-            byte_content = bytearray()
-            self.str_to_bytes(self.args['description'], byte_content)
-            description = base64.b64decode(byte_content)
+            # description = bytearray()
+            # byte_content = bytearray()
+            # self.str_to_bytes(self.args['description'], byte_content)
+            # description = base64.b64decode(byte_content)
             description_file = open(target_path, mode='wb')
-            description_file.write(description)
+            description_file.write(self.args['description'].encode('utf-8'))
             description_file.close()
             del self.args['description']
         for key in self.args.keys():

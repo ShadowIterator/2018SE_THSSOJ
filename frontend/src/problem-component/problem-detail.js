@@ -326,7 +326,7 @@ class ProblemDetailRecord extends Component {
                                 message.error("请求评测数据失败");
                                 return;
                             }
-                            that.setState({judger_info: result.data.info, judger_info_visible: false});
+                            that.setState({judger_info: result.data.info, judger_info_visible: true});
                         })
                     }}>查看评测信息</a></td>
                     }
@@ -392,7 +392,7 @@ class ProblemDetailRecord extends Component {
                                     message.error("请求评测数据失败");
                                     return;
                                 }
-                                that.setState({judger_info: result.data.info, judger_info_visible: false});
+                                that.setState({judger_info: result.data.info, judger_info_visible: true});
                             })
                         }}>查看评测信息</a></td>
                         }
