@@ -16,7 +16,10 @@ import datetime
 import time
 # import unicodedata
 import asyncio
-from tornado.locks import Condition
+# from aiopg.sa import create_engine
+# import sqlalchemy as sa
+# import aiopg.sa as sa
+from tornado.locks import Condition, Lock
 
 class NoResultError(Exception):
     pass
@@ -64,6 +67,11 @@ class BaseDB:
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
+    async def execute_without_args(self, stmt):
+        print('exe-without: ', stmt)
+        with (await self.db.cursor()) as cur:
+            await cur.execute(stmt)
+
     async def query(self, stmt, *args):
         """Query for a list of results.
 
@@ -75,6 +83,7 @@ class BaseDB:
 
             for row in await self.query(...)
         """
+        print('query: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
             res = [self.row_to_obj(row, cur)
@@ -138,6 +147,22 @@ class BaseDB:
     async def createObject(self, si_table_name, **kw):
         return await self.tables[si_table_name].createObject(**kw)
 
+    async def acquire_lock(self, si_table_name, hash_id):
+        return await self.tables[si_table_name].acquire_lock(hash_id)
+
+    async def release_lock(self, si_table_name, hash_id):
+        return await self.tables[si_table_name].release_lock(hash_id)
+
+    def get_lock_object(self, si_table_name, hash_id):
+        return self.tables[si_table_name].get_lock_object(hash_id)
+
+    async def insert_element_in_array(self, si_table_name, column_name, value, id):
+        return await self.tables[si_table_name].insert_element_in_array(column_name, value, id)
+
+    async def remove_element_in_array(self, si_table_name, column_name, value, id):
+        return await self.tables[si_table_name].remove_element_in_array(column_name, value, id)
+
+condition = Condition()
 
 class BaseTable:
 
@@ -147,7 +172,9 @@ class BaseTable:
         self.table_name = si_table_name
         self.database_keys = []
         self.lockN = lock_cnt
-        self.lock = [Condition() for i in range(lock_cnt)]
+        self.lock = [Lock() for i in range(lock_cnt)]
+
+        # self.locker = Condition()
         # loop = asyncio.get_event_loop()
         # loop.run_until_complete(self.async_init())
         # loop.close()
@@ -159,21 +186,40 @@ class BaseTable:
         self.database_keys = list(map(lambda item: item['column_name'], database_keys))
         print(self.database_keys)
 
+    #
+    async def insert_element_in_array(self, column_name, value, id):
+        stmt = '''UPDATE {table_name} SET {column_name} = array_append({column_name}, {value}) WHERE id = {id};'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
+        await self.db.execute(stmt)
+
+    async def remove_element_in_array(self, column_name, value, id):
+        # stmt = '''UPDATE {table_name} SET {column_name} = arrary_remove({column_name}, %s) WHERE id = %s'''.format(table_name = self.table_name, column_name = column_name)
+        stmt = '''UPDATE {table_name} SET {column_name} = array_remove({column_name}, {value}) WHERE id = {id};'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
+        await self.db.execute(stmt)
+
+        # await self.db.execute(stmt, value, id)
+
     # to use this, u must
     # I do not want to write a comment
     async def acquire_lock(self, hash_id):
-        await self.lock[hash_id % self.lockN].wait()
+        await self.lock[hash_id % self.lockN].acquire()
+        print('before_ac lock')
+        # await condition.wait()
 
     async def release_lock(self, hash_id):
-        self.lock[hash_id % self.lockN].notify()
+        self.lock[hash_id % self.lockN].release()
+        print('release lock lock')
+        # condition.notify()
+
+    def get_lock_object(self, hash_id):
+        return self.lock[hash_id % self.lockN]
 
     async def saveObject(self, object, cur_user = None):
         si_table_name = self.table_name
         if(cur_user):
             object = await self.objectFilter('write', object, cur_user)
-        print('saveObject-before: ', object)
+        # print('saveObject-before: ', object)
         object = self.filterKeys(object)
-        print('saveObject: ', object)
+        # print('saveObject: ', object)
         fmtList = []
         valueList = []
         for key,value in object.items():
@@ -181,7 +227,7 @@ class BaseTable:
                 fmtList.append(str(key) + ' = %s')
                 valueList.append(value)
         sfmt = ' , '.join(fmtList)
-        print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
+        # print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
         await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
 
     async def all(self, cur_user = None):
@@ -200,9 +246,9 @@ class BaseTable:
 
     async def getObject(self, cur_user = None, **kw):
         si_table_name = self.table_name
-        print('getobject: ', kw)
+        # print('getobject: ', kw)
         kw = self.filterKeys(kw)
-        print('getobject after filter: ', kw)
+        # print('getobject after filter: ', kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
@@ -211,13 +257,14 @@ class BaseTable:
         slst = ' AND '.join(plst)
         print("slst = ", slst)
         res = await self.db.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
-        if(cur_user):
-            rtn = []
-            for item in res:
-                rtn.append(await self.objectFilter('read', item, cur_user))
-            return rtn
-        else:
-            return res
+        return res
+        # if(cur_user):
+        #     rtn = []
+        #     for item in res:
+        #         rtn.append(await self.objectFilter('read', item, cur_user))
+        #     return rtn
+        # else:
+        #     return res
 
 
     async def deleteObject(self, **kw):

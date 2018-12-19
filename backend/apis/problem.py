@@ -164,7 +164,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['NTESTS'] = config_info['NTESTS']
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
-            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
             # requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif test_language==3:
             judge_req = {}
@@ -175,8 +175,8 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = os.getcwd() + '/' + target_zip_path
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req['OTHERS'] = './judge.sh -r 100'
-            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
+            requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
             # requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         os.remove(code_path)
@@ -505,8 +505,8 @@ class APIProblemHandler(base.BaseHandler):
             return res_dict
 
         if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
-            if not os.path.exists('test'):
-                os.makedirs('test')
+            # if not os.path.exists('test'):
+            #     os.makedirs('test')
             # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
             case_path = os.getcwd()+'/'+self.root_dir+'/'+str(problem_of_code['id'])+'/case'
             config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
@@ -539,8 +539,8 @@ class APIProblemHandler(base.BaseHandler):
 
             requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif self.args['src_language'] == 3:
-            if not os.path.exists('judge_script'):
-                os.makedirs('judge_script')
+            # if not os.path.exists('judge_script'):
+            #     os.makedirs('judge_script')
             script_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem_of_code['id']) + '/script'
             # config_file = open(script_path + '/config.json', mode='r', encoding='utf8')
             # config_info = json.load(config_file)
@@ -550,13 +550,13 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
             judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
-            judge_req['WORK_PATH'] = os.getcwd() + '/judge_script'
+            judge_req['WORK_PATH'] = script_path
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
             if self.args['record_type'] == 0:
                 judge_req['OTHERS'] = './judge.sh -r 100'
             elif self.args['record_type'] == 1:
-                judge_req['OTHERS'] = './judge.sh -r {}'.format(ratio_percent)
+                judge_req['OTHERS'] = '/bin/bash ./judge.sh -r {}'.format(ratio_percent)
 
             requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
@@ -677,7 +677,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
                 judge_req['SOURCE_FILE'] = str_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
-                requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+                requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
 
         elif problem['judge_method'] == 1:
             final_records = await self.db.getObject('records', record_type=2, homework_id=homework_id, problem_id=problem['id'])
@@ -693,7 +693,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['MEMORY_LIMIT'] = problem['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
             judge_req['WORK_PATH'] = script_path
-            judge_req['OTHERS'] = './judge.sh -r 100'
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
 
             for each_record in final_records:
                 str_id = str(each_record['id'])
@@ -701,7 +701,7 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['id'] = each_record['id']
                 judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
                 judge_req['SOURCE'] = str_id
-                requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+                requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         elif problem['judge_method'] == 2:
             html_judge_path = os.getcwd()+'/'+self.root_dir.replace('problems', 'judge_html_temp')
@@ -731,4 +731,73 @@ class APIProblemHandler(base.BaseHandler):
 
 
         self.set_res_dict(res_dict, code=0, msg='problem judging', uri=uri)
+        return res_dict
+
+    async def _judge_post(self):
+        res_dict={}
+        course = (await self.db.getObject('courses', id=self.args['course_id']))[0]
+        # authority check
+        cur_user = await self.get_current_user_object()
+        if cur_user['role'] < 2:
+            self.set_res_dict(res_dict, code=1, msg='no authority')
+            return res_dict
+        elif cur_user['role'] == 2 and cur_user['id'] not in course['tas']:
+            self.set_res_dict(res_dict, code=1, msg='no authority')
+            return res_dict
+        # ----------------------------------------------------
+        record = await self.db.getObjectOne('records', id=self.args['record_id'])
+        if not record['record_type'] == 2:
+            self.set_res_dict(res_dict, code=1, msg='you can not rejudge this record')
+            return res_dict
+
+        judge_state = await self.db.getObjectOne('judgestates',
+                                                 problem_id=record['problem_id'],
+                                                 homework_id=record['homework_id'])
+        judge_state['judged'] += 1
+        self.db.saveObject('judgestates', object=judge_state)
+
+        record['status'] = 0
+        problem = await self.db.getObjectOne('problems', id=self.args['problem_id'])
+        record_dir = self.root_dir.replace('problems', 'records') + '/' + str(record['id'])
+        if record['result_type'] == 0:
+            case_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem['id']) + '/case'
+            config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
+            config_info = json.load(config_file)
+            config_file.close()
+            judge_req = {}
+            judge_req['id'] = record['id']
+            judge_req['TIME_LIMIT'] = problem['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['INPRE'] = config_info['INPRE']
+            judge_req['INSUF'] = config_info['INSUF']
+            judge_req['OUTPRE'] = config_info['OUTPRE']
+            judge_req['OUTSUF'] = config_info['OUTSUF']
+            if record['src_language'] == 1:
+                judge_req['Language'] = 'C'
+            elif record['src_language'] == 2:
+                judge_req['Language'] = 'C++'
+            elif record['src_language'] == 4:
+                judge_req['Language'] = 'Python'
+            judge_req['DATA_DIR'] = case_path
+            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            judge_req['CHECKER'] = 'ncmp'
+            judge_req['NTESTS'] = config_info['NTESTS']
+            judge_req['SOURCE_FILE'] = str(record['id'])
+            judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
+            requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
+        elif record['result_type'] == 1:
+            script_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem['id']) + '/script'
+            judge_req = {}
+            judge_req['id'] = record['id']
+            judge_req['TIME_LIMIT'] = problem['time_limit']
+            judge_req['MEMORY_LIMIT'] = problem['memory_limit']
+            judge_req['OUTPUT_LIMIT'] = 64
+            judge_req['WORK_PATH'] = script_path
+            judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
+            judge_req['SOURCE'] = str(record['id'])
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
+            requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
+
+        self.set_res_dict(res_dict, code=0, msg='single record rejudging')
         return res_dict

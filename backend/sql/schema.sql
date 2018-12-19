@@ -1,3 +1,5 @@
+--UPDATE users SET student_courses = array_append(student_courses, 3) WHERE id = 1;
+--UPDATE users SET student_courses = array_remove(student_courses, 2) WHERE id = 1;
 -- Copyright 2009 FriendFeed
 --
 -- Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -163,8 +165,17 @@ CREATE TABLE ratios (
 -- create items
 --INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
 
+<<<<<<< HEAD
 INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{1}', 'liadf92wlfisajfli39alsdifj3isd');
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('ta','1234','zyw@wzy.com', 2, '{1}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'faslidjf23453dsafads');
+=======
+INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{2, 1, 2}', 'liadf92wlfisajfli39alsdifj3isd');
+
+UPDATE users SET student_courses = array_append(student_courses, 3) WHERE id = 1;
+UPDATE users SET student_courses = array_remove(student_courses, 2) WHERE id = 1;
+
+INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('ta','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'faslidjf23453dsafads');
+>>>>>>> zjl
 INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time, secret) VALUES ('admin','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
 --INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin1','1234','zyw@wzy.com', 3, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
 --INSERT INTO users (username, password, email, role, TA_courses, student_courses, create_time) VALUES ('admin2','1234','zyw@wzy.com', 2, '{}', '{}', TIMESTAMP '2011-05-16 15:36:38');
