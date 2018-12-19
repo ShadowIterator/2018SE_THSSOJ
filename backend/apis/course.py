@@ -80,11 +80,17 @@ class APICourseHandler(base.BaseHandler):
     async def _delete_post(self):
         res_dict = {}
         # authority check
-        role = (await self.get_current_user_object())['role']
-        if role < 3:
+        cur_user = await self.get_current_user_object()
+        role = cur_user['role']
+        if role < 2:
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
-
+        elif role == 2:
+            course = (await self.db.getObject('courses', id=self.args['id']))[0]
+            if course['status'] != 0 or cur_user['id'] not in course['tas']:
+                self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+                return res_dict
+        # ----------------------------------------------------------------
         await self.db.deleteObject('courses', id=self.args['id'])
         self.set_res_dict(res_dict, code=0, msg='course deleted')
         return res_dict
