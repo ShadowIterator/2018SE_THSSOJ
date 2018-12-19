@@ -52,19 +52,31 @@ async def main():
             user=options.db_user,
             password=options.db_password,
             dbname=options.db_database) as db:
-        await maybe_create_tables(db, 'sql/schema.sql')
         rdb = BaseDB(db)
-        # await rdb.createObject('users', username = 'hfz', password = '1234')
         app = Application(rdb,
                           options.RoutineList,
                           **options.AppConfig
                           )
-        app.listen(options.port)
         await app.async_init()
+
+        # with (await db.cursor()) as cur:
+            # print('maybe-create-tables: ', schema)
+            # await cur.execute(schema)
+
+        await maybe_create_tables(db, 'sql/schema.sql')
+        # await rdb.createObject('users', username = 'hfz', password = '1234')
+
+        # user = await rdb.createObject('users', email = 'xx')
+        # user['email'] = 'adfdsfe'
+        # await rdb.saveObject('users', {'id': user['id'], 'email': '12423'})
+        # stmt = ''''''
+        # await rdb
+
         await rdb.insert_element_in_array('users', 'student_courses', 5, 1)
         await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
-
         print('get user:', await rdb.getObjectOne('users', id = 1))
+
+        app.listen(options.port)
 
         # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted

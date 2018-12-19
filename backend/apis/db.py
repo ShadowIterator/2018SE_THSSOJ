@@ -16,6 +16,9 @@ import datetime
 import time
 # import unicodedata
 import asyncio
+# from aiopg.sa import create_engine
+# import sqlalchemy as sa
+# import aiopg.sa as sa
 from tornado.locks import Condition, Lock
 
 class NoResultError(Exception):
@@ -64,6 +67,11 @@ class BaseDB:
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
+    async def execute_without_args(self, stmt):
+        print('exe-without: ', stmt)
+        with (await self.db.cursor()) as cur:
+            await cur.execute(stmt)
+
     async def query(self, stmt, *args):
         """Query for a list of results.
 
@@ -75,6 +83,7 @@ class BaseDB:
 
             for row in await self.query(...)
         """
+        print('query: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
             res = [self.row_to_obj(row, cur)
@@ -179,13 +188,15 @@ class BaseTable:
 
     #
     async def insert_element_in_array(self, column_name, value, id):
-        stmt = '''UPDATE {table_name} SET {column_name} = arrary_append({column_name}, {value}) WHERE id = {id}'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
-        print('insert_element', stmt)
+        stmt = '''UPDATE {table_name} SET {column_name} = array_append({column_name}, {value}) WHERE id = {id};'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
         await self.db.execute(stmt)
 
     async def remove_element_in_array(self, column_name, value, id):
-        stmt = '''UPDATE {table_name} SET {column_name} = arrary_remove({column_name}, %s) WHERE id = %s'''.format(table_name = self.table_name, column_name = column_name)
-        await self.db.execute(stmt, value, id)
+        # stmt = '''UPDATE {table_name} SET {column_name} = arrary_remove({column_name}, %s) WHERE id = %s'''.format(table_name = self.table_name, column_name = column_name)
+        stmt = '''UPDATE {table_name} SET {column_name} = array_remove({column_name}, {value}) WHERE id = {id};'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
+        await self.db.execute(stmt)
+
+        # await self.db.execute(stmt, value, id)
 
     # to use this, u must
     # I do not want to write a comment
