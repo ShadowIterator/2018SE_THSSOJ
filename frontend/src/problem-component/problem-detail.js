@@ -242,6 +242,7 @@ class ProblemDetailRecord extends Component {
         super(props);
         this.state = {
             visible: false,
+            judger_info_visible: false,
             modal_text: '',
             src_code: ''
         }
@@ -304,16 +305,34 @@ class ProblemDetailRecord extends Component {
                     <td>{sub.src_size === null ? -1 : (sub.src_size.toString() + ' B')}</td>
                     <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
                     <td>{language[sub.src_language-1]}</td>
-                    <td><a onClick={()=>{
+                    {this.props.judge_method !== 2 &&
+                    <td><a onClick={() => {
                         ajax_post(api_list['srcCode_record'], {id: sub.id}, this, (that, result) => {
-                            that.setState({src_code: result.data.src_code});
+                            if(result.data.code === 1) {
+                                message.error("请求源码失败");
+                                return;
+                            }
+                            that.setState({src_code: result.data.src_code, visible: true});
                         });
-                        this.setState({visible: true});
                     }}>查看源码</a></td>
+                    }
+                    {this.props.judge_method !== 2 &&
+                    <td><a onClick={() => {
+                        if(sub.status === 0) {
+                            message.warning("暂无评测信息");
+                        }
+                        ajax_post(api_list['judger_info'], {record_id: sub.id}, this, (that, result) => {
+                            if(result.data.code === 1) {
+                                message.error("请求评测数据失败");
+                                return;
+                            }
+                            that.setState({judger_info: result.data.info, judger_info_visible: false});
+                        })
+                    }}>查看评测信息</a></td>
+                    }
                 </tr>
             )
         }
-        // console.log('outside table render', this.props.records, this.props.records.consume_time);
         if(this.props.records[0]!==undefined && this.props.records[0].consume_time!==undefined) {
             console.log('inside table render', this.props.records);
             let counter = 1;
@@ -354,13 +373,33 @@ class ProblemDetailRecord extends Component {
                         <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
                         <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
+<<<<<<< HEAD
                         <td>{language[re.src_language-1]}</td>
                         <td><a onClick={()=>{
+=======
+                        {this.props.judge_method !== 2 &&
+                        <td><a onClick={() => {
+>>>>>>> 52baada2fbb2fee5ac68fb82bbe426daa0802367
                             ajax_post(api_list['srcCode_record'], {id: re.id}, this, (that, result) => {
                                 that.setState({src_code: result.data.src_code});
                             });
                             this.setState({visible: true});
                         }}>查看源码</a></td>
+                        }
+                        {this.props.judge_method !== 2 &&
+                        <td><a onClick={() => {
+                            if(re.status === 0) {
+                                message.warning("暂无评测信息");
+                            }
+                            ajax_post(api_list['judger_info'], {record_id: re.id}, this, (that, result) => {
+                                if(result.data.code === 1) {
+                                    message.error("请求评测数据失败");
+                                    return;
+                                }
+                                that.setState({judger_info: result.data.info, judger_info_visible: false});
+                            })
+                        }}>查看评测信息</a></td>
+                        }
                     </tr>
                 );
                 counter += 1;
@@ -381,7 +420,12 @@ class ProblemDetailRecord extends Component {
                         <th>文件大小</th>
                         <th>提交时间</th>
                         <th>语言</th>
-                        <th>操作</th>
+                        {this.props.judge_method !== 2 &&
+                        <th>源码</th>
+                        }
+                        {this.props.judge_method !== 2 &&
+                        <th>评测信息</th>
+                        }
                     </tr>
                     </thead>
                     <tbody>
@@ -389,18 +433,26 @@ class ProblemDetailRecord extends Component {
                     </tbody>
                 </Table>
                 <Modal
-                    title="Basic Modal"
+                    title="查看源码"
                     visible={this.state.visible}
-                    width='40%'
+                    width='55%'
                     onOk={()=>{this.setState({visible: false})}}
                     onCancel={()=>{this.setState({visible: false})}}
                 >
                     <CodeMirror options={{
-                        // mode: this.state.language,
                         theme: 'neat',
                         lineNumbers: true,
                         readOnly: true,
                     }} value={this.state.src_code} />
+                </Modal>
+                <Modal
+                    title="查看评测详细信息"
+                    visible={this.state.judger_info_visible}
+                    width='55%'
+                    onOk={()=>{this.setState({judger_info_visible: false})}}
+                    onCancel={()=>{this.setState({judger_info_visible: false})}}
+                >
+                    {this.state.judger_info}
                 </Modal>
             </div>
         );

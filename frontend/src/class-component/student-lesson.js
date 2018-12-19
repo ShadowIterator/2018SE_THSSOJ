@@ -329,24 +329,32 @@ class StudentHomework extends Component {
 class mStudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
+        let current_selected = '1';
+        if(this.props.location.state !== undefined) {
+            if(this.props.location.state.panel === '1') {
+                current_selected = '5';
+            } else if(this.props.location.state.panel === '2') {
+                current_selected = '1';
+            } else if(this.props.location.state.panel === '3') {
+                current_selected = '6';
+            } else {
+                current_selected = '1';
+            }
+        }
         this.state = {
             infoitems: [],
             homeworkitems: [],
-            // problemitems: [],
             lesson_name: '',
-            current_selected: '1',
+            current_selected: current_selected,
             course_info: {
                 name: "",
                 description: "",
                 ta_list: []
             }
-
-            // homeworkstatus: {},
         };
         this.infoitems = [];
         this.homeworkitems = [];
         this.problemitems = [];
-        // this.homeworkstatus = {};
     }
     componentDidMount() {
         const course_id = parseInt(this.props.course_id);
@@ -373,7 +381,7 @@ class mStudentLessonMiddle extends Component {
     };
 
     update_pannel = (course_id) => {
-        console.log('update_pannel');
+        console.log('update_panel');
         ajax_post(api_list['query_course'], {id:course_id}, this, (that, result) =>{
             if(result.data.length===0)
                 return;
@@ -488,7 +496,6 @@ class mStudentLessonMiddle extends Component {
                                             prob['result'] = data['result'];
                                             prob['score'] = data['score'];
                                         }
-                                        // else prob['result_type'] = -1;
                                         that.setState({homeworkitems: homework_items});
                                     });
                             });
@@ -584,13 +591,13 @@ class mStudentLessonMiddle extends Component {
                             onClick={
                                 (e)=>{
                                     const course_id = parseInt(this.props.course_id);
-                                    this.setState({current_selected: e.key})
+                                    this.setState({current_selected: e.key});
                                     this.setState({homeworkitems: []});
                                     this.update_pannel(course_id);
                                 }
                             }
                             mode="inline"
-                            defaultSelectedKeys={['1']}
+                            defaultSelectedKeys={this.state.current_selected}
                             defaultOpenKeys={['sub1']}
                             style={{ height: '100%' }}
                         >

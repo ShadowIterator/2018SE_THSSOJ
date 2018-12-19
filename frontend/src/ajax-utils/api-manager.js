@@ -43,6 +43,7 @@ const api_list = {
     'delete_record': '/api/record/delete',
     'query_record': '/api/record/query',
     'srcCode_record': '/api/record/srcCode',
+    'judger_info': '/api/record/judgerInfo',
 
     'list_problem': '/api/problem/list',
     'create_problem': '/api/problem/create',
