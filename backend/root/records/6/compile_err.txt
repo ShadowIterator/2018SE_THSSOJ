@@ -1,2 +1,0 @@
-/home/shadowiterator/2018SE3_OJ/backend/root/records/6/6.code:3:76: fatal error: /home/shadowiterator/2018SE3_OJ/backend/settings/app_config.json: 没有那个文件或目录
-compilation terminated.

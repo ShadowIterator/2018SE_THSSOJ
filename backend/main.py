@@ -1,3 +1,4 @@
+# encoding = utf-8
 import json
 import aiopg
 import bcrypt
@@ -14,8 +15,11 @@ import tornado.web
 import unicodedata
 from apis.base import maybe_create_tables, Application
 from apis.db import BaseDB
-
+from tornado.locks import Condition, Lock
+from tornado import gen
 from tornado.options import define, options
+
+
 
 define("port", default=8000, help="run on the given port")
 define("db_host", default="postgres", help="blog database host")
@@ -29,6 +33,10 @@ define('AppConfig', default=None, help='tornado settings file', type=dict)
 define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
 define('judgerSecret', default='no_secret', help='secret', type=str)
+
+
+
+
 
 async def main():
     tornado.options.parse_command_line()
@@ -45,16 +53,33 @@ async def main():
             user=options.db_user,
             password=options.db_password,
             dbname=options.db_database) as db:
-        await maybe_create_tables(db, 'sql/schema.sql')
         rdb = BaseDB(db)
-        # await rdb.createObject('users', username = 'hfz', password = '1234')
         app = Application(rdb,
                           options.RoutineList,
                           **options.AppConfig
                           )
-        app.listen(options.port)
         await app.async_init()
 
+        # with (await db.cursor()) as cur:
+            # print('maybe-create-tables: ', schema)
+            # await cur.execute(schema)
+
+        await maybe_create_tables(db, 'sql/schema.sql')
+        # await rdb.createObject('users', username = 'hfz', password = '1234')
+
+        # user = await rdb.createObject('users', email = 'xx')
+        # user['email'] = 'adfdsfe'
+        # await rdb.saveObject('users', {'id': user['id'], 'email': '12423'})
+        # stmt = ''''''
+        # await rdb
+
+        await rdb.insert_element_in_array('users', 'student_courses', 5, 1)
+        await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
+        print('get user:', await rdb.getObjectOne('users', id = 1))
+
+        app.listen(options.port)
+
+        # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted
         # with Ctrl-C, but if you want to shut down more gracefully,
         # call shutdown_event.set().

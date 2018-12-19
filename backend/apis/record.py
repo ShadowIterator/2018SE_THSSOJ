@@ -5,6 +5,7 @@ import smtplib
 import random
 import datetime
 import os
+import json
 from email.mime.text import MIMEText
 from email.header import Header
 from . import base
@@ -90,6 +91,22 @@ class APIRecordHandler(base.BaseHandler):
     async def _srcCode_post(self):
         # raise Exception('implement srcCode')
         res_dict={}
+        # authority check
+        cur_user = await self.get_current_user_object()
+        record = (await self.db.getObject('records', id=self.args['id']))[0]
+        if record['record_type'] == 0:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        elif record['record_type'] == 1 or record['record_type'] == 2:
+            if cur_user['role'] < 2 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        elif record['record_type'] == 3:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        # -----------------------------------------------------------
         record_id = str(self.args['id'])
         record_dir = self.root_dir+'/'+record_id
         if not os.path.exists(record_dir):
@@ -146,6 +163,12 @@ class APIRecordHandler(base.BaseHandler):
                        'unknown': 9,
                        }
         print('returnresult: ', match_record)
+        # ******************************** update judgestates *********************************************
+        if(match_record['record_type'] in [2, 4]):
+            judge_state = await self.db.getObjectOne('judgestates', homework_id = match_record['homework_id'], problem_id = match_record['problem_id'])
+            judge_state['judged'] += 1
+            await self.db.saveObject('judgestates', judge_state)
+
         judge_result = self.args['res']
         if match_record['src_language'] == 1 or match_record['src_language'] == 2 or match_record['src_language'] == 4:
             match_record['consume_time'] = judge_result['time']
@@ -165,8 +188,14 @@ class APIRecordHandler(base.BaseHandler):
                 matched_problem['status'] = 1
                 await self.db.saveObject('problems', cur_user=self.get_current_user_object(), object=matched_problem)
 
+        record_path = self.root_dir+'/'+str(match_record['id'])+'/'+str(match_record)+'.json'
+        record_file = open(record_path, mode='w')
+        json.dump(judge_result, record_file)
+        record_file.close()
+
         match_record['status'] = 1
         await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
+        return
 
     # async def get(self, type): #detail
     #     # self.getargs()
@@ -176,3 +205,18 @@ class APIRecordHandler(base.BaseHandler):
     # async def post(self, type):
     #     print('post: ', type)
     #     await self._call_method('''_{action_name}_post'''.format(action_name = type))
+
+    # @tornado.web.authenticated
+    async def _judgerInfo_post(self):
+        res_dict = {}
+        record_id = self.args['record_id']
+        record_path = self.root_dir+'/'+str(record_id)+'/'+str(record_id)+'.json'
+        if not os.path.exists(record_path):
+            self.set_res_dict(res_dict, code=1, msg='record does not exist')
+            return res_dict
+
+        record_file = open(record_path, mode='r')
+        record_detail = json.load(record_file)
+        record_file.close()
+        self.set_res_dict(res_dict, code=0, info=record_detail['Info'])
+        return res_dict

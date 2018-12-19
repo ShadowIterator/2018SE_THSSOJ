@@ -1,4 +1,0 @@
-/home/shadowiterator/2018SE3_OJ/backend/root/records/5/5.code: In function ‘main’:
-/home/shadowiterator/2018SE3_OJ/backend/root/records/5/5.code:7:5: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
-     scanf("%d %d",&a,&b);
-     ^

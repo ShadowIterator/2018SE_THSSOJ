@@ -1,11 +1,6 @@
 import React, { Component } from 'react';
-
-import {Container, Col, Row, Tabs, Tab} from 'react-bootstrap';
-
-import {ZeroPadding, Spacing} from "./lesson-component";
 import {withRouter, Link} from "react-router-dom";
 import {WrappedAddNewNotice, TANoticeList, TAHomeworkPanel, TACreateHomework} from "./TA-lesson-component";
-import {AnchorButton, Card, Code, H5, Intent, Menu as blueMenu, Switch} from "@blueprintjs/core";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {ShowLesson, ModifyLesson} from "./TA-create-lesson";
@@ -14,12 +9,26 @@ import { Layout, Breadcrumb, Menu, Icon, message, Button } from 'antd';
 const {Content, Sider} = Layout;
 const { SubMenu } = Menu;
 
-export class TALesson extends Component {
+class mTALesson extends Component {
     constructor(props) {
         super(props);
+        let current_selected = '1';
+        if(this.props.location.state !== undefined) {
+            if(this.props.location.state.panel === '1') {
+                current_selected = '4';
+            } else if(this.props.location.state.panel === '2') {
+                current_selected = '1';
+            } else if(this.props.location.state.panel === '3') {
+                current_selected = '2';
+            } else if(this.props.location.state.panel === '4') {
+                current_selected = '5';
+            } else {
+                current_selected = '1';
+            }
+        }
         this.state = {
             course_name: '',
-            current_selected: '1',
+            current_selected: current_selected,
 
             clickNewnotice: false,
             clickNewhomework: -2,   // -2     not click
@@ -54,17 +63,6 @@ export class TALesson extends Component {
             nextProps.lesson_id !== this.props.lesson_id) {
             const next_course_id = parseInt(nextProps.lesson_id);
             this.query_data(next_course_id);
-            // console.log('next course id ', next_course_id);
-            //
-            // ajax_post(api_list['query_course'], {id:next_course_id}, this, TALesson.query_course_callback);
-            //
-            // this.setState({homeworkitems: []});
-            // this.setState({problemitems: []});
-            // this.homeworkitems = [];
-            // this.problemitems = [];
-            //
-            // ajax_post(api_list['query_notice'], {course_id: next_course_id}, this, this.query_notice_callback);
-            // ajax_post(api_list['query_course'], {id: next_course_id}, this, this.query_homework_callback);
         }
     }
 
@@ -145,29 +143,19 @@ export class TALesson extends Component {
                     const id_str = result.data[0].problems[index].toString();
                     let problemitem;
 
-                    if (res.data.length === 1) {    // get data
-                        if (id_str in problemset) {
-                            problemitem = problemset[id_str];
-                        } else
-                        {
-                            problemitem = { id: result.data[0].problems[index] };
-                        }
-                        if (res.data[0].total === res.data[0].judged)
-                            problemitem['judger_status'] = 2;   // finished
-                        else
-                            problemitem['judger_status'] = 1;   // judging
-                    } else      // no data gotten
+                    if (id_str in problemset) {
+                        problemitem = problemset[id_str];
+                    } else
                     {
-                        if (id_str in problemset) {
-                            problemitem = problemset[id_str];
-
-                        } else
-                        {
-                            problemitem = { id: result.data[0].problems[index] };
-                        }
-                        problemitem['judger_status'] = 0;   // NoStarted
+                        problemitem = {id: result.data[0].problems[index]};
                     }
-
+                    if (res.data[0].total_waiting <= 0)      // not started
+                        problemitem['judger_status'] = 0;
+                    else
+                    if (res.data[0].total_waiting === res.data[0].judged)   // judging
+                        problemitem['judger_status'] = 2;
+                    else
+                        problemitem['judger_status'] = 1;   // finished
                     problemset[id_str] = problemitem;
                     that.setState({
                         problemitems: problemset
@@ -280,7 +268,7 @@ export class TALesson extends Component {
                     </>
                 );
                 content = (
-                    <div></div>
+                    <></>
                 )
             } else {
                 breadcrumb = (
@@ -449,9 +437,6 @@ export class TALesson extends Component {
 
         return (
             <>
-            {/*<Container>*/}
-                {/*<TALessonMiddle stu_id={this.props.id} course_id={parseInt(this.props.lesson_id)} course_name={this.state.course_name}/>*/}
-            {/*</Container>*/}
                 <Content style={{ padding: '0 50px' }}>
                     <Breadcrumb style={{ margin: '16px 0' }}>
                         <Breadcrumb.Item><Link to="/ta">主页</Link></Breadcrumb.Item>
@@ -463,7 +448,7 @@ export class TALesson extends Component {
                             <Menu
                                 onClick={(e)=>{this.setState({current_selected: e.key})}}
                                 mode="inline"
-                                defaultSelectedKeys={['1']}
+                                defaultSelectedKeys={[this.state.current_selected]}
                                 defaultOpenKeys={['sub1']}
                                 style={{ height: '100%' }}
                             >
@@ -484,5 +469,8 @@ export class TALesson extends Component {
             </>
         );
     }
-
 }
+
+const TALesson = withRouter(mTALesson);
+
+export {TALesson};

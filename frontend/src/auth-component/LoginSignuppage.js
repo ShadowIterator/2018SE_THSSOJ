@@ -46,8 +46,9 @@ class Login extends Component
         if(code===0) {
             const id = result.data.id;
             const role = result.data.role;
+            const username = result.data.username;
             Cookies.set('mid', id.toString());
-            that.props.callback(id, role);
+            that.props.callback(id, role, username);
             if (role === 1) {
                 that.context.router.history.push("/student");
             }
@@ -57,7 +58,6 @@ class Login extends Component
                 that.context.router.history.push("/admin")
             }
         } else{
-            // alert("Username or password incorrect.");
             message.error("用户名或密码错误！");
         }
     }
@@ -254,13 +254,12 @@ class mLoginPage extends Component {
             } else if(this.props.role === 3) {
                 this.props.history.push('/admin');
             } else {
-                // alert("Bad role number.");
                 message.error("Role数字不对！");
             }
         }
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
             if(nextProps.state && nextProps.role!==undefined) {
@@ -271,7 +270,6 @@ class mLoginPage extends Component {
                 } else if(nextProps.role===3) {
                     this.props.history.push('/admin')
                 } else {
-                    // alert("Bad role number.");
                     message.error("Role数字不对！");
                 }
             }
@@ -304,7 +302,7 @@ class mSignupPage extends Component {
         }
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
             if(nextProps.state && nextProps.role!==undefined) {
@@ -343,10 +341,8 @@ class mLogoutPage extends Component {
         const code = result.data.code;
         if(code===0) {
             Cookies.remove('mid');
-            // alert("Logout succeed.");
             message.success("登出成功");
         } else {
-            // alert("Logout failed.");
             message.error("登出失败");
         }
         that.props.callback();

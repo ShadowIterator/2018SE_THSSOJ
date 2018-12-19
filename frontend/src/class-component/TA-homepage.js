@@ -28,16 +28,15 @@ class mTAHomepageMiddle extends Component {
         // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
-        if(!this.props.state || this.props.id===undefined) {
+        if(!this.props.state || this.props.id===undefined || this.props.id === -1) {
             return;
         }
         const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, mTAHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        // console.log("componentWillUpdate");
         console.log(nextProps);
-        if(nextProps.id===undefined)
+        if(nextProps.id===undefined || nextProps.id === -1)
             return;
         if(nextProps.id !== this.props.id) {
             console.log(nextProps.id);
@@ -119,12 +118,15 @@ class mTAHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
-        console.log("this.state.uplesson: ", this.state.uplesson);
-        console.log("this.state.talesson: ", this.state.talesson);
+        // console.log("this.state.uplesson: ", this.state.uplesson);
+        // console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
-        const running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
-        console.log("now", now);
-        console.log("running_talesson", running_talesson);
+        let running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
+        running_talesson = running_talesson.sort((a, b) => {
+            return a.id < b.id;
+        });
+        // console.log("now", now);
+        // console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
@@ -136,30 +138,54 @@ class mTAHomepageMiddle extends Component {
                             {running_talesson.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
+                                          // title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                           actions={[
                                               <Tooltip title="查看通知">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '1'}
+                                                  })}}>
                                                       <Icon type="notification" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看作业">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '2'}
+                                                  })}}>
                                                       <Icon type="edit" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看成绩">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '3'}
+                                                  })}}>
                                                       <Icon type="check-circle" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看课程信息">
-                                                  <Icon type="info-circle" theme="twoTone"
-                                                        onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                          pathname: "/talesson/"+parseInt(lesson.id),
+                                                          state: {panel : '4'}
+                                                      })
+                                                  }} >
+                                                  <Icon type="info-circle" theme="twoTone"/>
+                                                  </div>
                                               </Tooltip>]}
                                           hoverable={true}
+
                                     >
-                                        <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={
+                                                  <div>
+                                                      <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程暗号："+lesson.course_spell}</p>
+                                                      <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
+                                                  </div>
+                                              }
+                                        />
                                     </Card>
                                 </Col>
                             )}
@@ -217,8 +243,8 @@ class mTAHomepageMiddle extends Component {
                                                         }
                                                         }/>
                                               </Tooltip>]}>
-                                        <Meta title={<Link to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
+                                              description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                                     </Card>
                                 </Col>
                             )}
@@ -230,7 +256,7 @@ class mTAHomepageMiddle extends Component {
     }
 }
 mTAHomepageMiddle.contextType = AuthContext;
-const TAHomepageMiddle = withRouter(mTAHomepageMiddle)
+const TAHomepageMiddle = withRouter(mTAHomepageMiddle);
 
 class TAHomepage extends Component {
     render() {

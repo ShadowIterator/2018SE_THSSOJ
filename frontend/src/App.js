@@ -52,10 +52,12 @@ class App extends Component {
             id: -1,
             role: -1,
             jumpToLogin: false,
-            username: ''
+            username: '',
+            use_hard: false,
         };
         this.logout_callback = this.logout_callback.bind(this);
         this.login_callback = this.login_callback.bind(this);
+        this.changeDisplay_calback = this.changeDisplay_calback(this);
     }
     componentDidMount() {
         const id_cookie = Cookies.get('mid');
@@ -94,14 +96,21 @@ class App extends Component {
         this.setState({
             state: false,
             id: -1,
-            role: -1
+            role: -1,
+            username: '',
         });
     }
-    login_callback(id, role) {
+    login_callback(id, role, username) {
         this.setState({
             state: true,
             id: id,
             role: role,
+            username: username,
+        });
+    }
+    changeDisplay_calback(use_hard) {
+        this.setState({
+            use_hard: use_hard,
         });
     }
     render() {
@@ -120,7 +129,7 @@ class App extends Component {
                 <Router>
                     <div>
                         <Layout>
-                            <Topbar {...this.state}/>
+                            <Topbar {...this.state} callback={(use_hard)=>{this.setState({use_hard: use_hard})}}/>
                             <Route exact path="/" component={Home} />
                             <Route path="/admin" render={()=><AdminPage {...this.state} />} />
                             <Route path="/login" render={()=><LoginPage {...this.state} callback={this.login_callback} />} />
@@ -146,7 +155,8 @@ class App extends Component {
                             <Route path="/judgehtml/:cid/:hid/:pid" render={(props) => <JudgeHTML {...this.state}
                                                                                                   course_id={props.match.params.cid}
                                                                                                   homework_id={props.match.params.hid}
-                                                                                                  problem_id={props.match.params.pid}/>} />
+                                                                                                  problem_id={props.match.params.pid}
+                                                                                                  callback={(use_hard)=>{this.setState({use_hard: use_hard})}}/>} />
                             <Route path="/alllessons" render={(props) => <AllLesson {...this.state} />}/>
                             <Route path="/tajudge/:cid/:hid/:pid" render={(props) => <TAJudge {...this.state}
                                                                                               course_id={props.match.params.cid}

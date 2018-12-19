@@ -1,30 +1,34 @@
 import React, {Component} from 'react';
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list, URL} from "../ajax-utils/api-manager";
-import {Layout, Menu, Breadcrumb, message, Row, Col, Input, Button} from 'antd';
+import {Layout, Menu, Breadcrumb, message, Row, Col, Input, Button, Modal} from 'antd';
+import {Link, withRouter} from 'react-router-dom';
 
 const { Content, Sider } = Layout;
 
-class JudgeHTML extends Component {
+class mJudgeHTML extends Component {
     constructor(props) {
         super(props);
         this.state = {
             records: {},
             uri: '',
-            current_selected: '',
-            current_score: ''
+            current_selected: this.props.location.state === undefined ? '' : this.props.location.state.user_id,
+            current_score: '',
+            course_info: {},
+            homework_info: {},
+            problem_info: {},
         };
         this.course_id = parseInt(this.props.course_id);
         this.homework_id = parseInt(this.props.homework_id);
         this.problem_id = parseInt(this.props.problem_id);
-        console.log("course_id", this.course_id);
-        console.log("homework_id", this.homework_id);
-        console.log("problem_id", this.problem_id);
+        this.changed = false;
+        console.log("constructor", this.state.current_selected);
     }
     componentDidMount() {
         if(this.props.id === -1) {
             return;
         }
+        this.props.callback(true);
         this.fetchData(this.props.id);
     }
     componentWillUpdate(nextProps) {
@@ -33,10 +37,33 @@ class JudgeHTML extends Component {
         } else if(nextProps.id === this.props.id) {
             return;
         }
+        console.log("componentWillUpdate");
+        this.props.callback(true);
         this.fetchData(nextProps.id);
     }
     fetchData = (id) => {
         console.log("fetching data...");
+        ajax_post(api_list['query_course'], {id: this.course_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求课程信息失败");
+                return;
+            }
+            that.setState({course_info: result.data[0]});
+        });
+        ajax_post(api_list['query_homework'], {id: this.homework_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求作业信息失败");
+                return;
+            }
+            that.setState({homework_info: result.data[0]});
+        });
+        ajax_post(api_list['query_problem'], {id: this.problem_id}, this, (that, result) => {
+            if(result.data.code === 1 || result.data.length === 0) {
+                message.error("请求问题信息失败");
+                return;
+            }
+            that.setState({problem_info: result.data[0]});
+        });
         ajax_post(api_list['judge_all'], {
             homework_id: this.homework_id,
             problem_id: this.problem_id,
@@ -92,23 +119,23 @@ class JudgeHTML extends Component {
         const selected_key = this.state.current_selected === '' ?
             records_arr[0].user_id.toString() : this.state.current_selected;
         if(this.state.current_selected === '') {
-            this.setState({current_selected: selected_key});
+            this.setState({
+                current_selected: selected_key,
+                current_score: this.state.records[selected_key].status === 0 ? '' : this.state.records[selected_key].score,
+            });
         }
         const selected_record = this.state.records[selected_key];
         console.log("selected_key", selected_key);
         console.log("selected_record", selected_record);
         const iframe_src = URL+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
-        // const iframe_src = 'https://www.qq.com';
         const content = (
             <div style={{height: '100%'}}>
-                {/*<Row>*/}
                 <div style={{height: '95%'}}>
                     <iframe src={iframe_src} width={'100%'} height={'100%'} sandbox={''}>
                     </iframe>
                 </div>
-                {/*</Row>*/}
                 <div style={{height: '4%', marginTop: '1%'}}>
-                <Row type="flex" justify="space-around" align="middle">
+                <Row type="flex" justify="space-around" align="middle" gutter={16}>
                     <Col span={20}>
                         <Input onChange={(e)=>{this.setState({current_score: e.target.value})}}
                                value={this.state.current_score} placeholder="请输入所评分数" />
@@ -121,6 +148,28 @@ class JudgeHTML extends Component {
                                 return;
                             } else if(score<0 || score >100) {
                                 message.error("请输入0-100之间的整数");
+                                return;
+                            }
+                            if(selected_record.status !== 0) {
+                                Modal.confirm({
+                                    title: '您确定要重新给分吗？',
+                                    content: '该作业之前已经被助教评分，您确定要覆盖上一次分数吗？',
+                                    onOk: () => {
+                                        ajax_post(api_list['judge_html'], {
+                                            record_id: selected_record.id,
+                                            score: score,
+                                            user_course_id: this.course_id,
+                                        }, this, (that, result) => {
+                                            if(result.data.code !== 0) {
+                                                message.error("提交分数失败");
+                                            } else {
+                                                message.success("提交分数成功");
+                                            }
+                                        });
+                                    },
+                                    onCancel: () => {
+                                        console.log('Cancel');
+                                }});
                                 return;
                             }
                             ajax_post(api_list['judge_html'], {
@@ -147,9 +196,15 @@ class JudgeHTML extends Component {
                        style={{ background: '#fff', overflow: 'auto', height: '100vh', position: 'fixed', left: 0, }}>
                     <Menu
                         mode="inline"
-                        defaultSelectedKeys={[records_arr[0].user_id.toString()]}
+                        defaultSelectedKeys={[selected_key]}
                         style={{ height: '100%', borderRight: 0 }}
-                        onClick={(e)=>{this.setState({current_selected: e.key})}}
+                        onClick={(e)=>{
+                            if(this.state.records[e.key].status !== 0) {
+                                this.setState({current_selected: e.key, current_score: this.state.records[e.key].score});
+                            } else {
+                                this.setState({current_selected: e.key, current_score: ''});
+                            }
+                        }}
                     >
                         {records_arr.map((re) =>
                         <Menu.Item key={re.user_id.toString()}>
@@ -159,6 +214,13 @@ class JudgeHTML extends Component {
                 </Sider>
                 <Layout style={{ marginLeft: 200, height: '88vh' }}>
                     <Breadcrumb style={{ margin: '16px 0' }}>
+                        <Breadcrumb.Item><Link to='/ta' onClick={() => this.props.callback(false)}>主页</Link></Breadcrumb.Item>
+                        <Breadcrumb.Item><Link to={'/talesson/'+this.course_id.toString()}
+                                               onClick={()=>this.props.callback(false)}>{this.state.course_info.name}
+                                               </Link>
+                        </Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.homework_info.name}</Breadcrumb.Item>
+                        <Breadcrumb.Item>{this.state.problem_info.title}</Breadcrumb.Item>
                         <Breadcrumb.Item>HTML批改</Breadcrumb.Item>
                         <Breadcrumb.Item>{selected_record.user_info.realname === '' ?
                             selected_record.user_info.username:selected_record.user_info.realname}</Breadcrumb.Item>
@@ -175,5 +237,7 @@ class JudgeHTML extends Component {
         );
     }
 }
+
+const JudgeHTML = withRouter(mJudgeHTML);
 
 export {JudgeHTML};
