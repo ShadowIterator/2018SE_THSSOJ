@@ -164,7 +164,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['NTESTS'] = config_info['NTESTS']
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
-            requests.post('http://localhost:12345/traditionaljudger', data=json.dumps(judge_req))
+            requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
             # requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
         elif test_language==3:
             judge_req = {}
@@ -175,8 +175,8 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = os.getcwd() + '/' + target_zip_path
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str_id
-            judge_req['OTHERS'] = './judge.sh -r 100'
-            requests.post('http://localhost:12345/scriptjudger', data=json.dumps(judge_req))
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
+            requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
             # requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         os.remove(code_path)
@@ -556,7 +556,7 @@ class APIProblemHandler(base.BaseHandler):
             if self.args['record_type'] == 0:
                 judge_req['OTHERS'] = './judge.sh -r 100'
             elif self.args['record_type'] == 1:
-                judge_req['OTHERS'] = './judge.sh -r {}'.format(ratio_percent)
+                judge_req['OTHERS'] = '/bin/bash ./judge.sh -r {}'.format(ratio_percent)
 
             requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
@@ -693,7 +693,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['MEMORY_LIMIT'] = problem['memory_limit']
             judge_req['OUTPUT_LIMIT'] = 64
             judge_req['WORK_PATH'] = script_path
-            judge_req['OTHERS'] = './judge.sh -r 100'
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
 
             for each_record in final_records:
                 str_id = str(each_record['id'])
@@ -796,7 +796,7 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['WORK_PATH'] = script_path
             judge_req['SOURCE_PATH'] = os.getcwd() + '/' + record_dir
             judge_req['SOURCE'] = str(record['id'])
-            judge_req['OTHERS'] = './judge.sh -r 100'
+            judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
             requests.post(options.scriptJudgerAddr, data=json.dumps(judge_req))
 
         self.set_res_dict(res_dict, code=0, msg='single record rejudging')
