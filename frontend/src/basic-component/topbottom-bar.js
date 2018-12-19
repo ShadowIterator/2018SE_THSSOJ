@@ -10,7 +10,7 @@ import {Alignment,
 import {Layout} from 'antd';
 import {withRouter} from "react-router-dom";
 
-const { Header, Footer } = Layout;
+const { Footer } = Layout;
 class mDropdown extends Component {
     render() {
         let menuItem;
@@ -19,12 +19,13 @@ class mDropdown extends Component {
                 <div>
                     {this.props.role !== 3 &&
                     <Menu.Item text="全部课程" onClick={() => {
-                        // alert("Jump to all classes");
+                        this.props.callback(false);
                         this.props.history.push("/alllessons");
                     }}/>
                     }
                     {this.props.role === 2 &&
                     <Menu.Item text="我的题目" onClick={() => {
+                        this.props.callback(false);
                         this.props.history.push("/myproblem");
                     }
                     }/>
@@ -32,15 +33,21 @@ class mDropdown extends Component {
                     {this.props.role !== 3 &&
                         <Menu.Divider/>
                     }
-                    <Menu.Item text="Logout" onClick={()=>{this.props.history.push("/logout");}} />
+                    <Menu.Item text="Logout" onClick={()=>{
+                        this.props.callback(false);
+                        this.props.history.push("/logout");}} />
                 </div>
             );
         } else {
             menuItem = (
                 <div>
-                    <Menu.Item text="Signup" onClick={()=>{this.props.history.push("/signup");}} />
+                    <Menu.Item text="Signup" onClick={()=>{
+                        this.props.callback(false);
+                        this.props.history.push("/signup");}} />
                     <Menu.Divider />
-                    <Menu.Item text="Login" onClick={()=>{this.props.history.push("/login");}} />
+                    <Menu.Item text="Login" onClick={()=>{
+                        this.props.callback(false);
+                        this.props.history.push("/login");}} />
                 </div>
             )
         }
@@ -61,6 +68,7 @@ class mTopbar extends Component {
         this.handlePublicClick = this.handlePublicClick.bind(this);
     }
     handleHomeClick() {
+        this.props.callback(false);
         if(this.props.state && this.props.role) {
             if (this.props.role === 1) {
                 this.props.history.push('/student');
@@ -74,11 +82,16 @@ class mTopbar extends Component {
         }
     }
     handlePublicClick() {
+        this.props.callback(false);
         this.props.history.push('/problembase');
     }
     render() {
+        let style = {};
+        if(this.props.use_hard) {
+            style['height'] = '6vh';
+        }
         return (
-            <Navbar style={{height: '6vh'}}>
+            <Navbar style={style}>
                 <Navbar.Group align={Alignment.LEFT}>
                     <Navbar.Heading>THSSOJ</Navbar.Heading>
                     <Navbar.Divider />
@@ -88,19 +101,21 @@ class mTopbar extends Component {
                     }
                     {this.props.role === 2 &&
                         <Button className={Classes.MINIMAL} icon="new-object" text="新建题目" onClick={()=>{
+                            this.props.callback(false);
                             this.props.history.push('/problemcreate');
                         }} style={{outline: 0}} />
                     }
                 </Navbar.Group>
                 <Navbar.Group align={Alignment.RIGHT}>
                     <Navbar.Divider />
-                    <Popover content={<Dropdown {...this.props}/>} position={Position.BOTTOM_LEFT}>
-                        <Button className={Classes.MINIMAL} icon="user" style={{outline: 0}} />
+                    <Popover content={<Dropdown {...this.props} callback={this.props.callback}/>} position={Position.BOTTOM_LEFT}>
+                        <Button className={Classes.MINIMAL} icon="user" style={{outline: 0}} text={this.props.username} />
                     </Popover>
                     {this.props.state &&
                         <Button className={Classes.MINIMAL} icon="cog" style={{outline: 0}} onClick={() => {
+                            this.props.callback(false);
                             this.props.history.push('/usersettings');
-                        }}/>
+                        }} text={"设置"}/>
                     }
                 </Navbar.Group>
             </Navbar>
@@ -111,8 +126,12 @@ class mTopbar extends Component {
 
 class Bottombar extends Component {
     render() {
+        let style = { textAlign: 'center'};
+        if(this.props.use_hard) {
+            style['height'] = '6vh';
+        }
         return (
-            <Footer style={{ textAlign: 'center', height: '6vh' }}>
+            <Footer style={style}>
                 THSSOJ ©2018 Created by THSS
             </Footer>
         )

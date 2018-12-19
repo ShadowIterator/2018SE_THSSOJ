@@ -50,14 +50,16 @@ class APIProblemHandler(base.BaseHandler):
                                    ratio_two = -1,
                                    ratio_two_limit = -1,
                                    ratio_three = -1,
-                                   ratio_three_limit = -1)
+                                   ratio_three_limit = -1,
+                                   user_id = cur_user['id'])
         data = self.args['description']
         pro_dir = self.root_dir + '/' + str(createdobj['id'])
-        os.mkdir(pro_dir)
-        with open('''{dir}/{problem_id}.md'''.format(dir = pro_dir, problem_id = createdobj['id']), 'wb') as fd:
-            byte_content = bytearray()
-            self.str_to_bytes(data, byte_content)
-            fd.write(byte_content)
+        if not os.path.exists(pro_dir):
+            os.mkdir(pro_dir)
+        with open('''{dir}/{problem_id}.md'''.format(dir = pro_dir, problem_id = createdobj['id']), 'w') as fd:
+            # byte_content = bytearray()
+            # self.str_to_bytes(data, byte_content)
+            fd.write(data)
         return {'code': 0}
 
     # @tornado.web.authenticated
@@ -91,17 +93,18 @@ class APIProblemHandler(base.BaseHandler):
         file_zip = zipfile.ZipFile(zip_path)
         del self.args['code_uri']
 
-        byte_content = bytearray()
-        self.str_to_bytes(self.args['description'], byte_content)
+        # byte_content = bytearray()
+        # self.str_to_bytes(self.args['description'], byte_content)
         # description = base64.b64decode(byte_content)
+        str_description = self.args['description']
         del self.args['description']
         await self.db.createObject('problems', **self.args)
         problem_in_db = (await self.db.getObject('problems', cur_user = self.get_current_user_object(), **self.args))[0]
         target_path = self.root_dir + '/' + str(problem_in_db['id'])
         if not os.path.exists(target_path):
             os.makedirs(target_path)
-        description_file = open(target_path + '/' + str(problem_in_db['id']) + '.md', mode='wb')
-        description_file.write(byte_content)
+        description_file = open(target_path + '/' + str(problem_in_db['id']) + '.md', mode='w')
+        description_file.write(str_description)
         description_file.close()
 
         target_code_path = target_path+'/code'
@@ -117,7 +120,7 @@ class APIProblemHandler(base.BaseHandler):
         # print("target_code_path ", target_code_path)
         # code_file_name = code_path.split('/')[-1]
         shutil.copyfile(code_path, target_code_path+'/'+str(problem_id)+'.code')
-        shutil.cpoyfile(zip_path, target_zip_path + '/' + str(problem_id) + '.zip')
+        shutil.copyfile(zip_path, target_zip_path + '/' + str(problem_id) + '.zip')
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
         config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')

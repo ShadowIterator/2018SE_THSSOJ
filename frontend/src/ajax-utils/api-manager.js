@@ -48,6 +48,7 @@ const api_list = {
     'submit_problem': '/api/problem/submit',
     'judge_all': '/api/problem/judgeAll',
     'judge_html': '/api/problem/judgeHTML',
+    'create_html': '/api/problem/createHTML',
 
     'upload_code': '/api/upload/files',
     'upload_case': '/api/upload/files',
@@ -58,7 +59,6 @@ const api_list = {
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
 
-    'create_judgestates': '/api/judgestate/create',
     'query_judgestates': '/api/judgestate/query',
 };
 

@@ -259,14 +259,14 @@ const table_columns = {
             }
             return (<span>[{pbs.map((c)=>{return c+','})}]</span>);
         }},
-        {title: '状态', dataIndex: 'status', key: 'status', width: 150, render: (status) => {
-            switch(status) {
-                case 0: return <span>未开始评测</span>;
-                case 1: return <span>正在评测</span>;
-                case 2: return <span>评测完成</span>;
-                default: return <span>读取数据错误</span>;
-            }
-        }},
+        // {title: '状态', dataIndex: 'status', key: 'status', width: 150, render: (status) => {
+        //     switch(status) {
+        //         case 0: return <span>未开始评测</span>;
+        //         case 1: return <span>正在评测</span>;
+        //         case 2: return <span>评测完成</span>;
+        //         default: return <span>读取数据错误</span>;
+        //     }
+        // }},
     ],
     'Problems': [
         {title: 'ID', dataIndex: 'id', key: 'id', fixed: 'left'},
@@ -289,6 +289,7 @@ const table_columns = {
             switch(method) {
                 case 0: return <span>传统评测</span>;
                 case 1: return <span>脚本评测</span>;
+                case 2: return <span>HTML手工评测</span>;
                 default: return <span>读取数据错误</span>;
             }
         }},
