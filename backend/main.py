@@ -14,8 +14,11 @@ import tornado.web
 import unicodedata
 from apis.base import maybe_create_tables, Application
 from apis.db import BaseDB
-
+from tornado.locks import Condition, Lock
+from tornado import gen
 from tornado.options import define, options
+
+
 
 define("port", default=8000, help="run on the given port")
 define("db_host", default="postgres", help="blog database host")
@@ -29,6 +32,10 @@ define('AppConfig', default=None, help='tornado settings file', type=dict)
 define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
 define('judgerSecret', default='no_secret', help='secret', type=str)
+
+
+
+
 
 async def main():
     tornado.options.parse_command_line()
@@ -55,6 +62,7 @@ async def main():
         app.listen(options.port)
         await app.async_init()
 
+        # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted
         # with Ctrl-C, but if you want to shut down more gracefully,
         # call shutdown_event.set().
