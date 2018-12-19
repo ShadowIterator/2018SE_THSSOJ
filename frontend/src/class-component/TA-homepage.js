@@ -229,7 +229,7 @@ class mTAHomepageMiddle extends Component {
                                                         }
                                                         }/>
                                               </Tooltip>]}>
-                                        <Meta title={<Link to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
                                               description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                                     </Card>
                                 </Col>

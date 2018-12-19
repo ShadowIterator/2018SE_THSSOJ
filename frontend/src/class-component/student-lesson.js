@@ -5,7 +5,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {withRouter, Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Menu, List, Row, Col, Icon, Table } from 'antd';
+import { Layout, Breadcrumb, Menu, List, Row, Col, Icon, Table, Form } from 'antd';
 import moment from 'moment'
 import {Info} from "./lesson-component";
 const {Content, Sider} = Layout;
@@ -30,17 +30,56 @@ class CourseInfo extends Component {
             {title: '助教姓名', dataIndex: 'username',width: 150, key: 'username'},
             {title: '邮箱', dataIndex: 'email',width: 150, key: 'email'}
         ];
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 20 },
+            },
+        };
         return (
             <div style={{textAlign: 'center'}}>
-                <Row gutter={8} type={"flex"} justify="start">
-                    <Col span={4} style={{fontSize: '150%'}}>课程名</Col>
-                    <Col span={20} style={{fontSize: '150%'}}>{this.props.name}</Col>
-                </Row>
-                <Row gutter={8}>
-                    <Col span={4} style={{fontSize: '150%'}}>课程名</Col>
-                    <Col span={8} style={{fontSize: '150%'}}>{this.props.name}</Col>
-                    <Col span={12}/>
-                </Row>
+                <h3>课程信息</h3>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="课程名："
+                    >
+                        <span className="ant-form-text"><strong style={{fontSize: '150%'}}>{this.props.name}</strong></span>
+                    </Form.Item>
+                </Form>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="课程简介："
+                    >
+                        <span className="ant-form-text" style={{fontSize: '125%'}}>{this.props.description}</span>
+                    </Form.Item>
+                </Form>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="助教："
+                    >
+                        <Table dataSource={this.props.ta_list}
+                               columns={ta_columns}
+                               pagination={false}
+                        />
+                    </Form.Item>
+                </Form>
+                {/*<Row>*/}
+                    {/*<Col span={4} style={{fontSize: '150%'}}>课程名</Col>*/}
+                    {/*<Col span={20} style={{fontSize: '150%'}}>{this.props.name}</Col>*/}
+                {/*</Row>*/}
+                {/*<Row>*/}
+                    {/*<Col span={4} style={{fontSize: '150%'}}>课程简介</Col>*/}
+                    {/*<Col span={20} style={{fontSize: '150%'}}>{this.props.description}</Col>*/}
+                {/*</Row>*/}
                 {/*<HTMLTable striped={true} bordered={true}>*/}
                     {/*<tr>*/}
                         {/*<th>课程名</th>*/}
