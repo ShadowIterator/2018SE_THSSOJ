@@ -209,8 +209,9 @@ class APIHomeworkHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
         target_homework['submitable']=self.args['submitable']
-        self.db.saveObject('homeworks', object=target_homework)
+        await self.db.saveObject('homeworks', object=target_homework)
         self.set_res_dict(res_dict, code=0, msg='submitable changed')
+        return res_dict
 
     # @tornado.web.authenticated
     async def _scoreOpenness_post(self):
@@ -223,6 +224,6 @@ class APIHomeworkHandler(base.BaseHandler):
             return res_dict
         # ---------------------------------------------------------------------
         target_homework['score_openness'] = self.args['score_openness']
-        self.db.saveObject('homeworks', object=target_homework)
+        await self.db.saveObject('homeworks', object=target_homework)
         self.set_res_dict(res_dict, code=0, msg='score_openness changed')
-
+        return res_dict
