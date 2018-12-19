@@ -29,6 +29,8 @@ const api_list = {
     'delete_homework': '/api/homework/delete',
     'update_homework': '/api/homework/update',
     'query_homework': '/api/homework/query',
+    'submitable_homework': '/api/homework/submitable',
+    'scoreOpenness_homework': '/api/homework/scoreOpenness',
 
     'list_notice': '/api/notice/list',
     'create_notice': '/api/notice/create',

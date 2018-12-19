@@ -268,7 +268,7 @@ class mTALesson extends Component {
                     </>
                 );
                 content = (
-                    <div></div>
+                    <></>
                 )
             } else {
                 breadcrumb = (
