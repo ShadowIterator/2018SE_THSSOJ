@@ -155,14 +155,17 @@ class mTAHomeworkCard extends Component {
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span><Button htmlType={'button'}
-                                            onClick={()=>{
-                                                this.props.clickEditCallback(this.props.homework_id);
-                                            }}>
-                                        编辑
-                                    </Button>
+                                    <span style={{color: 'red'}}> 截止日期：{ddl_str}</span>
                                 </Col>
                             </Row>
+                        }
+                        footer={
+                            <Button htmlType={'button'}
+                                    onClick={()=>{
+                                        this.props.clickEditCallback(this.props.homework_id);
+                                    }}>
+                                编辑
+                            </Button>
                         }
                         bordered
                         dataSource={problems}
@@ -182,18 +185,74 @@ class mTAHomeworkCard extends Component {
             );
         } else
         {
+            const score_openess_text = ['发布成绩', '隐藏成绩'];
+            const submitable_text = ['打开补交', '关闭补交'];
             ret = (
                 <div style={{margin: '20px'}}>
                     <List
                         size="small"
                         header={
                             <Row type="flex" justify="space-around" align="middle">
-                                <Col span={18}>
+                                <Col span={18} style={{textAlign: 'left'}}>
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span>
+                                    <span style={{color: 'red'}}>截止日期：{ddl_str}</span>
                                 </Col>
+                            </Row>
+                        }
+                        footer={
+                            <Row type="flex" justify="space-around" align="middle">
+                                <Col span={2} style={{textAlign: 'left'}}>
+                                    <Button onClick={()=>{
+                                        const data = {
+                                            homework_id: this.props.homework_id,
+                                            score_openness: 1-this.props.score_openess
+                                        };
+                                        ajax_post(api_list['scoreOpenness_homework'], data, this, (that, res)=>{
+                                            if (res.data.code !== 0) {
+                                                if (this.props.score_openess === 0)
+                                                    message.error('发布成绩失败！');
+                                                else
+                                                    message.error('隐藏成绩失败！');
+                                                return;
+                                            }
+                                            if (this.props.score_openess === 0)
+                                                message.success('已发布成绩！');
+                                            else
+                                                message.success('已隐藏成绩！');
+                                            this.props.refreshCallback(this.props.course_id);
+                                        });
+                                    }}>
+                                        {score_openess_text[this.props.score_openess]}
+                                    </Button>
+                                </Col>
+                                <Col span={2}>
+                                    <Button onClick={()=>{
+                                        const data = {
+                                            homework_id: this.props.homework_id,
+                                            submitable: 1-this.props.submitable
+                                        };
+                                        ajax_post(api_list['submitable_homework'], data, this, (that, res)=>{
+                                            if (res.data.code !== 0) {
+                                                if (this.props.submitable === 0)
+                                                    message.error('打开补交失败！');
+                                                else
+                                                    message.error('关闭补交失败！');
+                                                return;
+                                            }
+                                            if (this.props.submitable === 0)
+                                                message.success('已打开补交！');
+                                            else
+                                                message.success('已关闭补交！');
+                                            this.props.refreshCallback(this.props.course_id);
+                                        });
+                                    }}>
+                                        {submitable_text[this.props.submitable]}
+                                    </Button>
+                                </Col>
+                                <Col span={20}/>
+
                             </Row>
                         }
                         bordered
@@ -297,6 +356,8 @@ class TAHomeworkPanel extends Component {
                                     homework_id={homework.id}
                                     course_id={this.props.course_id}
                                     deadline={homework.deadline === undefined ? 0 : homework.deadline}
+                                    score_openess={homework.score_openness}
+                                    submitable={homework.submitable}
                                     refreshCallback={this.props.refreshCallback}
                                     clickEditCallback={this.props.clickEditCallback}
                     />

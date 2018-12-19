@@ -293,7 +293,7 @@ export class TALesson extends Component {
                     </>
                 );
                 content = (
-                    <div></div>
+                    <></>
                 )
             } else {
                 breadcrumb = (

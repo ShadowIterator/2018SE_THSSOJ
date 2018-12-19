@@ -163,7 +163,7 @@ class mStudentHomeworkCard extends Component {
                                 <h4>{this.props.name}</h4>
                             </Col>
                             <Col span={6} style={{textAlign: 'right'}}>
-                                <span>截止日期：{ddl_str}</span>
+                                <span style={{color: 'red'}}>截止日期：{ddl_str}</span>
                             </Col>
                         </Row>
                     }
@@ -418,13 +418,13 @@ class mStudentLessonMiddle extends Component {
                 let homework_items = [];
                 for(let homework_id of homework_ids) {
                     ajax_post(api_list['query_homework'], {id:homework_id}, that, (that, result) => {
-                        console.log('query_homework: ', homework_id);
+                        // console.log('query_homework: ', homework_id);
                         let hw = result.data[0];
                         if(!this.check_homework(hw, that.state.current_selected)) {
                             console.log('query_homework: returned');
                             return ;
                         }
-                        console.log('query_homework: succeed');
+                        // console.log('query_homework: succeed');
 
                         hw['problem_list'] = [];
                         hw['type_key'] = that.state.current_selected;
