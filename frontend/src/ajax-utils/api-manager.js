@@ -49,6 +49,7 @@ const api_list = {
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
     'judge_all': '/api/problem/judgeAll',
+    'judge_one': '/api/problem/judge',
     'judge_html': '/api/problem/judgeHTML',
     'create_html': '/api/problem/createHTML',
 
