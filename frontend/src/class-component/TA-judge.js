@@ -32,10 +32,13 @@ class mTAJudge extends Component {
                         case 0: return <Button onClick={()=>{
                             console.log("提交评测"+record.record_id);
                             if(this.state.problem_type === 2) {
-                                this.props.history.push("/judgehtml/"+
-                                    this.course_id.toString()+"/"+
-                                    this.homework_id.toString()+"/"+
-                                    this.problem_id.toString()+"/");
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
                             } else {
                                 ajax_post(api_list['judge_one'], {
                                     course_id: this.course_id,
@@ -53,10 +56,13 @@ class mTAJudge extends Component {
                         case 1: return <Button onClick={()=>{
                             console.log("提交重新评测"+record.record_id);
                             if(this.state.problem_type === 2) {
-                                this.props.history.push("/judgehtml/"+
-                                    this.course_id.toString()+"/"+
-                                    this.homework_id.toString()+"/"+
-                                    this.problem_id.toString()+"/");
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
                             } else {
                                 ajax_post(api_list['judge_one'], {
                                     course_id: this.course_id,
@@ -89,10 +95,13 @@ class mTAJudge extends Component {
                         case 0: return <Button onClick={()=>{
                             console.log("提交评测"+record.record_id);
                             if(this.state.problem_type === 2) {
-                                this.props.history.push("/judgehtml/"+
-                                    this.course_id.toString()+"/"+
-                                    this.homework_id.toString()+"/"+
-                                    this.problem_id.toString()+"/");
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
                             } else {
                                 ajax_post(api_list['judge_one'], {
                                     course_id: this.course_id,
@@ -110,10 +119,13 @@ class mTAJudge extends Component {
                         case 1: return <Button onClick={()=>{
                             console.log("提交重新评测"+record.record_id);
                             if(this.state.problem_type === 2) {
-                                this.props.history.push("/judgehtml/"+
-                                    this.course_id.toString()+"/"+
-                                    this.homework_id.toString()+"/"+
-                                    this.problem_id.toString()+"/");
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
                             } else {
                                 ajax_post(api_list['judge_one'], {
                                     course_id: this.course_id,
@@ -152,12 +164,58 @@ class mTAJudge extends Component {
             {title: '评测状态', dataIndex: 'judge_state', key: 'judge_state'},
             {title: '操作', dataIndex: 'action', key: 'action', render: (type, record) => {
                     switch (type) {
-                        case 0: return <Button onClick={()=>{console.log("提交评测"+record.record_id)}}>提交评测</Button>;
-                        case 1: return <Button onClick={()=>{console.log("提交重新评测"+record.record_id);}}>重新评测</Button>;
+                        case 0: return <Button onClick={()=>{
+                            console.log("提交评测"+record.record_id)
+                            if(this.state.problem_type === 2) {
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
+                            } else {
+                                ajax_post(api_list['judge_one'], {
+                                    course_id: this.course_id,
+                                    problem_id: this.problem_id,
+                                    record_id: record.record_id,
+                                }, this, (that, result) => {
+                                    if(result.data.code === 1) {
+                                        message.error("提交评测失败");
+                                    } else {
+                                        message.success("开始评测");
+                                    }
+                                })
+                            }
+                        }}>提交评测</Button>;
+                        case 1: return <Button onClick={()=>{
+                            console.log("提交重新评测"+record.record_id);
+                            if(this.state.problem_type === 2) {
+                                this.props.history.push({
+                                    pathname: "/judgehtml/"+
+                                        this.course_id.toString()+"/"+
+                                        this.homework_id.toString()+"/"+
+                                        this.problem_id.toString()+"/",
+                                    state: { user_id: record.user_id.toString() }
+                                });
+                            } else {
+                                ajax_post(api_list['judge_one'], {
+                                    course_id: this.course_id,
+                                    problem_id: this.problem_id,
+                                    record_id: record.record_id,
+                                }, this, (that, result) => {
+                                    if(result.data.code === 1) {
+                                        message.error("提交评测失败");
+                                    } else {
+                                        message.success("开始评测");
+                                    }
+                                })
+                            }
+                        }}>重新评测</Button>;
                         case 2: return <span>未提交</span>;
                         default: return <span>准备数据出错</span>;
                     }
-                }}
+                }},
         ]
     };
     constructor(props) {

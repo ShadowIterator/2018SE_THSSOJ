@@ -141,23 +141,37 @@ class mTAHomepageMiddle extends Component {
                                           // title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                           actions={[
                                               <Tooltip title="查看通知">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '1'}
+                                                  })}}>
                                                       <Icon type="notification" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看作业">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '2'}
+                                                  })}}>
                                                       <Icon type="edit" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看成绩">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '3'}
+                                                  })}}>
                                                       <Icon type="check-circle" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看课程信息">
-                                                  <Icon type="info-circle" theme="twoTone"
-                                                        onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                          pathname: "/talesson/"+parseInt(lesson.id),
+                                                          state: {panel : '4'}
+                                                      })
+                                                  }} >
+                                                  <Icon type="info-circle" theme="twoTone"/>
+                                                  </div>
                                               </Tooltip>]}
                                           hoverable={true}
 

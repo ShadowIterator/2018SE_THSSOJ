@@ -103,23 +103,36 @@ class mAllLesson extends Component {
                                     <Card style={{width: '100%', marginTop: 16}}
                                           actions={[
                                               <Tooltip title="查看通知">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '1'}
+                                                  })}}>
                                                       <Icon type="notification" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看作业">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '2'}
+                                                  })}}>
                                                       <Icon type="edit" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看成绩">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '3'}
+                                                  })}}>
                                                       <Icon type="check-circle" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看课程信息">
-                                                  <Icon type="info-circle" theme="twoTone"
-                                                        onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '4'}
+                                                  })}}>
+                                                  <Icon type="info-circle" theme="twoTone" />
+                                                  </div>
                                               </Tooltip>]}
                                           hoverable={true}
                                     >
@@ -163,7 +176,7 @@ class mAllLesson extends Component {
                                         const data = {
                                             user_id: this.props.id,
                                             course_spell: value
-                                        }
+                                        };
                                         ajax_post(api_list['add_course'], data, this, (that, result) => {
                                             if (result.data.code === 1) {
                                                 message.error('未找到课程');
@@ -182,22 +195,28 @@ class mAllLesson extends Component {
                                     <Card style={{width: '100%', marginTop: 16}}
                                           actions={[
                                               <Tooltip title="查看通知">
-                                                  <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/studentlesson/"+parseInt(lesson.id),
+                                                      state: {panel: '1'}
+                                                  })}}>
                                                       <Icon type="notification" theme="twoTone" style={{padding: '0 5px'}} />
-                                                      {/*<Badge count={lesson.notices.length}*/}
-                                                      {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看作业">
-                                                  <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/studentlesson/"+parseInt(lesson.id),
+                                                      state: {panel: '2'}
+                                                  })}}>
                                                       <Icon type="edit" theme="twoTone" style={{padding: '0 5px'}} />
-                                                      {/*<Badge count={lesson.homeworks.length}*/}
-                                                      {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看课程信息">
-                                                  <Icon type="info-circle" theme="twoTone"
-                                                        onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname:"/studentlesson/"+parseInt(lesson.id),
+                                                      state: {panel: '3'}
+                                                  })}}>
+                                                  <Icon type="info-circle" theme="twoTone" />
+                                                  </div>
                                               </Tooltip>]}>
                                         <Meta title={<Link style={{fontSize: '200%'}} to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                               description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
