@@ -61,6 +61,8 @@ async def main():
                           )
         app.listen(options.port)
         await app.async_init()
+        await rdb.insert_element_in_array('users', 'student_courses', 5, 1)
+        await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
 
         print('get user:', await rdb.getObjectOne('users', id = 1))
 

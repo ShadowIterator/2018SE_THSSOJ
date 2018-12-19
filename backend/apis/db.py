@@ -147,6 +147,12 @@ class BaseDB:
     def get_lock_object(self, si_table_name, hash_id):
         return self.tables[si_table_name].get_lock_object(hash_id)
 
+    async def insert_element_in_array(self, si_table_name, column_name, value, id):
+        return await self.tables[si_table_name].insert_element_in_array(column_name, value, id)
+
+    async def remove_element_in_array(self, si_table_name, column_name, value, id):
+        return await self.tables[si_table_name].remove_element_in_array(column_name, value, id)
+
 condition = Condition()
 
 class BaseTable:
@@ -170,6 +176,16 @@ class BaseTable:
             self.table_name)
         self.database_keys = list(map(lambda item: item['column_name'], database_keys))
         print(self.database_keys)
+
+    #
+    async def insert_element_in_array(self, column_name, value, id):
+        stmt = '''UPDATE {table_name} SET {column_name} = arrary_append({column_name}, {value}) WHERE id = {id}'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
+        print('insert_element', stmt)
+        await self.db.execute(stmt)
+
+    async def remove_element_in_array(self, column_name, value, id):
+        stmt = '''UPDATE {table_name} SET {column_name} = arrary_remove({column_name}, %s) WHERE id = %s'''.format(table_name = self.table_name, column_name = column_name)
+        await self.db.execute(stmt, value, id)
 
     # to use this, u must
     # I do not want to write a comment
