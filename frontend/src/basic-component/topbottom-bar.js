@@ -7,8 +7,10 @@ import {Alignment,
     Popover,
     Position
 } from "@blueprintjs/core";
-import {Layout} from 'antd';
+import {ajax_post} from "../ajax-utils/ajax-method";
+import {Layout, message, Modal, Form, Input, Icon} from 'antd';
 import {withRouter} from "react-router-dom";
+import {api_list} from "../ajax-utils/api-manager";
 
 const { Footer } = Layout;
 class mDropdown extends Component {
@@ -64,6 +66,14 @@ const Dropdown = withRouter(mDropdown);
 class mTopbar extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            visible:false,
+            username: '',
+            password: '',
+            email: '',
+            realname: '',
+            student_id: '',
+        };
         this.handleHomeClick = this.handleHomeClick.bind(this);
         this.handlePublicClick = this.handlePublicClick.bind(this);
     }
@@ -78,10 +88,14 @@ class mTopbar extends Component {
                 this.props.history.push('/admin');
             }
         } else {
-            this.props.history.push('/login');
+            message.warning("请先登录");
         }
     }
     handlePublicClick() {
+        if(this.props.state === false) {
+            message.warning("请先登录");
+            return;
+        }
         this.props.callback(false);
         this.props.history.push('/problembase');
     }
@@ -91,6 +105,7 @@ class mTopbar extends Component {
             style['height'] = '6vh';
         }
         return (
+            <>
             <Navbar style={style}>
                 <Navbar.Group align={Alignment.LEFT}>
                     <Navbar.Heading>THSSOJ</Navbar.Heading>
@@ -103,6 +118,11 @@ class mTopbar extends Component {
                         <Button className={Classes.MINIMAL} icon="new-object" text="新建题目" onClick={()=>{
                             this.props.callback(false);
                             this.props.history.push('/problemcreate');
+                        }} style={{outline: 0}} />
+                    }
+                    {this.props.role === 3 &&
+                        <Button className={Classes.MINIMAL} icon="new-object" text="新建助教" onClick={() => {
+                            this.setState({visible: true, username: '', password: '', email: ''});
                         }} style={{outline: 0}} />
                     }
                 </Navbar.Group>
@@ -119,6 +139,67 @@ class mTopbar extends Component {
                     }
                 </Navbar.Group>
             </Navbar>
+            <Modal
+                title="新建助教"
+                visible={this.state.visible}
+                onOk={()=>{
+                    // this.setState({visible: false});
+                    if(this.state.username === '') {
+                        message.error("用户名不能为空");
+                    } else if(this.state.password === '') {
+                        message.error("密码不能为空");
+                    } else if(this.state.email === '') {
+                        message.error("邮箱不能为空");
+                    } else if(this.state.realname === '') {
+                        message.error("真实姓名不能为空");
+                    } else if(this.state.student_id === '') {
+                        message.error("学号不能为空");
+                    } else if(isNaN(parseInt(this.state.student_id))) {
+                        message.error("学号格式错误");
+                    } else {
+                        ajax_post(api_list['create_ta'], {
+                            username: this.state.username,
+                            password: this.state.password,
+                            email: this.state.email,
+                            realname: this.state.realname,
+                            student_id: this.state.student_id,
+                        }, this, (that, result) => {
+                            if(result.data.code !== 0) {
+                                message.error("助教创建失败");
+                            } else {
+                                message.success("创建成功");
+                                that.setState({visible: false});
+                            }
+                        });
+                    }
+                }}
+                onCancel={()=>{this.setState({visible: false})}}
+                okText={"创建助教"}
+                cancelText={"取消"}>
+                <Form onSubmit={(e)=>{e.preventDefault()}}>
+                    <Form.Item>
+                        <Input prefix={<Icon type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Username"
+                               value={this.state.username} onChange={(e) => {this.setState({username: e.target.value})}} />
+                    </Form.Item>
+                    <Form.Item >
+                        <Input prefix={<Icon type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} type="password" placeholder="Password"
+                               value={this.state.password} onChange={(e) => {this.setState({password: e.target.value})}} />
+                    </Form.Item>
+                    <Form.Item >
+                        <Input prefix={<Icon type="mail" style={{ color: 'rgba(0,0,0,.25)' }} />} type="email" placeholder="Email"
+                               value={this.state.email} onChange={(e) => {this.setState({email: e.target.value})}} />
+                    </Form.Item>
+                    <Form.Item >
+                        <Input prefix={<Icon type="contacts" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="真实姓名"
+                               value={this.state.realname} onChange={(e) => {this.setState({realname: e.target.value})}} />
+                    </Form.Item>
+                    <Form.Item >
+                        <Input prefix={<Icon type="smile" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="学号"
+                               value={this.state.student_id} onChange={(e) => {this.setState({student_id: e.target.value})}} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+            </>
         )
     }
 }

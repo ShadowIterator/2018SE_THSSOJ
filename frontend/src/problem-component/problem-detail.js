@@ -94,7 +94,9 @@ class ProblemDetailBody extends Component {
                         }
                         {!this.state.isEditing && this.props.probleminfo.judge_method === 2 &&
                         <div style={{textAlign: 'center', marginTop: 15}}>
-                            <Button type={"primary"} onClick={() => {
+                            <Button type={"primary"}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={() => {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
@@ -172,7 +174,9 @@ class ProblemDetailBody extends Component {
                         }
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && this.state.reupload &&
                         <div style={{textAlign: 'center', marginTop: 15}}>
-                            <Button type={"primary"} onClick={() => {
+                            <Button type={"primary"}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={() => {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
@@ -223,7 +227,9 @@ class ProblemDetailBody extends Component {
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && !this.state.reupload &&
                         <div style={{textAlign: 'center'}}>
                             <a href={URL+api_list['download_html']+"?id="+this.props.html_record.id.toString()} download={"html.zip"} >下载已上传文件</a><br/>
-                            <Button style={{marginTop: 15}} onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
+                            <Button style={{marginTop: 15}}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
                         </div>
                         }
                         </div>
