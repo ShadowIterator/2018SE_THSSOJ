@@ -418,26 +418,16 @@ class UserSettingsForm extends Component {
                 >
                     <span className="ant-form-text">{role}</span>
                 </FormItem>
-                <FormItem
-                    {...formItemLayout}
-                    label="激活状态"
-                >
-                    {status_html}
-                </FormItem>
+                {/*<FormItem*/}
+                    {/*{...formItemLayout}*/}
+                    {/*label="激活状态"*/}
+                {/*>*/}
+                    {/*{status_html}*/}
+                {/*</FormItem>*/}
                 <Button type="primary" htmlType="submit">
                     保存
                 </Button>
             </Form>
-                <Modal
-                    title="请输入确认密码"
-                    visible={this.state.isOpen}
-                    onOk={this.handleSave}
-                    onCancel={()=>{this.setState({isOpen: false})}}
-                >
-                    <Input value={this.state.password}
-                           onChange={(e)=>{console.log("password:", e.target.value);
-                                    this.setState({password: e.target.value})}} />
-                </Modal>
             </div>
         );
     }
