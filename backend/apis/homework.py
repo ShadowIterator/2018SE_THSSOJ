@@ -208,6 +208,12 @@ class APIHomeworkHandler(base.BaseHandler):
         # if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
         #     self.set_res_dict(res_dict, code=1, msg='you are not authorized')
         #     return res_dict
+        if cur_user['role'] < 2:
+            self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+            return res_dict
+        elif cur_user['role'] == 2 and target_homework['course_id'] not in cur_user['ta_courses']:
+            self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+            return res_dict
         # ---------------------------------------------------------------------
         target_homework['submitable']=self.args['submitable']
         await self.db.saveObject('homeworks', object=target_homework)

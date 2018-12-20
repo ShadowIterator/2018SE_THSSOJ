@@ -109,6 +109,11 @@ class APIRecordHandler(base.BaseHandler):
             if cur_user['role'] < 2 and cur_user['id'] != record['user_id']:
                 self.set_res_dict(res_dict, code=1, msg='back off!')
                 return res_dict
+            if cur_user['role'] == 2:
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['course_id'] not in cur_user['ta_courses']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
         elif record['record_type'] == 3:
             if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
                 self.set_res_dict(res_dict, code=1, msg='back off!')
