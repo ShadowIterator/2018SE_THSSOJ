@@ -234,12 +234,11 @@ class BaseHandler(tornado.web.RequestHandler):
         #
         rtn = {}
         for key, value in object_selected.items():
-            print_debug('filter object rules: ', key, allowed_properties, abandoned_properties,(allowed_properties == None) or (key in allowed_properties), ((abandoned_properties == None) or (key not in abandoned_properties)))
+            # print_debug('filter object rules: ', key, allowed_properties, abandoned_properties,(allowed_properties == None) or (key in allowed_properties), ((abandoned_properties == None) or (key not in abandoned_properties)))
             if (((allowed_properties == None) or (key in allowed_properties)) and ((abandoned_properties == None) or (key not in abandoned_properties))):
-                print_debug('filter-object checkok: ', key)
+                # print_debug('filter-object checkok: ', key)
                 rtn[key] = value
 
-        object_selected = rtn
-        print_debug('filter-obj: ', rtn, object_selected)
+        # object_selected = rtn
+        # print_debug('filter-obj: ', rtn, object_selected)
         return rtn
-
