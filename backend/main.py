@@ -86,7 +86,7 @@ async def main():
         # print('stmt = ', stmt)
         # for user in await rdb.query(stmt):
         #     print('get user: ', user)
-        # app.listen(options.port)
+        app.listen(options.port)
 
         # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted
