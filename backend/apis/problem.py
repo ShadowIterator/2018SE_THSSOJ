@@ -565,7 +565,7 @@ class APIProblemHandler(base.BaseHandler):
             if ratio_used > test_ratio_limit:
                 self.set_res_dict(res_dict, code=1, msg='exceeds limit')
                 return res_dict
-            self.db.saveObject('ratios', object=check_ratio)
+            await self.db.saveObject('ratios', object=check_ratio)
 
         record_created = await self.db.createObject('records', **self.args)
 
