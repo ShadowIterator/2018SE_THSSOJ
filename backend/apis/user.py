@@ -234,6 +234,17 @@ class APIUserHandler(base.BaseHandler):
 
     async def _list_post(self):
         return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
+
+    async def _createTA_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] >= Roles.ADMIN)
+        acquired_args = ['username', 'password', 'realname', 'email', 'student_id']
+        assert (self.check_input(*acquired_args))
+        self.args = self.property_filter(allowed_properties = acquired_args)
+        self.args['status'] = 1
+        self.args['role'] = Roles.TA
+        await self.db.createObject('users', *self.args)
+        return {'code': 0}
         #
         # if(type == 'create'):
         #     print_debug('post create')
