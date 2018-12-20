@@ -4,7 +4,7 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Radio, Card, Table, message} from 'antd';
+import { Layout, Breadcrumb, Radio, Card, Table, message, Input} from 'antd';
 const {Content, Sider} = Layout;
 
 const problemColumns = [
@@ -104,22 +104,57 @@ class ProblemBase extends Component {
                         <Card title="选择题目类型" style={{width: "100%", padding: "5px", marginLeft: "5px"}}>
                             <Radio.Group onChange={
                                 (e)=>{
-                                    let pager = this.state.pagination;
-                                    pager.current = 1;
-                                    this.setState({value:e.target.value, page: 1, pagination: pager});
-                                    this.updateProblems(1, e.target.value);
+                                    if(e.target.value !== 4) {
+                                        let pager = this.state.pagination;
+                                        pager.current = 1;
+                                        this.setState({value:e.target.value, page: 1, pagination: pager});
+                                        this.updateProblems(1, e.target.value);
+                                    } else {
+                                        let pager = this.state.pagination;
+                                        pager.current = 1;
+                                        this.setState({value: e.target.value, page: 1, pagination: pager, data: []});
+                                    }
                                 }
                             } value={this.state.value}>
                                 <Radio style={radioStyle} value={1}>全部题目</Radio>
                                 <Radio style={radioStyle} value={2}>传统IO评测</Radio>
                                 <Radio style={radioStyle} value={3}>Javascript</Radio>
+                                <Radio style={radioStyle} value={4}>搜索题目</Radio>
                             </Radio.Group>
                         </Card>
                     </Sider>
                     <Content style={{ padding: '0 24px', minHeight: 280 }}>
+                        {this.state.value === 4 &&
+                        <Input.Search
+                            style={{width: '100%', marginBottom: '10px'}}
+                            placeholder="输入搜索，使用空格隔开关键词"
+                            onSearch={value => {
+                                console.log(value);
+                                ajax_post(api_list['search_problem'], {keyword: value}, this, (that, result) => {
+                                    if(result.data.code === 1) {
+                                        message.error("搜索题目失败");
+                                        return;
+                                    } else if(result.data.length === 0) {
+                                        message.warning("暂无结果");
+                                        return;
+                                    }
+                                    let data = [];
+                                    for(const d of result.data) {
+                                        let new_record = {};
+                                        for(const c of problemColumns) {
+                                            new_record[c['dataIndex']] = d[c['dataIndex']];
+                                        }
+                                        data.push(new_record);
+                                    }
+                                    that.setState({data: data.sort((a,b)=>{return a.id-b.id})});
+                                })
+                            }}
+                            enterButton
+                        />
+                        }
                         <Table columns={problemColumns}
                                dataSource={this.state.data}
-                               pagination={this.state.pagination}
+                               pagination={this.state.value === 4 ? false : this.state.pagination}
                                loading={this.state.loading}
                                onChange={this.handleTableChange} />
                     </Content>

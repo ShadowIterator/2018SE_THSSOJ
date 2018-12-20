@@ -12,6 +12,7 @@ const api_list = {
     'validate_user': '/api/user/validate',
     'update_user': '/api/user/update',
     'modifypwd_user': '/api/user/modifypwd',
+    'create_ta': '/api/user/createTA',
 
     'list_course': '/api/course/list',
     'create_course': '/api/course/create',
@@ -55,6 +56,7 @@ const api_list = {
     'judge_one': '/api/problem/judge',
     'judge_html': '/api/problem/judgeHTML',
     'create_html': '/api/problem/createHTML',
+    'search_problem': '/api/problem/search',
 
     'upload_code': '/api/upload/files',
     'upload_case': '/api/upload/files',
@@ -67,7 +69,6 @@ const api_list = {
     'download_html': '/api/download/html',
 
     'query_ratio': '/api/ratio/query',
-
     'query_judgestates': '/api/judgestate/query',
 };
 

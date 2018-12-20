@@ -219,7 +219,10 @@ class CodeInput extends Component {
                         </Select>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" icon="upload" onClick={(e) => {
+                        <Button type="primary"
+                                icon="upload"
+                                disabled={this.props.homework_info.submitable === 0}
+                                onClick={(e) => {
                             e.preventDefault();
                             if(this.props.lesson_id === '0') {
                                 this.clickSubmit();
