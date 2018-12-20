@@ -127,6 +127,13 @@ class BaseTestCase(AsyncHTTPTestCase):
     async def get_request(self, uri, **kw):
         return await self.get_response(uri, method = 'GET', body = None)
 
+    async def login(self, username, password):
+        response = self.getbodyObject(await self.post_request('/api/user/login',
+                                                              username=username,
+                                                              password=password))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+
     # an example
     # @async_aquire_db
     # async def test_hello(self):

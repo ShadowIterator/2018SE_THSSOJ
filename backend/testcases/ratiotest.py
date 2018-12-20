@@ -11,6 +11,7 @@ class RatioTest(BaseTestCase):
         self.user2 = await self.db.createObject('users', username = 'hfz1', password = 'hfz', email = 'hfz@hfz.com', role = 1)
         await self.db.createObject('ratios', homework_id = 1, problem_id = 1, user_id = self.user1['id'], ratio_one_used = 10, ratio_two_used = 100, ratio_three_used = 1000)
         await self.db.createObject('ratios', homework_id = 1, problem_id = 1, user_id = self.user2['id'], ratio_one_used = 10, ratio_two_used = 100, ratio_three_used = 1000)
+
     @async_aquire_db
     async def test_query_ratio(self):
         response = self.getbodyObject(await self.post_request('/api/user/login',

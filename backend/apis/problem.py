@@ -696,7 +696,7 @@ class APIProblemHandler(base.BaseHandler):
 
 
     async def _search_post(self):
-        res_list = await self.db.getTable('problems').search_by_title(filter(lambda s: s!='', self.args['keyword'].split(' ')))
+        res_list = await self.db.getTable('problems').search_by_title(filter(lambda s: s!='', self.args['keywords'].split(' ')))
         rtn = []
         for problem in res_list:
             if(problem['openness'] == 1):
