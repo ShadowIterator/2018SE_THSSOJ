@@ -16,7 +16,9 @@ import "./problem_tab.css";
 
 import moment from 'moment';
 
-import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from 'antd';
+import '../../node_modules/codemirror/lib/codemirror.css';
+
+import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message, Input } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
 
@@ -441,15 +443,25 @@ class ProblemDetailRecord extends Component {
                         readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
+                {this.state.judger_info_visible &&
                 <Modal
                     title="查看评测详细信息"
                     visible={this.state.judger_info_visible}
                     width='55%'
-                    onOk={()=>{this.setState({judger_info_visible: false})}}
-                    onCancel={()=>{this.setState({judger_info_visible: false})}}
+                    onOk={() => {
+                        this.setState({judger_info_visible: false})
+                    }}
+                    onCancel={() => {
+                        this.setState({judger_info_visible: false})
+                    }}
                 >
-                    {this.state.judger_info}
+                    <CodeMirror options={{
+                        readOnly: true,
+                    }}
+                        value={this.state.judger_info}
+                    />
                 </Modal>
+                }
             </div>
         );
     }
