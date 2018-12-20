@@ -68,7 +68,7 @@ class APICourseHandler(base.BaseHandler):
         #             await self.saveObject('users', TA)
         #         self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
         #     except Exception as e:
-        #         print("create course err: ", e)
+        #         print_debug("create course err: ", e)
         #         self.set_res_dict(res_dict, code=1, msg='can not add students and TAs to course')
         #         self.return_json(res_dict)
         #         return
@@ -166,7 +166,7 @@ class APICourseHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _query_post(self):
-        # print('query = ', self.args)
+        # print_debug('query = ', self.args)
         res = await self.db.getObject('courses', cur_user = self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
         ret_list=[]

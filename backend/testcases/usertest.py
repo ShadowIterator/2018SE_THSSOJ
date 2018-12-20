@@ -2,13 +2,14 @@
 import unittest
 import tornado.testing
 from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug, Roles
 
 class UserTest(BaseTestCase):
 
     async def prepare(self):
         self.url = '/api/user'
-        await self.db.createObject('users', username = 'hfz', password = 'hfz', email = 'hfz@hfz.com')
-        await self.db.createObject('users', username = 'hfz1', password = 'hfz', email = 'hfz@hfz.com', role = 1)
+        await self.db.createObject('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0)
+        await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN)
         # await self.db.createObject('users', username='admin', password='hfz', email='hfz@hfz.com', role = 4)
 
     @async_aquire_db
@@ -78,7 +79,7 @@ class UserTest(BaseTestCase):
         # success
         response = self.getbodyObject(await self.post_request(uri,
                                                               username='hfz',
-                                                              password='hfz'))
+                                                              password='4321'))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
         dbobj = (await self.db.getObject('users', username = 'hfz'))[0]
@@ -96,7 +97,7 @@ class UserTest(BaseTestCase):
                                                               id = 100))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 1)
-        # print('xxxx')
+        # print_test('xxxx')
 
         # fail: absent of id field
         response = self.getbodyObject(await self.post_request(uri))
@@ -114,7 +115,7 @@ class UserTest(BaseTestCase):
         #     login first
         response = self.getbodyObject(await self.post_request(self.url + '/login',
                                                               username='hfz',
-                                                              password='hfz'))
+                                                              password='4321'))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
         user_id = response['id']
@@ -129,6 +130,45 @@ class UserTest(BaseTestCase):
     async def test_delete(self):
         pass
 
+    @async_aquire_db
+    async def test_createTA(self):
+        uri = self.url + '/createTA'
 
-# if __name__ == '__main__':
-#     tornado.testing.main()
+        # no permission
+        response = self.getbodyObject(await self.post_request(self.url + '/login',
+                                                              username='hfz',
+                                                              password='4321'))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              username='hfzTA',
+                                                              password='TA234',
+                                                              email = '123@hfz.com',
+                                                              realname = 'hongfangzhou',
+                                                              student_id = '2016013259'))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 1)
+
+        # pass
+        response = self.getbodyObject(await self.post_request(self.url + '/login',
+                                                              username='admin',
+                                                              password='1234'))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              username='hfzTA',
+                                                              password='TA234',
+                                                              email = '123@hfz.com',
+                                                              realname = 'hongfangzhou',
+                                                              student_id = '2016013259'))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+        obj = await self.db.getObjectOne('users', username = 'hfzTA')
+        self.assertEqual(obj['student_id'], '2016013259')
+        self.assertEqual(obj['role'], Roles.TA )
+        self.assertEqual(obj['status'], 1)
+
+if __name__ == '__main__':
+    tornado.testing.main()

@@ -25,15 +25,15 @@ class APIDownloadHandler(base.BaseHandler):
 
         # self.dir =  'tmp/'
         # self.user = None
-        # print(self.request.body)
+        # print_debug(self.request.body)
 
     async def get(self, type): #detail
-        print('get: ', type)
+        print_debug('get: ', type)
         await self._call_method('''_{action_name}_get'''.format(action_name = type))
 
     async def _example_get(self):
         problem_id  = self.get_argument('id', None)
-        print('example download id=: ', problem_id)
+        print_debug('example download id=: ', problem_id)
         if(not problem_id):
             raise tornado.web.HTTPError(403)
         filename = 'servefiles/test.txt'
@@ -69,7 +69,7 @@ class APIDownloadHandler(base.BaseHandler):
 
     async def _code_get(self):
         problem_id = self.get_argument('id', None)
-        print('download-code: problem-id = ', problem_id)
+        print_debug('download-code: problem-id = ', problem_id)
         logged_user = await self.get_current_user_object()
         matched_problem = (await self.db.getObject('problems', cur_user=logged_user, id=problem_id))[0]
         if logged_user['role'] != 3 and logged_user['id'] != matched_problem['user_id']:

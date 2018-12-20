@@ -2,13 +2,14 @@ import unittest
 from tornado import gen
 import tornado.testing
 from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug
 
 
 class ExampleTestCase(BaseTestCase):
 
     @async_aquire_db
     async def test_example(self):
-        print('example_test')
+        print_test('example_test')
 
         # TODO: no way to test condition
 
@@ -32,7 +33,7 @@ class ExampleTestCase(BaseTestCase):
         response_object = self.getbodyObject(response)
         self.assertEqual(response_object[0]['username'], 'hfzzz')
     # query db
-        print('getobj in db: ', await self.db.getObject('users', username='hfzzz'))
+        print_test('getobj in db: ', await self.db.getObject('users', username='hfzzz'))
 
 if __name__ == '__main__':
     tornado.testing.main()
