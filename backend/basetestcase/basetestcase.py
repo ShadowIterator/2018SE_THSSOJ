@@ -122,6 +122,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         return res
 
     async def post_request(self, uri, **kw):
+        print_debug('post_request', kw)
         return await self.get_response(uri, method = 'POST', body = json.dumps(kw).encode())
 
     async def get_request(self, uri, **kw):
@@ -133,6 +134,17 @@ class BaseTestCase(AsyncHTTPTestCase):
                                                               password=password))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
+
+    async def login_object(self, obj):
+        response = self.getbodyObject(await self.post_request('/api/user/login',
+                                                              username=obj['username'],
+                                                              password=obj['password']))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+
+
+    async def post_request_return_object(self, url, *args, **kw):
+        return self.getbodyObject(await self.post_request(url, *args, **kw))
 
     # an example
     # @async_aquire_db

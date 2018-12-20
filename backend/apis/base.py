@@ -217,19 +217,27 @@ class BaseHandler(tornado.web.RequestHandler):
         #     for each_property in object_selected.keys():
         #         if not each_property in allowed_properties:
         #             del object_selected[each_property]
+        # rtn = {}
+        # if (allowed_properties != None):
+        #     for key, value in object_selected.items():
+        #         if(key in allowed_properties):
+        #             rtn[key] = value
+        # else:
+        #     rtn = object_selected
+        # print_debug('filter-obj1: ', rtn)
+        # if (abandoned_properties != None):
+        #     object_selected = rtn
+        #     for key, value in object_selected.keys():
+        #         if(key not in abandoned_properties):
+        #             rtn[key] = value
+        #
         rtn = {}
-        if (allowed_properties != None):
-            for key, value in object_selected.items():
-                if(key in allowed_properties):
-                    rtn[key] = value
-        print_debug('filter-obj1: ', rtn)
-        if (abandoned_properties != None):
-            rtn = {}
-            object_selected = rtn
-            for key, value in object_selected.keys():
-                if(key not in abandoned_properties):
-                    rtn[key] = value
-        object_selected = rtn
-        print_debug('filter-obj2: ', rtn)
+        for key, value in object_selected.items():
+            print_debug('filter object rules: ', key, allowed_properties, abandoned_properties,(allowed_properties == None) or (key in allowed_properties), ((abandoned_properties == None) or (key not in abandoned_properties)))
+            if (((allowed_properties == None) or (key in allowed_properties)) and ((abandoned_properties == None) or (key not in abandoned_properties))):
+                print_debug('filter-object checkok: ', key)
+                rtn[key] = value
 
+        object_selected = rtn
+        print_debug('filter-obj: ', rtn, object_selected)
         return rtn

@@ -26,29 +26,38 @@ class APIUserHandler(base.BaseHandler):
     async def _query_post(self):
         print_debug('query = ', self.args)
         res = await self.db.getObject('users', **self.args)
-        print_debug('query res = ', res)
         cur_user = await self.get_current_user_object()
         ret_list = []
+        print_debug('query res = ', res, cur_user)
+
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
             if 'validate_time' in user.keys() and user['validate_time'] is not None:
                 user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
             # authority check
-            if cur_user['role'] == 1:
-                if user['role'] == 2 or cur_user['id'] == user['id']:
-                    self.property_filter(user,
+            user = self.property_filter(user, allowed_properties=None, abandoned_properties=['validate_time', 'validate_code', 'secret'])
+            print('query_user-aftr filter: ', user)
+            if cur_user['role'] <= 1:
+                if user['role'] == 2:
+                    tusr = self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses'])
+                    print_debug('query_user: ', user, cur_user)
+                    ret_list.append(tusr)
+                elif cur_user['id'] == user['id']:
+                    tusr = self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
-                    ret_list.append(user)
+                    ret_list.append(tusr)
                 else:
                     pass
             elif cur_user['role'] == 2:
                 if user['role'] < 3:
-                    self.property_filter(user,
+                    tusr = self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
-                    ret_list.append(user)
+                    ret_list.append(tusr)
                 else:
                     pass
             elif cur_user['role'] == 3:
@@ -58,8 +67,8 @@ class APIUserHandler(base.BaseHandler):
             # ---------------------------------------------------------------------
 
         # self.write(json.dumps(res).encode())
-        print_debug('query_return: ', res)
-        return res
+        print_debug('query_return: ', ret_list)
+        return ret_list
 
     @tornado.web.authenticated
     # @check_password
@@ -245,6 +254,7 @@ class APIUserHandler(base.BaseHandler):
         self.args = self.property_filter(self.args, allowed_properties = acquired_args, abandoned_properties= None)
         self.args['status'] = 1
         self.args['role'] = Roles.TA
+        self.args['secret'] = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         print_debug('createTA-after: ', self.args)
         await self.db.createObject('users', **self.args)
         return {'code': 0}
