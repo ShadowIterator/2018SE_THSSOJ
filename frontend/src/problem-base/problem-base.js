@@ -130,7 +130,7 @@ class ProblemBase extends Component {
                             placeholder="输入搜索，使用空格隔开关键词"
                             onSearch={value => {
                                 console.log(value);
-                                ajax_post(api_list['search_problem'], {keyword: value}, this, (that, result) => {
+                                ajax_post(api_list['search_problem'], {keywords: value}, this, (that, result) => {
                                     if(result.data.code === 1) {
                                         message.error("搜索题目失败");
                                         return;

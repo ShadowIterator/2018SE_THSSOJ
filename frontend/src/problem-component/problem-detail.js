@@ -490,7 +490,7 @@ class ProblemDetail extends Component {
             language: [],
             homework_info: {},
             problem_info: {},
-            ratio: {ratio_one_used: 10, ratio_two_used: 10, ratio_three_used: 10},
+            ratio: {ratio_one_used: 0, ratio_two_used: 0, ratio_three_used: 0},
         };
         this.records = [];
     }
