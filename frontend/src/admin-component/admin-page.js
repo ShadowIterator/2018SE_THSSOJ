@@ -40,6 +40,7 @@ class AdminTable extends Component {
                         <span>
                             <Button onClick={() => {
                                 this.setState({current_record: record, visible: true});
+                                console.log("点击查看详情");
                             }}>查看详情</Button>
                         </span>
                 },
@@ -465,7 +466,7 @@ class AdminPage extends Component {
         this.state = {
             current: 'Users'
         };
-        this.tables = ['Users', 'Courses', 'Homework', 'Problems', 'Records', 'Notices'];
+        this.tables = ['Users', 'Courses', 'Homework', 'Problems', 'Records', 'Notices', 'Ratios', 'Judge States'];
     }
     handleClick = (e) => {
         this.setState({
