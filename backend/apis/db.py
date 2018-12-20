@@ -20,6 +20,7 @@ import asyncio
 # import sqlalchemy as sa
 # import aiopg.sa as sa
 from tornado.locks import Condition, Lock
+from apis.base import print_debug
 
 class NoResultError(Exception):
     pass
@@ -63,12 +64,12 @@ class BaseDB:
 
         Must be called with ``await self.execute(...)``
         """
-        print('execute: ', stmt, args)
+        print_debug('execute: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
     async def execute_without_args(self, stmt):
-        print('exe-without: ', stmt)
+        print_debug('exe-without: ', stmt)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt)
 
@@ -83,13 +84,13 @@ class BaseDB:
 
             for row in await self.query(...)
         """
-        print('query: ', stmt, args)
+        print_debug('query: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
             res = [self.row_to_obj(row, cur)
                     for row in await cur.fetchall()]
             # for item in res:
-            #     print(item)
+            #     print_debug(item)
             # for xx in res:
             #     xx.save()
             # res[0].name = 'ycdfwzy'
@@ -107,7 +108,7 @@ class BaseDB:
             raise NoResultError()
         elif len(results) > 1:
             raise ValueError("Expected 1 result, got %d" % len(results))
-        print(results[0])
+        print_debug(results[0])
         return results[0]
 
     async def querylr(self, si_table_name, l , r, **kw):
@@ -159,14 +160,18 @@ class BaseDB:
     async def insert_element_in_array(self, si_table_name, column_name, value, id):
         return await self.tables[si_table_name].insert_element_in_array(column_name, value, id)
 
+    async def insert_element_in_array_unique(self, si_table_name, column_name, value, id):
+        return await self.tables[si_table_name].insert_element_in_array_unique(column_name, value, id)
+
     async def remove_element_in_array(self, si_table_name, column_name, value, id):
         return await self.tables[si_table_name].remove_element_in_array(column_name, value, id)
+
 
 condition = Condition()
 
 class BaseTable:
 
-    def __init__(self, db, si_table_name, lock_cnt = 10):
+    def __init__(self, db, si_table_name, lock_cnt = 17):
         self.db = db
         # self.table_name = self.__class__.__name__.lower()
         self.table_name = si_table_name
@@ -184,11 +189,16 @@ class BaseTable:
             'SELECT column_name FROM information_schema.columns WHERE table_schema = %s and table_name = %s', 'public',
             self.table_name)
         self.database_keys = list(map(lambda item: item['column_name'], database_keys))
-        print(self.database_keys)
+        print_debug(self.database_keys)
 
     #
     async def insert_element_in_array(self, column_name, value, id):
         stmt = '''UPDATE {table_name} SET {column_name} = array_append({column_name}, {value}) WHERE id = {id};'''.format(table_name = self.table_name, column_name = column_name, value = value, id = id)
+        await self.db.execute(stmt)
+
+    async def insert_element_in_array_unique(self, column_name, value, id):
+        stmt = '''UPDATE {table_name} SET {column_name} = (CASE WHEN ARRAY[{value}] <@ {column_name} THEN {column_name} ELSE array_append({column_name}, {value}) END) WHERE id = {id};'''.format(
+            table_name = self.table_name, column_name = column_name, value = value, id = id)
         await self.db.execute(stmt)
 
     async def remove_element_in_array(self, column_name, value, id):
@@ -202,12 +212,12 @@ class BaseTable:
     # I do not want to write a comment
     async def acquire_lock(self, hash_id):
         await self.lock[hash_id % self.lockN].acquire()
-        print('before_ac lock')
+        print_debug('before_ac lock')
         # await condition.wait()
 
     async def release_lock(self, hash_id):
         self.lock[hash_id % self.lockN].release()
-        print('release lock lock')
+        print_debug('release lock lock')
         # condition.notify()
 
     def get_lock_object(self, hash_id):
@@ -217,9 +227,9 @@ class BaseTable:
         si_table_name = self.table_name
         if(cur_user):
             object = await self.objectFilter('write', object, cur_user)
-        # print('saveObject-before: ', object)
+        # print_debug('saveObject-before: ', object)
         object = self.filterKeys(object)
-        # print('saveObject: ', object)
+        # print_debug('saveObject: ', object)
         fmtList = []
         valueList = []
         for key,value in object.items():
@@ -227,7 +237,7 @@ class BaseTable:
                 fmtList.append(str(key) + ' = %s')
                 valueList.append(value)
         sfmt = ' , '.join(fmtList)
-        # print('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
+        # print_debug('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
         await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
 
     async def all(self, cur_user = None):
@@ -246,16 +256,16 @@ class BaseTable:
 
     async def getObject(self, cur_user = None, **kw):
         si_table_name = self.table_name
-        # print('getobject: ', kw)
+        # print_debug('getobject: ', kw)
         kw = self.filterKeys(kw)
-        # print('getobject after filter: ', kw)
+        # print_debug('getobject after filter: ', kw)
         plst = []
         valuelist = []
         for key, value in kw.items():
             plst.append(str(key) + ' = %s')
             valuelist.append(value)
         slst = ' AND '.join(plst)
-        print("slst = ", slst)
+        print_debug("slst = ", slst)
         res = await self.db.query('''SELECT * FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
         return res
         # if(cur_user):
@@ -275,13 +285,13 @@ class BaseTable:
             plst.append(str(key) + ' = %s')
             valuelist.append(value)
         slst = ' AND '.join(plst)
-        print("slst = ", slst)
+        print_debug("slst = ", slst)
         return await self.db.execute('''DELETE FROM {table_name} WHERE {conditions}'''.format(table_name = si_table_name, conditions = slst), *valuelist)
 
 
     async def createObject(self, **kw):
         si_table_name = self.table_name
-        print('createObject: kw = ', kw)
+        print_debug('createObject: kw = ', kw)
         kw = self.filterKeys(kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
@@ -293,7 +303,7 @@ class BaseTable:
             propvalues.append(value)
 
         str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt}) RETURNING *;'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
-        print('fmt = ', str_fmt, propvalues)
+        print_debug('fmt = ', str_fmt, propvalues)
         return await self.db.queryone(str_fmt, *propvalues)
 
     async def objectFilter(self, method, dic, user):
@@ -308,8 +318,8 @@ class BaseTable:
         #             per_owner = 1
         #     per_role = user['role']
         # except:
-        #     print('object filter: user not loged in')
-        # print('permission: ', per_role, per_owner)
+        #     print_debug('object filter: user not loged in')
+        # print_debug('permission: ', per_role, per_owner)
         # return self.jsonFilter(method, dic, per_role, per_owner)
 
     async def querylr(self, l , r, **kw):
@@ -324,7 +334,7 @@ class BaseTable:
             slst = 'WHERE ' + ' AND '.join(plst)
         else:
             slst = ''
-        print("slst = ", slst)
+        print_debug("slst = ", slst)
         # slst = ''
 
         stmt = 'SELECT * FROM {table_name} {conditions} LIMIT {n} OFFSET {s}'.format(
@@ -334,14 +344,14 @@ class BaseTable:
             conditions = slst
         )
 
-        print('querylr: ', stmt, *valuelist)
+        print_debug('querylr: ', stmt, *valuelist)
         res = await self.db.query(stmt, *valuelist)
         for x in res:
             for key, value in x.items():
-                # print(key, isinstance(value, datetime.datetime))
+                # print_debug(key, isinstance(value, datetime.datetime))
                 if (isinstance(value, datetime.datetime)):
                     x[key] = int(time.mktime(value.timetuple()))
-        print(res)
+        print_debug(res)
 
 
         rtn = {}
@@ -357,11 +367,11 @@ class BaseTable:
         # rtn = {}
         # # permissionList = permissions[table_name][method]
         # permissionList = self.permissions[method]
-        # print('jsonFilter: ', dic)
+        # print_debug('jsonFilter: ', dic)
         # for key, value in dic.items():
         #     if(key in permissionList.keys()):
         #         permission = permissionList[key]
-        #         # print(permission)
+        #         # print_debug(permission)
         #         if(permission[0] <= per_role and permission[1] <= per_owner):
         #             rtn[key] = value
         # return rtn
@@ -369,7 +379,7 @@ class BaseTable:
 
     def filterKeys(self, kw):
         si_table_name = self.table_name
-        # print('filterKeys: ', kw)
+        # print_debug('filterKeys: ', kw)
         rtn = {}
         keyslist = self.database_keys
         for key, value in kw.items():
@@ -388,7 +398,21 @@ class Homeworks(BaseTable):
     pass
 
 class Problems(BaseTable):
-    pass
+    async def query_contain(self, column_name, keyword):
+        return await self.db.query('''SELECT * FROM {table_name} WHERE {column_name} LIKE \'%%{keyword}%%\''''.format(
+            table_name = self.table_name, column_name = column_name, keyword = keyword
+        ))
+
+    async def search_by_title(self, keyword_list):
+        id_set = set()
+        rtn = []
+        for keyword in keyword_list:
+            res_list = await self.query_contain('title', keyword)
+            for res in res_list:
+                if(res['id'] not in id_set):
+                    rtn.append(res)
+                    id_set.add(res['id'])
+        return rtn
 
 class Records(BaseTable):
     pass
