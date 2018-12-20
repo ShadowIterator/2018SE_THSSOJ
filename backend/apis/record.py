@@ -64,7 +64,7 @@ class APIRecordHandler(base.BaseHandler):
                     if cur_user['id'] != record['user_id']:
                         continue
                     if homework['score_openness'] == 0:
-                        self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
+                        record = self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
                     ret_list.append(record)
                 elif cur_user['role'] == 2:
                     if cur_user['id'] in course['tas']:
@@ -83,7 +83,7 @@ class APIRecordHandler(base.BaseHandler):
                     if cur_user['id'] != record['user_id']:
                         continue
                     if homework['score_openness'] == 0:
-                        self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
+                        record = self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
                     ret_list.append(record)
                 elif cur_user['role'] == 2:
                     if cur_user['id'] in course['tas']:

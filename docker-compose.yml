@@ -30,13 +30,6 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile-prod
-    # volumes:
-    #   - './frontend:/usr/src/app'
-    #   # - '/usr/src/app/node_modules'
-    # ports:
-    #   - '3000:3000'
-    # environment:
-    #   - NODE_ENV=development
     volumes:
       - './backend/root/judge_html_temp:/usr/src/app/root/judge_html_temp'
     ports:
