@@ -180,7 +180,7 @@ class APICourseHandler(base.BaseHandler):
                 pass
             elif cur_user['role'] == 1:
                 if course['status'] == 1 and cur_user['id'] in course['students']:
-                    self.property_filter(course, None, ['course_spell', 'students'])
+                    course = self.property_filter(course, None, ['course_spell', 'students'])
                     ret_list.append(course)
             elif cur_user['role'] == 2:
                 if cur_user['id'] in course['tas']:

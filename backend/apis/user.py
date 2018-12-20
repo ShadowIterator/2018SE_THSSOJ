@@ -37,7 +37,7 @@ class APIUserHandler(base.BaseHandler):
             # authority check
             if cur_user['role'] == 1:
                 if user['role'] == 2 or cur_user['id'] == user['id']:
-                    self.property_filter(user,
+                    user = self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
                     ret_list.append(user)
@@ -45,7 +45,7 @@ class APIUserHandler(base.BaseHandler):
                     pass
             elif cur_user['role'] == 2:
                 if user['role'] < 3:
-                    self.property_filter(user,
+                    user = self.property_filter(user,
                                          allowed_properties=None,
                                          abandoned_properties=['validate_time', 'validate_code', 'secret'])
                     ret_list.append(user)
