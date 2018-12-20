@@ -3,7 +3,6 @@ import {ajax_post} from "../ajax-utils/ajax-method";
 import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 
-import {Card, Container} from "react-bootstrap";
 import { Layout, Breadcrumb } from 'antd';
 import { Form, Input, Select, Row, Col, message, Button, Modal, Menu, Icon} from 'antd';
 import {withRouter, Link} from "react-router-dom";
@@ -233,6 +232,7 @@ class UserSettingsForm extends Component {
             if(!err) {
                 const update_data = {
                     id: this.props.id,
+                    username: this.state.username,
                     auth_password: pwd_encrypt(this.state.password),
                     email: this.state.email,
                     gender: this.state.gender,
