@@ -31,7 +31,7 @@ class APIProblemHandler(base.BaseHandler):
         #
         # self.root_dir='root'
         # self.user = None
-        # print(self.request.body)
+        # print_debug(self.request.body)
 
 
     async def _list_post(self):
@@ -117,7 +117,7 @@ class APIProblemHandler(base.BaseHandler):
         if not os.path.exists(target_zip_path):
             os.makedirs(target_zip_path)
         problem_id = problem_in_db['id']
-        # print("target_code_path ", target_code_path)
+        # print_debug("target_code_path ", target_code_path)
         # code_file_name = code_path.split('/')[-1]
         shutil.copyfile(code_path, target_code_path+'/'+str(problem_id)+'.code')
         shutil.copyfile(zip_path, target_zip_path + '/' + str(problem_id) + '.zip')
@@ -139,7 +139,7 @@ class APIProblemHandler(base.BaseHandler):
         record_created = (await self.db.getObject('records', cur_user=self.get_current_user_object(), **record_info))[0]
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
-        print("record_dir ", record_dir)
+        print_debug("record_dir ", record_dir)
         shutil.copyfile(code_path, record_dir+'/'+str_id+'.code')
 
         if test_language==1 or test_language==2 or test_language==4:
@@ -199,7 +199,7 @@ class APIProblemHandler(base.BaseHandler):
         #     description_file.close()
         #     self.set_res_dict(res_dict, code=0, msg='problem created')
         # except:
-        #     print(traceback.print_exc())
+        #     print_debug(traceback.print_exc())
         #     self.set_res_dict(res_dict, code=1, msg='fail to create problem')
         # self.return_json(res_dict)
 
@@ -296,7 +296,7 @@ class APIProblemHandler(base.BaseHandler):
         if 'description' in self.args.keys():
             del self.args['description']
 
-        print('query-problem: ', self.args)
+        print_debug('query-problem: ', self.args)
         res = await self.db.getObject('problems', cur_user=self.get_current_user_object(), **self.args)
         cur_user = await self.get_current_user_object()
         ret_list=[]
@@ -307,15 +307,15 @@ class APIProblemHandler(base.BaseHandler):
             description_file = open(target_path, mode='rb')
             description = description_file.read()
             description_file.close()
-            print('query-problem-desc-tar-path: ', target_path)
+            print_debug('query-problem-desc-tar-path: ', target_path)
             # encoded_content = base64.b64encode(description)
             encoded_content = description
             # des_str = self.bytes_to_str(encoded_content)
             des_str = encoded_content.decode(encoding='utf-8')
             problem['description'] = des_str
-            # print('query_problem_loop', problem)
-            # print('path', target_path)
-            # print('description', description)
+            # print_debug('query_problem_loop', problem)
+            # print_debug('path', target_path)
+            # print_debug('description', description)
 
             # authority check
             if problem['openness'] == 0:
@@ -348,12 +348,12 @@ class APIProblemHandler(base.BaseHandler):
         #         # des_str = self.bytes_to_str(encoded_content)
         #         des_str = encoded_content.decode(encoding='utf-8')
         #         problem['description'] = des_str
-        #         print('query_problem_loop', problem)
-        #         print('path', target_path)
-        #         print('description', description)
+        #         print_debug('query_problem_loop', problem)
+        #         print_debug('path', target_path)
+        #         print_debug('description', description)
         #     self.return_json(res)
         # except Exception as e:
-        #     print(e)
+        #     print_debug(e)
         #     self.set_res_dict(res_dict, code=1, msg='query failed')
         #     self.return_json(res_dict)
 
@@ -365,7 +365,7 @@ class APIProblemHandler(base.BaseHandler):
     async def _submit_post(self):
         res_dict={}
         if not self.check_input('user_id', 'problem_id', 'src_code', 'record_type'):
-            print(self.args)
+            print_debug(self.args)
             self.set_res_dict(res_dict, code=1, msg='submit post not enough params')
             # self.return_json(res_dict)
             return res_dict
@@ -406,7 +406,7 @@ class APIProblemHandler(base.BaseHandler):
         if self.args['record_type'] == 4:
             # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
             old_record = await self.db.getObject('records', **self.args)
-            print('submit_html: ', old_record)
+            print_debug('submit_html: ', old_record)
             if len(old_record) == 0:
                 html_record = await self.db.createObject('records', **self.args)
                 problem_of_code = (await self.db.getObject('problems', cur_user=self.get_current_user_object(),
@@ -527,7 +527,7 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _uploadCode_post(self):
-        # print('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
+        # print_debug('uploadCode_post: ', self.request.files['code'][0]['filename'], self.request.files['code'][0]['body'] )
 
         res_dict = {}
         # upload_path = os.path.join(os.path.dirname(__file__), 'files')
@@ -693,3 +693,12 @@ class APIProblemHandler(base.BaseHandler):
 
         self.set_res_dict(res_dict, code=0, msg='problem judging', uri=uri)
         return res_dict
+
+
+    async def _search_post(self):
+        res_list = await self.db.getTable('problems').search_by_title(filter(lambda s: s!='', self.args['keyword'].split(' ')))
+        rtn = []
+        for problem in res_list:
+            if(problem['openness'] == 1):
+                rtn.append(problem)
+        return rtn

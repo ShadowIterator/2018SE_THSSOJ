@@ -30,7 +30,7 @@ class APIHomeworkHandler(base.BaseHandler):
         created_homework = await self.db.createObject('homeworks', **self.args)
         course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
 
-        print('create_homeworks: ', course)
+        print_debug('create_homeworks: ', course)
         course['homeworks'].append(created_homework['id'])
         course['homeworks'] = list(set(course['homeworks']))
         created_homework_id = created_homework['id']

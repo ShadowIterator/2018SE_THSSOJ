@@ -1,6 +1,8 @@
 import unittest
 import tornado.testing
 from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug
+
 
 class RatioTest(BaseTestCase):
     async def prepare(self):
@@ -17,6 +19,6 @@ class RatioTest(BaseTestCase):
         self.assertEqual(response['code'], 0)
         ratio_response = self.getbodyObject(await self.post_request(self.url+'/query', 
             homework_id = 1, problem_id = 1, user_id = self.user1['id']))
-        print(ratio_response)
+        print_test(ratio_response)
         self.assertEqual(len(ratio_response), 1)
         self.assertEqual(ratio_response[0]['ratio_one_used'], 10)

@@ -2,6 +2,7 @@
 import unittest
 import tornado.testing
 from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug
 
 class UserTest(BaseTestCase):
 
@@ -96,7 +97,7 @@ class UserTest(BaseTestCase):
                                                               id = 100))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 1)
-        # print('xxxx')
+        # print_test('xxxx')
 
         # fail: absent of id field
         response = self.getbodyObject(await self.post_request(uri))

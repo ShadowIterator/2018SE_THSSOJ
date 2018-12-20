@@ -1,7 +1,6 @@
 import json
 import aiopg
 import bcrypt
-# import markdown
 import os.path
 import psycopg2
 import datetime
@@ -23,6 +22,13 @@ from tornado.options import define, options
 
 
 
+def print_debug(*args, **kw):
+    # print(*args, **kw)
+    pass
+
+def print_test(*args, **kw):
+    # print(*args, **kw)
+    pass
 
 class Roles:
     NOROLE = 0
@@ -44,15 +50,15 @@ def catch_exception_write(func):
         try:
             return await func(self, *args, **kw)
         except Exception as e:
-            print('catch_exception: return code = -1\n', repr(e))
-            print(traceback.print_exc())
+            print_debug('catch_exception: return code = -1\n', repr(e))
+            print_debug(traceback.print_exc())
             self.write(json.dumps({'code': 1}).encode())
     return wrapper
 
 def check_password(func):
     async def wrapper(self, *args, **kw):
         user = await self.get_current_user_object()
-        print('checkpassword: ', user['password'], self.args['auth_password'])
+        print_debug('checkpassword: ', user['password'], self.args['auth_password'])
         if(user['password'] == self.args['auth_password']):
             return await func(self, *args, **kw)
         raise BaseError('password incorrect')
@@ -64,13 +70,13 @@ async def maybe_create_tables(db, filename):
     #     with (await db.cursor()) as cur:
     #         await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
     #         await cur.fetchone()
-    #     print("in create")
+    #     print_debug("in create")
     # except psycopg2.ProgrammingError:
-        print('create tables')
+        print_debug('create tables')
         with open(filename) as f:
             schema = f.read()
         with (await db.cursor()) as cur:
-            print('maybe-create-tables: ', schema)
+            # print_debug('maybe-create-tables: ', schema)
             await cur.execute(schema)
     # with open('schema.sql') as f:
     #     schema = f.read()
@@ -91,12 +97,12 @@ class Application(tornado.web.Application):
 
 # class FormHandler(tornado.web.RequestHandler):
 #     def post(self):
-#         print('form-post')
+#         print_debug('form-post')
 
 class BaseHandler(tornado.web.RequestHandler):
     async def try_query(self):
-        print('try_query')
-        print('handler_query: ', await self.db.getObject('users', username='ss'))
+        print_debug('try_query')
+        print_debug('handler_query: ', await self.db.getObject('users', username='ss'))
 
     def __init__(self, *args, **kw):
         super(BaseHandler, self).__init__(*args, **kw)
@@ -111,26 +117,26 @@ class BaseHandler(tornado.web.RequestHandler):
         self.user = None
 
     # async def get(self, type): #detail
-    #     print('get: ', type)
+    #     print_debug('get: ', type)
     #     await self._call_method('''_{action_name}_get'''.format(action_name = type))
 
     @catch_exception_write
     async def get(self, type):  # detail
         # self.getargs()
-        print('get: ', type)
+        print_debug('get: ', type)
         res = await self._call_method('''_{action_name}_get'''.format(action_name=type))
         self.write(json.dumps(res).encode())
 
     # async def post(self, type):
-    #     print('post: ', type)
+    #     print_debug('post: ', type)
     #     await self._call_method('''_{action_name}_post'''.format(action_name = type))
 
     @catch_exception_write
     async def post(self, type):
-        print('request = ', self.request.headers)
-        print('post: ', type)
+        print_debug('request = ', self.request.headers)
+        print_debug('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
-        print('return: ', res)
+        print_debug('return: ', res)
         self.write(json.dumps(res).encode())
 
     async def get_current_user_object(self):
@@ -138,40 +144,40 @@ class BaseHandler(tornado.web.RequestHandler):
             return self.user
         try:
             user_id = self.get_secure_cookie('user_id')
-            print('user_id:', int(user_id))
+            print_debug('user_id:', int(user_id))
             users = await self.db.getObject('users', id = int(user_id))
-            print('users: ', users)
+            print_debug('users: ', users)
             return users[0]
         except:
-            print('get_user: not loged in')
+            print_debug('get_user: not loged in')
             return None
 
     def get_current_user(self):
         return self.get_secure_cookie('user_id')
 
     async def _testhello_post(self):
-        print('app: in testhello')
+        print_debug('app: in testhello')
         self.write('hello: ' + self.__class__.__name__  + ' ' + self.args['msg'])
         return None
 
     def getargs(self):
-        # print('getargs: ', self.request.body.decode() or '{}')
+        # print_debug('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
         # self.argFilter()
-        print('getargs\n', self.request, '\n', self.args)
-        print(self.request.method)
+        print_debug('getargs\n', self.request, '\n', self.args)
+        print_debug(self.request.method)
 
 
     async def _call_method(self, method, *args, **kw):
-        print(method)
+        print_debug(method)
         func = getattr(self, method, None)
         if(not callable(func)):
-            print('no method')
+            print_debug('no method')
             raise NoMethodError
-        print('await to call function')
+        print_debug('await to call function')
         return await func(*args, **kw)
         # res = await func(*args, **kw)
-        # print('call method res = ', res)
+        # print_debug('call method res = ', res)
         # return res
 
     def options(self, *args, **kw):

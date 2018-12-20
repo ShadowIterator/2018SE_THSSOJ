@@ -22,6 +22,7 @@ from apis.problem import *
 from apis.homework import *
 from apis.db import BaseDB
 from tornado.options import define, options
+from apis.base import print_test, print_debug
 
 
 from tornado.options import define, options
@@ -55,7 +56,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         pass
 
     async def set_application_db(self):
-        print('in get_db', options.db_host,
+        print_test('in get_db', options.db_host,
                 options.db_port,
                 options.db_user,
                 options.db_password,
@@ -69,20 +70,20 @@ class BaseTestCase(AsyncHTTPTestCase):
                         password=options.db_password,
                         dbname=options.db_database)
                 await maybe_create_tables(db, './sql/schema.sql')
-                print('create pool done')
+                print_test('create pool done')
                 break
             except:
-                print("retrying to connect test database")
+                print_test("retrying to connect test database")
                 pass
         rdb = BaseDB(db)
         self.db = rdb
         self._app.setDB(rdb)
-        print('get_db done')
+        print_test('get_db done')
 
     async def try_createObject(self):
-        print('try_createObj')
+        print_test('try_createObj')
         await self.db.createObject('users', username='ss', password='zz', email='dd')
-        print('create: ', await self.db.getObject('users', username = 'ss'))
+        print_test('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
         options.parse_config_file('./settings/app_config.py')
@@ -94,7 +95,7 @@ class BaseTestCase(AsyncHTTPTestCase):
 
 
     def get_app(self):
-        print('call get_app')
+        print_test('call get_app')
         return Application(None,
                           options.RoutineList,
                           **options.AppConfig
@@ -107,17 +108,17 @@ class BaseTestCase(AsyncHTTPTestCase):
         header = tornado.httputil.HTTPHeaders({'content-type': 'application/json', 'Cookie': self.user_id_cookie})
         # for key, value in self.cookies.items():
         #     header.add('Cookie', '='.join((key, value)))
-        # print('post header: ', header)
+        # print_test('post header: ', header)
         res = await self.http_client.fetch(self.get_url(uri), headers = header, *args, **kw)
         for cookie in res.headers.get_list('Set-Cookie'):
             parsed_cookie = tornado.httputil.parse_cookie(cookie)
-            # print('setcookie: ', parsed_cookie)
+            # print_test('setcookie: ', parsed_cookie)
             # for key, value in parsed_cookie.items():
             #     if(key != 'Path'):
             #         self.cookies[key] = '='.join((key, value))
             if 'user_id' in parsed_cookie.keys():
                 self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
-        # print('selfcookies: ', self.user_id_cookie)
+        # print_test('selfcookies: ', self.user_id_cookie)
         return res
 
     async def post_request(self, uri, **kw):
@@ -132,17 +133,17 @@ class BaseTestCase(AsyncHTTPTestCase):
     #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
     #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz"}')
     #     self.assertIn(b'st', response.body)
-    #     print(response.body)
-    #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
+    #     print_test(response.body)
+    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
 
 
     # @async_aquire_db
     # async def test_2(self):
-    #     print('test_2')
+    #     print_test('test_2')
     #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
     #     await self.db.createObject('users', username = 'hfzzz1', password = 'pwd', email = 'xx@xx.com')
     #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz1"}')
     #     self.assertIn(b'st', response.body)
-    #     print(response.body)
-    #     print('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
+    #     print_test(response.body)
+    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
     #
