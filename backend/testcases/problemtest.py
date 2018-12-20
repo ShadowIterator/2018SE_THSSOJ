@@ -24,7 +24,7 @@ class ProblemTestCase(BaseTestCase):
         await self.login(username = 'hfz', password = '4321')
 
         response = self.getbodyObject(await self.post_request(uri,
-                                                              keywords = '  hfz HTML 题目 の '))
+                                                              keywords = '  hfz  の HTML 题目'))
         self.assertEqual(5, len(response))
         for res in response:
             # print_test(res)

@@ -46,24 +46,39 @@ async def main():
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
     # Create the global connection pool.
-    async with aiopg.create_pool(
-            host=options.db_host,
-            port=options.db_port,
-            user=options.db_user,
-            password=options.db_password,
-            dbname=options.db_database) as db:
-        rdb = BaseDB(db)
-        app = Application(rdb,
-                          options.RoutineList,
-                          **options.AppConfig
-                          )
-        await app.async_init()
+    while True:
+        try:
+            db = await aiopg.create_pool(
+                host=options.db_host,
+                port=options.db_port,
+                user=options.db_user,
+                password=options.db_password,
+                dbname=options.db_database)
+            # print_test('create pool done')
+            break
+        except:
+            # print_test("retrying to connect test database")
+            pass
+    await maybe_create_tables(db, './sql/schema.sql')
+
+    # async with aiopg.create_pool(
+    #         host=options.db_host,
+    #         port=options.db_port,
+    #         user=options.db_user,
+    #         password=options.db_password,
+    #         dbname=options.db_database) as db:
+    rdb = BaseDB(db)
+    app = Application(rdb,
+                      options.RoutineList,
+                      **options.AppConfig
+                      )
+    await app.async_init()
 
         # with (await db.cursor()) as cur:
             # print('maybe-create-tables: ', schema)
             # await cur.execute(schema)
 
-        await maybe_create_tables(db, 'sql/schema.sql')
+    await maybe_create_tables(db, 'sql/schema.sql')
         # await rdb.createObject('users', username = 'hfz', password = '1234')
 
         # user = await rdb.createObject('users', email = 'xx')
@@ -91,8 +106,8 @@ async def main():
         # In this demo the server will simply run until interrupted
         # with Ctrl-C, but if you want to shut down more gracefully,
         # call shutdown_event.set().
-        shutdown_event = tornado.locks.Event()
-        await shutdown_event.wait()
+    shutdown_event = tornado.locks.Event()
+    await shutdown_event.wait()
 
 
 if __name__ == "__main__":
