@@ -42,13 +42,13 @@ class APIUserHandler(base.BaseHandler):
                 if user['role'] == 2:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses', 'password'])
                     print_debug('query_user: ', user, cur_user)
                     ret_list.append(tusr)
                 elif cur_user['id'] == user['id']:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
                     ret_list.append(tusr)
                 else:
                     pass
@@ -56,7 +56,7 @@ class APIUserHandler(base.BaseHandler):
                 if user['role'] < 3:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
                     ret_list.append(tusr)
                 else:
                     pass
@@ -98,7 +98,7 @@ class APIUserHandler(base.BaseHandler):
         for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
             if key in self.args:
                 del self.args[key]
-        await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
+        await self.db.saveObject('users', object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
         # rtn = {
