@@ -30,7 +30,7 @@ class APIRecordHandler(base.BaseHandler):
 
     @tornado.web.authenticated
     async def _query_post(self):
-        print('query = ', self.args)
+        print_debug('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
 
         cur_user = await self.get_current_user_object()
@@ -174,7 +174,7 @@ class APIRecordHandler(base.BaseHandler):
                        'Compile Error': 8,
                        'unknown': 9,
                        }
-        print('returnresult: ', match_record)
+        print_debug('returnresult: ', match_record)
         # ******************************** update judgestates *********************************************
         if(match_record['record_type'] in [2, 4]):
             judge_state = await self.db.getObjectOne('judgestates', homework_id = match_record['homework_id'], problem_id = match_record['problem_id'])
@@ -211,11 +211,11 @@ class APIRecordHandler(base.BaseHandler):
 
     # async def get(self, type): #detail
     #     # self.getargs()
-    #     print('get: ', type)
+    #     print_debug('get: ', type)
     #     await self._call_method('''_{action_name}_get'''.format(action_name = type))
     #
     # async def post(self, type):
-    #     print('post: ', type)
+    #     print_debug('post: ', type)
     #     await self._call_method('''_{action_name}_post'''.format(action_name = type))
 
     # @tornado.web.authenticated

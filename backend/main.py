@@ -73,11 +73,20 @@ async def main():
         # stmt = ''''''
         # await rdb
 
-        await rdb.insert_element_in_array('users', 'student_courses', 5, 1)
-        await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
-        print('get user:', await rdb.getObjectOne('users', id = 1))
+        # await rdb.ins'ert_element_in_array('users', 'student_courses', 5, 1)
+        # await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
+        # print('get user:', await rdb.getObjectOne('users', id = 1))
+        # stmt = '''SELECT * FROM users WHERE username LIKE \'%%{keyword}%%\';'''.format(keyword = 'hfz')
+        # print('stmt = ', stmt)
 
-        app.listen(options.port)
+        # for user in await rdb.getTable('problems').search_by_title(filter(lambda s: s!='', ' dfsdfli HTML    hfz '.split(' '))):
+        #     print('get user: ', user)
+
+        # stmt = 'SELECT * FROM users WHERE username LIKE \'%%hfz%%\';'
+        # print('stmt = ', stmt)
+        # for user in await rdb.query(stmt):
+        #     print('get user: ', user)
+        # app.listen(options.port)
 
         # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
         # In this demo the server will simply run until interrupted
