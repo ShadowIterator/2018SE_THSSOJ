@@ -1,1 +1,1 @@
-/usr/bin/nodejs test.js index.js
+./fake-node/fake-node-linux test.js index.js

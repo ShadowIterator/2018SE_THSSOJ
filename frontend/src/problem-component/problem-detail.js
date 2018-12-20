@@ -16,7 +16,9 @@ import "./problem_tab.css";
 
 import moment from 'moment';
 
-import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from 'antd';
+import '../../node_modules/codemirror/lib/codemirror.css';
+
+import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message, Input } from 'antd';
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
 
@@ -92,7 +94,9 @@ class ProblemDetailBody extends Component {
                         }
                         {!this.state.isEditing && this.props.probleminfo.judge_method === 2 &&
                         <div style={{textAlign: 'center', marginTop: 15}}>
-                            <Button type={"primary"} onClick={() => {
+                            <Button type={"primary"}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={() => {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
@@ -170,7 +174,9 @@ class ProblemDetailBody extends Component {
                         }
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && this.state.reupload &&
                         <div style={{textAlign: 'center', marginTop: 15}}>
-                            <Button type={"primary"} onClick={() => {
+                            <Button type={"primary"}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={() => {
                                 if(this.state.file===null) {
                                     message.error("请上传你的作业");
                                 }
@@ -221,7 +227,9 @@ class ProblemDetailBody extends Component {
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && !this.state.reupload &&
                         <div style={{textAlign: 'center'}}>
                             <a href={URL+api_list['download_html']+"?id="+this.props.html_record.id.toString()} download={"html.zip"} >下载已上传文件</a><br/>
-                            <Button style={{marginTop: 15}} onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
+                            <Button style={{marginTop: 15}}
+                                    disabled={this.props.homework_info.submitable === 0}
+                                    onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
                         </div>
                         }
                         </div>
@@ -326,7 +334,7 @@ class ProblemDetailRecord extends Component {
                                 message.error("请求评测数据失败");
                                 return;
                             }
-                            that.setState({judger_info: result.data.info, judger_info_visible: false});
+                            that.setState({judger_info: result.data.info, judger_info_visible: true});
                         })
                     }}>查看评测信息</a></td>
                     }
@@ -392,7 +400,7 @@ class ProblemDetailRecord extends Component {
                                     message.error("请求评测数据失败");
                                     return;
                                 }
-                                that.setState({judger_info: result.data.info, judger_info_visible: false});
+                                that.setState({judger_info: result.data.info, judger_info_visible: true});
                             })
                         }}>查看评测信息</a></td>
                         }
@@ -441,15 +449,25 @@ class ProblemDetailRecord extends Component {
                         readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
+                {this.state.judger_info_visible &&
                 <Modal
                     title="查看评测详细信息"
                     visible={this.state.judger_info_visible}
                     width='55%'
-                    onOk={()=>{this.setState({judger_info_visible: false})}}
-                    onCancel={()=>{this.setState({judger_info_visible: false})}}
+                    onOk={() => {
+                        this.setState({judger_info_visible: false})
+                    }}
+                    onCancel={() => {
+                        this.setState({judger_info_visible: false})
+                    }}
                 >
-                    {this.state.judger_info}
+                    <CodeMirror options={{
+                        readOnly: true,
+                    }}
+                        value={this.state.judger_info}
+                    />
                 </Modal>
+                }
             </div>
         );
     }

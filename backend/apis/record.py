@@ -32,13 +32,20 @@ class APIRecordHandler(base.BaseHandler):
     async def _query_post(self):
         print('query = ', self.args)
         res = await self.db.getObject('records', cur_user=self.get_current_user_object(), **self.args)
+
         cur_user = await self.get_current_user_object()
 
         ret_list = []
         for record in res:
             timepoint = int(record['submit_time'].timestamp())
             record['submit_time'] = timepoint
-
+            problem = await self.db.getObjectOne('problems', id=record['problem_id'])
+            if record['test_ratio'] == 1:
+                record['test_ratio'] == problem['ratio_one']
+            elif record['test_ratio'] == 2:
+                record['test_ratio'] = problem['ratio_two']
+            elif record['test_ratio'] == 3:
+                record['test_ratio'] = problem['ratio_three']
             # authority check
             if record['record_type'] == 0:
                 if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:
@@ -102,6 +109,11 @@ class APIRecordHandler(base.BaseHandler):
             if cur_user['role'] < 2 and cur_user['id'] != record['user_id']:
                 self.set_res_dict(res_dict, code=1, msg='back off!')
                 return res_dict
+            if cur_user['role'] == 2:
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['course_id'] not in cur_user['ta_courses']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
         elif record['record_type'] == 3:
             if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
                 self.set_res_dict(res_dict, code=1, msg='back off!')
@@ -188,7 +200,7 @@ class APIRecordHandler(base.BaseHandler):
                 matched_problem['status'] = 1
                 await self.db.saveObject('problems', cur_user=self.get_current_user_object(), object=matched_problem)
 
-        record_path = self.root_dir+'/'+str(match_record['id'])+'/'+str(match_record)+'.json'
+        record_path = self.root_dir+'/'+str(match_record['id'])+'/'+str(match_record['id'])+'.json'
         record_file = open(record_path, mode='w')
         json.dump(judge_result, record_file)
         record_file.close()
