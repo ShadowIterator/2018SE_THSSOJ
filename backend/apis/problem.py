@@ -287,7 +287,7 @@ class APIProblemHandler(base.BaseHandler):
             record['status']=0
             record['src_size'] = src_size
             await self.db.saveObject('records', object=record)
-            
+
             target_code_path = target_path + '/code'
             if os.path.exists(target_code_path):
                 shutil.rmtree(target_code_path)
@@ -723,8 +723,6 @@ class APIProblemHandler(base.BaseHandler):
         uri=''
         # homework['status']=1
         # await self.db.saveObject('homeworks', object=homework)
-
-
 
         if problem['judge_method'] == 0:
             case_path = os.getcwd() + '/' + self.root_dir + '/' + str(problem['id']) + '/case'
