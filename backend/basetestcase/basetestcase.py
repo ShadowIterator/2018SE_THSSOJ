@@ -112,13 +112,13 @@ class BaseTestCase(AsyncHTTPTestCase):
         res = await self.http_client.fetch(self.get_url(uri), headers = header, *args, **kw)
         for cookie in res.headers.get_list('Set-Cookie'):
             parsed_cookie = tornado.httputil.parse_cookie(cookie)
-            # print_test('setcookie: ', parsed_cookie)
+            print_test('setcookie: ', parsed_cookie)
             # for key, value in parsed_cookie.items():
             #     if(key != 'Path'):
             #         self.cookies[key] = '='.join((key, value))
             if 'user_id' in parsed_cookie.keys():
                 self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
-        # print_test('selfcookies: ', self.user_id_cookie)
+        print_test('selfcookies: ', self.user_id_cookie)
         return res
 
     async def post_request(self, uri, **kw):

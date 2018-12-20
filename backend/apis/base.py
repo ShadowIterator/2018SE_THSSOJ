@@ -23,12 +23,12 @@ from tornado.options import define, options
 
 
 def print_debug(*args, **kw):
-    # print(*args, **kw)
-    pass
+    print(*args, **kw)
+    # pass
 
 def print_test(*args, **kw):
-    # print(*args, **kw)
-    pass
+    print(*args, **kw)
+    # pass
 
 class Roles:
     NOROLE = 0
@@ -222,11 +222,14 @@ class BaseHandler(tornado.web.RequestHandler):
             for key, value in object_selected.items():
                 if(key in allowed_properties):
                     rtn[key] = value
-        object_selected = rtn
-        rtn = {}
+        print_debug('filter-obj1: ', rtn)
         if (abandoned_properties != None):
+            rtn = {}
+            object_selected = rtn
             for key, value in object_selected.keys():
                 if(key not in abandoned_properties):
                     rtn[key] = value
         object_selected = rtn
+        print_debug('filter-obj2: ', rtn)
+
         return rtn

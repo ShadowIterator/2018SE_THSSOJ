@@ -204,13 +204,13 @@ CREATE TABLE ratios (
 --
 --INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{}', TIMESTAMP '2010-05-16 15:36:38', TIMESTAMP '2020-05-16 15:36:38');
 --
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('hfzzz', 1000, 1024, 0, 1, '{1, 2, 4}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('12hfzz3', 1000, 262144, 1, 1, '{3}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML', 1000, 1024, 2, 0, '{}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML2123', 1000, 1024, 2, 0, '{}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTafe', 1000, 1024, 2, 0, '{}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTfz', 1000, 1024, 2, 0, '{}', 2, 1);
-INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML_hfz', 1000, 1024, 2, 0, '{}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('hfzzz', 1000, 1024, 0, 1, '{1, 2, 4}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('12hfzz3', 1000, 262144, 1, 1, '{3}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML', 1000, 1024, 2, 0, '{}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML2123', 1000, 1024, 2, 0, '{}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTafe', 1000, 1024, 2, 0, '{}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTfz', 1000, 1024, 2, 0, '{}', 2, 1);
+--INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML_hfz', 1000, 1024, 2, 0, '{}', 2, 1);
 
 ---- INSERT INTO problems (title, judge_method, records, openness, user_id, status) VALUES ('html test', 2, '{1}', 1, 2, 1);
 --
