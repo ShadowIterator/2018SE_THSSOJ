@@ -178,8 +178,9 @@ class APIDownloadHandler(base.BaseHandler):
                       '迟交时间(单位:s)',
                       '成绩']
         csv_list.append(title_list)
+
         for stu_id in course['students']:
-            student = await self.db.getObjectOne('students', id=stu_id)
+            student = await self.db.getObjectOne('users', id=stu_id)
             single_record_info = []
             possible_records = await self.db.getObject('records',
                                                        record_type=record_type,
@@ -201,7 +202,7 @@ class APIDownloadHandler(base.BaseHandler):
         for each_row in csv_list:
             writer.writerow(each_row)
         write_csv.close()
-        
+
         self.set_header('Content-Type', 'application/octet-stream')
         self.set_header('Content-Disposition', 'attachment; filename=%s' % target_path)
         read_csv = open(target_path, 'rb')

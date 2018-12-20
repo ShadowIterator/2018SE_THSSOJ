@@ -330,11 +330,13 @@ class APICourseHandler(base.BaseHandler):
 
         student = (await self.db.getObject('users', id=self.args['user_id']))[0]
         course = (await self.db.getObject('courses', course_spell=self.args['course_spell']))[0]
-        student['student_courses'].append(course['id'])
-
-        course['students'].append(self.args['user_id'])
-        await self.db.saveObject('users', object=student)
-        await self.db.saveObject('courses', object=course)
+        # student['student_courses'].append(course['id'])
+        #
+        # course['students'].append(self.args['user_id'])
+        # await self.db.saveObject('users', object=student)
+        # await self.db.saveObject('courses', object=course)
+        await self.db.insert_element_in_array_unique('users', column_name='student_courses', value=course['id'], id=student['id'])
+        await self.db.insert_element_in_array_unique('courses', column_name='students', value=student['id'], id=course['id'])
         self.set_res_dict(res_dict, code=0, msg='student added into courses')
         return res_dict
 
