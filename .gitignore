@@ -23,7 +23,7 @@ node_modules
 __pycache__
 backend/root/
 env_config.py
-DS_Store
+.DS_Store
 *.pyc
 tradiJudger
 scriptJudger
