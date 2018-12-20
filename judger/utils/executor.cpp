@@ -60,7 +60,7 @@ void childMainWork(){
 	// }
 	// printf("\n");
 
-	printf("inputFileName=%s\n", runConfig.inputFileName.c_str());
+	// printf("inputFileName=%s\n", runConfig.inputFileName.c_str());
 	// cout << "inputFileName=" << runConfig.inputFileName << endl;
 	if (runConfig.inputFileName != "stdin"){
 		if (freopen(runConfig.inputFileName.c_str(), "r", stdin) == NULL){
@@ -71,7 +71,7 @@ void childMainWork(){
 	}
 
 	// cout << "outputFileName=" << runConfig.outputFileName << endl;
-	printf("outputFileName=%s\n", runConfig.outputFileName.c_str());
+	// printf("outputFileName=%s\n", runConfig.outputFileName.c_str());
 	if (runConfig.outputFileName != "stdout" && runConfig.outputFileName != "stderr") {
 		if (freopen(runConfig.outputFileName.c_str(), "w", stdout) == NULL){
 			// cout << "error when open outputFileName" << endl;
@@ -81,7 +81,7 @@ void childMainWork(){
 	}
 
 	// cout << "errorFileName=" << runConfig.errorFileName << endl;
-	printf("errorFileName=%s\n", runConfig.errorFileName.c_str());
+	// printf("errorFileName=%s\n", runConfig.errorFileName.c_str());
 	if (runConfig.errorFileName != "stderr") {
 		if (runConfig.errorFileName == "stdout"){
 			if (dup2(STDOUT_FILENO, STDERR_FILENO) == -1){
@@ -107,12 +107,15 @@ void childMainWork(){
 		}
 	}
 
+	printf("to set env");
+
 	char *env_path_str = getenv("PATH");
 	char *env_lang_str = getenv("LANG");
 	char *env_shell_str = getenv("SHELL");
 	string env_path = env_path_str ? env_path_str : "";
 	string env_lang = env_lang_str ? env_lang_str : "";
 	string env_shell = env_shell_str ? env_shell_str : "";
+	// printf("env_path_str = %s\n", env_path_str);
 	env_path = "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin";
 
 	clearenv();

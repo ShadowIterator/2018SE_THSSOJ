@@ -1,3 +1,5 @@
+--UPDATE users SET student_courses = array_append(student_courses, 3) WHERE id = 1;
+--UPDATE users SET student_courses = array_remove(student_courses, 2) WHERE id = 1;
 -- Copyright 2009 FriendFeed
 --
 -- Licensed under the Apache License, Version 2.0 (the "License"); you may

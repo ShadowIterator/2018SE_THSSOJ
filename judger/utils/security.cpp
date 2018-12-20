@@ -534,6 +534,9 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_clock_getres   ] = -1;
 
 		syscall_limit[__NR_getpid         ] = -1;
+		syscall_limit[__NR_getppid        ] = -1;
+		syscall_limit[__NR_getpgrp        ] = -1;
+		syscall_limit[__NR_wait4          ] = -1;
 		syscall_limit[__NR_getuid         ] = -1;
 		syscall_limit[__NR_geteuid        ] = -1;
 		syscall_limit[__NR_getgid         ] = -1;
@@ -542,11 +545,15 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_prctl          ] = -1;
 		syscall_limit[__NR_poll           ] = -1;
 
+		syscall_limit[__NR_uname          ] = -1;	// to run /bin/bash
+
 		readable.insert(runConfig.path);
 		writable.insert(runConfig.path + "/");
+		writable.insert("/dev/tty");				// to run /bin/bash
 
 		readable.insert("/usr/bin/nodejs");
 		readable.insert("/usr/lib/nodejs/");
+		readable.insert("/usr/share/locale/");
 
 		statable.insert("/usr");
 		statable.insert("/usr/bin");

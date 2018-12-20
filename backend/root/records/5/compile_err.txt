@@ -1,4 +1,4 @@
-/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/5/5.code:1:10: fatal error: cstdio: No such file or directory
- #include <cstdio>
-          ^~~~~~~~
-compilation terminated.
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/5/5.code: In function ‘main’:
+/home/ycdfwzy/github/2018SE_THSSOJ/backend/root/records/5/5.code:4:1: warning: ignoring return value of ‘scanf’, declared with attribute warn_unused_result [-Wunused-result]
+ scanf("%d %d",&a,&b);
+ ^~~~~~~~~~~~~~~~~~~~

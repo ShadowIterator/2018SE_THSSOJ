@@ -54,7 +54,7 @@ class CodeInput extends Component {
     modeChange(value) {
         let mode = value;
         this.setState({
-            code: defaultcode[mode],
+            // code: defaultcode[mode],
             mode: mode
         });
 
