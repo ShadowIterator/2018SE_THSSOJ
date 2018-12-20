@@ -123,8 +123,7 @@ class APIProblemHandler(base.BaseHandler):
         shutil.copyfile(zip_path, target_zip_path + '/' + str(problem_id) + '.zip')
         file_zip.extractall(target_zip_path)
         # shutil.move(case_path, target_case_path)
-        config_file = open(target_zip_path+'/config.json', mode='r', encoding='utf8')
-        config_info = json.load(config_file)
+
 
         record_info = {
             'user_id':self.args['user_id'],
@@ -143,6 +142,9 @@ class APIProblemHandler(base.BaseHandler):
         shutil.copyfile(code_path, record_dir+'/'+str_id+'.code')
 
         if test_language==1 or test_language==2 or test_language==4:
+            config_file = open(target_zip_path + '/config.json', mode='r', encoding='utf8')
+            config_info = json.load(config_file)
+            config_file.close()
             judge_req = {}
             judge_req['id'] = record_created['id']
             judge_req['TIME_LIMIT'] = self.args['time_limit']
@@ -256,15 +258,19 @@ class APIProblemHandler(base.BaseHandler):
             del self.args['description']
 
         target_path = self.root_dir + '/' + str(target_problem['id'])
+
+        need_rejudge = False
         zip_path = ''
         if 'case_uri' in self.args and target_problem['judge_method'] == 0:
             zip_path = self.root_dir.replace('/problems', '') + '/' + self.args['case_uri']
             target_zip_path = target_path + '/case'
             del self.args['case_uri']
+            need_rejudge = True
         elif 'script_uri' in self.args and target_problem['judge_method'] == 1:
             zip_path = self.root_dir.replace('/problems', '') + '/' + self.args['script_uri']
             target_zip_path = target_path + '/script'
             del self.args['script_uri']
+            need_rejudge = True
         else:
             self.set_res_dict(res_dict, code=1, msg='back off!')
             return res_dict
@@ -277,7 +283,7 @@ class APIProblemHandler(base.BaseHandler):
             file_zip.extractall(target_zip_path)
             os.remove(zip_path)
 
-        need_rejudge = False
+
         if 'code_uri' in self.args:
             code_path = self.root_dir.replace('/problems', '') + '/' + self.args['code_uri']
             src_size = os.path.getsize(code_path)
