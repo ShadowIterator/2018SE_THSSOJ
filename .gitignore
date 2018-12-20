@@ -24,3 +24,8 @@ backend/root/
 env_config.py
 DS_Store
 *.pyc
+tradiJudger
+scriptJudger
+htmlJudger
+executor
+*.o

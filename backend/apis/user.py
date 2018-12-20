@@ -24,9 +24,9 @@ class APIUserHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _query_post(self):
-        print('query = ', self.args)
+        print_debug('query = ', self.args)
         res = await self.db.getObject('users', **self.args)
-        print('query res = ', res)
+        print_debug('query res = ', res)
         cur_user = await self.get_current_user_object()
         ret_list = []
         for user in res:
@@ -58,7 +58,7 @@ class APIUserHandler(base.BaseHandler):
             # ---------------------------------------------------------------------
 
         # self.write(json.dumps(res).encode())
-        print('query_return: ', res)
+        print_debug('query_return: ', res)
         return res
 
     @tornado.web.authenticated
@@ -78,7 +78,7 @@ class APIUserHandler(base.BaseHandler):
     @tornado.web.authenticated
     # @check_password
     async def _update_post(self):
-        print('si_update: ', self.args)
+        print_debug('si_update: ', self.args)
         res_dict={}
         # authority check
         cur_user = await self.get_current_user_object()
@@ -96,12 +96,12 @@ class APIUserHandler(base.BaseHandler):
         #     'code': 1
         # }
         # try:
-        #     print('update: ', self.args)
+        #     print_debug('update: ', self.args)
         #     await self.saveObject('users', secure = 1, object = self.args)
         #     rtn['code'] = 0
         # except:
-        #     print('update failed')
-        # print('update: ', rtn)
+        #     print_debug('update failed')
+        # print_debug('update: ', rtn)
         # # self.write(json.dumps(rtn).encode())
         # return rtn
 
@@ -116,7 +116,7 @@ class APIUserHandler(base.BaseHandler):
                                 email=self.args['email'],
                                 create_time=current_time,
                                 secret = ran_str)
-        # print('created: ', result)
+        # print_debug('created: ', result)
         # await self.createObject('users', **self.args)
         # self.write(json.dumps({'code': 0}).encode())
         return {'code': 0}
@@ -127,13 +127,13 @@ class APIUserHandler(base.BaseHandler):
         password = self.args['password']
         # try:
         users_list = await self.db.getObject('users', **{'username': username, 'password': password})
-        print('login, userlist = ', users_list)
+        print_debug('login, userlist = ', users_list)
 
         res_dict['code'] = 1
 
         if len(users_list) == 1:
             userObj = users_list[0]
-            print(userObj)
+            print_debug(userObj)
             self.set_secure_cookie('user_id', str(userObj.id), expires_days = None)
             self.set_cookie('id', str(userObj.id), expires_days = None)
             res_dict['code'] = 0
@@ -183,7 +183,7 @@ class APIUserHandler(base.BaseHandler):
                 smtpObj = smtplib.SMTP('smtp.qq.com')
                 smtpObj.login(sender, 'vwwiwzsdkzvbbcdb')
                 smtpObj.sendmail(sender, receivers, message.as_string())
-                print("邮件发送成功", activate_code)
+                print_debug("邮件发送成功", activate_code)
                 user_qualified['validate_code']=activate_code
                 await self.db.saveObject('users', user_qualified)
                 res_dict['code']=0
@@ -221,26 +221,40 @@ class APIUserHandler(base.BaseHandler):
     # @catch_exception_write
     # async def get(self, type): #detail
     #     # self.getargs()
-    #     print('get: ', type)
+    #     print_debug('get: ', type)
     #     res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
     #     self.write(json.dumps(res).encode())
     #
     # @catch_exception_write
     # async def post(self, type):
-    #     print('post: ', type)
+    #     print_debug('post: ', type)
     #     res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
-    #     print('return: ', res)
+    #     print_debug('return: ', res)
     #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
         return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
+
+    async def _createTA_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] >= Roles.ADMIN)
+        print_debug('createTA-before: ', self.args)
+
+        acquired_args = ['username', 'password', 'realname', 'email', 'student_id']
+        assert (self.check_input(*acquired_args))
+        self.args = self.property_filter(self.args, allowed_properties = acquired_args, abandoned_properties= None)
+        self.args['status'] = 1
+        self.args['role'] = Roles.TA
+        print_debug('createTA-after: ', self.args)
+        await self.db.createObject('users', **self.args)
+        return {'code': 0}
         #
         # if(type == 'create'):
-        #     print('post create')
+        #     print_debug('post create')
         # elif(type == 'delete'):
-        #     print('post delete')
+        #     print_debug('post delete')
         # elif(type == 'modify'):
-        #     print('post modify')
+        #     print_debug('post modify')
 
 # class UserLoginHandler(base.BaseHandler):
 #     async def post(self):

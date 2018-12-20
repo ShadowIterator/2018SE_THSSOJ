@@ -18,9 +18,6 @@ import { Layout, Breadcrumb, Tabs, Modal, Upload, Button, Icon, message } from '
 const {Content} = Layout;
 const TabPane = Tabs.TabPane;
 
-// TODO: 公共题库题目的筛选功能
-// TODO: 请求题目的API不能使用LIST方法，因为不能显示非公开的题目
-
 class ProblemDetailBody extends Component {
     constructor(props) {
         super(props);
@@ -294,7 +291,6 @@ class ProblemDetail extends Component {
             homework_id: parseInt(this.props.homework_id),
             course_id: parseInt(this.props.lesson_id),
         }, this, ProblemDetail.query_problem_callback);
-        this.update_record(this.props.id);
         if(this.props.lesson_id==='0')
             return;
         ajax_post(api_list['query_course'], {id:parseInt(this.props.lesson_id)}, this, (that, result)=>{
@@ -304,9 +300,12 @@ class ProblemDetail extends Component {
             const course = result.data[0];
             that.setState({lesson_name:course.name});
         });
+        if(this.props.id !== -1) {
+            this.update_record(this.props.id);
+        }
     }
     componentWillUpdate(nextProps) {
-        if(nextProps.id===undefined)
+        if(nextProps.id===undefined || nextProps.id === -1)
             return;
         if(nextProps.id !== this.props.id) {
             this.update_record(nextProps.id);

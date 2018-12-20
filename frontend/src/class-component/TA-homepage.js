@@ -28,16 +28,15 @@ class mTAHomepageMiddle extends Component {
         // this.clickCreateLesson = this.clickCreateLesson.bind(this);
     }
     componentDidMount() {
-        if(!this.props.state || this.props.id===undefined) {
+        if(!this.props.state || this.props.id===undefined || this.props.id === -1) {
             return;
         }
         const id = this.props.id;
         ajax_post(api_list['query_user'], {id:id}, this, mTAHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        // console.log("componentWillUpdate");
         console.log(nextProps);
-        if(nextProps.id===undefined)
+        if(nextProps.id===undefined || nextProps.id === -1)
             return;
         if(nextProps.id !== this.props.id) {
             console.log(nextProps.id);
@@ -122,7 +121,10 @@ class mTAHomepageMiddle extends Component {
         console.log("this.state.uplesson: ", this.state.uplesson);
         console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
-        const running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
+        let running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
+        running_talesson = running_talesson.sort((a, b) => {
+            return a.id < b.id;
+        });
         console.log("now", now);
         console.log("running_talesson", running_talesson);
         return (
@@ -136,6 +138,7 @@ class mTAHomepageMiddle extends Component {
                             {running_talesson.map((lesson)=>
                                 <Col span={8}>
                                     <Card style={{width: '100%', marginTop: 16}}
+                                          // title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                           actions={[
                                               <Tooltip title="查看通知">
                                                   <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
@@ -157,9 +160,17 @@ class mTAHomepageMiddle extends Component {
                                                         onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
                                               </Tooltip>]}
                                           hoverable={true}
+
                                     >
-                                        <Meta title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
+                                              description={
+                                                  <div>
+                                                      <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
+                                                  </div>
+                                              }
+                                        />
                                     </Card>
                                 </Col>
                             )}
@@ -218,7 +229,7 @@ class mTAHomepageMiddle extends Component {
                                                         }/>
                                               </Tooltip>]}>
                                         <Meta title={<Link to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
-                                              description={lesson.description}/>
+                                              description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                                     </Card>
                                 </Col>
                             )}
@@ -230,7 +241,7 @@ class mTAHomepageMiddle extends Component {
     }
 }
 mTAHomepageMiddle.contextType = AuthContext;
-const TAHomepageMiddle = withRouter(mTAHomepageMiddle)
+const TAHomepageMiddle = withRouter(mTAHomepageMiddle);
 
 class TAHomepage extends Component {
     render() {

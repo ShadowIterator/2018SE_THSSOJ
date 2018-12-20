@@ -20,17 +20,19 @@ class APIDownloadHandler(base.BaseHandler):
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
         self.root_dir='root/'
+        self.user = None
+
         # self.dir =  'tmp/'
         # self.user = None
-        # print(self.request.body)
+        # print_debug(self.request.body)
 
     async def get(self, type): #detail
-        print('get: ', type)
+        print_debug('get: ', type)
         await self._call_method('''_{action_name}_get'''.format(action_name = type))
 
     async def _example_get(self):
         problem_id  = self.get_argument('id', None)
-        print('example download id=: ', problem_id)
+        print_debug('example download id=: ', problem_id)
         if(not problem_id):
             raise tornado.web.HTTPError(403)
         filename = 'servefiles/test.txt'
@@ -42,13 +44,13 @@ class APIDownloadHandler(base.BaseHandler):
 
     async def _data_get(self):
         problem_id = self.get_argument('id', None)
-        logged_user = self.get_current_user_object()
+        logged_user = await self.get_current_user_object()
         matched_problem = (await self.db.getObject('problems', cur_user=logged_user, id=problem_id))[0]
 
         if logged_user['role'] != 3 and logged_user['id'] != matched_problem['user_id']:
             raise tornado.web.HTTPError(403)
         if matched_problem['judge_method']==0:
-            src_path = self.root_dir+'problem/'+str(problem_id)+'/case/'+str(problem_id)+'.zip'
+            src_path = self.root_dir+'problems/'+str(problem_id)+'/case/'+str(problem_id)+'.zip'
         else:
             raise tornado.web.HTTPError(403)
 
@@ -66,11 +68,12 @@ class APIDownloadHandler(base.BaseHandler):
 
     async def _code_get(self):
         problem_id = self.get_argument('id', None)
-        logged_user = self.get_current_user_object()
+        print_debug('download-code: problem-id = ', problem_id)
+        logged_user = await self.get_current_user_object()
         matched_problem = (await self.db.getObject('problems', cur_user=logged_user, id=problem_id))[0]
         if logged_user['role'] != 3 and logged_user['id'] != matched_problem['user_id']:
             raise tornado.web.HTTPError(403)
-        src_path = self.root_dir+'problem/'+str(problem_id)+'/code/'+str(problem_id)+'.code'
+        src_path = self.root_dir+'problems/'+str(problem_id)+'/code/'+str(problem_id)+'.code'
         if os.path.exists(self.root_dir+'serverfiles'):
             os.makedirs(self.root_dir+'serverfiles')
         target_path = self.root_dir+'servefiles/'+str(problem_id)+'.code'
@@ -85,14 +88,14 @@ class APIDownloadHandler(base.BaseHandler):
 
     async def _script_get(self):
         problem_id = self.get_argument('id', None)
-        logged_user = self.get_current_user_object()
+        logged_user = await self.get_current_user_object()
         matched_problem = (await self.db.getObject('problems', cur_user=logged_user, id=problem_id))[0]
 
         if logged_user['role'] != 3 and logged_user['id'] != matched_problem['user_id']:
             raise tornado.web.HTTPError(403)
         src_path=''
         if matched_problem['judge_method'] == 1:
-            src_path = self.root_dir + 'problem/' + str(problem_id) + '/script/' + str(problem_id) + '.zip'
+            src_path = self.root_dir + 'problems/' + str(problem_id) + '/script/' + str(problem_id) + '.zip'
         else:
             raise tornado.web.HTTPError(403)
 

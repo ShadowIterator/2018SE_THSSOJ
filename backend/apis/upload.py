@@ -20,18 +20,18 @@ class APIUploadHandler(base.BaseHandler):
         self.root_dir='root/'
         self.dir =  'tmp/'
         self.user = None
-        # print(self.request.body)
+        # print_debug(self.request.body)
 
     async def _files_post(self):
-        print('in file post')
+        print_debug('in file post')
         filename = str(uuid.uuid1())
         suffix = self.request.files['file'][0]['filename'].split('.')[-1]
         data = self.request.files['file'][0]['body']
         # with open('''{dir}/{filename}.{suffix}'''.format(dir = self.dir, filename = filename, suffix = suffix), 'wb') as fd:
         path = '''{dir}{filename}.{suffix}'''.format(dir=self.dir, filename=filename, suffix=suffix)
-        print('path: ', path)
-        # print('data: ', data)
-        print("self.root_dir + path ", self.root_dir + path)
+        print_debug('path: ', path)
+        # print_debug('data: ', data)
+        print_debug("self.root_dir + path ", self.root_dir + path)
         with open(self.root_dir + path, 'wb') as fd:
             fd.write(data)
         return {'code': 0, 'uri': path}

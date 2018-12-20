@@ -93,6 +93,9 @@ class TAJudge extends Component {
             student_info: {},
             current_key: '1',
             judge_state: null,
+            course_info: {},
+            homework_info: {},
+            problem_info: {},
         };
         this.course_id = parseInt(this.props.course_id);
         this.homework_id = parseInt(this.props.homework_id);
@@ -126,14 +129,17 @@ class TAJudge extends Component {
                 message.error("请求作业数据失败");
                 return;
             }
-            that.setState({homework_ddl: result.data[0].deadline});
+            that.setState({homework_ddl: result.data[0].deadline,
+                homework_info: result.data[0]});
         });
         ajax_post(api_list['query_problem'], {id: this.problem_id}, this, (that, result) => {
             if(result.data.length === 0){
                 message.error("请求题目数据失败");
                 return;
             }
-            that.setState({problem_name: result.data[0].title, problem_type: result.data[0].judge_method});
+            that.setState({problem_name: result.data[0].title,
+                problem_type: result.data[0].judge_method,
+                problem_info: result.data[0]});
         });
         ajax_post(api_list['query_course'], {id: this.course_id}, this, (that, result) => {
             if(result.data.length === 0) {
@@ -143,6 +149,7 @@ class TAJudge extends Component {
             that.setState({
                 course_name: result.data[0].name,
                 student_id: result.data[0].students,
+                course_info: result.data[0],
             });
             for(const id of result.data[0].students) {
                 ajax_post(api_list['query_user'], {id: id}, this, (that, result) => {
@@ -325,6 +332,8 @@ class TAJudge extends Component {
                 <Breadcrumb style={{ margin: '16px 0' }}>
                     <Breadcrumb.Item><Link to={"/ta"}>主页</Link></Breadcrumb.Item>
                     <Breadcrumb.Item><Link to={"/talesson/"+this.course_id.toString()}>{this.state.course_name}</Link></Breadcrumb.Item>
+                    <Breadcrumb.Item>{this.state.homework_info.name}</Breadcrumb.Item>
+                    <Breadcrumb.Item>{this.state.problem_info.title}</Breadcrumb.Item>
                     <Breadcrumb.Item>查看题目完成情况</Breadcrumb.Item>
                     <Breadcrumb.Item>{this.state.problem_name}</Breadcrumb.Item>
                 </Breadcrumb>

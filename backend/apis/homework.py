@@ -29,18 +29,18 @@ class APIHomeworkHandler(base.BaseHandler):
 
         created_homework = await self.db.createObject('homeworks', **self.args)
         course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
-        print('create_homeworks: ', course)
+
+        print_debug('create_homeworks: ', course)
         course['homeworks'].append(created_homework['id'])
         course['homeworks'] = list(set(course['homeworks']))
+        created_homework_id = created_homework['id']
+        problem_set = set(self.args['problems'])
+        for problem_id in problem_set:
+            await self.db.createObject('judgestates', homework_id=created_homework_id, problem_id = problem_id)
+
         await self.db.saveObject('courses', course)
         self.set_res_dict(res_dict, code=0, msg='homework created')
         return res_dict
-        # try:
-        #     await self.createObject('homeworks', **self.args)
-        #     self.set_res_dict(res_dict, code=0, msg='homework created')
-        # except:
-        #     self.set_res_dict(res_dict, code=1, msg='fail to create homework')
-        # self.return_json(res_dict)
 
     # @tornado.web.authenticated
     async def _delete_post(self):
@@ -111,21 +111,21 @@ class APIHomeworkHandler(base.BaseHandler):
                 self.set_res_dict(res_dict, code=1, msg='not authorized')
                 return res_dict
             # ---------------------------------------------------------------------
-
-            if each_res['status'] == 1:
-                final_records = await self.db.getObject('records',
-                                                  cur_user=self.get_current_user_object(),
-                                                  homework_id=each_res['id'],
-                                                  record_type=2
-                                                  )
-                all_judged = True
-                for each_record in final_records:
-                    if each_record['status'] == 0:
-                        all_judged = False
-                        break
-                if all_judged:
-                    each_res['status'] = 2
-                    await self.db.saveObject('homeworks', object=each_res, cur_user=self.get_current_user_object())
+            #
+            # if each_res['status'] == 1:
+            #     final_records = await self.db.getObject('records',
+            #                                       cur_user=self.get_current_user_object(),
+            #                                       homework_id=each_res['id'],
+            #                                       record_type=2
+            #                                       )
+            #     all_judged = True
+            #     for each_record in final_records:
+            #         if each_record['status'] == 0:
+            #             all_judged = False
+            #             break
+            #     if all_judged:
+            #         each_res['status'] = 2
+            #         await self.db.saveObject('homeworks', object=each_res, cur_user=self.get_current_user_object())
 
             each_res['deadline'] = int(time.mktime(each_res['deadline'].timetuple()))
 
@@ -204,13 +204,15 @@ class APIHomeworkHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         target_homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
         # authority check
-        if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role']<3:
+        # if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role']<3:
+        if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
             self.set_res_dict(res_dict, code=1, msg='you are not authorized')
             return res_dict
         # ---------------------------------------------------------------------
         target_homework['submitable']=self.args['submitable']
-        self.db.saveObject('homeworks', object=target_homework)
+        await self.db.saveObject('homeworks', object=target_homework)
         self.set_res_dict(res_dict, code=0, msg='submitable changed')
+        return res_dict
 
     # @tornado.web.authenticated
     async def _scoreOpenness_post(self):
@@ -218,11 +220,12 @@ class APIHomeworkHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         target_homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
         # authority check
-        if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role'] < 3:
+        # if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role'] < 3:
+        if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
             self.set_res_dict(res_dict, code=1, msg='you are not authorized')
             return res_dict
         # ---------------------------------------------------------------------
         target_homework['score_openness'] = self.args['score_openness']
-        self.db.saveObject('homeworks', object=target_homework)
+        await self.db.saveObject('homeworks', object=target_homework)
         self.set_res_dict(res_dict, code=0, msg='score_openness changed')
-
+        return res_dict
