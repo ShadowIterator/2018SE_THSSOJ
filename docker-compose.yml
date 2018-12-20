@@ -46,6 +46,8 @@ services:
     build: ./judger
     expose:
       - "12345"
+    cap_add:
+      - SYS_PTRACE
     volumes:
       - './backend/root:/usr/src/app/root'
       - './backend/test:/usr/src/app/test'
