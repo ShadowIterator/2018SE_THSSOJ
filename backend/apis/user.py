@@ -81,7 +81,7 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
-        await self.deleteObject('users', **self.args)
+        await self.db.deleteObject('users', **self.args)
         return {'code': 0}
 
     @tornado.web.authenticated
