@@ -279,8 +279,21 @@ class UserTest(BaseTestCase):
 
     @async_aquire_db
     async def test_modifypwd(self):
-        response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
-        print('test list: ', response)
+        # response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
+        # print('test list: ', response)
+        uri = self.url + '/modifypwd'
+        # not log in
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], old_pwd = self.user_st['password'], new_pwd = 'hfztttql')
+        self.assertEqual(1, response['code'])
+
+        # modify success
+        await self.login_object(self.user_ta)
+        modify_options = {
+            'old_pwd': self.user_ta['password'],
+            'new_pwd': 'hfzttttql'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
+        self.assertEqual(0, response['code'])
 
 if __name__ == '__main__':
     tornado.testing.main()
