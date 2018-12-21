@@ -55,6 +55,7 @@ class AdminTable extends Component {
                                 if (result.data.code === 1) {
                                     message.error("删除失败！");
                                 } else {
+                                    message.success("删除成功！");
                                     this.updateTable(this.state.page);
                                 }
                             });
@@ -70,7 +71,7 @@ class AdminTable extends Component {
             that.data = [];
             if(result.data.code===1) {
                 // alert("List failed.");
-                message.error("查询数据失败！")
+                message.error("查询数据失败！");
                 return;
             }
             for(const d of result.data.list) {
