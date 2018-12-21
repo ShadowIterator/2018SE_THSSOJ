@@ -10,7 +10,7 @@ services:
     restart: always
     environment:
       DOMAINS: '308469.iterator-traits.com -> http://frontend:80'
-      # STAGE: 'production'
+      STAGE: 'production'
       # FORCE_RENEW: 'true'
 
   tornado_web:
