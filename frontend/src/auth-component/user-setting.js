@@ -353,7 +353,7 @@ class UserSettingsForm extends Component {
                         initialValue: this.state.username,
                         rules: [{ required: true, message: '请输入您的用户名' }],
                     })(
-                        <Input style={{ width: '100%' }} onChange={this.handleChange} />
+                        <Input style={{ width: '100%' }} disabled={true} />
                     )}
                 </FormItem>
                 <FormItem
@@ -418,12 +418,12 @@ class UserSettingsForm extends Component {
                 >
                     <span className="ant-form-text">{role}</span>
                 </FormItem>
-                <FormItem
-                    {...formItemLayout}
-                    label="激活状态"
-                >
-                    {status_html}
-                </FormItem>
+                {/*<FormItem*/}
+                    {/*{...formItemLayout}*/}
+                    {/*label="激活状态"*/}
+                {/*>*/}
+                    {/*{status_html}*/}
+                {/*</FormItem>*/}
                 <Button type="primary" htmlType="submit">
                     保存
                 </Button>
