@@ -22,11 +22,14 @@ class APIHomeworkHandler(base.BaseHandler):
     async def _create_post(self):
         res_dict={}
         # authority check
-        role = (await self.get_current_user_object())['role']
-        if role < 2:
+        cur_user = await self.get_current_user_object()
+        if cur_user['role'] < 2:
             self.set_res_dict(res_dict, code=1, msg='you are not allowed to use this')
             return res_dict
-
+        elif cur_user['role']==2 and self.args['course_id'] not in cur_user['ta_courses']:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed to use this')
+            return res_dict
+        # ------------------------------------------------------------
         created_homework = await self.db.createObject('homeworks', **self.args)
         course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
 
@@ -50,10 +53,18 @@ class APIHomeworkHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         homework = (await self.db.getObject('homeworks', id=self.args['id']))[0]
         course_id = homework['course_id']
-        if cur_user['role']<2 or (cur_user['role']==2 and course_id not in cur_user['ta_courses']):
+        course = await self.db.getObjectOne('courses', id=course_id)
+        if cur_user['role']<2 :
+            print_test('role', cur_user['role'])
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+        elif cur_user['role']==2 and course_id not in cur_user['ta_courses']:
+            print_test('course_id ',course_id, 'ta_courses ', cur_user['ta_courses'])
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
+        course['homeworks'].remove(homework['id'])
+        await self.db.saveObject('courses', object=course)
         await self.db.deleteObject('homeworks', **self.args)
         self.set_res_dict(res_dict, code=0, msg='homework deleted')
         return res_dict
