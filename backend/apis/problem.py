@@ -43,7 +43,7 @@ class APIProblemHandler(base.BaseHandler):
         createdobj = await self.db.createObject('problems',
                                    title = self.args['title'],
                                    judge_method = 2,
-                                   openness = 1,
+                                   openness = 0,
                                    test_language = -1,
                                    ratio_one = -1,
                                    ratio_one_limit = -1,
