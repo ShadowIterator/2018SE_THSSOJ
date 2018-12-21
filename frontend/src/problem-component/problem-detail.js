@@ -445,7 +445,7 @@ class ProblemDetailRecord extends Component {
                 >
                     <CodeMirror options={{
                         theme: 'neat',
-                        lineNumbers: true,
+                        lineNumbers: false,
                         readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
