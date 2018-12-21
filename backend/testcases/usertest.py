@@ -11,7 +11,8 @@ class UserTest(BaseTestCase):
         await self.db.createObject('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1343')
         self.user_st = await self.db.createObject('users', username = 'student', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343')
         self.user_ta = await self.db.createObject('users', username = 'ta', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
-        self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+        # self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+        self.user_admin = await self.db.getObjectOne('users', username = 'admin')
         # await self.db.createObject('users', username='admin', password='hfz', email='hfz@hfz.com', role = 4)
 
     @async_aquire_db
