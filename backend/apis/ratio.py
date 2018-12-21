@@ -2,7 +2,6 @@ from . import base
 from .base import *
 
 class APIRatioHandler(base.BaseHandler):
-
     # @tornado.web.authenticated
 	async def _query_post(self):
 		result = await self.db.getObject('ratios', **self.args)

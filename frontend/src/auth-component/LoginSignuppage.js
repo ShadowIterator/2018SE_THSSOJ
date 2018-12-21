@@ -146,7 +146,11 @@ class Signup extends Component {
     static signup_callback(that, result) {
         const code = result.data.code;
         if(code===0) {
+            message.success("注册成功，请登录");
             that.context.router.history.push("/login");
+        } else
+        {
+            message.error("注册失败");
         }
     }
     render() {

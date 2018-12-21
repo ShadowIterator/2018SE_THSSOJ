@@ -11,8 +11,11 @@ class UserTest(BaseTestCase):
         await self.db.createObject('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1343')
         self.user_st = await self.db.createObject('users', username = 'student', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343')
         self.user_ta = await self.db.createObject('users', username = 'ta', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
-        self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
-        # await self.db.createObject('users', username='admin', password='hfz', email='hfz@hfz.com', role = 4)
+        try:
+            self.user_admin = await self.db.getObjectOne('users', username = 'admin')
+        except:
+            self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+
 
     @async_aquire_db
     async def test_create(self):
@@ -63,7 +66,9 @@ class UserTest(BaseTestCase):
 
     @async_aquire_db
     async def test_login(self):
+        print_test('test: login. ')
         uri = self.url + '/login'
+
         # fail: user do not exist
         response = self.getbodyObject(await self.post_request(uri,
                                            username = 'hfzz',
@@ -94,6 +99,7 @@ class UserTest(BaseTestCase):
     @async_aquire_db
     async def test_logout(self):
         uri = self.url + '/logout'
+        print_test('test: logout. ')
         # fail: user do not exist
         response = self.getbodyObject(await self.post_request(uri,
                                                               id = 100))
@@ -127,10 +133,6 @@ class UserTest(BaseTestCase):
         response = self.getbodyObject(await self.post_request(uri,
                                                               id=user_id))
         self.assertEqual(1, response['code'])
-
-    @async_aquire_db
-    async def test_delete(self):
-        pass
 
     @async_aquire_db
     async def test_createTA(self):
@@ -199,7 +201,7 @@ class UserTest(BaseTestCase):
                                  [self.user_ta['id'], self.user_ta['username'], self.user_ta['email']])
 
         # student query st
-        response = await self.post_request_return_object(uri, id = student_2)
+        response = await self.post_request_return_object(uri, id = student_2['id'])
         self.assertIsInstance(response, list)
         self.assertEqual(0, len(response))
 
@@ -215,7 +217,7 @@ class UserTest(BaseTestCase):
         await self.login_object(self.user_ta)
         response = await self.post_request_return_object(uri, id = self.user_st['id'])
         self.assertIsInstance(response, list)
-        self.assertEqual(1, response)
+        self.assertEqual(1, len(response))
         for keyword in nonavalibal_keys:
             self.assertNotIn(keyword, response[0].keys())
 
@@ -279,8 +281,62 @@ class UserTest(BaseTestCase):
 
     @async_aquire_db
     async def test_modifypwd(self):
-        response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
-        print('test list: ', response)
+        # response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
+        # print('test list: ', response)
+        print_test('test_modifypwd')
+        uri = self.url + '/modifypwd'
+        # not log in
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], old_pwd = self.user_st['password'], new_pwd = 'hfztttql')
+        self.assertEqual(1, response['code'])
+
+        # modify success
+        await self.login_object(self.user_ta)
+        modify_options = {
+            'old_pwd': self.user_ta['password'],
+            'new_pwd': 'hfzttttql'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
+        self.assertEqual(0, response['code'])
+        modified = await self.db.getObjectOne('users', id = self.user_ta['id'])
+        self.assertEqual(modified['password'], modify_options['new_pwd'])
+
+        # modify failed
+        modify_options = {
+            'old_pwd': 'wrongpass',
+            'new_pwd': 'failed'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
+        self.assertEqual(1, response['code'])
+        modified_2 = await self.db.getObjectOne('users', id=self.user_ta['id'])
+        self.assertEqual(modified['password'], modified_2['password'])
+
+        #modify other
+        modify_options = {
+            'old_pwd': self.user_st['password'],
+            'new_pwd': 'failed'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], **modify_options)
+        modified_3 = await self.db.getObjectOne('users', id = self.user_st['id'])
+        self.assertEqual(1, response['code'])
+        self.assertEqual(self.user_st['password'], modified_3['password'])
+
+    @async_aquire_db
+    async def test_delete(self):
+        print_test('test: delete. ')
+        uri = self.url + '/delete'
+        # no permission
+        await self.login_object(self.user_ta)
+        respons = await self.post_request_return_object(uri, id = self.user_st['id'])
+        self.assertEqual(1, respons['code'])
+        user_st_query_result = await self.db.getObject('users', id = self.user_st['id'])
+        self.assertIsInstance(user_st_query_result, list)
+        self.assertEqual(1, len(user_st_query_result))
+        # success
+        await self.login_object(self.user_admin)
+        respons = await self.post_request_return_object(uri, id = self.user_st['id'])
+        self.assertEqual(0, respons['code'])
+        user_st_query_result = await self.db.getObject('users', id = self.user_st['id'])
+        self.assertEqual(0, len(user_st_query_result))
 
 if __name__ == '__main__':
     tornado.testing.main()

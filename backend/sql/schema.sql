@@ -165,7 +165,9 @@ CREATE TABLE ratios (
 -- create items
 --INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
 
+
 -- INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{2, 1}', 'liadf92wlfisajfli39alsdifj3isd');
+
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st1','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('123hfzt23','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('hfz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
@@ -173,7 +175,9 @@ CREATE TABLE ratios (
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('zzz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('hfzzz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 
+
 -- UPDATE users SET username = 'hfzzz' WHERE id = 1;
+--UPDATE users SET username = 'hfzzz' WHERE id = 1;
 
 --UPDATE users SET student_courses = (CASE WHEN ARRAY[3] <@ student_courses THEN student_courses ELSE array_append(student_courses, 3) END) WHERE id = 1;
 --UPDATE users SET student_courses = array_append(student_courses, 3) WHERE id = 1;

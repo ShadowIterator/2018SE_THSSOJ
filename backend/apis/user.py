@@ -81,7 +81,7 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
-        await self.deleteObject('users', **self.args)
+        await self.db.deleteObject('users', **self.args)
         return {'code': 0}
 
     @tornado.web.authenticated
@@ -251,6 +251,8 @@ class APIUserHandler(base.BaseHandler):
     async def _createTA_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] >= Roles.ADMIN)
+        # if(cur_user['role'] < Roles.ADMIN):
+        #     return
         print_debug('createTA-before: ', self.args)
 
         acquired_args = ['username', 'password', 'realname', 'email', 'student_id']
