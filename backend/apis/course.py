@@ -32,7 +32,7 @@ class APICourseHandler(base.BaseHandler):
         # authority check
         role = (await self.get_current_user_object())['role']
         if role < 2:
-            self.set_res_dict(res_dict, code=0, msg='you are not allowed')
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
         await self.db.createObject('courses', **self.args)
