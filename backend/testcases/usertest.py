@@ -200,7 +200,7 @@ class UserTest(BaseTestCase):
                                  [self.user_ta['id'], self.user_ta['username'], self.user_ta['email']])
 
         # student query st
-        response = await self.post_request_return_object(uri, id = student_2)
+        response = await self.post_request_return_object(uri, id = student_2['id'])
         self.assertIsInstance(response, list)
         self.assertEqual(0, len(response))
 
@@ -216,7 +216,7 @@ class UserTest(BaseTestCase):
         await self.login_object(self.user_ta)
         response = await self.post_request_return_object(uri, id = self.user_st['id'])
         self.assertIsInstance(response, list)
-        self.assertEqual(1, response)
+        self.assertEqual(1, len(response))
         for keyword in nonavalibal_keys:
             self.assertNotIn(keyword, response[0].keys())
 
@@ -282,6 +282,7 @@ class UserTest(BaseTestCase):
     async def test_modifypwd(self):
         # response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
         # print('test list: ', response)
+        print_test('test_modifypwd')
         uri = self.url + '/modifypwd'
         # not log in
         response = await self.post_request_return_object(uri, id = self.user_st['id'], old_pwd = self.user_st['password'], new_pwd = 'hfztttql')
@@ -295,6 +296,28 @@ class UserTest(BaseTestCase):
         }
         response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
         self.assertEqual(0, response['code'])
+        modified = await self.db.getObjectOne('users', id = self.user_ta['id'])
+        self.assertEqual(modified['password'], modify_options['new_pwd'])
+
+        # modify failed
+        modify_options = {
+            'old_pwd': 'wrongpass',
+            'new_pwd': 'failed'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
+        self.assertEqual(1, response['code'])
+        modified_2 = await self.db.getObjectOne('users', id=self.user_ta['id'])
+        self.assertEqual(modified['password'], modified_2['password'])
+
+        #modify other
+        modify_options = {
+            'old_pwd': self.user_st['password'],
+            'new_pwd': 'failed'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], **modify_options)
+        modified_3 = await self.db.getObjectOne('users', id = self.user_st['id'])
+        self.assertEqual(1, response['code'])
+        self.assertEqual(self.user_st['password'], modified_3['password'])
 
 if __name__ == '__main__':
     tornado.testing.main()
