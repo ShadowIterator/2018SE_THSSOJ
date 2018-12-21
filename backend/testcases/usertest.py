@@ -49,14 +49,14 @@ class UserTest(BaseTestCase):
         # pass with additional field
         response = self.getbodyObject(await
         self.post_request(uri,
-                          username='hfzzz',
+                          username='hfz22zz',
                           password='123',
                           email='hfz@123.com',
                           role = 3))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
-        dbobj = (await self.db.getObject('users', username = 'hfzzz'))[0]
-        self.assertEqual(dbobj.username, 'hfzzz')
+        dbobj = (await self.db.getObject('users', username = 'hfz22zz'))[0]
+        self.assertEqual(dbobj.username, 'hfz22zz')
         self.assertEqual(dbobj.password, '123')
         self.assertEqual(dbobj.email, 'hfz@123.com')
         self.assertEqual(dbobj.role, 1)
@@ -182,14 +182,14 @@ class UserTest(BaseTestCase):
         # student
         await self.login_object(self.user_st)
         response = await self.post_request_return_object(uri, id = student_2['id'])
-
         print_debug('test_query:', response)
         self.assertEqual(0, len(response))
+
+        # student query ta
         response = await self.post_request_return_object(uri, id = self.user_ta['id'])
-        # self.assertEqual(0, response['code'])
         self.assertIsInstance(response, list)
         private_keys = ['student_courses', 'ta_courses']
-        nonavalibal_keys = ['validate_time', 'validate_code', 'secret']
+        nonavalibal_keys = ['validate_time', 'validate_code', 'secret', 'password']
         for res in response:
             print_debug('test-query: ', res)
             for keyword in private_keys + nonavalibal_keys:
@@ -198,6 +198,89 @@ class UserTest(BaseTestCase):
             self.assertListEqual([res['id'], res['username'], res['email']],
                                  [self.user_ta['id'], self.user_ta['username'], self.user_ta['email']])
 
+        # student query st
+        response = await self.post_request_return_object(uri, id = student_2)
+        self.assertIsInstance(response, list)
+        self.assertEqual(0, len(response))
+
+        # student query self
+        response = await self.post_request_return_object(uri, id = self.user_st['id'])
+        self.assertIsInstance(response, list)
+        for res in response:
+            # print_debug('test')
+            for keyword in nonavalibal_keys:
+                self.assertNotIn(keyword, res.keys())
+
+        #ta querys
+        await self.login_object(self.user_ta)
+        response = await self.post_request_return_object(uri, id = self.user_st['id'])
+        self.assertIsInstance(response, list)
+        self.assertEqual(1, response)
+        for keyword in nonavalibal_keys:
+            self.assertNotIn(keyword, response[0].keys())
+
+    @async_aquire_db
+    async def test_update(self):
+        uri = self.url + '/update'
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], username = '32esdad')
+        self.assertEqual(1, response['code'])
+
+        await self.login_object(self.user_st)
+        # update it self
+        update_option = {'username': 'hongfz16', 'gender': 2}
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], **update_option)
+        self.assertEqual(0, response['code'])
+        updated = await self.db.getObjectOne('users', id = self.user_st['id'])
+        self.assertListEqual([updated['username'], updated['gender']],
+                             [update_option['username'], update_option['gender']])
+        # update others
+        await self.login_object(self.user_ta)
+        response = await self.post_request_return_object(uri, id = self.user_st['id'], username = 'laifadie')
+        self.assertEqual(1, response['code'])
+        updated = await self.db.getObjectOne('users', id = self.user_st['id'])
+        self.assertEqual(update_option['username'], updated['username'])
+
+        # update sensitive colums
+        user_ta_obj = await self.db.getObjectOne('users', id = self.user_ta['id'])
+        update_option = {
+            'ta_courses': [1, 3, 4],
+            'student_courses': [1, 3, 9],
+            'password': 'hfztttttql',
+            'validate_time': 12432343,
+            'validate_code': '123',
+            'role': 3,
+            'create_time': 23243,
+            'secret': 'lifasdlfeifaf'
+        }
+        response = await self.post_request_return_object(uri, id = self.user_ta['id'], **update_option)
+        user_ta_obj_upd = await self.db.getObjectOne('users', id = self.user_ta['id'])
+        for key in update_option.keys():
+            self.assertEqual(user_ta_obj[key], user_ta_obj_upd[key])
+
+        # update by admin
+        await self.login_object(self.user_admin)
+        user_ta_obj = await self.db.getObjectOne('users', id=self.user_ta['id'])
+        update_option = {
+            'ta_courses': [1, 3, 4],
+            'student_courses': [1, 3, 9],
+            'password': 'hfztttttql',
+            'validate_time': 12432343,
+            'validate_code': 123,
+            'role': 3,
+            'create_time': 23243,
+            'secret': 'lifasdlfeifaf'
+        }
+        response = await self.post_request_return_object(uri, id=self.user_ta['id'], **update_option)
+        user_ta_obj_upd = await self.db.getObjectOne('users', id=self.user_ta['id'])
+        self.assertEqual(0, response['code'])
+        for key in update_option.keys():
+            if(key != 'validate_time' and key != 'create_time'):
+                self.assertEqual(update_option[key], user_ta_obj_upd[key])
+
+    @async_aquire_db
+    async def test_modifypwd(self):
+        response = await self.post_request_return_object('/api/ratio/list', start = 1, end =  2)
+        print('test list: ', response)
 
 if __name__ == '__main__':
     tornado.testing.main()

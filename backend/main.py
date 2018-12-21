@@ -74,38 +74,14 @@ async def main():
                       )
     await app.async_init()
 
-        # with (await db.cursor()) as cur:
-            # print('maybe-create-tables: ', schema)
-            # await cur.execute(schema)
+    user_obj = await rdb.getObjectOne('users', id = 1)
+    print('main: ', user_obj)
+    user_obj['username'] = 'hz'
+    await rdb.saveObject('users', user_obj)
+    print('main-2: ', await rdb.getObjectOne('users', id = 1))
 
     await maybe_create_tables(db, 'sql/schema.sql')
-        # await rdb.createObject('users', username = 'hfz', password = '1234')
-
-        # user = await rdb.createObject('users', email = 'xx')
-        # user['email'] = 'adfdsfe'
-        # await rdb.saveObject('users', {'id': user['id'], 'email': '12423'})
-        # stmt = ''''''
-        # await rdb
-
-        # await rdb.ins'ert_element_in_array('users', 'student_courses', 5, 1)
-        # await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
-        # print('get user:', await rdb.getObjectOne('users', id = 1))
-        # stmt = '''SELECT * FROM users WHERE username LIKE \'%%{keyword}%%\';'''.format(keyword = 'hfz')
-        # print('stmt = ', stmt)
-
-        # for user in await rdb.getTable('problems').search_by_title(filter(lambda s: s!='', ' dfsdfli HTML    hfz '.split(' '))):
-        #     print('get user: ', user)
-
-        # stmt = 'SELECT * FROM users WHERE username LIKE \'%%hfz%%\';'
-        # print('stmt = ', stmt)
-        # for user in await rdb.query(stmt):
-        #     print('get user: ', user)
-        # app.listen(options.port)
-
-        # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
-        # In this demo the server will simply run until interrupted
-        # with Ctrl-C, but if you want to shut down more gracefully,
-        # call shutdown_event.set().
+    app.listen(options.port)
     shutdown_event = tornado.locks.Event()
     await shutdown_event.wait()
 

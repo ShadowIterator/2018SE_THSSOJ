@@ -10,3 +10,7 @@ class APIRatioHandler(base.BaseHandler):
 			if re['user_id'] == cur_user['id']:
 				return_result.append(re)
 		return return_result
+
+
+	async def _list_post(self):
+		return await self.db.querylr('ratios', self.args['start'], self.args['end'], **self.args)
