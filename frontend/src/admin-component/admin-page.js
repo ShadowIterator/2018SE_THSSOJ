@@ -40,23 +40,29 @@ class AdminTable extends Component {
                         <span>
                             <Button onClick={() => {
                                 this.setState({current_record: record, visible: true});
+                                console.log("点击查看详情");
                             }}>查看详情</Button>
                         </span>
                 },
-                {
-                    title: '操作', dataIndex: 'action', key: 'action', render: (text, record) =>
-                        <span>
+            );
+            if(this.props.current !== 'Ratios' && this.props.current !== 'Judge States') {
+                this.props.columns.push(
+                    {
+                        title: '操作', dataIndex: 'action', key: 'action', render: (text, record) =>
+                            <span>
                         <Button onClick={() => {
                             ajax_post(this.props.delete_api, {id: record.id}, this, (that, result) => {
                                 if (result.data.code === 1) {
                                     message.error("删除失败！");
                                 } else {
+                                    message.success("删除成功！");
                                     this.updateTable(this.state.page);
                                 }
                             });
                         }}>删除</Button>
                     </span>
-                });
+                    });
+            }
         }
         ajax_post(this.props.api, {
             start: (page-1)*this.state.item_per_page + 1,
@@ -65,19 +71,10 @@ class AdminTable extends Component {
             that.data = [];
             if(result.data.code===1) {
                 // alert("List failed.");
-                message.error("查询数据失败！")
+                message.error("查询数据失败！");
                 return;
             }
             for(const d of result.data.list) {
-                // let new_record = {};
-                // for(const c of that.props.columns) {
-                //     if(d[c['dataIndex']]===undefined) {
-                //         new_record[c['dataIndex']] = [];
-                //     } else {
-                //         new_record[c['dataIndex']] = d[c['dataIndex']];
-                //     }
-                // }
-                // that.data.push(new_record);
                 that.data.push(d);
             }
             const pagination = that.state.pagination;
@@ -177,7 +174,9 @@ const table_api = {
     'Homework': api_list['list_homework'],
     'Problems': api_list['list_problem'],
     'Records': api_list['list_record'],
-    'Notices': api_list['list_notice']
+    'Notices': api_list['list_notice'],
+    'Ratios': api_list['list_ratio'],
+    'Judge States': api_list['list_judgestates'],
 };
 
 const table_delete_api = {
@@ -449,6 +448,16 @@ const table_columns = {
         // {title: '正文', dataIndex: 'content', key: 'content', width: 250},
         {title: '创建用户', dataIndex: 'user_id', key: 'user_id'},
         // {title: '相关课程', dataIndex: 'course_id', key: 'course_id', width: 150},
+    ],
+    'Ratios': [
+        {title: 'ID', dataIndex: 'id', key: 'id'},
+        {title: '相关作业', dataIndex: 'homework_id', key: 'homework_id'},
+        {title: '相关题目', dataIndex: 'problem_id', key: 'problem_id'}
+    ],
+    'Judge States': [
+        {title: 'ID', dataIndex: 'id', key: 'id'},
+        {title: '相关作业', dataIndex: 'homework_id', key: 'homework_id'},
+        {title: '相关题目', dataIndex: 'problem_id', key: 'problem_id'}
     ]
 };
 
@@ -458,7 +467,7 @@ class AdminPage extends Component {
         this.state = {
             current: 'Users'
         };
-        this.tables = ['Users', 'Courses', 'Homework', 'Problems', 'Records', 'Notices'];
+        this.tables = ['Users', 'Courses', 'Homework', 'Problems', 'Records', 'Notices', 'Ratios', 'Judge States'];
     }
     handleClick = (e) => {
         this.setState({
@@ -488,7 +497,8 @@ class AdminPage extends Component {
                                         api={table_api[this.state.current]}
                                         delete_api={table_delete_api[this.state.current]}
                                         scroll_x={scroll_x[this.state.current]}
-                                        current_tab={this.state.current}/>
+                                        current_tab={this.state.current}
+                                        current={this.state.current}/>
                         </Content>
                     </Layout>
                 </Content>

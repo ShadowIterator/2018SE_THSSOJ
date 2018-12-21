@@ -67,8 +67,11 @@ const api_list = {
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
     'download_html': '/api/download/html',
+    'download_score': '/api/download/score',
 
+    'list_ratio': '/api/ratio/list',
     'query_ratio': '/api/ratio/query',
+    'list_judgestates': '/api/judgestate/list',
     'query_judgestates': '/api/judgestate/query',
 };
 

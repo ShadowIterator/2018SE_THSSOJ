@@ -84,7 +84,7 @@ class AddNewNotice extends Component {
             },
         };
         return (
-            <Card interactive={false} className="text-center">
+            <div style={{textAlign: 'center'}}>
             <Form onSubmit={this.submitHandler}>
                 <FormItem
                     {...formItemLayout}
@@ -118,7 +118,7 @@ class AddNewNotice extends Component {
                 <Button type="primary" htmlType="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
                 <Button onClick={this.props.cancel_callback} style={{marginLeft:"10px", marginRight:"10px"}}>放弃</Button>
             </Form>
-            </Card>
+            </div>
         )
     }
 }
@@ -128,17 +128,17 @@ const WrappedAddNewNotice = Form.create()(AddNewNotice);
 class TANoticeList extends Component {
     render() {
         return(
-            <Card interactive={false}>
-                <Button icon="add" onClick={this.props.newNotice}>新建通知</Button>
+            <div>
+                <Button icon="add" onClick={this.props.newNotice} style={{marginBottom: '10px'}}>新建通知</Button>
                 <Info infoitems={this.props.infoitems} />
-            </Card>
+            </div>
         );
     }
 }
 
 class mTAHomeworkCard extends Component {
     render() {
-        console.log(this.props)
+        console.log(this.props);
         const problems = this.props.problems.sort((a, b) => {
             return a.id - b.id;
         });

@@ -94,18 +94,18 @@ class MyProblem extends Component {
         {title: '操作', dataIndex: 'action', key: 'action', render: (text, prob) =>
                 <span>
                     <Button style={{outline: 0, marginRight: 5}}><Link to={"/problemedit/"+prob.id}>编辑</Link></Button>
-                    <Popconfirm title={"你确定要删除题目 "+prob.title+" 吗？"} onConfirm={()=> {
-                        ajax_post(api_list['delete_problem'], {id: prob.id}, this, (that, result) => {
-                            if(result.data.code === 1) {
-                                message.error("删除题目失败");
-                            } else {
-                                message.success("删除成功");
-                                that.request_data(that.props.id);
-                            }
-                        })
-                    }} okText="确定" cancelText="取消">
-                    <Button style={{outline: 0}}>删除</Button>
-                    </Popconfirm>
+                    {/*<Popconfirm title={"你确定要删除题目 "+prob.title+" 吗？"} onConfirm={()=> {*/}
+                        {/*ajax_post(api_list['delete_problem'], {id: prob.id}, this, (that, result) => {*/}
+                            {/*if(result.data.code === 1) {*/}
+                                {/*message.error("删除题目失败");*/}
+                            {/*} else {*/}
+                                {/*message.success("删除成功");*/}
+                                {/*that.request_data(that.props.id);*/}
+                            {/*}*/}
+                        {/*})*/}
+                    {/*}} okText="确定" cancelText="取消">*/}
+                    {/*<Button style={{outline: 0}}>删除</Button>*/}
+                    {/*</Popconfirm>*/}
                 </span>
         }
     ];

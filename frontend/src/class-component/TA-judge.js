@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {ajax_post} from "../ajax-utils/ajax-method";
-import {api_list} from "../ajax-utils/api-manager";
+import {api_list, URL} from "../ajax-utils/api-manager";
 import {Link, withRouter} from 'react-router-dom';
 import moment from 'moment';
 import {message, Layout, Menu, Breadcrumb, Table, Button, Badge, Form} from 'antd';
@@ -489,7 +489,9 @@ class mTAJudge extends Component {
                         </Button>
                     </Form.Item>
                     <Form.Item {...formItemLayout} label={"下载成绩单"}>
-                        <Button onClick={()=>{message.success("开始下载成绩单")}}>下载</Button>
+                        <a href={URL+api_list['download_score']+'?homework_id='+this.homework_id.toString()+'&problem_id='+this.problem_id.toString()} download={"score.csv"}>
+                            <Button onClick={()=>{message.success("开始下载成绩单")}}>下载</Button>
+                        </a>
                     </Form.Item>
                 </Form>
             );
