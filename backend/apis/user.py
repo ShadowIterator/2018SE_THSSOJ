@@ -250,6 +250,8 @@ class APIUserHandler(base.BaseHandler):
     async def _createTA_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] >= Roles.ADMIN)
+        # if(cur_user['role'] < Roles.ADMIN):
+        #     return
         print_debug('createTA-before: ', self.args)
 
         acquired_args = ['username', 'password', 'realname', 'email', 'student_id']

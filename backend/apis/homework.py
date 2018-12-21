@@ -74,6 +74,14 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
+        if('problems' in self.args.keys()):
+            old_problems = target_homework['problems']
+            new_problems = self.args['problems']
+            for add_prob_id in list(set(new_problems) - set(old_problems)):
+                self.db.createObject('judgestates', homework_id = target_homework['id'], problem_id = add_prob_id)
+            for sub_prob_id in list(set(old_problems) - set(new_problems)):
+                self.db.deleteObject('judgestates', homework_id = target_homework['id'], problem_id = sub_prob_id)
+
         for key in self.args.keys():
             if key == 'id':
                 continue
