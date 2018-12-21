@@ -445,7 +445,7 @@ class ProblemDetailRecord extends Component {
                 >
                     <CodeMirror options={{
                         theme: 'neat',
-                        lineNumbers: true,
+                        lineNumbers: false,
                         readOnly: true,
                     }} value={this.state.src_code} />
                 </Modal>
@@ -631,14 +631,20 @@ class ProblemDetail extends Component {
                     <Card.Body>
                         <Card.Title className="text-center"><h1>{this.state.title}</h1></Card.Title>
                         <Container>
-                            <ProblemDetailBody state={this.props.state} role={this.props.role}
-                                               id={this.props.id} probleminfo={this.state.problem_info}
+                            <ProblemDetailBody state={this.props.state}
+                                               role={this.props.role}
+                                               id={this.props.id}
+                                               probleminfo={this.state.problem_info}
                                                homework_id={parseInt(this.props.homework_id)}
-                                               records={this.state.records} lesson_id={this.props.lesson_id}
+                                               records={this.state.records}
+                                               lesson_id={this.props.lesson_id}
                                                submit_record={this.state.submit_record}
                                                html_record={this.state.html_record}
-                                               homework_info={this.state.homework_info} ratio={this.state.ratio}
-                                               update_record={this.update_record}/>
+                                               homework_info={this.state.homework_info}
+                                               ratio={this.state.ratio}
+                                               update_record={this.update_record}
+                                               // submitable={this.state.submitable}
+                            />
                         </Container>
                     </Card.Body>
                 </Card>
