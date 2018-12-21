@@ -238,7 +238,8 @@ class BaseTable:
                 valueList.append(value)
         sfmt = ' , '.join(fmtList)
         # print_debug('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), valueList)
-        await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
+        if(len(valueList)):
+            await self.db.execute('''UPDATE {table_name} SET {prop} WHERE id = {oid}'''.format(table_name = si_table_name, prop = sfmt, oid = object['id']), *valueList)
 
     async def all(self, cur_user = None):
         si_table_name = self.table_name
