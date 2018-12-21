@@ -47,6 +47,7 @@ async def main():
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
     # Create the global connection pool.
+
     while True:
         try:
             db = await aiopg.create_pool(

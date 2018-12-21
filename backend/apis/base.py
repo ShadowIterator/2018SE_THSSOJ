@@ -23,8 +23,8 @@ from tornado.options import define, options
 
 
 def print_debug(*args, **kw):
-    print(*args, **kw)
-    # pass
+    # print(*args, **kw)
+    pass
 
 def print_test(*args, **kw):
     print(*args, **kw)
