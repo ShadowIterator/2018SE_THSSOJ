@@ -12,7 +12,6 @@ class HomeworkTestCase(BaseTestCase):
         student1 = await self.db.createObject('users', username='hfz', password='4321', email='hfz@hfz.com', role=Roles.STUDENT)
         student2 = await self.db.createObject('users', username='nx', password='myq', role=Roles.STUDENT)
         ta1 = await self.db.createObject('users', username='zjl', password='ibtfy', email='sh@sina.com', role=Roles.TA, ta_courses=[1])
-        # print_test('ta1_role', ta1['role'])
         ta2 = await self.db.createObject('users', username='wzy', password='9897', role=Roles.TA)
         # await self.db.createObject('users', username='admin', password='1234', email='hfz@hfz.com', role=Roles.ADMIN)
 
