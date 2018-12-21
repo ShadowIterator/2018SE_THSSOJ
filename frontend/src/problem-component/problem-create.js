@@ -4,6 +4,8 @@ import {api_list, URL} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 
 import { Link, withRouter } from 'react-router-dom';
+import SimpleMDE from 'react-simplemde-editor';
+import "simplemde/dist/simplemde.min.css";
 
 import { Layout, Breadcrumb, Form, Input, Select, Row,
     Col, Checkbox, Button, Switch, Upload, Icon, Radio, message } from 'antd';
@@ -33,18 +35,22 @@ class RegistrationForm extends React.Component {
             reupload_code: false,
             reupload_case: false,
             reupload_script: false,
+            mde_description: '',
         };
     }
     componentWillUpdate(nextProps) {
+        if(!nextProps.isEditing)
+            return;
         if(nextProps.judge_method === this.props.judge_method) {
             return;
         }
-        console.log("judge_method", nextProps);
+        console.log("judge_method", nextProps.judge_method);
         this.setState({
             language_radio: nextProps.isEditing ? nextProps.language.value.map((value) => {
                 return (<Radio value={value}>{mapper[value]}</Radio>);
             }) : [],
             judge_method: nextProps.isEditing ? parseInt(nextProps.judge_method.value) : 0,
+            mde_description: nextProps.description.value,
         });
     }
     handleSubmit = (e) => {
@@ -55,7 +61,8 @@ class RegistrationForm extends React.Component {
                 if(this.state.judge_method === 0) {
                     data = {
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -75,7 +82,8 @@ class RegistrationForm extends React.Component {
                 } else if(this.state.judge_method === 1) {
                     data = {
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -95,7 +103,8 @@ class RegistrationForm extends React.Component {
                 } else if(this.state.judge_method === 2) {
                     data = {
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                     };
                     console.log("Create HTML problem", data);
                     ajax_post(api_list['create_html'], data, this, (that, result) => {
@@ -121,8 +130,10 @@ class RegistrationForm extends React.Component {
                 let data={};
                 if(this.state.judge_method === 0) {
                     data ={
+                        id: this.props.problem_id,
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -145,8 +156,10 @@ class RegistrationForm extends React.Component {
                     }
                 } else if(this.state.judge_method === 1) {
                     data = {
+                        id: this.props.problem_id,
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                         time_limit: parseInt(values.time_limit),
                         memory_limit: parseInt(values.memory_limit),
                         judge_method: parseInt(values.judge_method),
@@ -169,8 +182,10 @@ class RegistrationForm extends React.Component {
                     }
                 } else if(this.state.judge_method === 2) {
                     data = {
+                        id: this.props.problem_id,
                         title: values.title,
-                        description: values.description,
+                        // description: values.description,
+                        description: this.state.mde_description,
                     };
                     console.log("Create HTML problem", data);
                     ajax_post(api_list['create_html'], data, this, (that, result) => {
@@ -245,6 +260,7 @@ class RegistrationForm extends React.Component {
     };
 
     render() {
+        console.log("this.state: ", this.state);
         const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
@@ -273,6 +289,7 @@ class RegistrationForm extends React.Component {
                 },
             },
         };
+        console.log("printout judge_method",this.state.judge_method);
 
         return (
             <Form onSubmit={this.handleSubmit}>
@@ -321,13 +338,21 @@ class RegistrationForm extends React.Component {
                     label="题目描述"
                     hasFeedback
                 >
-                    {getFieldDecorator('description', {
-                        rules: [{
-                            required: true, message: '请输入题目描述！',
-                        }],
-                    })(
-                        <TextArea />
-                    )}
+                    <SimpleMDE
+                    onChange={(value)=>{this.setState({mde_description: value})}}
+                    value={this.state.mde_description}
+                    options={{
+                    spellChecker: false,
+                    hideIcons: ['fullscreen','side-by-side']
+                    }}
+                    />
+                    {/*{getFieldDecorator('description', {*/}
+                        {/*rules: [{*/}
+                            {/*required: true, message: '请输入题目描述！',*/}
+                        {/*}],*/}
+                    {/*})(*/}
+                        {/*<TextArea />*/}
+                    {/*)}*/}
                 </FormItem>
                 {this.state.judge_method !== 2 &&
                 <FormItem
@@ -703,6 +728,46 @@ class RegistrationForm extends React.Component {
                             style={{marginLeft: 5, marginRight: 5}}>重新上传</Button>
                 </FormItem>
                 }
+                {this.props.isEditing && this.state.reupload_script && this.state.judge_method === 1 &&
+                <FormItem
+                    {...formItemLayout}
+                    label="上传测试脚本"
+                >
+                    <div className="dropbox">
+                        {getFieldDecorator('upload_script', {
+                            rules: [{required: true, message: '请上传测试数据'}],
+                            valuePropName: 'cases',
+                            getValueFromEvent: this.normFile,
+                        })(
+                            <Upload.Dragger name="file" fileList={this.state.scriptFileList}
+                                            action={URL + api_list['upload_script']}
+                                            multiple={false} onChange={(info) => {
+                                let fileList = info.fileList;
+                                console.log("upload_script", fileList);
+                                fileList = fileList.slice(-1);
+                                fileList = fileList.map((file) => {
+                                    if (file.response) {
+                                        file.uri = file.response.uri;
+                                    }
+                                    return file;
+                                });
+                                fileList = fileList.filter((file) => {
+                                    if (file.response) {
+                                        return file.response.code === 0;
+                                    }
+                                    return true;
+                                });
+                                this.setState({upload_script: fileList[0], scriptFileList: fileList});
+                            }}>
+                                <p className="ant-upload-drag-icon">
+                                    <Icon type="inbox"/>
+                                </p>
+                                <p className="ant-upload-text">点击这里或者将文件拖到这里</p>
+                                <p className="ant-upload-hint">上传测试数据</p>
+                            </Upload.Dragger>
+                        )}
+                    </div>
+                </FormItem>}
                 {!this.props.isEditing && this.state.judge_method === 1 && this.state.reupload_script &&
                 <FormItem
                     {...formItemLayout}

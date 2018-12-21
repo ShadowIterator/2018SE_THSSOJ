@@ -72,8 +72,9 @@ async def maybe_create_tables(db, filename):
     #         await cur.fetchone()
     #     print_debug("in create")
     # except psycopg2.ProgrammingError:
-        print_debug('create tables')
-        with open(filename) as f:
+
+        print('create tables')
+        with open(filename, encoding = 'utf-8') as f:
             schema = f.read()
         with (await db.cursor()) as cur:
             # print_debug('maybe-create-tables: ', schema)

@@ -42,13 +42,13 @@ class APIUserHandler(base.BaseHandler):
                 if user['role'] == 2:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses', 'password'])
                     print_debug('query_user: ', user, cur_user)
                     ret_list.append(tusr)
                 elif cur_user['id'] == user['id']:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
                     ret_list.append(tusr)
                 else:
                     pass
@@ -56,7 +56,7 @@ class APIUserHandler(base.BaseHandler):
                 if user['role'] < 3:
                     tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
                     ret_list.append(tusr)
                 else:
                     pass
@@ -150,6 +150,7 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
+            res_dict['username'] = userObj.username
 
         else:
             res_dict['code'] = 1
@@ -267,6 +268,22 @@ class APIUserHandler(base.BaseHandler):
         #     print_debug('post delete')
         # elif(type == 'modify'):
         #     print_debug('post modify')
+
+    @tornado.web.authenticated
+    async def _modifypwd_post(self):
+        res_dict = {}
+        modified_user = (await self.db.getObject('users', id=self.args['id']))[0]
+        cur_user = await self.get_current_user_object()
+        if modified_user['id'] != cur_user['id']:
+            self.set_res_dict(res_dict, code=1, msg='you can only change your own password')
+            return res_dict
+        if self.args['old_pwd'] != modified_user['password']:
+            self.set_res_dict(res_dict, code=1, msg='wrong old password')
+            return res_dict
+        modified_user['password'] = self.args['new_pwd']
+        await self.db.saveObject('users', object=modified_user)
+        self.set_res_dict(res_dict, code=0, msg='password modified')
+        return res_dict
 
 # class UserLoginHandler(base.BaseHandler):
 #     async def post(self):

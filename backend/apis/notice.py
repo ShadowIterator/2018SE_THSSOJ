@@ -79,7 +79,7 @@ class APINoticeHandler(base.BaseHandler):
     async def _create_post(self):
         res_dict = {}
         course_id = self.args['course_id']
-        course = (await self.db.getObject('courses', cur_user=self.get_current_user_object(), id=course_id))[0]
+        course = (await self.db.getObject('courses', id=course_id))[0]
         # authority check
         cur_user = await self.get_current_user_object()
         if cur_user['role'] < 2 or (cur_user['role'] == 2 and cur_user['id'] not in course['tas']):
@@ -87,8 +87,9 @@ class APINoticeHandler(base.BaseHandler):
             return res_dict
 
         await self.db.createObject('notices', **self.args)
-        notice = (await self.db.getObject('notices',cur_user=self.get_current_user_object(), **self.args))[0]
-        print_debug('notice_create: ', notice)
+        
+        notice = (await self.db.getObject('notices', **self.args))[0]
+        print('notice_create: ', notice)
         course['notices'].append(notice['id'])
         course['notices'] = list(set(course['notices']))
         self.set_res_dict(res_dict, code=0, msg='notice created')

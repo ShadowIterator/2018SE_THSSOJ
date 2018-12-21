@@ -134,7 +134,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                                                               password=password))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
-
+    
     async def login_object(self, obj):
         response = self.getbodyObject(await self.post_request('/api/user/login',
                                                               username=obj['username'],
@@ -146,23 +146,3 @@ class BaseTestCase(AsyncHTTPTestCase):
     async def post_request_return_object(self, url, *args, **kw):
         return self.getbodyObject(await self.post_request(url, *args, **kw))
 
-    # an example
-    # @async_aquire_db
-    # async def test_hello(self):
-    #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
-    #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz"}')
-    #     self.assertIn(b'st', response.body)
-    #     print_test(response.body)
-    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
-
-
-    # @async_aquire_db
-    # async def test_2(self):
-    #     print_test('test_2')
-    #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
-    #     await self.db.createObject('users', username = 'hfzzz1', password = 'pwd', email = 'xx@xx.com')
-    #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz1"}')
-    #     self.assertIn(b'st', response.body)
-    #     print_test(response.body)
-    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
-    #
