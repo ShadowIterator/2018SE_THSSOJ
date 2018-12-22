@@ -69,10 +69,12 @@ async def main():
     #         user=options.db_user,
     #         password=options.db_password,
     #         dbname=options.db_database) as db:
+    print(options.AppConfig)
     rdb = BaseDB(db)
     app = Application(rdb,
+                      'root/',
                       options.RoutineList,
-                      **options.AppConfig
+                      **options.AppConfig,
                       )
     await app.async_init()
 
@@ -81,8 +83,6 @@ async def main():
     # user_obj['username'] = 'hz'
     # await rdb.saveObject('users', user_obj)
     # print('main-2: ', await rdb.getObjectOne('users', id = 1))
-
-    # await maybe_create_tables(db, 'sql/schema.sql')
     app.listen(options.port)
     shutdown_event = tornado.locks.Event()
     await shutdown_event.wait()

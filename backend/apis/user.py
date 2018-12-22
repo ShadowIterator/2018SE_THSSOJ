@@ -288,6 +288,9 @@ class APIUserHandler(base.BaseHandler):
         self.set_res_dict(res_dict, code=0, msg='password modified')
         return res_dict
 
+    async def _hello_post(self):
+        return {'msg': 'hello'}
+
 # class UserLoginHandler(base.BaseHandler):
 #     async def post(self):
 #         username = self.args['username']
