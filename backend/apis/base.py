@@ -23,8 +23,8 @@ from tornado.options import define, options
 
 
 def print_debug(*args, **kw):
-    # print(*args, **kw)
-    pass
+    print(*args, **kw)
+    # pass
 
 def print_test(*args, **kw):
     print(*args, **kw)
@@ -85,7 +85,7 @@ async def maybe_create_tables(db, filename):
     #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
-    def __init__(self, db, root_dir = 'root/', *args, **kw):
+    def __init__(self, db, root_dir, *args, **kw):
         self.db_instance = db
         self.root_dir = root_dir
         super(Application, self).__init__(*args, **kw)

@@ -123,9 +123,9 @@ class BaseTestCase(AsyncHTTPTestCase):
     def get_app(self):
         print_test('call get_app')
         return Application(None,
+                           self.root_dir,
                           options.RoutineList,
                           **options.AppConfig,
-                           root_dir = self.root_dir
                            )
 
     def getbodyObject(self, response):
@@ -166,7 +166,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                                                               id=user_id))
         self.assertEqual(response['code'], 0)
 
-    async def login_object(self, obj):
+    async def login_object(self, obj, client = None):
         response = self.getbodyObject(await self.post_request('/api/user/login',
                                                               username=obj['username'],
                                                               password=obj['password'],

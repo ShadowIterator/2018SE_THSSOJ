@@ -5,9 +5,9 @@ import time
 import os
 import json
 import shutil
-from ..basetestcase.basetestcase import BaseTestCase, async_aquire_db
-from ..apis.base import print_test, print_debug
-from ..apis.base import Roles
+from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug
+from apis.base import Roles
 
 class RecordTestCase(BaseTestCase):
     async def prepare(self):
@@ -162,7 +162,7 @@ class RecordTestCase(BaseTestCase):
                                              score=90)
 
         temp_config = {'NTESTS':10}
-        target_path = os.getcwd()+'''/{root_dir}/problems/'''.format(self.root_dir)+str(problem1['id'])+'/case'
+        target_path = os.getcwd()+'''/{root_dir}/problems/'''.format(root_dir = self.root_dir)+str(problem1['id'])+'/case'
         if not os.path.exists(target_path):
             os.makedirs(target_path)
         config_file = open(target_path+'/config.json', mode='w')
@@ -303,7 +303,7 @@ class RecordTestCase(BaseTestCase):
                                              test_ratio=2,
                                              result_type=0
                                              )
-        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record2['id'], self.root_dir)
+        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record2['id'], root_dir = self.root_dir)
         code_path = '{}/{}.code'.format(path, record2['id'])
         if not os.path.exists(path):
             os.makedirs(path)
@@ -336,7 +336,7 @@ class RecordTestCase(BaseTestCase):
                                              time_consume=500,
                                              score=100,
                                              result=0)
-        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record1['id'], self.root_dir)
+        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record1['id'], root_dir = self.root_dir)
         info_path = '{}/{}.json'.format(path, record1['id'])
         if not os.path.exists(path):
             os.makedirs(path)
@@ -368,7 +368,7 @@ class RecordTestCase(BaseTestCase):
                                              problem_id=1,
                                              homework_id=1,
                                              score=100)
-        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record2['id'], self.root_dir)
+        path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record2['id'], root_dir = self.root_dir)
         info_path = '{}/{}.json'.format(path, record2['id'])
         if not os.path.exists(path):
             os.makedirs(path)
@@ -399,6 +399,7 @@ class RecordTestCase(BaseTestCase):
                                              result_type=0
                                              )
         path = '{}/{root_dir}/records/{}'.format(os.getcwd(), record3['id'], root_dir = self.root_dir)
+        print_test('recordtest: ', path)
         info_path = '{}/{}.json'.format(path, record3['id'])
         if not os.path.exists(path):
             os.makedirs(path)

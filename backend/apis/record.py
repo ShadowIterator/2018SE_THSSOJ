@@ -225,7 +225,7 @@ class APIRecordHandler(base.BaseHandler):
 
         match_record['status'] = 1
         await self.db.saveObject('records', object=match_record, cur_user=self.get_current_user_object())
-        return
+        return {'code': 0}
 
     # async def get(self, type): #detail
     #     # self.getargs()

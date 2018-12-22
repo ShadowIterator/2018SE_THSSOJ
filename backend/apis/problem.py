@@ -17,7 +17,9 @@ judger_url = 'http://judger:12345'
 class APIProblemHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self.root_dir = self.root_dir+'/problems'
+        self.root_dir = self.root_dir+'problems/'
+        # problems is a dir
+        self.root_dir = self.root_dir.replace('problems/', 'problems')
         # ****************************************************
         # ****************************************************
         # ****************************************************
@@ -64,6 +66,8 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _create_post(self):
+        print_debug('create-problem: ', self.args['code_uri'], self.args['case_uri'])
+
         res_dict={}
         # authority check
         role = (await self.get_current_user_object())['role']
@@ -89,6 +93,9 @@ class APIProblemHandler(base.BaseHandler):
             del self.args['script_uri']
 
         code_path = self.root_dir.replace('/problems', '')+'/'+self.args['code_uri']
+
+        print_debug('create-path: ', code_path, zip_path)
+
         src_size = os.path.getsize(code_path)
         file_zip = zipfile.ZipFile(zip_path)
         del self.args['code_uri']
@@ -139,6 +146,8 @@ class APIProblemHandler(base.BaseHandler):
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
         print_debug("record_dir ", record_dir)
+        if not os.path.exists(record_dir):
+            os.makedirs(record_dir)
         shutil.copyfile(code_path, record_dir+'/'+str_id+'.code')
 
         if test_language==1 or test_language==2 or test_language==4:
