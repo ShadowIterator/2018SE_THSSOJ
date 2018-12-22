@@ -409,7 +409,6 @@ class RecordTestCase(BaseTestCase):
         await self.login_object(ta)
         response = self.getbodyObject(await self.post_request(uri,
                                                               record_id=record3['id']))
-
         self.assertEqual(1, response['code'])
 
         shutil.rmtree(path)
