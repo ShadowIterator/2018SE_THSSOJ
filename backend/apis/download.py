@@ -12,7 +12,7 @@ from .base import *
 
 class APIDownloadHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
-        super(BaseHandler, self).__init__(*args, **kw)
+        super(APIDownloadHandler, self).__init__(*args, **kw)
         self.db = self.application.db_instance
         # self.getargs()
         self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
