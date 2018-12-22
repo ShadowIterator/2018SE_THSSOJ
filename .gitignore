@@ -19,6 +19,7 @@ backend/temp/
 backend/root/records
 backend/pycharm_runner
 backend/test
+backend/judge_script
 node_modules
 __pycache__
 backend/root/

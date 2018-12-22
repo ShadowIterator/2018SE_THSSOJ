@@ -89,6 +89,7 @@ public:
 	std::string dataDir;
 	std::string sourceDir;
 	std::string source;
+	bool builtinChecker;
 	int time;
 	int memory;
 	int output;
