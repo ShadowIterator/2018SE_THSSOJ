@@ -318,3 +318,98 @@ class RecordTestCase(BaseTestCase):
         self.assertEqual(1, response['code'])
 
         shutil.rmtree(path)
+
+    @async_aquire_db
+    async def test_judgerinfo(self):
+        info = {'Info': 'you are good'}
+        uri = self.url+'/judgerInfo'
+        admin = await self.db.getObjectOne('users', username='admin')
+        ta = await self.db.getObjectOne('users', username='zjl')
+        student = await self.db.getObjectOne('users', username='hfz')
+        student2 = await self.db.getObjectOne('users', username='nx')
+
+        record1 = await self.db.createObject('records',
+                                             record_type=2,
+                                             user_id=student['id'],
+                                             problem_id=1,
+                                             homework_id=2,
+                                             time_consume=500,
+                                             score=100,
+                                             result=0)
+        path = '{}/root/records/{}'.format(os.getcwd(), record1['id'])
+        info_path = '{}/{}.json'.format(path, record1['id'])
+        if not os.path.exists(path):
+            os.makedirs(path)
+        info_file = open(info_path, 'w')
+        json.dump(info, info_file)
+        info_file.close()
+
+        # fail student check info of closed homework
+        await self.login_object(student)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record1['id']))
+
+        self.assertEqual(1, response['code'])
+        # pass ta check info of closed homework
+        await self.login_object(ta)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record1['id']))
+        self.assertEqual('you are good', response['info'])
+        # pass admin check
+        await self.login_object(admin)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record1['id']))
+        self.assertEqual('you are good', response['info'])
+        shutil.rmtree(path)
+
+        record2 = await self.db.createObject('records',
+                                             record_type=2,
+                                             user_id=student['id'],
+                                             problem_id=1,
+                                             homework_id=1,
+                                             score=100)
+        path = '{}/root/records/{}'.format(os.getcwd(), record2['id'])
+        info_path = '{}/{}.json'.format(path, record2['id'])
+        if not os.path.exists(path):
+            os.makedirs(path)
+        info_file = open(info_path, 'w')
+        json.dump(info, info_file)
+        info_file.close()
+
+        # fail student check info not belonging to him
+        await self.login_object(student2)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record2['id']))
+
+        self.assertEqual(1, response['code'])
+        # pass student check his own open info
+        await self.login_object(student)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record2['id']))
+        self.assertEqual('you are good', response['info'])
+
+        shutil.rmtree(path)
+
+        record3 = await self.db.createObject('records',
+                                             record_type=1,
+                                             user_id=student2['id'],
+                                             homework_id=3,
+                                             problem_id=1,
+                                             test_ratio=2,
+                                             result_type=0
+                                             )
+        path = '{}/root/records/{}'.format(os.getcwd(), record3['id'])
+        info_path = '{}/{}.json'.format(path, record3['id'])
+        if not os.path.exists(path):
+            os.makedirs(path)
+        info_file = open(info_path, 'w')
+        json.dump(info, info_file)
+        info_file.close()
+        # fail ta check info not in his course
+        await self.login_object(ta)
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              record_id=record3['id']))
+
+        self.assertEqual(1, response['code'])
+
+        shutil.rmtree(path)

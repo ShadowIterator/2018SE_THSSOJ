@@ -245,6 +245,33 @@ class APIRecordHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='record does not exist')
             return res_dict
 
+        # authority check
+        cur_user = await self.get_current_user_object()
+        record = await self.db.getObjectOne('records', id=record_id)
+        if record['record_type'] == 0:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        elif record['record_type'] == 1 or record['record_type'] == 2:
+            if cur_user['role'] < 2 :
+                if cur_user['id'] != record['user_id']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['score_openness'] == 0:
+                    self.set_res_dict(res_dict, code=1, msg='info is not available')
+                    return res_dict
+            if cur_user['role'] == 2:
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['course_id'] not in cur_user['ta_courses']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
+        elif record['record_type'] == 3:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        # ----------------------------------------------
+
         record_file = open(record_path, mode='r')
         record_detail = json.load(record_file)
         record_file.close()
