@@ -86,6 +86,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
+        self.root_dir = 'test_root/'
         options.parse_config_file('./settings/app_config.py')
         options.parse_config_file('./settings/env_config.py')
         self.db = None
@@ -98,7 +99,8 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('call get_app')
         return Application(None,
                           options.RoutineList,
-                          **options.AppConfig
+                          **options.AppConfig,
+                           root_dir = self.root_dir
                            )
 
     def getbodyObject(self, response):
