@@ -13,5 +13,6 @@ class APIRatioHandler(base.BaseHandler):
 		return return_result
 
 
+    # @tornado.web.authenticated
 	async def _list_post(self):
 		return await self.db.querylr('ratios', self.args['start'], self.args['end'], **self.args)

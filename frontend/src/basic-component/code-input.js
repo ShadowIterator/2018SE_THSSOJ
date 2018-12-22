@@ -188,13 +188,16 @@ class CodeInput extends Component {
             }
         }
         let ratio_one_text, ratio_two_text, ratio_three_text;
+        const ratio_one_left = this.props.problem_info.ratio_one_limit-this.props.ratio.ratio_one_used;
+        const ratio_two_left = this.props.problem_info.ratio_two_limit-this.props.ratio.ratio_two_used;
+        const ratio_three_left = this.props.problem_info.ratio_three_limit-this.props.ratio.ratio_three_used;
         if(this.props.lesson_id !== '0') {
             ratio_one_text = "测试"+this.props.problem_info.ratio_one.toString()+
-                "%数据(剩余测试次数："+(this.props.problem_info.ratio_one_limit-this.props.ratio.ratio_one_used).toString()+")";
+                "%数据(剩余测试次数："+ratio_one_left.toString()+")";
             ratio_two_text = "测试"+this.props.problem_info.ratio_two.toString()+
-                "%数据(剩余测试次数："+(this.props.problem_info.ratio_two_limit-this.props.ratio.ratio_two_used).toString()+")";
+                "%数据(剩余测试次数："+ratio_two_left.toString()+")";
             ratio_three_text = "测试"+this.props.problem_info.ratio_three.toString()+
-                "%数据(剩余测试次数："+(this.props.problem_info.ratio_three_limit-this.props.ratio.ratio_three_used).toString()+")";
+                "%数据(剩余测试次数："+ratio_three_left.toString()+")";
         }
         let submit_options = [];
         if(this.props.lesson_id !== '0') {
@@ -203,6 +206,15 @@ class CodeInput extends Component {
             submit_options.push(<Option value={"3"}>{ratio_three_text}</Option>);
         }
         submit_options.push(<Option value={"4"} key={"o4"}>提交</Option>);
+        const disabled_flag = ((this.state.submit_type === '1' && ratio_one_left <= 0) ||
+                                (this.state.submit_type === '2' && ratio_two_left <= 0) ||
+                                (this.state.submit_type === '3' && ratio_three_left <= 0) ||
+                                (this.state.submit_type !== '1' && this.state.submit_type !== '2' &&
+                                    this.state.submit_type !== '3' && this.state.submit_type !== '4'));
+        // console.log("one ", this.state.submit_type, ratio_one_left, (this.state.submit_type === '1' && ratio_one_left <= 0));
+        // console.log("two ", this.state.submit_type, ratio_two_left, (this.state.submit_type === '2' && ratio_two_left <= 0));
+        // console.log("three ", this.state.submit_type, ratio_three_left, (this.state.submit_type === '3' && ratio_three_left <= 0));
+        // console.log("disabled_flag", disabled_flag);
         return (
             <div>
                 <Form layout="inline" onSubmit={(e)=>{e.preventDefault();}}>
@@ -221,7 +233,7 @@ class CodeInput extends Component {
                     <Form.Item>
                         <Button type="primary"
                                 icon="upload"
-                                disabled={this.props.homework_info.submitable === 0}
+                                disabled={this.props.homework_info.submitable === 0 || disabled_flag}
                                 onClick={(e) => {
                             e.preventDefault();
                             if(this.props.lesson_id === '0') {

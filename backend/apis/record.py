@@ -39,13 +39,24 @@ class APIRecordHandler(base.BaseHandler):
         for record in res:
             timepoint = int(record['submit_time'].timestamp())
             record['submit_time'] = timepoint
-            problem = await self.db.getObjectOne('problems', id=record['problem_id'])
-            if record['test_ratio'] == 1:
-                record['test_ratio'] == problem['ratio_one']
-            elif record['test_ratio'] == 2:
-                record['test_ratio'] = problem['ratio_two']
-            elif record['test_ratio'] == 3:
-                record['test_ratio'] = problem['ratio_three']
+            if record['record_type'] == 1:
+                problem = await self.db.getObjectOne('problems', id=record['problem_id'])
+                if record['result_type'] == 0:
+                    config_path = os.getcwd()+'/'+self.root_dir.replace('records', 'problems')+'/'+\
+                                  str(problem['id'])+'/case/config.json'
+                elif record['result_type'] == 1:
+                    config_path = os.getcwd() + '/' + self.root_dir.replace('records', 'problems') + '/' + \
+                                  str(problem['id']) + '/script/config.json'
+
+                # config_file = open(config_path, mode='r', encoding='utf8')
+                # config_info = json.load(config_file)
+                # config_file.close()
+                if record['test_ratio'] == 1:
+                    record['test_ratio'] == problem['ratio_one']
+                elif record['test_ratio'] == 2:
+                    record['test_ratio'] = problem['ratio_two']
+                elif record['test_ratio'] == 3:
+                    record['test_ratio'] = problem['ratio_three']
             # authority check
             if record['record_type'] == 0:
                 if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:
@@ -53,21 +64,27 @@ class APIRecordHandler(base.BaseHandler):
                 else:
                     ret_list.append(record)
             elif record['record_type'] == 1:
-                if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:
+                if cur_user['role'] < 2 and record['user_id'] != cur_user['id']:
                     pass
+                elif cur_user['role'] == 2:
+                    homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                    if homework['course_id'] in cur_user['ta_courses']:
+                        ret_list.append(record)
                 else:
                     ret_list.append(record)
             elif record['record_type'] == 2:
-                homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
-                course = (await self.db.getObject('courses', id=homework['course_id']))[0]
+
+                # course = (await self.db.getObject('courses', id=homework['course_id']))[0]
                 if cur_user['role'] < 2:
+                    homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
                     if cur_user['id'] != record['user_id']:
                         continue
                     if homework['score_openness'] == 0:
                         record = self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
                     ret_list.append(record)
                 elif cur_user['role'] == 2:
-                    if cur_user['id'] in course['tas']:
+                    homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+                    if homework['course_id'] in cur_user['ta_courses']:
                         ret_list.append(record)
                 elif cur_user['role'] == 3:
                     ret_list.append(record)
@@ -77,16 +94,17 @@ class APIRecordHandler(base.BaseHandler):
                 elif cur_user['role'] == 3:
                     ret_list.append(record)
             elif record['record_type'] == 4:
-                homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
-                course = (await self.db.getObject('courses', id=homework['course_id']))[0]
+                # course = (await self.db.getObject('courses', id=homework['course_id']))[0]
                 if cur_user['role'] < 2:
+                    homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
                     if cur_user['id'] != record['user_id']:
                         continue
                     if homework['score_openness'] == 0:
                         record = self.property_filter(record, None, ['score', 'result', 'consume_time', 'consume_memory', 'status'])
                     ret_list.append(record)
                 elif cur_user['role'] == 2:
-                    if cur_user['id'] in course['tas']:
+                    homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+                    if homework['course_id'] in cur_user['ta_courses']:
                         ret_list.append(record)
                 elif cur_user['role'] == 3:
                     ret_list.append(record)
@@ -226,6 +244,33 @@ class APIRecordHandler(base.BaseHandler):
         if not os.path.exists(record_path):
             self.set_res_dict(res_dict, code=1, msg='record does not exist')
             return res_dict
+
+        # authority check
+        cur_user = await self.get_current_user_object()
+        record = await self.db.getObjectOne('records', id=record_id)
+        if record['record_type'] == 0:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        elif record['record_type'] == 1 or record['record_type'] == 2:
+            if cur_user['role'] < 2 :
+                if cur_user['id'] != record['user_id']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['score_openness'] == 0:
+                    self.set_res_dict(res_dict, code=1, msg='info is not available')
+                    return res_dict
+            if cur_user['role'] == 2:
+                homework = await self.db.getObjectOne('homeworks', id=record['homework_id'])
+                if homework['course_id'] not in cur_user['ta_courses']:
+                    self.set_res_dict(res_dict, code=1, msg='back off!')
+                    return res_dict
+        elif record['record_type'] == 3:
+            if cur_user['role'] < 3 and cur_user['id'] != record['user_id']:
+                self.set_res_dict(res_dict, code=1, msg='back off!')
+                return res_dict
+        # ----------------------------------------------
 
         record_file = open(record_path, mode='r')
         record_detail = json.load(record_file)

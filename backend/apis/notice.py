@@ -23,7 +23,6 @@ class APINoticeHandler(base.BaseHandler):
         for notice in res:
             if 'create_time' in notice.keys() and notice['create_time'] is not None:
                 notice['create_time'] = int(time.mktime(notice['create_time'].timetuple()))
-
             # authority check
             if cur_user['role'] < 3:
                 course = (await self.db.getObject('notices', id=notice['course_id']))[0]
@@ -32,9 +31,10 @@ class APINoticeHandler(base.BaseHandler):
                 else:
                     ret_list.append(notice)
             else:
+                print_test('insert notice', notice)
                 ret_list.append(notice)
             # ---------------------------------------------------------------------
-        return res
+        return ret_list
         # self.write(json.dumps(res).encode())
 
     # @tornado.web.authenticated
@@ -87,7 +87,7 @@ class APINoticeHandler(base.BaseHandler):
             return res_dict
 
         await self.db.createObject('notices', **self.args)
-        
+
         notice = (await self.db.getObject('notices', **self.args))[0]
         print('notice_create: ', notice)
         course['notices'].append(notice['id'])

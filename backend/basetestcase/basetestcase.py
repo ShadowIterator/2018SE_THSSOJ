@@ -134,7 +134,12 @@ class BaseTestCase(AsyncHTTPTestCase):
                                                               password=password))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
-    
+
+    async def logout(self, user_id):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=user_id))
+        self.assertEqual(response['code'], 0)
+
     async def login_object(self, obj):
         response = self.getbodyObject(await self.post_request('/api/user/login',
                                                               username=obj['username'],
@@ -142,6 +147,10 @@ class BaseTestCase(AsyncHTTPTestCase):
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
 
+    async def logout_object(self, obj):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=obj['id']))
+        self.assertEqual(response['code'], 0)
 
     async def post_request_return_object(self, url, *args, **kw):
         return self.getbodyObject(await self.post_request(url, *args, **kw))
