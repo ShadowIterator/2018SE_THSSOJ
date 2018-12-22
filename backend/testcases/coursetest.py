@@ -2,8 +2,10 @@
 import unittest
 import tornado.testing
 import datetime
-from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from basetestcase.basetestcase import BaseTestCase, async_aquire_db, SIClient
 from apis.base import print_test, print_debug, Roles
+from tornado import gen
+from tornado.httpclient import AsyncHTTPClient
 
 class CourseTestCase(BaseTestCase):
     async def prepare(self):
@@ -49,8 +51,6 @@ class CourseTestCase(BaseTestCase):
             self.user_admin = await self.db.getObjectOne('users', username = 'admin')
         except:
             self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
-
-
 
     @async_aquire_db
     async def test_create(self):
@@ -159,3 +159,212 @@ class CourseTestCase(BaseTestCase):
         self.assertNotIn(self.course_published['id'], ta1_after_post['ta_courses'])
         self.assertNotIn(self.course_published['id'], st1_after_post['student_courses'])
 
+    @async_aquire_db
+    async def test_update_1(self):
+        uri = self.url + '/update'
+        # failed: student is not allowed to use this
+        await self.login_object(self.user_st1)
+        modify_options = {
+            'name': 'course_modified',
+            'students': [self.user_st1['id'], self.user_st3['id']],
+            'tas': [self.user_ta1['id'], self.user_ta3['id']],
+        }
+        response = await self.post_request_return_object(uri, id = self.course_published['id'], **modify_options)
+        self.assertEqual(1, response['code'])
+        course_after_post = await self.courseTable.getObjectOne(id = self.course_published['id'])
+        st1_after_post = await self.userTable.getObjectOne(id = self.user_st1['id'])
+        st2_after_post = await self.userTable.getObjectOne(id = self.user_st2['id'])
+        st3_after_post = await self.userTable.getObjectOne(id = self.user_st3['id'])
+        ta1_after_post = await self.userTable.getObjectOne(id = self.user_ta1['id'])
+        ta2_after_post = await self.userTable.getObjectOne(id = self.user_ta2['id'])
+        ta3_after_post = await self.userTable.getObjectOne(id = self.user_ta3['id'])
+
+        self.assertEqual(course_after_post['name'], self.course_published['name'])
+        self.assertListEqual(course_after_post['students'], self.course_published['students'])
+        self.assertListEqual(course_after_post['tas'], self.course_published['tas'])
+        self.assertIn(self.course_published['id'], st2_after_post['student_courses'])
+        self.assertNotIn(self.course_published['id'], st3_after_post['student_courses'])
+        self.assertIn(self.course_published['id'], ta2_after_post['ta_courses'])
+        self.assertNotIn(self.course_published['id'], ta3_after_post['ta_courses'])
+
+    @async_aquire_db
+    async def test_update_2(self):
+        uri = self.url + '/update'
+        # failed: ta in other courses
+        await self.login_object(self.user_ta3)
+        modify_options = {
+            'name': 'course_modified',
+            'students': [self.user_st1['id'], self.user_st3['id']],
+            'tas': [self.user_ta1['id'], self.user_ta3['id']],
+        }
+        response = await self.post_request_return_object(uri, id = self.course_published['id'], **modify_options)
+        self.assertEqual(1, response['code'])
+        course_after_post = await self.courseTable.getObjectOne(id = self.course_published['id'])
+        st1_after_post = await self.userTable.getObjectOne(id = self.user_st1['id'])
+        st2_after_post = await self.userTable.getObjectOne(id = self.user_st2['id'])
+        st3_after_post = await self.userTable.getObjectOne(id = self.user_st3['id'])
+        ta1_after_post = await self.userTable.getObjectOne(id = self.user_ta1['id'])
+        ta2_after_post = await self.userTable.getObjectOne(id = self.user_ta2['id'])
+        ta3_after_post = await self.userTable.getObjectOne(id = self.user_ta3['id'])
+
+        self.assertEqual(course_after_post['name'], self.course_published['name'])
+        self.assertListEqual(course_after_post['students'], self.course_published['students'])
+        self.assertListEqual(course_after_post['tas'], self.course_published['tas'])
+        self.assertIn(self.course_published['id'], st2_after_post['student_courses'])
+        self.assertNotIn(self.course_published['id'], st3_after_post['student_courses'])
+        self.assertIn(self.course_published['id'], ta2_after_post['ta_courses'])
+        self.assertNotIn(self.course_published['id'], ta3_after_post['ta_courses'])
+
+    @async_aquire_db
+    async def test_update_3(self):
+        uri = self.url + '/update'
+        # success: ta in courses
+        await self.login_object(self.user_ta2)
+        modify_options = {
+            'name': 'course_modified',
+            'students': [self.user_st1['id'], self.user_st3['id']],
+            'tas': [self.user_ta1['id'], self.user_ta3['id']],
+        }
+        response = await self.post_request_return_object(uri, id = self.course_published['id'], **modify_options)
+        self.assertEqual(0, response['code'])
+        course_after_post = await self.courseTable.getObjectOne(id = self.course_published['id'])
+        print_test('test_update_3: ', self.course_published['id'])
+        st1_after_post = await self.userTable.getObjectOne(id = self.user_st1['id'])
+        st2_after_post = await self.userTable.getObjectOne(id = self.user_st2['id'])
+        st3_after_post = await self.userTable.getObjectOne(id = self.user_st3['id'])
+        ta1_after_post = await self.userTable.getObjectOne(id = self.user_ta1['id'])
+        ta2_after_post = await self.userTable.getObjectOne(id = self.user_ta2['id'])
+        ta3_after_post = await self.userTable.getObjectOne(id = self.user_ta3['id'])
+
+        self.assertEqual(course_after_post['name'], modify_options['name'])
+        self.assertListEqual(course_after_post['students'], modify_options['students'])
+        self.assertListEqual(course_after_post['tas'], modify_options['tas'])
+        self.assertIn(self.course_published['id'], st1_after_post['student_courses'])
+        self.assertNotIn(self.course_published['id'], st2_after_post['student_courses'])
+        self.assertIn(self.course_published['id'], st3_after_post['student_courses'])
+        self.assertIn(self.course_published['id'], ta1_after_post['ta_courses'])
+        self.assertNotIn(self.course_published['id'], ta2_after_post['ta_courses'])
+        self.assertIn(self.course_published['id'], ta3_after_post['ta_courses'])
+
+    @async_aquire_db
+    async def test_query_1(self):
+        print_test('test_query_1')
+        uri = self.url + '/query'
+        # fail: do not log in
+        response = await self.post_request_return_object(uri, id = self.course_published['id'])
+        self.assertEqual(1, response['code'])
+
+        # fail: query not related
+        await self.login_object(self.user_ta3)
+        response = await self.post_request_return_object(uri, id = self.course_published['id'])
+        self.assertEqual(0, len(response))
+        # print_debug('test_query_1', response)
+
+        # fail: student query not published
+        await self.login_object(self.user_st1)
+        response = await self.post_request_return_object(uri, id = self.course_non_published['id'])
+        self.assertEqual(0, len(response))
+
+        # success: student query publised
+        await self.login_object(self.user_st1)
+        response = await self.post_request_return_object(uri, id = self.course_published['id'])
+        self.assertEqual(1, len(response))
+        res = response[0]
+        self.assertEqual(res['id'], self.course_published['id'])
+        self.assertEqual(res['name'], self.course_published['name'])
+        self.assertEqual(res['tas'], self.course_published['tas'])
+        self.assertNotIn('studnets', res.keys())
+        self.assertNotIn('course_spell', res.keys())
+
+        # success ta query non-published
+        await self.login_object(self.user_ta1)
+        response = await self.post_request_return_object(uri, id = self.course_non_published['id'])
+        self.assertEqual(1, len(response))
+        res = response[0]
+        self.assertEqual(res['id'], self.course_non_published['id'])
+        self.assertEqual(res['name'], self.course_non_published['name'])
+        self.assertEqual(res['students'], self.course_non_published['students'])
+        self.assertEqual(res['tas'], self.course_non_published['tas'])
+        self.assertEqual(res['course_spell'], self.course_non_published['course_spell'])
+
+    @async_aquire_db
+    async def test_addCourse_1(self):
+        print_test('test_addCourse_1')
+        uri = self.url + '/addCourse'
+        st4 = await self.userTable.createObject(username = 'st4', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+
+        # fail: add others into a course
+        await self.login_object(self.user_st1)
+        params = {
+            'user_id': st4['id'],
+            'course_spell': self.course_published['course_spell']
+
+        }
+        response = await self.post_request_return_object(uri, **params)
+        self.assertEqual(1, response['code'])
+        st4_after_post = await self.userTable.getObjectOne(id = st4['id'])
+        course_after_post =await self.courseTable.getObjectOne(id = self.course_published['id'])
+        self.assertNotIn(st4['id'], course_after_post['students'])
+        self.assertNotIn(course_after_post['id'], st4_after_post['student_courses'])
+
+        # fail: ta should not use this
+        await self.login_object(self.user_ta3)
+        params = {
+            'user_id': self.user_ta3['id'],
+            'course_spell': self.course_published['course_spell']
+
+        }
+        response = await self.post_request_return_object(uri, **params)
+        self.assertEqual(1, response['code'])
+        user_after_post = await self.userTable.getObjectOne(id=self.user_ta3['id'])
+        course_after_post = await self.courseTable.getObjectOne(id=self.course_published['id'])
+        self.assertNotIn(user_after_post['id'], course_after_post['students'])
+        self.assertNotIn(course_after_post['id'], user_after_post['student_courses'])
+
+        # already in course: success but no modify
+        await self.login_object(self.user_st1)
+        params = {
+            'user_id': self.user_st1['id'],
+            'course_spell': self.course_published['course_spell']
+
+        }
+        response = await self.post_request_return_object(uri, **params)
+        self.assertEqual(0, response['code'])
+        user_after_post = await self.userTable.getObjectOne(id=self.user_st1['id'])
+        course_after_post = await self.courseTable.getObjectOne(id=self.course_published['id'])
+        # self.assertNotIn(user_after_post['id'], course_after_post['students'])
+        # self.assertNotIn(course_after_post['id'], user_after_post['student_courses'])
+        self.assertEqual(1, user_after_post['student_courses'].count(course_after_post['id']))
+        self.assertEqual(1, course_after_post['students'].count(user_after_post['id']))
+
+
+    async def addcouse_worker(self, user, course, client):
+        uri = self.url + '/addCourse'
+        await self.login_object(user, client = client)
+        response = await self.post_request_return_object(uri, user_id = user['id'], course_spell = course['course_spell'], client = client)
+        self.assertEqual(0, response['code'])
+        course_after_post = await self.courseTable.getObjectOne(id = course['id'])
+        user_after_post = await self.userTable.getObjectOne(id = user['id'])
+        self.assertEqual(1, user_after_post['student_courses'].count(course_after_post['id']))
+        self.assertEqual(1, course_after_post['students'].count(user_after_post['id']))
+        # to test the status of login
+        # response = await self.post_request_return_object('/api/user/query', id = user['id'], client = client)
+        # self.assertIsInstance(response, list)
+        # self.assertEqual(1, len(response))
+        
+    @async_aquire_db
+    async def test_addCourse_2(self):
+        # addcouse 2 multi access
+        print_test('test_addCourse_2')
+        uri = self.url + '/addCourse'
+        st4 = await self.userTable.createObject(username = 'st4', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        st5 = await self.userTable.createObject(username = 'st5', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        st6 = await self.userTable.createObject(username = 'st6', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        await gen.multi([self.addcouse_worker(st4, self.course_published, SIClient()),
+                         self.addcouse_worker(st5, self.course_non_published, SIClient()),
+                         self.addcouse_worker(st4, self.course_published, SIClient()),
+                         self.addcouse_worker(st4, self.course_published, SIClient()),
+                         self.addcouse_worker(self.user_st1, self.course_non_published, SIClient()),
+                         self.addcouse_worker(self.user_st3, self.course_non_published, SIClient()),
+                         self.addcouse_worker(self.user_st3, self.course_non_published, SIClient()),
+                         ])

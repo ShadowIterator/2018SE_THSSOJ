@@ -23,8 +23,8 @@ from tornado.options import define, options
 
 
 def print_debug(*args, **kw):
-    print(*args, **kw)
-    # pass
+    # print(*args, **kw)
+    pass
 
 def print_test(*args, **kw):
     print(*args, **kw)
@@ -134,8 +134,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @catch_exception_write
     async def post(self, type):
-        print_debug('request = ', self.request.headers)
-        print_debug('post: ', type)
+        print_debug('''request-type = {type} request-header = {headers}'''.format(headers = self.request.headers, type = type))
+        # print_debug('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
         print_debug('return: ', res)
         self.write(json.dumps(res).encode())
