@@ -61,10 +61,11 @@ def handleTraditionalJudger():
 
 		tradiQ.task_done()
 		
-		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
-		stdoutdata, stderrdata = judger.communicate()
-		print('id: ', record_id, stdoutdata.decode())
-		judger.wait()
+		os.system(" ".join(params))
+		# judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
+		# stdoutdata, stderrdata = judger.communicate()
+		# print('id: ', record_id, stdoutdata.decode())
+		# judger.wait()
 
 		try:
 			with open("result.json", "r", encoding='utf-8') as f:
