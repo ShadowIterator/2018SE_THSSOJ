@@ -57,7 +57,6 @@ def handleTraditionalJudger():
 					sourceFile = 'checkers/testlib.h'
 					open(targetFile, "wb").write(open(sourceFile, "rb").read())
 
-					if ()
 		record_id = data['id']
 
 		tradiQ.task_done()

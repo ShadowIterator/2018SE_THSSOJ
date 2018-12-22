@@ -76,13 +76,13 @@ async def main():
                       )
     await app.async_init()
 
-    user_obj = await rdb.getObjectOne('users', id = 1)
-    print('main: ', user_obj)
-    user_obj['username'] = 'hz'
-    await rdb.saveObject('users', user_obj)
-    print('main-2: ', await rdb.getObjectOne('users', id = 1))
+    # user_obj = await rdb.getObjectOne('users', id = 1)
+    # print('main: ', user_obj)
+    # user_obj['username'] = 'hz'
+    # await rdb.saveObject('users', user_obj)
+    # print('main-2: ', await rdb.getObjectOne('users', id = 1))
 
-    await maybe_create_tables(db, 'sql/schema.sql')
+    # await maybe_create_tables(db, 'sql/schema.sql')
     app.listen(options.port)
     shutdown_event = tornado.locks.Event()
     await shutdown_event.wait()
