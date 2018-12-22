@@ -40,6 +40,7 @@ class ProblemBase extends Component {
             start: (page-1)*this.state.item_per_page + 1,
             end: page*this.state.item_per_page,
             // judge_method: 1
+            openness: 1
         };
         if(value > 1) {
             post_data['judge_method'] = value - 2;

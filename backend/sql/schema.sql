@@ -165,7 +165,9 @@ CREATE TABLE ratios (
 -- create items
 --INSERT INTO records (user_id, problem_id, homework_id, record_type) VALUES (1, 3, 1, 4);
 
---INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{2, 1}', 'liadf92wlfisajfli39alsdifj3isd');
+
+-- INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st','1234','siro@163.com', 1, '{2, 1}', 'liadf92wlfisajfli39alsdifj3isd');
+
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('st1','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('123hfzt23','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('hfz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
@@ -173,6 +175,8 @@ CREATE TABLE ratios (
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('zzz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 --INSERT INTO users (username, password, email, role, student_courses, secret) VALUES ('hfzzz','1234','siro@163.com', 1, '{2, 1, 3}', 'liadf92wlfisajfli39alsdifj3isd');
 
+
+-- UPDATE users SET username = 'hfzzz' WHERE id = 1;
 --UPDATE users SET username = 'hfzzz' WHERE id = 1;
 
 --UPDATE users SET student_courses = (CASE WHEN ARRAY[3] <@ student_courses THEN student_courses ELSE array_append(student_courses, 3) END) WHERE id = 1;
@@ -207,8 +211,8 @@ INSERT INTO users (username, password, email, role, TA_courses, student_courses,
 --INSERT INTO courses (name, description, TAs, students, status, homeworks, notices, start_time, end_time) VALUES ('software', 'xxxxxxxxxxxx', '{2}', '{1}', 1, '{1}', '{}', TIMESTAMP '2010-05-16 15:36:38', TIMESTAMP '2020-05-16 15:36:38');
 --
 
---INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status, ratio_one, ratio_two, ratio_three, ratio_one_limit, ratio_two_limit, ratio_three_limit) VALUES ('A+B', 1000, 1024, 0, 1, '{1, 2, 4}', 2, 1, 10, 20, 30, 10, 20, 30);
---INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, 1, '{3}', 2, 1);
+-- INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status, ratio_one, ratio_two, ratio_three, ratio_one_limit, ratio_two_limit, ratio_three_limit) VALUES ('A+B', 1000, 1024, 0, 1, '{1, 2, 4}', 2, 1, 10, 20, 30, 10, 20, 30);
+-- INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('ip_sort', 1000, 262144, 1, 1, '{3}', 2, 1);
 -- INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('HTML', 1000, 1024, 2, 0, '{}', 2, 1);
 --INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('hfzzz', 1000, 1024, 0, 1, '{1, 2, 4}', 2, 1);
 --INSERT INTO problems (title, time_limit, memory_limit, judge_method, openness, language, user_id, status) VALUES ('12hfzz3', 1000, 262144, 1, 1, '{3}', 2, 1);

@@ -271,9 +271,10 @@ class APIProblemHandler(base.BaseHandler):
             target_zip_path = target_path + '/script'
             del self.args['script_uri']
             need_rejudge = True
-        else:
-            self.set_res_dict(res_dict, code=1, msg='back off!')
-            return res_dict
+        # else:
+        #     self.set_res_dict(res_dict, code=1, msg='back off!')
+        #     return res_dict
+
         if zip_path != '':
             file_zip = zipfile.ZipFile(zip_path)
             if os.path.exists(target_zip_path):

@@ -514,7 +514,7 @@ class mStudentLessonMiddle extends Component {
         {
             breadcrumb=(<>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>未到截止日期作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未截止作业</Breadcrumb.Item>
             </>);
             if(this.state.homeworkitems.length !== 0) {
                 panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
@@ -527,7 +527,7 @@ class mStudentLessonMiddle extends Component {
         {
             breadcrumb=(<>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>已到截止日期作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已截止作业</Breadcrumb.Item>
             </>);
             if(this.state.homeworkitems.length !== 0) {
                 panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
@@ -602,9 +602,9 @@ class mStudentLessonMiddle extends Component {
                             style={{ height: '100%' }}
                         >
               <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />作业</span>}>
-                                <Menu.Item key="1">未到截止日期作业</Menu.Item>
-                                <Menu.Item key="2">已到截止日期作业</Menu.Item>
-                                <Menu.Item key="3">全部</Menu.Item>
+                                <Menu.Item key="1">未截止作业</Menu.Item>
+                                <Menu.Item key="2">已截止作业</Menu.Item>
+                                <Menu.Item key="3">全部作业</Menu.Item>
                             </SubMenu>
                             <Menu.Item key="5"><Icon type="notification" theme="twoTone" />通知</Menu.Item>
                             <Menu.Item key="6"><Icon type="info-circle" theme="twoTone" />课程信息</Menu.Item>

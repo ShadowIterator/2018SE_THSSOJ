@@ -95,6 +95,7 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
+
         if(cur_user['role'] < Roles.ADMIN):
             for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
                 if key in self.args:

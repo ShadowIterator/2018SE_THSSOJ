@@ -111,6 +111,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
+        self.root_dir = 'test_root/'
         options.parse_config_file('./settings/app_config.py')
         options.parse_config_file('./settings/env_config.py')
         self.db = None
@@ -123,7 +124,8 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('call get_app')
         return Application(None,
                           options.RoutineList,
-                          **options.AppConfig
+                          **options.AppConfig,
+                           root_dir = self.root_dir
                            )
 
     def getbodyObject(self, response):
@@ -158,6 +160,13 @@ class BaseTestCase(AsyncHTTPTestCase):
     
     async def login_object(self, obj, client = None):
         print_debug('login_object: ', obj, client)
+
+    async def logout(self, user_id):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=user_id))
+        self.assertEqual(response['code'], 0)
+
+    async def login_object(self, obj):
         response = self.getbodyObject(await self.post_request('/api/user/login',
                                                               username=obj['username'],
                                                               password=obj['password'],
@@ -165,6 +174,10 @@ class BaseTestCase(AsyncHTTPTestCase):
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
 
+    async def logout_object(self, obj):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=obj['id']))
+        self.assertEqual(response['code'], 0)
 
     async def post_request_return_object(self, url, client = None, *args, **kw):
         return self.getbodyObject(await self.post_request(url, client = client, *args, **kw))

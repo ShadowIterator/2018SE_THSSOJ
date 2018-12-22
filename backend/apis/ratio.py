@@ -14,3 +14,4 @@ class APIRatioHandler(base.BaseHandler):
 
     async def _list_post(self):
         return await self.db.querylr('ratios', self.args['start'], self.args['end'], **self.args)
+

@@ -391,6 +391,10 @@ class mHomeworkForm extends Component {
         event.stopPropagation();
         this.props.form.validateFields((err, fieldsValue) => {
             if (err) return;
+            if (this.state.problems.length === 0) {
+                message.error("请至少添加一道题目！");
+                return;
+            }
             if (this.state.isEditing) {
                 const data = {
                     id: this.props.homework_id,

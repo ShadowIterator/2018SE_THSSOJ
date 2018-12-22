@@ -353,7 +353,7 @@ class UserSettingsForm extends Component {
                         initialValue: this.state.username,
                         rules: [{ required: true, message: '请输入您的用户名' }],
                     })(
-                        <Input style={{ width: '100%' }} onChange={this.handleChange} />
+                        <Input style={{ width: '100%' }} disabled={true} />
                     )}
                 </FormItem>
                 <FormItem
