@@ -17,6 +17,7 @@ judger/*.txt
 backend/venv/
 backend/temp/
 backend/root/records
+backend/root/problems
 backend/pycharm_runner
 backend/test
 node_modules
