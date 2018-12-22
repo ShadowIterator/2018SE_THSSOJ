@@ -242,6 +242,7 @@ JudgerResult main_test(const JudgerConfig& judgerConfig){
 	cout << "outputsuf=" << judgerConfig.outputSuf << endl;
 	cout << "datadir=" << judgerConfig.dataDir << endl;
 	cout << "checker=" << judgerConfig.checker << endl;
+	cout << "checkerDir=" << judgerConfig.checkerDir << endl;
 	cout << "ntests=" << judgerConfig.ntests << endl;
 	cout << "sourcename=" << judgerConfig.source << endl;
 	cout << "sourcedir=" << judgerConfig.sourceDir << endl;

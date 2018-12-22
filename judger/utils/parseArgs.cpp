@@ -204,9 +204,11 @@ error_t tradi_judger_argp_parse_opt (int key, char *arg, struct argp_state *stat
 			config->sourceDir = arg;
 			break;
 		case 'r':
-			if (arg == "true")
+			// printf("builtin-checker\n");
+			if (std::string(arg) == "true") {
+				// printf("builtin-checker = %s\n", arg);
 				config->builtinChecker = true;
-			else
+			} else
 				config->builtinChecker = false;
 			break;
 		default:
