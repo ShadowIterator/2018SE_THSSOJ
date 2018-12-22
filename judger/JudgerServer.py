@@ -1,4 +1,4 @@
-import os
+import os, stat
 import zipfile
 import shutil
 import subprocess
@@ -90,6 +90,13 @@ def handleTraditionalJudger():
 		# 			'Info': "No comment",
 		# 			'id': record_id})
 
+def chmodr(path, mode):
+	for root, dirs, files in os.walk(path):
+		for d in dirs:
+			os.chmod(os.path.join(root, d), mode)
+		for f in files:
+			os.chmod(os.path.join(root, f), mode)
+
 def handleScriptJudger():
 	while (True):
 		try:
@@ -134,6 +141,9 @@ def handleScriptJudger():
 					]
 
 		scriptQ.task_done()
+
+		chmodr(data['WORK_PATH'], 0o777)
+
 		judger = subprocess.Popen(params, stdout=subprocess.PIPE, close_fds=True)
 		stdoutdata, stderrdata = judger.communicate()
 		print(stdoutdata.decode())

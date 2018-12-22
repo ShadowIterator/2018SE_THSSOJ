@@ -178,7 +178,7 @@ class RegistrationForm extends React.Component {
                         data.code_uri = this.state.upload_code.uri;
                     }
                     if(this.state.reupload_script) {
-                        data.script_uri = this.state.upload_script;
+                        data.script_uri = this.state.upload_script.uri;
                     }
                 } else if(this.state.judge_method === 2) {
                     data = {
@@ -1015,6 +1015,7 @@ class ProblemCreate extends Component {
                 if(result.data.length === 0) {
                     return;
                 }
+                console.log("problem data", result.data);
                 const prob = result.data[0];
                 that.setState({
                     problem_id: prob.id,
