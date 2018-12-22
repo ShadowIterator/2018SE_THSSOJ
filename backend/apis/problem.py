@@ -161,8 +161,13 @@ class APIProblemHandler(base.BaseHandler):
             elif test_language == 4:
                 judge_req['Language'] = 'Python'
             judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
-            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-            judge_req['CHECKER'] = 'ncmp'
+            if config_info['BUILTIN_CHECKER']:
+                judge_req['BUILTIN_CHECKER'] = True
+                judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
+            else:
+                judge_req['BUILTIN_CHECKER'] = False
+                # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            judge_req['CHECKER'] = config_info['CHECKER']
             judge_req['NTESTS'] = config_info['NTESTS']
             judge_req['SOURCE_FILE'] = str_id
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
@@ -335,8 +340,13 @@ class APIProblemHandler(base.BaseHandler):
                 elif test_language == 4:
                     judge_req['Language'] = 'Python'
                 judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
-                judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-                judge_req['CHECKER'] = 'ncmp'
+                if config_info['BUILTIN_CHECKER']:
+                    judge_req['BUILTIN_CHECKER'] = True
+                    judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
+                else:
+                    judge_req['BUILTIN_CHECKER'] = False
+                # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+                # judge_req['CHECKER'] = 'ncmp'
                 judge_req['NTESTS'] = config_info['NTESTS']
                 judge_req['SOURCE_FILE'] = str_record_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
@@ -622,8 +632,13 @@ class APIProblemHandler(base.BaseHandler):
             elif self.args['src_language'] == 4:
                 judge_req['Language'] = 'Python'
             judge_req['DATA_DIR'] = case_path
-            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-            judge_req['CHECKER'] = 'ncmp'
+            if config_info['BUILTIN_CHECKER']:
+                judge_req['BUILTIN_CHECKER'] = True
+                judge_req['CHECKER_DIR'] = case_path
+            else:
+                judge_req['BUILTIN_CHECKER'] = False
+            # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            # judge_req['CHECKER'] = 'ncmp'
             if self.args['record_type'] == 0:
                 judge_req['NTESTS'] = config_info['NTESTS']
             elif self.args['record_type'] == 1:
@@ -751,8 +766,6 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['OUTPRE'] = config_info['OUTPRE']
             judge_req['OUTSUF'] = config_info['OUTSUF']
             judge_req['NTESTS'] = config_info['NTESTS']
-            judge_req['CHECKER'] = 'ncmp'
-
 
             for each_record in final_records:
                 str_id = str(each_record['id'])
@@ -766,7 +779,13 @@ class APIProblemHandler(base.BaseHandler):
                 elif src_language == 4:
                     judge_req['Language'] = 'Python'
                 judge_req['DATA_DIR'] = case_path
-                judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+                # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+                # judge_req['CHECKER'] = 'ncmp'
+                if config_info['BUILTIN_CHECKER']:
+                    judge_req['BUILTIN_CHECKER'] = True
+                    judge_req['CHECKER_DIR'] = case_path
+                else:
+                    judge_req['BUILTIN_CHECKER'] = False
                 judge_req['SOURCE_FILE'] = str_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
                 requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
@@ -872,8 +891,13 @@ class APIProblemHandler(base.BaseHandler):
             elif record['src_language'] == 4:
                 judge_req['Language'] = 'Python'
             judge_req['DATA_DIR'] = case_path
-            judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-            judge_req['CHECKER'] = 'ncmp'
+            # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+            # judge_req['CHECKER'] = 'ncmp'
+            if config_info['BUILTIN_CHECKER']:
+                judge_req['BUILTIN_CHECKER'] = True
+                judge_req['CHECKER_DIR'] = case_path
+            else:
+                judge_req['BUILTIN_CHECKER'] = False
             judge_req['NTESTS'] = config_info['NTESTS']
             judge_req['SOURCE_FILE'] = str(record['id'])
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
