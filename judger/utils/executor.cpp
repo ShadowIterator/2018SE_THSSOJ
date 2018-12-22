@@ -160,9 +160,18 @@ void childMainWork(){
     
     if (execv(argv[0], argv) == -1){
     	// cout << "execv error. errno = " << errno << endl;
+    	for (int i = 0; i < sz; ++i) {
+	    	delete[] argv[i];
+	    }
+	    delete[] argv;
     	printf("execv error. errno = %d", errno);
     	exit(execvError);
     }
+
+    for (int i = 0; i < sz; ++i) {
+    	delete[] argv[i];
+    }
+    delete[] argv;
 }
 
 pid_t apid; // this is an assist pid for forking a new process
