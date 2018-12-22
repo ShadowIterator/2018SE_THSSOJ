@@ -226,6 +226,10 @@ argp tradi_judger_margs = {
 };
 
 void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
+	char cwd[512];
+	getcwd(cwd, 512);
+
+
 	judgerConfig.time = 1;
 	judgerConfig.memory = 128;
 	judgerConfig.output = 64;
@@ -234,7 +238,7 @@ void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
 	judgerConfig.outputPre = "test";
 	judgerConfig.outputSuf = "ans";
 	judgerConfig.checker = "ncmp";
-	judgerConfig.checkerDir = default_checker_dir;
+	judgerConfig.checkerDir = string(cwd)+"/"+default_checker_dir;
 	judgerConfig.Lang = "C";
 	judgerConfig.dataDir = "/tmp";
 	judgerConfig.ntests = 10;
