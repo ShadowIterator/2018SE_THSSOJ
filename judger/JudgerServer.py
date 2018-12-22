@@ -167,7 +167,7 @@ def handleScriptJudger():
 					  'secret': options.secret}
 				try:
 					with open(jr['res']['Info'], "r", encoding='utf-8') as res:
-						js['res']['Info'] = res.read(500)
+						jr['res']['Info'] = res.read(500)
 				except:
 					pass
 				# print(jr)
