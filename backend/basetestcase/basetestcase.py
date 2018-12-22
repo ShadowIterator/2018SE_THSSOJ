@@ -48,7 +48,9 @@ def async_aquire_db(func):
         await self.set_application_db()
         await self._app.async_init()
         await self.prepare()
-        return await func(self, *args, **kw)
+        res = await func(self, *args, **kw)
+        await self.done()
+        return res
     return wrapper
 
 class SIClient:
@@ -73,6 +75,9 @@ class SIClient:
 
 class BaseTestCase(AsyncHTTPTestCase):
     async def prepare(self):
+        pass
+
+    async def done(self):
         pass
 
     async def set_application_db(self):

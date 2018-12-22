@@ -85,8 +85,9 @@ async def maybe_create_tables(db, filename):
     #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
-    def __init__(self, db, *args, **kw):
+    def __init__(self, db, root_dir = 'root/', *args, **kw):
         self.db_instance = db
+        self.root_dir = root_dir
         super(Application, self).__init__(*args, **kw)
 
     def setDB(self, db):
@@ -114,7 +115,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        self.root_dir='root'
+        self.root_dir= self.application.root_dir
         self.user = None
 
     # async def get(self, type): #detail

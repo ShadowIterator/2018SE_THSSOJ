@@ -71,7 +71,8 @@ async def main():
     rdb = BaseDB(db)
     app = Application(rdb,
                       options.RoutineList,
-                      **options.AppConfig
+                      **options.AppConfig,
+                      root_dir='root/'
                       )
     await app.async_init()
 

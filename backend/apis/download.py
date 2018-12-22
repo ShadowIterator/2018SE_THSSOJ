@@ -20,7 +20,7 @@ class APIDownloadHandler(base.BaseHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        self.root_dir='root/'
+        # self.root_dir='root/'
         self.user = None
 
         # self.dir =  'tmp/'

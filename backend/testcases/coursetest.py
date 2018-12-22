@@ -351,7 +351,7 @@ class CourseTestCase(BaseTestCase):
         # response = await self.post_request_return_object('/api/user/query', id = user['id'], client = client)
         # self.assertIsInstance(response, list)
         # self.assertEqual(1, len(response))
-        
+
     @async_aquire_db
     async def test_addCourse_2(self):
         # addcouse 2 multi access
