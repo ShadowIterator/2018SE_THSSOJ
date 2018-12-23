@@ -44,6 +44,7 @@ class BaseDB:
         self.tables['notices'] = Notices(self, 'notices')
         self.tables['judgestates'] = Judgestates(self, 'judgestates')
         self.tables['ratios'] = Ratios(self, 'ratios')
+        self.tables['global'] = Global(self, 'global', 2047)
 
     async def async_init(self):
         for name, table in self.tables.items():
@@ -425,4 +426,7 @@ class Judgestates(BaseTable):
     pass
 
 class Ratios(BaseTable):
+    pass
+
+class Global(BaseTable):
     pass
