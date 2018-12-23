@@ -26,6 +26,8 @@ class APIRecordHandler(base.BaseHandler):
             self.args['submit_time'] = datetime.datetime.fromtimestamp(self.args['submit_time'])
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('records', self.args['start'], self.args['end'], **self.args)
 
     @tornado.web.authenticated
@@ -52,7 +54,7 @@ class APIRecordHandler(base.BaseHandler):
                 # config_info = json.load(config_file)
                 # config_file.close()
                 if record['test_ratio'] == 1:
-                    record['test_ratio'] == problem['ratio_one']
+                    record['test_ratio'] = problem['ratio_one']
                 elif record['test_ratio'] == 2:
                     record['test_ratio'] = problem['ratio_two']
                 elif record['test_ratio'] == 3:
