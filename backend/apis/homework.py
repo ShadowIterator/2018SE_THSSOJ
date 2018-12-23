@@ -11,6 +11,8 @@ class APIHomeworkHandler(base.BaseHandler):
         self.root_dir = self.root_dir+'/homeworks'
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('homeworks', self.args['start'], self.args['end'], **self.args)
 
     def getargs(self):

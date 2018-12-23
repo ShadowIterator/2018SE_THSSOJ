@@ -37,8 +37,17 @@ class APIProblemHandler(base.BaseHandler):
 
 
     async def _list_post(self):
-        return await self.db.querylr('problems', self.args['start'], self.args['end'], **self.args)
-
+        cur_user = await self.get_current_user_object()
+        res = await self.db.querylr('problems', self.args['start'], self.args['end'], **self.args)
+        if(cur_user['role'] == Roles.ADMIN):
+            return res
+        else:
+            rtn = []
+            for prob in res:
+                if(prob['openness'] == 1):
+                    rtn.append(prob)
+            return rtn
+        
     async def _createHTML_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] >= Roles.TA)

@@ -676,34 +676,34 @@ class ProblemTestCase(BaseTestCase):
         print_test('submit worker get response: ', response)
         # self.assertEqual(0, response['code'])
 
-    # @async_aquire_db
-    # async def test_submit_2(self):
-    #     """
-    #     course-homework submit multi-worker check ratio lock
-    #     :return:
-    #     """
-    #     print_test('test_submit_2:')
-    #     uri = self.url + '/submit'
-    #     cur_user = self.user_st1
-    #     tar_problem = self.problem_1_ta1
-    #     tar_homework = self.homework_submitable
-    #     request_param = {
-    #         'user_id': cur_user['id'],
-    #         'problem_id': tar_problem['id'],
-    #         'homework_id': tar_homework['id'],
-    #         'record_type': RecordTypes.TEST,
-    #         'src_code': 'hello,world',
-    #         'src_language': Languages.CPP,
-    #         'test_ratio': 3,
-    #     }
-    #     await gen.multi([
-    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 0),
-    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 1),
-    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 2),
-    #     ])
-    #
-    #     records = await self.recordTable.getObject(**request_param)
-    #     self.assertEqual(tar_problem['ratio_three_limit'], len(records))
+    @async_aquire_db
+    async def test_submit_2(self):
+        """
+        course-homework submit multi-worker check ratio lock
+        :return:
+        """
+        print_test('test_submit_2:')
+        uri = self.url + '/submit'
+        cur_user = self.user_st1
+        tar_problem = self.problem_1_ta1
+        tar_homework = self.homework_submitable
+        request_param = {
+            'user_id': cur_user['id'],
+            'problem_id': tar_problem['id'],
+            'homework_id': tar_homework['id'],
+            'record_type': RecordTypes.TEST,
+            'src_code': 'hello,world',
+            'src_language': Languages.CPP,
+            'test_ratio': 3,
+        }
+        await gen.multi([
+            self.submit_worker(uri, cur_user, request_param, SIClient(), 0),
+            self.submit_worker(uri, cur_user, request_param, SIClient(), 1),
+            self.submit_worker(uri, cur_user, request_param, SIClient(), 2),
+        ])
+
+        records = await self.recordTable.getObject(**request_param)
+        self.assertEqual(tar_problem['ratio_three_limit'], len(records))
 
     @async_aquire_db
     async def test_submit_3(self):
