@@ -301,8 +301,6 @@ class APIProblemHandler(base.BaseHandler):
             file_zip.extractall(target_zip_path)
             os.remove(zip_path)
 
-
-
         if 'code_uri' in self.args:
             code_path = self.root_dir.replace('/problems', '') + '/' + self.args['code_uri']
             del self.args['code_uri']
@@ -314,7 +312,10 @@ class APIProblemHandler(base.BaseHandler):
             shutil.copyfile(code_path, target_code_path + '/' + str(problem_id) + '.code')
             target_problem['status'] = 0
             need_rejudge = True
-            
+
+        if 'test_language' in self.args:
+            target_problem['status'] = 0
+            need_rejudge = True
             
 
         for key in self.args.keys():
@@ -360,7 +361,6 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
                 if config_info['BUILTIN_CHECKER']:
                     judge_req['BUILTIN_CHECKER'] = True
-                    
                 else:
                     judge_req['BUILTIN_CHECKER'] = False
                     judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
@@ -369,7 +369,6 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['NTESTS'] = config_info['NTESTS']
                 judge_req['SOURCE_FILE'] = str_record_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
-                print('god damn checker', judge_req)
                 requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
             elif target_problem['judge_method'] == 1:
                 judge_req = {}
