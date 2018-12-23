@@ -48,15 +48,15 @@ class APIRecordHandler(base.BaseHandler):
                     config_path = os.getcwd() + '/' + self.root_dir.replace('records', 'problems') + '/' + \
                                   str(problem['id']) + '/script/config.json'
 
-                config_file = open(config_path, mode='r', encoding='utf8')
-                config_info = json.load(config_file)
-                config_file.close()
+                # config_file = open(config_path, mode='r', encoding='utf8')
+                # config_info = json.load(config_file)
+                # config_file.close()
                 if record['test_ratio'] == 1:
-                    record['test_ratio'] == int(problem['ratio_one']*config_info['NTESTS']/100)
+                    record['test_ratio'] == problem['ratio_one']
                 elif record['test_ratio'] == 2:
-                    record['test_ratio'] = int(problem['ratio_two']*config_info['NTESTS']/100)
+                    record['test_ratio'] = problem['ratio_two']
                 elif record['test_ratio'] == 3:
-                    record['test_ratio'] = int(problem['ratio_three']*config_info['NTESTS']/100)
+                    record['test_ratio'] = problem['ratio_three']
             # authority check
             if record['record_type'] == 0:
                 if cur_user['role'] < 3 and record['user_id'] != cur_user['id']:

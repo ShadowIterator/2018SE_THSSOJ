@@ -9,7 +9,7 @@ from .base import *
 
 class APIUploadHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
-        super(APIUploadHandler, self).__init__(*args, **kw)
+        super(BaseHandler, self).__init__(*args, **kw)
         self.db = self.application.db_instance
         # self.getargs()
         self.set_header("Access-Control-Allow-Origin", "http://localhost:3000")
@@ -17,7 +17,7 @@ class APIUploadHandler(base.BaseHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        # self.root_dir='root/'
+        self.root_dir=self.application.root_dir
         self.dir =  'tmp/'
         self.user = None
         # print_debug(self.request.body)
