@@ -45,8 +45,6 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
 
-	// chmod(Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(), 0x777);
-
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
 			ostringstream oss;
