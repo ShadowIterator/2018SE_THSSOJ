@@ -16,5 +16,7 @@ class APIRatioHandler(base.BaseHandler):
         return return_result
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('ratios', self.args['start'], self.args['end'], **self.args)
 
