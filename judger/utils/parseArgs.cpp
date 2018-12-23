@@ -204,9 +204,11 @@ error_t tradi_judger_argp_parse_opt (int key, char *arg, struct argp_state *stat
 			config->sourceDir = arg;
 			break;
 		case 'r':
-			if (arg == "true")
+			// printf("builtin-checker\n");
+			if (std::string(arg) == "true") {
+				// printf("builtin-checker = %s\n", arg);
 				config->builtinChecker = true;
-			else
+			} else
 				config->builtinChecker = false;
 			break;
 		default:
@@ -224,6 +226,10 @@ argp tradi_judger_margs = {
 };
 
 void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
+	char cwd[512];
+	getcwd(cwd, 512);
+
+
 	judgerConfig.time = 1;
 	judgerConfig.memory = 128;
 	judgerConfig.output = 64;
@@ -232,7 +238,7 @@ void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
 	judgerConfig.outputPre = "test";
 	judgerConfig.outputSuf = "ans";
 	judgerConfig.checker = "ncmp";
-	judgerConfig.checkerDir = default_checker_dir;
+	judgerConfig.checkerDir = string(cwd)+"/"+default_checker_dir;
 	judgerConfig.Lang = "C";
 	judgerConfig.dataDir = "/tmp";
 	judgerConfig.ntests = 10;

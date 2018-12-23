@@ -66,7 +66,7 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _create_post(self):
-        print_debug('create-problem: ', self.args['code_uri'], self.args['case_uri'])
+        # print_debug('create-problem: ', self.args['code_uri'], self.args['case_uri'])
 
         res_dict={}
         # authority check
@@ -172,9 +172,10 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
             if config_info['BUILTIN_CHECKER']:
                 judge_req['BUILTIN_CHECKER'] = True
-                judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
+                
             else:
                 judge_req['BUILTIN_CHECKER'] = False
+                judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
                 # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = config_info['CHECKER']
             judge_req['NTESTS'] = config_info['NTESTS']
@@ -300,8 +301,6 @@ class APIProblemHandler(base.BaseHandler):
             file_zip.extractall(target_zip_path)
             os.remove(zip_path)
 
-
-
         if 'code_uri' in self.args:
             code_path = self.root_dir.replace('/problems', '') + '/' + self.args['code_uri']
             del self.args['code_uri']
@@ -313,7 +312,10 @@ class APIProblemHandler(base.BaseHandler):
             shutil.copyfile(code_path, target_code_path + '/' + str(problem_id) + '.code')
             target_problem['status'] = 0
             need_rejudge = True
-            
+
+        if 'test_language' in self.args:
+            target_problem['status'] = 0
+            need_rejudge = True
             
 
         for key in self.args.keys():
@@ -359,15 +361,14 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['DATA_DIR'] = os.getcwd() + '/' + target_zip_path
                 if config_info['BUILTIN_CHECKER']:
                     judge_req['BUILTIN_CHECKER'] = True
-                    judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
                 else:
                     judge_req['BUILTIN_CHECKER'] = False
+                    judge_req['CHECKER_DIR'] = os.getcwd() + '/' + target_zip_path
                 # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
                 judge_req['CHECKER'] = config_info['CHECKER']
                 judge_req['NTESTS'] = config_info['NTESTS']
                 judge_req['SOURCE_FILE'] = str_record_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
-                print('god damn checker', judge_req)
                 requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
             elif target_problem['judge_method'] == 1:
                 judge_req = {}
@@ -602,7 +603,7 @@ class APIProblemHandler(base.BaseHandler):
         if 'homework_id' in self.args:
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
             # matched_homework['records'].append(record_created['id'])
-            await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
+            await self.db.saveObject('homeworks', object=matched_homework)
 
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
@@ -652,9 +653,10 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['DATA_DIR'] = case_path
             if config_info['BUILTIN_CHECKER']:
                 judge_req['BUILTIN_CHECKER'] = True
-                judge_req['CHECKER_DIR'] = case_path
+                
             else:
                 judge_req['BUILTIN_CHECKER'] = False
+                judge_req['CHECKER_DIR'] = case_path
             # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
             judge_req['CHECKER'] = config_info['CHECKER']
             if self.args['record_type'] == 0:
@@ -801,9 +803,10 @@ class APIProblemHandler(base.BaseHandler):
                 judge_req['CHECKER'] = config_info['CHECKER']
                 if config_info['BUILTIN_CHECKER']:
                     judge_req['BUILTIN_CHECKER'] = True
-                    judge_req['CHECKER_DIR'] = case_path
+                    
                 else:
                     judge_req['BUILTIN_CHECKER'] = False
+                    judge_req['CHECKER_DIR'] = case_path
                 judge_req['SOURCE_FILE'] = str_id
                 judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
                 requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
@@ -913,9 +916,10 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['CHECKER'] = config_info['CHECKER']
             if config_info['BUILTIN_CHECKER']:
                 judge_req['BUILTIN_CHECKER'] = True
-                judge_req['CHECKER_DIR'] = case_path
+                
             else:
                 judge_req['BUILTIN_CHECKER'] = False
+                judge_req['CHECKER_DIR'] = case_path
             judge_req['NTESTS'] = config_info['NTESTS']
             judge_req['SOURCE_FILE'] = str(record['id'])
             judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir

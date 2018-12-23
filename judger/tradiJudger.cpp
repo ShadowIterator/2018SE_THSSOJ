@@ -45,8 +45,6 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
 
-	// chmod(Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(), 0x777);
-
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
 			ostringstream oss;
@@ -242,6 +240,7 @@ JudgerResult main_test(const JudgerConfig& judgerConfig){
 	cout << "outputsuf=" << judgerConfig.outputSuf << endl;
 	cout << "datadir=" << judgerConfig.dataDir << endl;
 	cout << "checker=" << judgerConfig.checker << endl;
+	cout << "checkerDir=" << judgerConfig.checkerDir << endl;
 	cout << "ntests=" << judgerConfig.ntests << endl;
 	cout << "sourcename=" << judgerConfig.source << endl;
 	cout << "sourcedir=" << judgerConfig.sourceDir << endl;
