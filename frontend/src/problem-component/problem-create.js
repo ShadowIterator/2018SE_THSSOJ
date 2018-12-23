@@ -11,7 +11,6 @@ import { Layout, Breadcrumb, Form, Input, Select, Row,
     Col, Checkbox, Button, Switch, Upload, Icon, Radio, message } from 'antd';
 const {Content} = Layout;
 const Option = Select.Option;
-const {TextArea} = Input;
 const FormItem = Form.Item;
 
 const mapper = {
@@ -56,6 +55,10 @@ class RegistrationForm extends React.Component {
     handleSubmit = (e) => {
         e.preventDefault();
         this.props.form.validateFieldsAndScroll((err, values) => {
+            if(!err && this.state.mde_description.length === 0) {
+                message.error("题目描述不能为空");
+                return;
+            }
             if (!err && !this.props.isEditing) {
                 let data = {};
                 if(this.state.judge_method === 0) {
@@ -187,13 +190,13 @@ class RegistrationForm extends React.Component {
                         // description: values.description,
                         description: this.state.mde_description,
                     };
-                    console.log("Create HTML problem", data);
-                    ajax_post(api_list['create_html'], data, this, (that, result) => {
+                    console.log("Update HTML problem", data);
+                    ajax_post(api_list['update_problem'], data, this, (that, result) => {
                         if(result.data.code === 0) {
-                            message.success("成功创建题目");
+                            message.success("成功编辑题目");
                             this.props.history.push('/myproblem');
                         } else {
-                            message.error("创建题目失败");
+                            message.error("编辑题目失败");
                         }
                     });
                     return;
@@ -338,20 +341,19 @@ class RegistrationForm extends React.Component {
                     label="题目描述"
                     hasFeedback
                 >
-                    <SimpleMDE
-                    onChange={(value)=>{this.setState({mde_description: value})}}
-                    value={this.state.mde_description}
-                    options={{
-                    spellChecker: false,
-                    hideIcons: ['fullscreen','side-by-side']
-                    }}
-                    />
                     {/*{getFieldDecorator('description', {*/}
                         {/*rules: [{*/}
                             {/*required: true, message: '请输入题目描述！',*/}
                         {/*}],*/}
                     {/*})(*/}
-                        {/*<TextArea />*/}
+                        <SimpleMDE
+                            onChange={(value)=>{this.setState({mde_description: value})}}
+                            value={this.state.mde_description}
+                            options={{
+                                spellChecker: false,
+                                hideIcons: ['fullscreen','side-by-side']
+                            }}
+                        />
                     {/*)}*/}
                 </FormItem>
                 {this.state.judge_method !== 2 &&
