@@ -43,10 +43,12 @@ class APIProblemHandler(base.BaseHandler):
             return res
         else:
             rtn = []
-            for prob in res:
+            for prob in res['list']:
+                print_debug('problem_list', prob)
                 if(prob['openness'] == 1):
                     rtn.append(prob)
-            return rtn
+            res['list'] = rtn
+            return res
 
     async def _createHTML_post(self):
         cur_user = await self.get_current_user_object()
