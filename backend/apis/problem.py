@@ -597,7 +597,14 @@ class APIProblemHandler(base.BaseHandler):
                 return res_dict
             await self.db.saveObject('ratios', object=check_ratio)
 
-        record_created = await self.db.createObject('records', **self.args)
+        if self.args['record_type'] == 2:
+            possible_records = await self.db.createObject('records', **self.args)
+            if len(possible_records):
+                record_created = possible_records[0]
+            else:
+                record_created = await self.db.createObject('records', **self.args)
+        else:
+            record_created = await self.db.createObject('records', **self.args)
 
         # await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
         if 'homework_id' in self.args:
