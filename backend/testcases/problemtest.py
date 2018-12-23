@@ -818,9 +818,9 @@ class ProblemTestCase(BaseTestCase):
         print_test('submit5-judgestates: ', judgestate_after_post)
         self.assertEqual(1, judgestate_after_post['total'])
 
-    @async_aquire_db
-    async def test_list(self):
-        print_test('test_list')
-        await self.login_object(self.user_st1)
-        response = await self.post_request_return_object(self.url + '/list', start = 1, end = 2)
-        print_test(response)
+    # @async_aquire_db
+    # async def test_list(self):
+    #     print_test('test_list')
+    #     await self.login_object(self.user_st1)
+    #     response = await self.post_request_return_object(self.url + '/list', start = 1, end = 2)
+    #     print_test(response)

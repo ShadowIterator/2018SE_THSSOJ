@@ -194,7 +194,7 @@ class APIDownloadHandler(base.BaseHandler):
                 self.make_record_info(single_record_info, student, homework, record)
             csv_list.append(single_record_info)
 
-        if os.path.exists(self.root_dir+'serverfiles'):
+        if not os.path.exists(self.root_dir+'serverfiles'):
             os.makedirs(self.root_dir+'serverfiles')
         target_path = self.root_dir+'serverfiles/'+'homework{h_id}_problem{p_id}.csv'.format(h_id=homework_id, p_id=problem_id)
         write_csv = open(target_path, 'w', newline='')
