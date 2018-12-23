@@ -339,10 +339,12 @@ class APIProblemHandler(base.BaseHandler):
                 target_zip_path = target_path+'/case'
             elif target_problem['judge_method'] == 1:
                 target_zip_path = target_path+'/script'
-            config_file = open(target_zip_path + '/config.json', mode='r', encoding='utf8')
-            config_info = json.load(config_file)
+
             test_language = target_problem['test_language']
             if target_problem['judge_method'] == 0:
+                config_file = open(target_zip_path + '/config.json', mode='r', encoding='utf8')
+                config_info = json.load(config_file)
+                config_file.close()
                 judge_req = {}
                 judge_req['id'] = record['id']
                 judge_req['TIME_LIMIT'] = target_problem['time_limit']
