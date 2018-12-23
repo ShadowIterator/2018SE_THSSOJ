@@ -11,6 +11,7 @@ import datetime
 import zipfile
 from tornado.options import options, define
 from tornado import gen
+from copy import deepcopy
 define('judgerSecret', default='no_secret', help='secret', type=str)
 
 class Languages:
@@ -668,36 +669,93 @@ class ProblemTestCase(BaseTestCase):
 
     async def submit_woker(self, uri, cur_user, request_param, client, worker_id):
         print_test('submit_wokder:', worker_id)
+        request_param['user_id'] = cur_user['id']
         await self.login_object(cur_user, client = client)
+        print_test('submit_woker-user = ', cur_user['id'], client.user_id_cookie, request_param['user_id'])
         response = await self.post_request_return_object(uri, **request_param, client = client)
         print_test('submit worker get response: ', response)
+        # self.assertEqual(0, response['code'])
+
+    # @async_aquire_db
+    # async def test_submit_2(self):
+    #     """
+    #     course-homework submit multi-worker check ratio lock
+    #     :return:
+    #     """
+    #     print_test('test_submit_2:')
+    #     uri = self.url + '/submit'
+    #     cur_user = self.user_st1
+    #     tar_problem = self.problem_1_ta1
+    #     tar_homework = self.homework_submitable
+    #     request_param = {
+    #         'user_id': cur_user['id'],
+    #         'problem_id': tar_problem['id'],
+    #         'homework_id': tar_homework['id'],
+    #         'record_type': RecordTypes.TEST,
+    #         'src_code': 'hello,world',
+    #         'src_language': Languages.CPP,
+    #         'test_ratio': 3,
+    #     }
+    #     await gen.multi([
+    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 0),
+    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 1),
+    #         self.submit_woker(uri, cur_user, request_param, SIClient(), 2),
+    #     ])
+    #
+    #     records = await self.recordTable.getObject(**request_param)
+    #     self.assertEqual(tar_problem['ratio_three_limit'], len(records))
 
     @async_aquire_db
-    async def test_submit_2(self):
+    async def test_submit_3(self):
         """
-        course-homework submit multi-worker
+        course-homework submit multi-worker check judgestates lock
         :return:
         """
-        print_test('test_submit_2:')
+        print_test('test_submit_3:')
         uri = self.url + '/submit'
         cur_user = self.user_st1
         tar_problem = self.problem_1_ta1
         tar_homework = self.homework_submitable
         request_param = {
-            'user_id': cur_user['id'],
+            # 'user_id': None,
             'problem_id': tar_problem['id'],
             'homework_id': tar_homework['id'],
-            'record_type': RecordTypes.TEST,
+            'record_type': RecordTypes.SUBMIT,
             'src_code': 'hello,world',
             'src_language': Languages.CPP,
-            'test_ratio': 3,
         }
         await gen.multi([
-            self.submit_woker(uri, cur_user, request_param, SIClient(), 0),
-            self.submit_woker(uri, cur_user, request_param, SIClient(), 1),
-            self.submit_woker(uri, cur_user, request_param, SIClient(), 2),
+            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+            self.submit_woker(uri, self.user_st2, deepcopy(request_param), SIClient(), 1),
+            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 2),
         ])
-
+        await gen.multi([
+            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+        ])
+        # judgestate_after_post = await self.db.getObject('judgestates', homework_id = tar_homework['id'], problem_id = tar_problem['id'])
+        # self.assertIsInstance(judgestate_after_post, list)
+        # self.assertEqual(1, len(judgestate_after_post))
+        # judgestate_after_post = judgestate_after_post[0]
+        # self.assertEqual(2, judgestate_after_post['total'])
         records = await self.recordTable.getObject(**request_param)
-        self.assertEqual(tar_problem['ratio_three_limit'], len(records))
-       
+        self.assertIsInstance(records, list)
+        # self.assertEqual(2, len(records))
+
+        # print()
+        for record in records:
+            # response = await self.post_request_return_object(self.returnresult_url,
+            #                                                  id=record['id'],
+            #                                                  res={
+            #                                                      'Result': 'Accept',
+            #                                                      'time': 12,
+            #                                                      'memory': 123,
+            #                                                      'Info': 'ok',
+            #                                                  },
+            #                                                  secret=options.judgerSecret)
+            # self.assertEqual(0, response['code'])
+            print_test('test_submit_3-after: ', record)
+
+        records_after_judge = await self.recordTable.getObject(**request_param)
+
+        # records = await self.recordTable.getObject(**request_param)
+        # self.assertEqual(tar_problem['ratio_three_limit'], len(records))

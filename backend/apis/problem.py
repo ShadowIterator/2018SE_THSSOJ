@@ -498,6 +498,8 @@ class APIProblemHandler(base.BaseHandler):
         record_type = self.args['record_type']
         if record_type == 1 or record_type == 2 or record_type == 4:
             cur_user = await self.get_current_user_object()
+            # assert (cur_user['id'] == self.args['user_id'])
+            # print_debug('submit-post: ', cur_user['id'], self.args['user_id'])
             # problem = (await self.db.getObject('problems', id=self.args['problem_id']))[0]
             homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
             course = (await self.db.getObject('courses', id=homework['course_id']))[0]
