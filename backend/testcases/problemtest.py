@@ -730,32 +730,27 @@ class ProblemTestCase(BaseTestCase):
             self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 2),
         ])
         await gen.multi([
-            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3),
         ])
-        # judgestate_after_post = await self.db.getObject('judgestates', homework_id = tar_homework['id'], problem_id = tar_problem['id'])
-        # self.assertIsInstance(judgestate_after_post, list)
-        # self.assertEqual(1, len(judgestate_after_post))
-        # judgestate_after_post = judgestate_after_post[0]
-        # self.assertEqual(2, judgestate_after_post['total'])
+
+        judgestate_after_post = await self.db.getObject('judgestates', homework_id = tar_homework['id'], problem_id = tar_problem['id'])
+        self.assertIsInstance(judgestate_after_post, list)
+        self.assertEqual(1, len(judgestate_after_post))
+        judgestate_after_post = judgestate_after_post[0]
+        self.assertEqual(2, judgestate_after_post['total'])
         records = await self.recordTable.getObject(**request_param)
         self.assertIsInstance(records, list)
-        # self.assertEqual(2, len(records))
+        self.assertEqual(2, len(records))
 
-        # print()
         for record in records:
-            # response = await self.post_request_return_object(self.returnresult_url,
-            #                                                  id=record['id'],
-            #                                                  res={
-            #                                                      'Result': 'Accept',
-            #                                                      'time': 12,
-            #                                                      'memory': 123,
-            #                                                      'Info': 'ok',
-            #                                                  },
-            #                                                  secret=options.judgerSecret)
-            # self.assertEqual(0, response['code'])
-            print_test('test_submit_3-after: ', record)
+            response = await self.post_request_return_object(self.returnresult_url,
+                                                             id=record['id'],
+                                                             res={
+                                                                 'Result': 'Accept',
+                                                                 'time': 12,
+                                                                 'memory': 123,
+                                                                 'Info': 'ok',
+                                                             },
+                                                             secret=options.judgerSecret)
+            self.assertEqual(0, response['code'])
 
-        records_after_judge = await self.recordTable.getObject(**request_param)
-
-        # records = await self.recordTable.getObject(**request_param)
-        # self.assertEqual(tar_problem['ratio_three_limit'], len(records))
