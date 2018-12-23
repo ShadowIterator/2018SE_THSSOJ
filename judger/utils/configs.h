@@ -40,7 +40,8 @@ enum JudgeResult{
 std::string JudgeResult2string(JudgeResult jr);
 void StringFormat(std::string&);
 
-const std::string default_checker_dir = "/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers";
+// const std::string default_checker_dir = "/home/ycdfwzy/github/2018SE_THSSOJ/judger/checkers";
+const std::string default_checker_dir = "checkers/";
 
 class runLimit{
 public:
@@ -89,6 +90,7 @@ public:
 	std::string dataDir;
 	std::string sourceDir;
 	std::string source;
+	bool builtinChecker;
 	int time;
 	int memory;
 	int output;

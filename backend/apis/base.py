@@ -23,8 +23,8 @@ from tornado.options import define, options
 
 
 def print_debug(*args, **kw):
-    # print(*args, **kw)
-    pass
+    print(*args, **kw)
+    # pass
 
 def print_test(*args, **kw):
     print(*args, **kw)
@@ -85,8 +85,9 @@ async def maybe_create_tables(db, filename):
     #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
-    def __init__(self, db, *args, **kw):
+    def __init__(self, db, root_dir, *args, **kw):
         self.db_instance = db
+        self.root_dir = root_dir
         super(Application, self).__init__(*args, **kw)
 
     def setDB(self, db):
@@ -114,7 +115,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        self.root_dir='root'
+        self.root_dir= self.application.root_dir
         self.user = None
 
     # async def get(self, type): #detail
@@ -134,8 +135,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @catch_exception_write
     async def post(self, type):
-        print_debug('request = ', self.request.headers)
-        print_debug('post: ', type)
+        print_debug('''request-type = {type} request-header = {headers}'''.format(headers = self.request.headers, type = type))
+        # print_debug('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
         print_debug('return: ', res)
         self.write(json.dumps(res).encode())

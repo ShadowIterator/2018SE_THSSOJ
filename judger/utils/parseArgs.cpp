@@ -139,20 +139,21 @@ void exec_parse_args(int argc, char **argv, RunConfig &runConfig){
 char tradi_judger_argp_args_doc[] = "run program arg1, arg2, ...";
 char tradi_judger_argp_doc[] = "A tool to run traditional judger";
 argp_option tradi_judger_argp_options[] = {
-	{"tl"                 , 'T', "TIME_LIMIT"  , 0, "Set time limit (in second)"                            ,  1},
-	{"ml"                 , 'M', "MEMORY_LIMIT", 0, "Set memory limit (in mb)"                              ,  2},
-	{"ol"                 , 'O', "OUTPUT_LIMIT", 0, "Set output limit (in mb)"                              ,  3},
-	{"in-pre"             , 'p', "INPRE"       , 0, "Set input file prefix name"                            ,  4},
-	{"in-suf"             , 's', "INSUF"       , 0, "Set input file suffix name"                            ,  5},
-	{"out-pre"            , 'P', "OUTPRE"      , 0, "Set output file prefix name"                           ,  6},
-	{"out-suf"            , 'S', "OUTSUF"      , 0, "Set output file suffix name"                           ,  7},
-	{"Lang"               , 'L', "Language"    , 0, "Set the Language"                                      ,  8},
-	{"data-dir"           , 'd', "DATA_DIR"    , 0, "Set the data directory"                                ,  9},
-	{"checker"            , 'c', "CHECKER"     , 0, "Set the checker type"                                  , 10},
-	{"checker-dir"        , 'C', "CHECKER_DIR" , 0, "Set the checker directory"                             , 11},
-	{"n-tests"            , 'n', "NTESTS"      , 0, "Set the number of tests"                               , 12},
-	{"source-name"        , 'f', "SOURCE_FILE" , 0, "Set the source file name"                              , 13},
-	{"source-dir"         , 'D', "SOURCE_DIR"  , 0, "Set the source file directory"                         , 14},
+	{"tl"                 , 'T', "TIME_LIMIT"     , 0, "Set time limit (in second)"                            ,  1},
+	{"ml"                 , 'M', "MEMORY_LIMIT"   , 0, "Set memory limit (in mb)"                              ,  2},
+	{"ol"                 , 'O', "OUTPUT_LIMIT"   , 0, "Set output limit (in mb)"                              ,  3},
+	{"in-pre"             , 'p', "INPRE"          , 0, "Set input file prefix name"                            ,  4},
+	{"in-suf"             , 's', "INSUF"          , 0, "Set input file suffix name"                            ,  5},
+	{"out-pre"            , 'P', "OUTPRE"         , 0, "Set output file prefix name"                           ,  6},
+	{"out-suf"            , 'S', "OUTSUF"         , 0, "Set output file suffix name"                           ,  7},
+	{"Lang"               , 'L', "Language"       , 0, "Set the Language"                                      ,  8},
+	{"data-dir"           , 'd', "DATA_DIR"       , 0, "Set the data directory"                                ,  9},
+	{"checker"            , 'c', "CHECKER"        , 0, "Set the checker type"                                  , 10},
+	{"checker-dir"        , 'C', "CHECKER_DIR"    , 0, "Set the checker directory"                             , 11},
+	{"n-tests"            , 'n', "NTESTS"         , 0, "Set the number of tests"                               , 12},
+	{"source-name"        , 'f', "SOURCE_FILE"    , 0, "Set the source file name"                              , 13},
+	{"source-dir"         , 'D', "SOURCE_DIR"     , 0, "Set the source file directory"                         , 14},
+	{"builtin-checker"    , 'r', "BUILTIN_CHECKER", 0, "Set if use builtin checker"                            , 15},
 	{0}
 };
 
@@ -202,6 +203,14 @@ error_t tradi_judger_argp_parse_opt (int key, char *arg, struct argp_state *stat
 		case 'D':
 			config->sourceDir = arg;
 			break;
+		case 'r':
+			// printf("builtin-checker\n");
+			if (std::string(arg) == "true") {
+				// printf("builtin-checker = %s\n", arg);
+				config->builtinChecker = true;
+			} else
+				config->builtinChecker = false;
+			break;
 		default:
 			return ARGP_ERR_UNKNOWN;
 	}
@@ -217,6 +226,10 @@ argp tradi_judger_margs = {
 };
 
 void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
+	char cwd[512];
+	getcwd(cwd, 512);
+
+
 	judgerConfig.time = 1;
 	judgerConfig.memory = 128;
 	judgerConfig.output = 64;
@@ -225,10 +238,11 @@ void tradi_judger_parse_args(int argc ,char **argv, JudgerConfig &judgerConfig){
 	judgerConfig.outputPre = "test";
 	judgerConfig.outputSuf = "ans";
 	judgerConfig.checker = "ncmp";
-	judgerConfig.checkerDir = default_checker_dir;
+	judgerConfig.checkerDir = string(cwd)+"/"+default_checker_dir;
 	judgerConfig.Lang = "C";
 	judgerConfig.dataDir = "/tmp";
 	judgerConfig.ntests = 10;
+	judgerConfig.builtinChecker = true;
 
 	argp_parse(&tradi_judger_margs, argc, argv, ARGP_NO_ARGS | ARGP_IN_ORDER, 0, &judgerConfig);
 }

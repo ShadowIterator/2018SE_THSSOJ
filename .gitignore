@@ -20,6 +20,7 @@ backend/root/records
 backend/root/problems
 backend/pycharm_runner
 backend/test
+backend/judge_script
 node_modules
 __pycache__
 backend/root/

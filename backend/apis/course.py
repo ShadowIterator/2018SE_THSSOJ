@@ -13,7 +13,7 @@ def sub_list(lista, listb):
 class APICourseHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self.root_dir = self.root_dir+'/courses'
+        # self.root_dir = self.root_dir+'/courses'
 
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
@@ -82,16 +82,23 @@ class APICourseHandler(base.BaseHandler):
         # authority check
         cur_user = await self.get_current_user_object()
         role = cur_user['role']
+        course = (await self.db.getObject('courses', id=self.args['id']))[0]
         if role < 2:
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
         elif role == 2:
-            course = (await self.db.getObject('courses', id=self.args['id']))[0]
+            # course = (await self.db.getObject('courses', id=self.args['id']))[0]
+            print_debug('course_delete: ', cur_user, course)
             if course['status'] != 0 or cur_user['id'] not in course['tas']:
                 self.set_res_dict(res_dict, code=1, msg='you are not allowed')
                 return res_dict
         # ----------------------------------------------------------------
         await self.db.deleteObject('courses', id=self.args['id'])
+        course_id = course['id']
+        for student_id in course['students']:
+            await self.db.remove_element_in_array('users', 'student_courses', course_id, student_id)
+        for ta_id in course['tas']:
+            await self.db.remove_element_in_array('users', 'ta_courses', course_id, ta_id)
         self.set_res_dict(res_dict, code=0, msg='course deleted')
         return res_dict
         # try:
@@ -141,7 +148,9 @@ class APICourseHandler(base.BaseHandler):
             if key == 'id':
                 continue
             target_course[key] = self.args[key]
-        await self.db.saveObject('courses', cur_user = self.get_current_user_object(), object=target_course)
+
+        print_debug('courses_update: ', target_course)
+        await self.db.saveObject('courses', object=target_course)
         # for student_id in target_course['']
         self.set_res_dict(res_dict, code=0, msg='course updated')
         return res_dict
@@ -327,7 +336,9 @@ class APICourseHandler(base.BaseHandler):
         if not self.check_input('user_id', 'course_spell'):
             self.set_res_dict(res_dict, code=1, msg='invalid input params')
             return res_dict
-
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.STUDENT)
+        assert (cur_user['id'] == self.args['user_id'])
         student = (await self.db.getObject('users', id=self.args['user_id']))[0]
         course = (await self.db.getObject('courses', course_spell=self.args['course_spell']))[0]
         # student['student_courses'].append(course['id'])

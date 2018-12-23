@@ -64,7 +64,7 @@ class BaseDB:
 
         Must be called with ``await self.execute(...)``
         """
-        print_debug('execute: ', stmt, args)
+        # print_debug('execute: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
 
@@ -84,7 +84,7 @@ class BaseDB:
 
             for row in await self.query(...)
         """
-        print_debug('query: ', stmt, args)
+        # print_debug('query: ', stmt, args)
         with (await self.db.cursor()) as cur:
             await cur.execute(stmt, args)
             res = [self.row_to_obj(row, cur)
@@ -189,7 +189,7 @@ class BaseTable:
             'SELECT column_name FROM information_schema.columns WHERE table_schema = %s and table_name = %s', 'public',
             self.table_name)
         self.database_keys = list(map(lambda item: item['column_name'], database_keys))
-        print_debug(self.database_keys)
+        # print_debug(self.database_keys)
 
     #
     async def insert_element_in_array(self, column_name, value, id):
@@ -292,7 +292,7 @@ class BaseTable:
 
     async def createObject(self, **kw):
         si_table_name = self.table_name
-        print_debug('createObject: kw = ', kw)
+        # print_debug('createObject: kw = ', kw)
         kw = self.filterKeys(kw)
         propfmt = ['%s'] * len(kw)
         spropfmt = ','.join(propfmt)
@@ -304,7 +304,7 @@ class BaseTable:
             propvalues.append(value)
 
         str_fmt = '''INSERT INTO {table_name} ({property_keys})\n VALUES ({property_fmt}) RETURNING *;'''.format(table_name = si_table_name, property_keys = ','.join(propkeys), property_fmt = spropfmt)
-        print_debug('fmt = ', str_fmt, propvalues)
+        # print_debug('fmt = ', str_fmt, propvalues)
         return await self.db.queryone(str_fmt, *propvalues)
 
     async def objectFilter(self, method, dic, user):

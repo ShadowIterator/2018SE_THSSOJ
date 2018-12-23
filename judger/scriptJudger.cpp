@@ -18,7 +18,7 @@ int main(int argc, char** argv){
 	cout << "output=" << scriptConfig.lim.output << endl;
 
 	ScriptJudgerResult scriptJudgerResult = runScript(scriptConfig);
-	StringFormat(scriptJudgerResult.info);
+	// StringFormat(scriptJudgerResult.info);
 	ofstream fout("result.json");
 	fout << "{" << endl;
 	fout << "    \"Score\" : " << scriptJudgerResult.score << "," << endl;
