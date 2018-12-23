@@ -66,7 +66,7 @@ class APIProblemHandler(base.BaseHandler):
 
     # @tornado.web.authenticated
     async def _create_post(self):
-        print_debug('create-problem: ', self.args['code_uri'], self.args['case_uri'])
+        # print_debug('create-problem: ', self.args['code_uri'], self.args['case_uri'])
 
         res_dict={}
         # authority check
