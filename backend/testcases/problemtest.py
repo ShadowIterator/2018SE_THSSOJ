@@ -667,7 +667,7 @@ class ProblemTestCase(BaseTestCase):
         records = await self.recordTable.getObject(**request_param)
         self.assertEqual(tar_problem['ratio_one_limit'], len(records))
 
-    async def submit_woker(self, uri, cur_user, request_param, client, worker_id):
+    async def submit_worker(self, uri, cur_user, request_param, client, worker_id):
         print_test('submit_wokder:', worker_id)
         request_param['user_id'] = cur_user['id']
         await self.login_object(cur_user, client = client)
@@ -725,32 +725,95 @@ class ProblemTestCase(BaseTestCase):
             'src_language': Languages.CPP,
         }
         await gen.multi([
-            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
-            self.submit_woker(uri, self.user_st2, deepcopy(request_param), SIClient(), 1),
-            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 2),
-        ])
-        await gen.multi([
-            self.submit_woker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3),
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+            self.submit_worker(uri, self.user_st2, deepcopy(request_param), SIClient(), 1),
+            # self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 5),
         ])
 
         judgestate_after_post = await self.db.getObject('judgestates', homework_id = tar_homework['id'], problem_id = tar_problem['id'])
         self.assertIsInstance(judgestate_after_post, list)
         self.assertEqual(1, len(judgestate_after_post))
         judgestate_after_post = judgestate_after_post[0]
+        print_test('submit3-judgestates: ', judgestate_after_post)
         self.assertEqual(2, judgestate_after_post['total'])
+
+
+    @async_aquire_db
+    async def test_submit_4(self):
+        """
+        course-homework submit multi-worker check only one final submit record
+        :return:
+        """
+        print_test('test_submit_4:')
+        uri = self.url + '/submit'
+        cur_user = self.user_st1
+        tar_problem = self.problem_1_ta1
+        tar_homework = self.homework_submitable
+        request_param = {
+            # 'user_id': None,
+            'problem_id': tar_problem['id'],
+            'homework_id': tar_homework['id'],
+            'record_type': RecordTypes.SUBMIT,
+            'src_code': 'hello,world',
+            'src_language': Languages.CPP,
+        }
+        await gen.multi([
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+            self.submit_worker(uri, self.user_st2, deepcopy(request_param), SIClient(), 1),
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 4),
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 5),
+        ])
+        await gen.multi([
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3),
+        ])
+
         records = await self.recordTable.getObject(**request_param)
         self.assertIsInstance(records, list)
         self.assertEqual(2, len(records))
 
         for record in records:
-            response = await self.post_request_return_object(self.returnresult_url,
-                                                             id=record['id'],
-                                                             res={
-                                                                 'Result': 'Accept',
-                                                                 'time': 12,
-                                                                 'memory': 123,
-                                                                 'Info': 'ok',
-                                                             },
-                                                             secret=options.judgerSecret)
-            self.assertEqual(0, response['code'])
+            # response = await self.post_request_return_object(self.returnresult_url,
+            #                                                  id=record['id'],
+            #                                                  res={
+            #                                                      'Result': 'Accept',
+            #                                                      'time': 12,
+            #                                                      'memory': 123,
+            #                                                      'Info': 'ok',
+            #                                                  },
+            #                                                  secret=options.judgerSecret)
+            # self.assertEqual(0, response['code'])
+            print_test('submit4-records', record)
 
+    @async_aquire_db
+    async def test_submit_5(self):
+        """
+        course-homework submit multi-worker check record exsistence before modify judgestates
+        :return:
+        """
+        print_test('test_submit_5:')
+        uri = self.url + '/submit'
+        cur_user = self.user_st1
+        tar_problem = self.problem_1_ta1
+        tar_homework = self.homework_submitable
+        request_param = {
+            # 'user_id': None,
+            'problem_id': tar_problem['id'],
+            'homework_id': tar_homework['id'],
+            'record_type': RecordTypes.SUBMIT,
+            'src_code': 'hello,world',
+            'src_language': Languages.CPP,
+        }
+        await gen.multi([
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 0),
+            self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 5),
+        ])
+        await self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3)
+        await self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3)
+        await self.submit_worker(uri, self.user_st1, deepcopy(request_param), SIClient(), 3)
+
+        judgestate_after_post = await self.db.getObject('judgestates', homework_id = tar_homework['id'], problem_id = tar_problem['id'])
+        self.assertIsInstance(judgestate_after_post, list)
+        self.assertEqual(1, len(judgestate_after_post))
+        judgestate_after_post = judgestate_after_post[0]
+        print_test('submit5-judgestates: ', judgestate_after_post)
+        self.assertEqual(1, judgestate_after_post['total'])
