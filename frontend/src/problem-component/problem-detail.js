@@ -308,9 +308,9 @@ class ProblemDetailRecord extends Component {
                     <td>正式提交</td>
                     }
                     <td>{result}</td>
-                    <td>{sub.consume_time === null ? -1 : (sub.consume_time.toString() + 'ms')}</td>
-                    <td>{sub.consume_memory === null ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
-                    <td>{sub.src_size === null ? -1 : (sub.src_size.toString() + ' B')}</td>
+                    <td>{(sub.consume_time === null || sub.consume_time === undefined) ? -1 : (sub.consume_time.toString() + 'ms')}</td>
+                    <td>{(sub.consume_memory === null || sub.consume_memory === undefined) ? -1 : (sub.consume_memory.toString() + ' kb')}</td>
+                    <td>{(sub.src_size === null || sub.src_size === undefined) ? -1 : (sub.src_size.toString() + ' B')}</td>
                     <td>{ProblemDetailRecord.timeConverter(sub.submit_time)}</td>
                     <td>{language[sub.src_language-1]}</td>
                     {this.props.judge_method !== 2 &&
@@ -377,9 +377,9 @@ class ProblemDetailRecord extends Component {
                         <td>{'测试' + re.test_ratio.toString() + '%数据'}</td>
                         }
                         <td>{result}</td>
-                        <td>{re.consume_time === null ? -1 : (re.consume_time.toString() + ' ms')}</td>
-                        <td>{re.consume_memory === null ? -1 : (re.consume_memory.toString() + ' kb')}</td>
-                        <td>{re.src_size === null ? -1 : (re.src_size.toString() + ' B')}</td>
+                        <td>{(re.consume_time === null || re.consume_time === undefined) ? -1 : (re.consume_time.toString() + ' ms')}</td>
+                        <td>{(re.consume_memory === null || re.consume_memory === undefined) ? -1 : (re.consume_memory.toString() + ' kb')}</td>
+                        <td>{(re.src_size === null || re.src_size === undefined) ? -1 : (re.src_size.toString() + ' B')}</td>
                         <td>{ProblemDetailRecord.timeConverter(re.submit_time)}</td>
                         <td>{language[re.src_language-1]}</td>
                         {this.props.judge_method !== 2 &&
