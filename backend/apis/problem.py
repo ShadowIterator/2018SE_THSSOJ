@@ -584,7 +584,7 @@ class APIProblemHandler(base.BaseHandler):
         if 'homework_id' in self.args:
             matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
             # matched_homework['records'].append(record_created['id'])
-            await self.db.saveObject('homeworks', object=matched_homework, cur_user=self.get_current_user_object())
+            await self.db.saveObject('homeworks', object=matched_homework)
 
         str_id = str(record_created['id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
