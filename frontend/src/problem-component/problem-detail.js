@@ -226,7 +226,7 @@ class ProblemDetailBody extends Component {
                         }
                         {this.state.isEditing && this.props.probleminfo.judge_method === 2 && !this.state.reupload &&
                         <div style={{textAlign: 'center'}}>
-                            <a href={URL+api_list['download_html']+"?id="+this.props.html_record.id.toString()} download={"html.zip"} >下载已上传文件</a><br/>
+                            <a href={URL+api_list['download_html']+"?record_id="+this.props.html_record.id.toString()} download={"html.zip"} >下载已上传文件</a><br/>
                             <Button style={{marginTop: 15}}
                                     disabled={this.props.homework_info.submitable === 0}
                                     onClick={()=>{this.setState({reupload: true})}}>重新上传</Button>
