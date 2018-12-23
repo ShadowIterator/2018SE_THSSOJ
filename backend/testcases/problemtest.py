@@ -7,6 +7,7 @@ import subprocess
 import uuid
 import shutil
 import os
+import datetime
 import zipfile
 from tornado.options import options, define
 define('judgerSecret', default='no_secret', help='secret', type=str)
@@ -35,7 +36,7 @@ class ProblemTestCase(BaseTestCase):
         self.fakejudge.kill()
 
 
-    async def create_problem(self):
+    async def create_problem_0(self):
         # path_src = '''{dir}{file_name}'''.format(dir = self.problem0_io['dir'], file_name = self.problem0_io['std_correct'])
         # std_correct_filename = str(uuid.uuid1())+'.code'
         # path_tar = '''{dir}{file_name}'''.format(dir = self.tmp_dir, file_name = std_correct_filename)
@@ -124,28 +125,42 @@ class ProblemTestCase(BaseTestCase):
     async def prepare(self):
         self.url = '/api/problem'
         self.returnresult_url = '/api/record/returnresult'
+
+        self.course_published = await self.db.createObject('courses',
+                                                            name='hfz de anothoer 课程',
+                                                            description='laidfjladfeisd',
+                                                            course_spell='13ijlaf',
+                                                            status = 1,
+                                                            start_time = datetime.datetime.fromtimestamp(123242),
+                                                            end_time = datetime.datetime.fromtimestamp(12232443))
+
+
+
         self.user_hfz = await self.db.createObject('users', username='hfz', password='4321', email='hfz@hfz.com',
                                                    role=0, secret='1314')
         self.user_st1 = await self.db.createObject('users', username='student1', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343',
-                                                   student_courses=[])
+                                                   student_courses=[self.course_published['id']])
         self.user_st2 = await self.db.createObject('users', username='student2', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343',
-                                                   student_courses=[])
+                                                   student_courses=[self.course_published['id']])
         self.user_st3 = await self.db.createObject('users', username='student3', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343', )
         self.user_ta1 = await self.db.createObject('users', username='ta1', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343',
-                                                   ta_courses=[])
+                                                   ta_courses=[self.course_published['id']])
         self.user_ta2 = await self.db.createObject('users', username='ta2', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343',
-                                                   ta_courses=[])
+                                                   ta_courses=[self.course_published['id']])
         self.user_ta3 = await self.db.createObject('users', username='ta3', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343')
         try:
-            self.user_admin = await self.db.getObjectOne('users', username = 'admin')
+            self.user_admin = await self.db.getObjectOne('users', username = 'admin', role = Roles.ADMIN)
         except:
             self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+
+        self.course_published['students'] = [self.user_st1['id'], self.user_st2['id']]
+        self.course_published['tas'] = [self.user_ta1['id'], self.user_ta2['id']]
 
         self.tmp_dir = '''{root_dir}tmp/'''.format(root_dir = self.root_dir)
         self.problem_dir = '''{root_dir}problems/'''.format(root_dir = self.root_dir)
@@ -165,8 +180,7 @@ class ProblemTestCase(BaseTestCase):
         self.homeworkTable = self.db.getTable('homeworks')
         self.courseTable = self.db.getTable('courses')
         self.recordTable = self.db.getTable('records')
-
-        await self.create_problem()
+        await self.create_problem_0()
 
     async def done(self):
      # if os.path.exists(self.tmp_dir):
@@ -178,28 +192,28 @@ class ProblemTestCase(BaseTestCase):
     async def test_prepare(self):
         pass
 
-    # @async_aquire_db
-    # async def test_search(self):
-    #     uri = self.url + '/search'
-    #     await self.db.createObject('problems', title = 'hfz111', openness = 1)
-    #     await self.db.createObject('problems', title = 'HTML1', openness = 1)
-    #     await self.db.createObject('problems', title = 'hfzHTML', openness = 1)
-    #     await self.db.createObject('problems', title = 'HTMHFLZ', openness = 1)
-    #     await self.db.createObject('problems', title = 'HTML_HFZ', openness = 0)
-    #     await self.db.createObject('problems', title = '中文题目', openness = 1)
-    #     await self.db.createObject('problems', title = '日本語の問題', openness = 1)
-    #
-    #     await self.login(username = 'hfz', password = '4321')
-    #
-    #     response = self.getbodyObject(await self.post_request(uri,
-    #                                                           keywords = '  hfz  の HTML 题目'))
-    #     self.assertEqual(5, len(response))
-    #     for res in response:
-    #         # print_test(res)
-    #         self.assertEqual(res['openness'], 1)
-    #         self.assertIn(res['id'], [1, 2, 3, 6, 7])
-    #
-    #
+    @async_aquire_db
+    async def test_search(self):
+        uri = self.url + '/search'
+        p1 = await self.db.createObject('problems', title = 'xhfz111', openness = 1)
+        p2 =await self.db.createObject('problems', title = 'HTML1', openness = 1)
+        p3 =await self.db.createObject('problems', title = 'xhfzHTML', openness = 1)
+        p4 =await self.db.createObject('problems', title = 'HTMHXFLZ', openness = 1)
+        p5 =await self.db.createObject('problems', title = 'HTML_XHFZ', openness = 0)
+        p6 =await self.db.createObject('problems', title = '中文题目', openness = 1)
+        p7 =await self.db.createObject('problems', title = '日本語の問題', openness = 1)
+
+        await self.login(username = 'hfz', password = '4321')
+
+        response = self.getbodyObject(await self.post_request(uri,
+                                                              keywords = '  xhfz  の HTML 题目'))
+        self.assertEqual(5, len(response))
+        for res in response:
+            # print_test(res)
+            self.assertEqual(res['openness'], 1)
+            self.assertIn(res['id'], [p1['id'], p2['id'], p3['id'], p6['id'], p7['id']])
+
+
     @async_aquire_db
     async def test_create_0(self):
         """
@@ -357,25 +371,64 @@ class ProblemTestCase(BaseTestCase):
         self.assertEqual(modify_param['time_limit'], problem_after_post['time_limit'])
         self.assertEqual(modify_param['title'], problem_after_post['title'])
 
+        tar_record = await self.recordTable.getObject(problem_id = tar_problem['id'], record_type = RecordTypes.STD)
+        self.assertIsInstance(tar_record, list)
+        self.assertEqual(1, len(tar_record))
+        tar_record = tar_record[0]
 
+        response = await self.post_request_return_object(self.returnresult_url,
+                                                         id=tar_record['id'],
+                                                         res={
+                                                             'Result': 'Wrong Answer',
+                                                             'time': 12,
+                                                             'memory': 123,
+                                                             'Info': 'ok',
+                                                         },
+                                                         secret=options.judgerSecret)
+        problem_after_judge = await self.problemTable.getObject(id = tar_problem['id'])
+        self.assertIsInstance(problem_after_judge, list)
+        self.assertEqual(1, len(problem_after_judge))
+        problem_after_judge = problem_after_judge[0]
+        self.assertEqual(0, problem_after_judge['status'])
 
+    @async_aquire_db
+    async def test_update_3(self):
+        """
+        test: post with code_uri, should rejudge, update problem_status
+        :return:
+        """
+        print_test('test_update_3')
+        uri = self.url + '/update'
+        await self.login_object(self.user_ta1)
+        tar_problem = self.problem_0_ta1
 
-        # modify_param = {
-        #     'id': tar_problem['id'],
-        #     'title': str(uuid.uuid1()),
-        #     'description': 'dlaifjleiajl23431324few',
-        #     'time_limit': 1108,
-        #     'memory_limit': 123456,
-        # }
-        # response = await self.post_request_return_object(uri, **modify_param)
-        # self.assertEqual(0, response['code'])
-        # problem_after_post = await self.problemTable.getObject(id = tar_problem['id'])
-        # self.assertIsInstance(problem_after_post, list)
-        # self.assertEqual(1, len(problem_after_post))
-        # problem_after_post = problem_after_post[0]
-        # self.assertEqual(modify_param['time_limit'], problem_after_post['time_limit'])
-        # self.assertEqual(modify_param['title'], problem_after_post['title'])
-        # self.assertEqual(0, problem_after_post['status'])
+        # copy std_correct to
+        path_src = '''{dir}{file_name}'''.format(dir = self.problem0_io['dir'], file_name = self.problem0_io['std_wrong'])
+        std_wrong_filename = str(uuid.uuid1())+'.code'
+        path_tar = '''{dir}{file_name}'''.format(dir = self.tmp_dir, file_name = std_wrong_filename)
+        shutil.copyfile(path_src, path_tar)
+        # copy data to
+        path_src = '''{dir}{file_name}'''.format(dir = self.problem0_io['dir'], file_name = self.problem0_io['data_zip'])
+        data_filename = str(uuid.uuid1())+'.zip'
+        path_tar = '''{dir}{file_name}'''.format(dir = self.tmp_dir, file_name = data_filename)
+        shutil.copyfile(path_src, path_tar)
+
+        modify_param = {
+            'id': tar_problem['id'],
+            'title': str(uuid.uuid1()),
+            'description': 'dl3431324few',
+            'time_limit': 1108,
+            'memory_limit': 123456,
+            'code_uri': 'tmp/' + std_wrong_filename,
+        }
+        response = await self.post_request_return_object(uri, **modify_param)
+        self.assertEqual(0, response['code'])
+        problem_after_post = await self.problemTable.getObject(id=tar_problem['id'])
+        self.assertIsInstance(problem_after_post, list)
+        self.assertEqual(1, len(problem_after_post))
+        problem_after_post = problem_after_post[0]
+        self.assertEqual(modify_param['time_limit'], problem_after_post['time_limit'])
+        self.assertEqual(modify_param['title'], problem_after_post['title'])
 
         tar_record = await self.recordTable.getObject(problem_id = tar_problem['id'], record_type = RecordTypes.STD)
         self.assertIsInstance(tar_record, list)
