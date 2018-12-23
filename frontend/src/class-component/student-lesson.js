@@ -203,10 +203,10 @@ class mStudentHomeworkCard extends Component {
                         }
                         else
                         {
-                            if(item.result_type === 0 && item.status !== 0) {
+                            if(item.result_type === 0 && item.result !== null) {
                                 problem_res = result_arr[item.result];
                             }
-                            else if(item.result_type === 1 && item.status !== 0) {
+                            else if(item.result_type === 1 && item.score !== null) {
                                 problem_res = item.score.toString();
                             }
                             if( (!submitted) && (!delayed)) // 未提交未到截止日期
