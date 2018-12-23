@@ -47,7 +47,7 @@ class APIProblemHandler(base.BaseHandler):
                 if(prob['openness'] == 1):
                     rtn.append(prob)
             return rtn
-        
+
     async def _createHTML_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] >= Roles.TA)

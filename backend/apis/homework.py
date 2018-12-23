@@ -91,9 +91,9 @@ class APIHomeworkHandler(base.BaseHandler):
             old_problems = target_homework['problems']
             new_problems = self.args['problems']
             for add_prob_id in list(set(new_problems) - set(old_problems)):
-                self.db.createObject('judgestates', homework_id = target_homework['id'], problem_id = add_prob_id)
+                await self.db.createObject('judgestates', homework_id = target_homework['id'], problem_id = add_prob_id)
             for sub_prob_id in list(set(old_problems) - set(new_problems)):
-                self.db.deleteObject('judgestates', homework_id = target_homework['id'], problem_id = sub_prob_id)
+                await self.db.deleteObject('judgestates', homework_id = target_homework['id'], problem_id = sub_prob_id)
 
         for key in self.args.keys():
             if key == 'id':
