@@ -515,6 +515,8 @@ class APIProblemHandler(base.BaseHandler):
             hash_id = self.args['homework_id'] * 1234567891 + self.args['problem_id']
         else:
             hash_id = self.args['problem_id']
+
+
         async with self.db.get_lock_object('global', hash_id):
             if(self.args['record_type'] == 2 or self.args['record_type'] == 4):
                 old_record = await self.db.getObject('records',
@@ -619,12 +621,6 @@ class APIProblemHandler(base.BaseHandler):
             else:
                 record_created = await self.db.createObject('records', **self.args)
 
-            # await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
-            if 'homework_id' in self.args:
-                matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
-                # matched_homework['records'].append(record_created['id'])
-                await self.db.saveObject('homeworks', object=matched_homework)
-
             str_id = str(record_created['id'])
             record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
             if not os.path.exists(record_dir):
@@ -642,6 +638,12 @@ class APIProblemHandler(base.BaseHandler):
             elif self.args['src_language'] == 3:
                 record_created['result_type'] = 1
             await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+
+            # await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
+            # if 'homework_id' in self.args:
+            #     matched_homework = (await self.db.getObject('homeworks', cur_user=self.get_current_user_object(), id=self.args['homework_id']))[0]
+            #     matched_homework['records'].append(record_created['id'])
+            #     await self.db.saveObject('homeworks', object=matched_homework)
 
             if self.args['record_type']==2:
                 self.set_res_dict(res_dict, code=0, msg='code successfully uploaded')
