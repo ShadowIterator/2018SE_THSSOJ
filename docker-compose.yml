@@ -10,6 +10,9 @@ services:
     restart: always
     environment:
       DOMAINS: '308469.iterator-traits.com -> http://frontend:80'
+      WORKER_PROCESSES: 2
+      WORKER_CONNECTIONS: 4096
+      CLIENT_MAX_BODY_SIZE: '500M'
       # STAGE: 'production'
       # FORCE_RENEW: 'true'
 
