@@ -246,6 +246,8 @@ class APIUserHandler(base.BaseHandler):
     #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
 
     async def _createTA_post(self):
