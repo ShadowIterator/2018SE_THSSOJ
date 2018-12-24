@@ -9,6 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import Cookies from "js-cookie";
 import {message} from 'antd';
+import pageimage from '../static/tsinghua1.jpeg';
 
 class Login extends Component
 {
@@ -214,7 +215,7 @@ class LoginMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://www.fillmurray.com/1438/680" alt = "Card image" />
+                <Card.Img src={pageimage} alt = "Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">
@@ -233,7 +234,7 @@ class SignupMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://www.fillmurray.com/1438/680" alt="Card image" />
+                <Card.Img src={pageimage} alt="Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">

@@ -93,6 +93,11 @@ class mJudgeHTML extends Component {
             }
             that.setState({records: records});
             for(const re of result.data) {
+                if(this.state.current_selected === re.user_id.toString()) {
+                    if(re.score !== null && re.score !== undefined) {
+                        that.setState({current_score: re.score});
+                    }
+                }
                 ajax_post(api_list['query_user'], {id: re.user_id}, that, (that, result) => {
                     if(result.data.length !== 0) {
                         let records = that.state.records;
