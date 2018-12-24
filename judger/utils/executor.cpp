@@ -276,6 +276,7 @@ RunResult parentMainWork(pid_t childpid){
 			// printf("after wait %d\n", p);
 			if (p == apid) {
 				if (WIFEXITED(stat) || WIFSIGNALED(stat)) {
+					kill_process();
 					// cout << "TLE detected by assist process!" << endl;
 					printf("TLE detected by assist process!\n");
 					return RunResult(TimeLimitExceed);

@@ -152,7 +152,7 @@ class mTALesson extends Component {
                     if (res.data[0].total_waiting <= 0)      // not started
                         problemitem['judger_status'] = 0;
                     else
-                    if (res.data[0].total_waiting === res.data[0].judged)   // judging
+                    if (res.data[0].total_waiting > res.data[0].judged)   // judging
                         problemitem['judger_status'] = 2;
                     else
                         problemitem['judger_status'] = 1;   // finished
