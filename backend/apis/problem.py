@@ -554,7 +554,10 @@ class APIProblemHandler(base.BaseHandler):
 
             if self.args['record_type'] == 4:
                 # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
-                old_record = await self.db.getObject('records', **self.args)
+                old_record = await self.db.getObject('records',
+                                                     record_type=self.args['record_type'],
+                                                     problem_id=self.args['problem_id'],
+                                                     homework_id=self.args['homework_id'])
                 print_debug('submit_html: ', old_record)
                 if len(old_record) == 0:
                     html_record = await self.db.createObject('records', **self.args)
@@ -624,7 +627,11 @@ class APIProblemHandler(base.BaseHandler):
                 await self.db.saveObject('ratios', object=check_ratio)
 
             if self.args['record_type'] == 2:
-                possible_records = await self.db.getObject('records', **self.args)
+                possible_records = await self.db.getObject('records',
+                                                           record_type=self.args['record_type'],
+                                                           problem_id=self.args['problem_id'],
+                                                           homework_id=self.args['homework_id']
+                                                           )
                 if len(possible_records):
                     record_created = possible_records[0]
                 else:
@@ -891,6 +898,8 @@ class APIProblemHandler(base.BaseHandler):
                 src_zip_path = self.root_dir.replace('problems', 'homeworks') + '/' + str(homework_id) +\
                                     '/' +str(problem['id']) + '/' + str(each_record['user_id']) + '/' + str(problem['id']) + '.zip'
                 stu_judge_html_path = html_judge_path+'/'+str(each_record['user_id'])
+                if os.path.exists(stu_judge_html_path):
+                    shutil.rmtree(stu_judge_html_path)
                 os.makedirs(stu_judge_html_path)
                 file_zip = zipfile.ZipFile(src_zip_path)
                 file_zip.extractall(stu_judge_html_path)

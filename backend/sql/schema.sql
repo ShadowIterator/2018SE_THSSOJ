@@ -108,7 +108,7 @@ CREATE TABLE problems (
 DROP TABLE IF EXISTS records;
 CREATE TABLE records (
     id SERIAL PRIMARY KEY,
-    description TEXT,
+--     description TEXT,
     submit_time TIMESTAMP DEFAULT current_timestamp,
     user_id INTEGER,
     problem_id INTEGER,
