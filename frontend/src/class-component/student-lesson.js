@@ -194,19 +194,19 @@ class mStudentHomeworkCard extends Component {
                         let problem_info = '未知的作业状态';
                         let icon_name = 'issue';
                         let icon_intent = 'Danger';
-                        if(item.status === undefined) {
-                            item.status = {};
-                        }
+                        // if(item.status === undefined) {
+                        //     item.status = {};
+                        // }
                         if(item.result_type === undefined)
                         {
                             item.status = 0;
                         }
                         else
                         {
-                            if(item.result_type === 0) {
+                            if(item.result_type === 0 && item.result !== null && item.result !== undefined) {
                                 problem_res = result_arr[item.result];
                             }
-                            else if(item.result_type === 1) {
+                            else if(item.result_type === 1 && item.score !== null && item.score !== undefined) {
                                 problem_res = item.score.toString();
                             }
                             if( (!submitted) && (!delayed)) // 未提交未到截止日期

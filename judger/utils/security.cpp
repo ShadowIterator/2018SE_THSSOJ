@@ -528,6 +528,7 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_epoll_create1  ] = -1;
 		syscall_limit[__NR_epoll_ctl      ] = -1;
 		syscall_limit[__NR_epoll_wait     ] = -1;
+		syscall_limit[__NR_epoll_pwait    ] = -1;
 		syscall_limit[__NR_eventfd2       ] = -1;
 
 		syscall_limit[__NR_clock_gettime  ] = -1;
@@ -547,6 +548,13 @@ void init_config(const RunConfig& runConfig) {
 
 		syscall_limit[__NR_uname          ] = -1;	// to run /bin/bash
 
+        syscall_limit[__NR_socket         ] = -1;	// docker need the following to run /bin/bash
+        syscall_limit[__NR_connect        ] = -1;
+        syscall_limit[__NR_accept         ] = -1;
+        syscall_limit[__NR_bind           ] = -1;
+        syscall_limit[__NR_listen         ] = -1;
+
+
 		readable.insert(runConfig.path);
 		writable.insert(runConfig.path + "/");
 		writable.insert("/dev/tty");				// to run /bin/bash
@@ -562,6 +570,9 @@ void init_config(const RunConfig& runConfig) {
 		statable.insert("/usr/");
 		statable.insert("/usr/bin/");
 		statable.insert("/usr/lib/");
+
+		readable.insert("/etc/nsswitch.conf");
+		readable.insert("/etc/passwd");
 	}
 
 	if (runConfig.Lang == "compiler") {

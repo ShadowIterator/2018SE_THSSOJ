@@ -79,6 +79,7 @@ ScriptJudgerResult runScript(const ScriptConfig& scriptConfig){
 	ret.memory = res.memory;
 	if (res.jr == Accept && res.ec == NoError){
 		ret.load_Score_Info(runConfig.outputFileName);
+		ret.info = runConfig.outputFileName;
 	} else
 	{
 		ret.load_Score_Info(runConfig.outputFileName);
