@@ -122,7 +122,7 @@ class mTopbar extends Component {
                     }
                     {this.props.role === 3 &&
                         <Button className={Classes.MINIMAL} icon="new-object" text="新建助教" onClick={() => {
-                            this.setState({visible: true, username: '', password: '', email: ''});
+                            this.setState({visible: true, username: '', password: '', email: '', realname: '', student_id: ''});
                         }} style={{outline: 0}} />
                     }
                 </Navbar.Group>
