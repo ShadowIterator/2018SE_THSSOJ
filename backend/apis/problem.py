@@ -152,6 +152,10 @@ class APIProblemHandler(base.BaseHandler):
             'src_language':test_language,
             'src_size':src_size
         }
+        # record_created = await self.db.getObject('records', user_id = record_info['user_id'], problem_id = record_info['problem_id'], record_type = record_info['record_type'])
+        # if(len(record_created)):
+        #     record_created = record_created[0]
+        # else:
         record_created = await self.db.createObject('records', **record_info)
         # record_created = (await self.db.getObject('records', **record_info))[0]
         str_id = str(record_created['id'])
@@ -338,8 +342,16 @@ class APIProblemHandler(base.BaseHandler):
             code_path = target_path+'/code'+'/'+str(problem_id)+'.code'
             src_size = os.path.getsize(code_path)
             record = await self.db.getObjectOne('records', record_type=3, problem_id=problem_id)
-            record['status']=0
+            record['status'] = 0
+            record['consume_time'] = None
+            record['consume_memory'] = None
+            record['result'] = None
+            record['score'] = None
             record['src_size'] = src_size
+            current_time = datetime.datetime.now()
+            cur_timestamp = int(time.mktime(current_time.timetuple()))
+            submit_time = datetime.datetime.fromtimestamp(cur_timestamp)
+            record['submit_time'] = submit_time
             await self.db.saveObject('records', object=record)
             str_record_id = str(record['id'])
             record_dir = self.root_dir.replace('problems', 'records') + '/' + str_record_id
@@ -546,15 +558,18 @@ class APIProblemHandler(base.BaseHandler):
 
             current_time = datetime.datetime.now()
             cur_timestamp = int(time.mktime(current_time.timetuple()))
-
-            # self.args['submit_time'] = datetime.datetime.fromtimestamp(cur_timestamp)
             submit_time = datetime.datetime.fromtimestamp(cur_timestamp)
             self.args['status'] = 0
             # for html submit
 
             if self.args['record_type'] == 4:
                 # old_record = await self.db.getObject('records', user_id=self.args['user_id'],)
-                old_record = await self.db.getObject('records', **self.args)
+                old_record = await self.db.getObject('records',
+                                                     record_type=self.args['record_type'],
+                                                     problem_id=self.args['problem_id'],
+                                                     homework_id=self.args['homework_id'],
+                                                     user_id = self.args['user_id'],
+                                                     )
                 print_debug('submit_html: ', old_record)
                 if len(old_record) == 0:
                     html_record = await self.db.createObject('records', **self.args)
@@ -570,6 +585,9 @@ class APIProblemHandler(base.BaseHandler):
 
                 else:
                     html_record = old_record[0]
+                    html_record['status'] = 0
+                    html_record['score'] = 0
+                    # await self.db.saveObject('records', object=html_record)
                 src_zip_path = self.root_dir.replace('problems', '')+self.args['src_code']
                 target_record_path = self.root_dir.replace('problems', 'records') + '/' + str(html_record['id'])
                 stu_homework_path = self.root_dir.replace('problems', 'homeworks') + '/' + str(self.args['homework_id']) +\
@@ -624,9 +642,20 @@ class APIProblemHandler(base.BaseHandler):
                 await self.db.saveObject('ratios', object=check_ratio)
 
             if self.args['record_type'] == 2:
-                possible_records = await self.db.getObject('records', **self.args)
+                possible_records = await self.db.getObject('records',
+                                                           record_type=self.args['record_type'],
+                                                           problem_id=self.args['problem_id'],
+                                                           homework_id=self.args['homework_id'],
+                                                           user_id = self.args['user_id'],
+                                                           )
                 if len(possible_records):
                     record_created = possible_records[0]
+                    record_created['status'] = 0
+                    record_created['result'] = None
+                    record_created['score'] = None
+                    record_created['consume_time'] = None
+                    record_created['consume_memory'] = None
+                    # await self.db.saveObject('records', object=record_created)
                 else:
                     record_created = await self.db.createObject('records', **self.args)
             else:
@@ -648,7 +677,7 @@ class APIProblemHandler(base.BaseHandler):
                 record_created['result_type'] = 0
             elif self.args['src_language'] == 3:
                 record_created['result_type'] = 1
-            await self.db.saveObject('records', object=record_created, cur_user=self.get_current_user_object())
+            await self.db.saveObject('records', object=record_created)
 
             # await self.db.saveObject('problems', object=problem_of_code, cur_user=self.get_current_user_object())
             # if 'homework_id' in self.args:
@@ -822,6 +851,13 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['NTESTS'] = config_info['NTESTS']
 
             for each_record in final_records:
+                each_record['status'] = 0
+                each_record['consume_time'] = None
+                each_record['consume_memory'] = None
+                each_record['result'] = None
+                each_record['score'] = None
+                await self.db.saveObject('records', object=each_record)
+
                 str_id = str(each_record['id'])
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
                 src_language = each_record['src_language']
@@ -862,6 +898,12 @@ class APIProblemHandler(base.BaseHandler):
             judge_req['OTHERS'] = '/bin/bash ./judge.sh -r 100'
 
             for each_record in final_records:
+                each_record['status'] = 0
+                each_record['consume_time'] = None
+                each_record['consume_memory'] = None
+                each_record['result'] = None
+                each_record['score'] = None
+                await self.db.saveObject('records', object=each_record)
                 str_id = str(each_record['id'])
                 record_dir = self.root_dir.replace('problems', 'records') + '/' + str_id
                 judge_req['id'] = each_record['id']
@@ -888,9 +930,14 @@ class APIProblemHandler(base.BaseHandler):
             await self.db.saveObject('judgestates', judge_state)
 
             for each_record in final_records:
+                each_record['status'] = 0
+                each_record['score'] = None
+                await self.db.saveObject('records', object=each_record)
                 src_zip_path = self.root_dir.replace('problems', 'homeworks') + '/' + str(homework_id) +\
                                     '/' +str(problem['id']) + '/' + str(each_record['user_id']) + '/' + str(problem['id']) + '.zip'
                 stu_judge_html_path = html_judge_path+'/'+str(each_record['user_id'])
+                if os.path.exists(stu_judge_html_path):
+                    shutil.rmtree(stu_judge_html_path)
                 os.makedirs(stu_judge_html_path)
                 file_zip = zipfile.ZipFile(src_zip_path)
                 file_zip.extractall(stu_judge_html_path)
@@ -923,6 +970,11 @@ class APIProblemHandler(base.BaseHandler):
         self.db.saveObject('judgestates', object=judge_state)
 
         record['status'] = 0
+        record['consume_time'] = None
+        record['consume_memory'] = None
+        record['result'] = None
+        record['score'] = None
+        await self.db.saveObject('records', object=record)
         problem = await self.db.getObjectOne('problems', id=self.args['problem_id'])
         record_dir = self.root_dir.replace('problems', 'records') + '/' + str(record['id'])
         if record['result_type'] == 0:
