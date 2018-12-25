@@ -152,6 +152,10 @@ class APIProblemHandler(base.BaseHandler):
             'src_language':test_language,
             'src_size':src_size
         }
+        # record_created = await self.db.getObject('records', user_id = record_info['user_id'], problem_id = record_info['problem_id'], record_type = record_info['record_type'])
+        # if(len(record_created)):
+        #     record_created = record_created[0]
+        # else:
         record_created = await self.db.createObject('records', **record_info)
         # record_created = (await self.db.getObject('records', **record_info))[0]
         str_id = str(record_created['id'])
@@ -563,7 +567,9 @@ class APIProblemHandler(base.BaseHandler):
                 old_record = await self.db.getObject('records',
                                                      record_type=self.args['record_type'],
                                                      problem_id=self.args['problem_id'],
-                                                     homework_id=self.args['homework_id'])
+                                                     homework_id=self.args['homework_id'],
+                                                     user_id = self.args['user_id'],
+                                                     )
                 print_debug('submit_html: ', old_record)
                 if len(old_record) == 0:
                     html_record = await self.db.createObject('records', **self.args)
@@ -639,7 +645,8 @@ class APIProblemHandler(base.BaseHandler):
                 possible_records = await self.db.getObject('records',
                                                            record_type=self.args['record_type'],
                                                            problem_id=self.args['problem_id'],
-                                                           homework_id=self.args['homework_id']
+                                                           homework_id=self.args['homework_id'],
+                                                           user_id = self.args['user_id'],
                                                            )
                 if len(possible_records):
                     record_created = possible_records[0]
