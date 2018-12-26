@@ -11,6 +11,8 @@ class APIHomeworkHandler(base.BaseHandler):
         self.root_dir = self.root_dir+'/homeworks'
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('homeworks', self.args['start'], self.args['end'], **self.args)
 
     def getargs(self):
@@ -22,11 +24,14 @@ class APIHomeworkHandler(base.BaseHandler):
     async def _create_post(self):
         res_dict={}
         # authority check
-        role = (await self.get_current_user_object())['role']
-        if role < 2:
+        cur_user = await self.get_current_user_object()
+        if cur_user['role'] < 2:
             self.set_res_dict(res_dict, code=1, msg='you are not allowed to use this')
             return res_dict
-
+        elif cur_user['role']==2 and self.args['course_id'] not in cur_user['ta_courses']:
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed to use this')
+            return res_dict
+        # ------------------------------------------------------------
         created_homework = await self.db.createObject('homeworks', **self.args)
         course = (await self.db.getObject('courses', id = self.args['course_id']))[0]
 
@@ -50,10 +55,18 @@ class APIHomeworkHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         homework = (await self.db.getObject('homeworks', id=self.args['id']))[0]
         course_id = homework['course_id']
-        if cur_user['role']<2 or (cur_user['role']==2 and course_id not in cur_user['ta_courses']):
+        course = await self.db.getObjectOne('courses', id=course_id)
+        if cur_user['role']<2 :
+            print_test('role', cur_user['role'])
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+            return res_dict
+        elif cur_user['role']==2 and course_id not in cur_user['ta_courses']:
+            print_test('course_id ',course_id, 'ta_courses ', cur_user['ta_courses'])
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
+        course['homeworks'].remove(homework['id'])
+        await self.db.saveObject('courses', object=course)
         await self.db.deleteObject('homeworks', **self.args)
         self.set_res_dict(res_dict, code=0, msg='homework deleted')
         return res_dict
@@ -74,6 +87,14 @@ class APIHomeworkHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
+        if('problems' in self.args.keys()):
+            old_problems = target_homework['problems']
+            new_problems = self.args['problems']
+            for add_prob_id in list(set(new_problems) - set(old_problems)):
+                await self.db.createObject('judgestates', homework_id = target_homework['id'], problem_id = add_prob_id)
+            for sub_prob_id in list(set(old_problems) - set(new_problems)):
+                await self.db.deleteObject('judgestates', homework_id = target_homework['id'], problem_id = sub_prob_id)
+
         for key in self.args.keys():
             if key == 'id':
                 continue
@@ -205,7 +226,13 @@ class APIHomeworkHandler(base.BaseHandler):
         target_homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
         # authority check
         # if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role']<3:
-        if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
+        # if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
+        #     self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+        #     return res_dict
+        if cur_user['role'] < 2:
+            self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+            return res_dict
+        elif cur_user['role'] == 2 and target_homework['course_id'] not in cur_user['ta_courses']:
             self.set_res_dict(res_dict, code=1, msg='you are not authorized')
             return res_dict
         # ---------------------------------------------------------------------
@@ -218,13 +245,20 @@ class APIHomeworkHandler(base.BaseHandler):
     async def _scoreOpenness_post(self):
         res_dict = {}
         cur_user = await self.get_current_user_object()
-        target_homework = (await self.db.getObject('homeworks', id=self.args['homework_id']))[0]
+        target_homework = await self.db.getObjectOne('homeworks', id=self.args['homework_id'])
         # authority check
         # if target_homework['course_id'] not in cur_user['ta_courses'] and cur_user['role'] < 3:
-        if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
+        # if cur_user['id'] not in target_homework['tas'] and cur_user['role'] < Roles.ADMIN:
+        #     self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+        #     return res_dict
+        if cur_user['role'] < 2:
+            self.set_res_dict(res_dict, code=1, msg='you are not authorized')
+            return res_dict
+        elif cur_user['role'] == 2 and target_homework['course_id'] not in cur_user['ta_courses']:
             self.set_res_dict(res_dict, code=1, msg='you are not authorized')
             return res_dict
         # ---------------------------------------------------------------------
+
         target_homework['score_openness'] = self.args['score_openness']
         await self.db.saveObject('homeworks', object=target_homework)
         self.set_res_dict(res_dict, code=0, msg='score_openness changed')

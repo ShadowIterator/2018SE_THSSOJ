@@ -23,7 +23,6 @@ class APINoticeHandler(base.BaseHandler):
         for notice in res:
             if 'create_time' in notice.keys() and notice['create_time'] is not None:
                 notice['create_time'] = int(time.mktime(notice['create_time'].timetuple()))
-
             # authority check
             if cur_user['role'] < 3:
                 course = (await self.db.getObject('notices', id=notice['course_id']))[0]
@@ -32,9 +31,10 @@ class APINoticeHandler(base.BaseHandler):
                 else:
                     ret_list.append(notice)
             else:
+                print_test('insert notice', notice)
                 ret_list.append(notice)
             # ---------------------------------------------------------------------
-        return res
+        return ret_list
         # self.write(json.dumps(res).encode())
 
     # @tornado.web.authenticated
@@ -73,13 +73,15 @@ class APINoticeHandler(base.BaseHandler):
         return res_dict
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('notices', self.args['start'], self.args['end'], **self.args)
 
     # @tornado.web.authenticated
     async def _create_post(self):
         res_dict = {}
         course_id = self.args['course_id']
-        course = (await self.db.getObject('courses', cur_user=self.get_current_user_object(), id=course_id))[0]
+        course = (await self.db.getObject('courses', id=course_id))[0]
         # authority check
         cur_user = await self.get_current_user_object()
         if cur_user['role'] < 2 or (cur_user['role'] == 2 and cur_user['id'] not in course['tas']):
@@ -87,8 +89,9 @@ class APINoticeHandler(base.BaseHandler):
             return res_dict
 
         await self.db.createObject('notices', **self.args)
-        notice = (await self.db.getObject('notices',cur_user=self.get_current_user_object(), **self.args))[0]
-        print_debug('notice_create: ', notice)
+
+        notice = (await self.db.getObject('notices', **self.args))[0]
+        print('notice_create: ', notice)
         course['notices'].append(notice['id'])
         course['notices'] = list(set(course['notices']))
         self.set_res_dict(res_dict, code=0, msg='notice created')

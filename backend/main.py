@@ -1,3 +1,4 @@
+# encoding = utf-8
 import json
 import aiopg
 import bcrypt
@@ -47,53 +48,45 @@ async def main():
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 
     # Create the global connection pool.
-    async with aiopg.create_pool(
-            host=options.db_host,
-            port=options.db_port,
-            user=options.db_user,
-            password=options.db_password,
-            dbname=options.db_database) as db:
-        rdb = BaseDB(db)
-        app = Application(rdb,
-                          options.RoutineList,
-                          **options.AppConfig
-                          )
-        await app.async_init()
 
-        # with (await db.cursor()) as cur:
-            # print('maybe-create-tables: ', schema)
-            # await cur.execute(schema)
+    while True:
+        try:
+            db = await aiopg.create_pool(
+                host=options.db_host,
+                port=options.db_port,
+                user=options.db_user,
+                password=options.db_password,
+                dbname=options.db_database)
+            # print_test('create pool done')
+            break
+        except:
+            # print_test("retrying to connect test database")
+            pass
+    await maybe_create_tables(db, './sql/schema.sql')
 
-        await maybe_create_tables(db, 'sql/schema.sql')
-        # await rdb.createObject('users', username = 'hfz', password = '1234')
+    # async with aiopg.create_pool(
+    #         host=options.db_host,
+    #         port=options.db_port,
+    #         user=options.db_user,
+    #         password=options.db_password,
+    #         dbname=options.db_database) as db:
+    print(options.AppConfig)
+    rdb = BaseDB(db)
+    app = Application(rdb,
+                      'root/',
+                      options.RoutineList,
+                      **options.AppConfig,
+                      )
+    await app.async_init()
 
-        # user = await rdb.createObject('users', email = 'xx')
-        # user['email'] = 'adfdsfe'
-        # await rdb.saveObject('users', {'id': user['id'], 'email': '12423'})
-        # stmt = ''''''
-        # await rdb
-
-        # await rdb.ins'ert_element_in_array('users', 'student_courses', 5, 1)
-        # await rdb.remove_element_in_array('users', 'student_courses', 2, 1)
-        # print('get user:', await rdb.getObjectOne('users', id = 1))
-        # stmt = '''SELECT * FROM users WHERE username LIKE \'%%{keyword}%%\';'''.format(keyword = 'hfz')
-        # print('stmt = ', stmt)
-
-        # for user in await rdb.getTable('problems').search_by_title(filter(lambda s: s!='', ' dfsdfli HTML    hfz '.split(' '))):
-        #     print('get user: ', user)
-
-        # stmt = 'SELECT * FROM users WHERE username LIKE \'%%hfz%%\';'
-        # print('stmt = ', stmt)
-        # for user in await rdb.query(stmt):
-        #     print('get user: ', user)
-        # app.listen(options.port)
-
-        # print('after op: ', await rdb.getObjectOne('judgestates', id = 1))
-        # In this demo the server will simply run until interrupted
-        # with Ctrl-C, but if you want to shut down more gracefully,
-        # call shutdown_event.set().
-        shutdown_event = tornado.locks.Event()
-        await shutdown_event.wait()
+    # user_obj = await rdb.getObjectOne('users', id = 1)
+    # print('main: ', user_obj)
+    # user_obj['username'] = 'hz'
+    # await rdb.saveObject('users', user_obj)
+    # print('main-2: ', await rdb.getObjectOne('users', id = 1))
+    app.listen(options.port)
+    shutdown_event = tornado.locks.Event()
+    await shutdown_event.wait()
 
 
 if __name__ == "__main__":

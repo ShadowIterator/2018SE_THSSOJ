@@ -84,7 +84,7 @@ class AddNewNotice extends Component {
             },
         };
         return (
-            <Card interactive={false} className="text-center">
+            <div style={{textAlign: 'center'}}>
             <Form onSubmit={this.submitHandler}>
                 <FormItem
                     {...formItemLayout}
@@ -118,7 +118,7 @@ class AddNewNotice extends Component {
                 <Button type="primary" htmlType="submit" style={{marginLeft:"10px", marginRight:"10px"}}>发布</Button>
                 <Button onClick={this.props.cancel_callback} style={{marginLeft:"10px", marginRight:"10px"}}>放弃</Button>
             </Form>
-            </Card>
+            </div>
         )
     }
 }
@@ -128,17 +128,17 @@ const WrappedAddNewNotice = Form.create()(AddNewNotice);
 class TANoticeList extends Component {
     render() {
         return(
-            <Card interactive={false}>
-                <Button icon="add" onClick={this.props.newNotice}>新建通知</Button>
+            <div>
+                <Button icon="add" onClick={this.props.newNotice} style={{marginBottom: '10px'}}>新建通知</Button>
                 <Info infoitems={this.props.infoitems} />
-            </Card>
+            </div>
         );
     }
 }
 
 class mTAHomeworkCard extends Component {
     render() {
-        console.log(this.props)
+        console.log(this.props);
         const problems = this.props.problems.sort((a, b) => {
             return a.id - b.id;
         });
@@ -155,14 +155,17 @@ class mTAHomeworkCard extends Component {
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span><Button htmlType={'button'}
-                                            onClick={()=>{
-                                                this.props.clickEditCallback(this.props.homework_id);
-                                            }}>
-                                        编辑
-                                    </Button>
+                                    <span style={{color: 'red'}}> 截止日期：{ddl_str}</span>
                                 </Col>
                             </Row>
+                        }
+                        footer={
+                            <Button htmlType={'button'}
+                                    onClick={()=>{
+                                        this.props.clickEditCallback(this.props.homework_id);
+                                    }}>
+                                编辑
+                            </Button>
                         }
                         bordered
                         dataSource={problems}
@@ -182,24 +185,93 @@ class mTAHomeworkCard extends Component {
             );
         } else
         {
+            const score_openess_text = ['发布成绩', '隐藏成绩'];
+            const submitable_text = ['打开补交', '关闭补交'];
             ret = (
                 <div style={{margin: '20px'}}>
                     <List
                         size="small"
                         header={
                             <Row type="flex" justify="space-around" align="middle">
-                                <Col span={18}>
+                                <Col span={18} style={{textAlign: 'left'}}>
                                     <h4>{this.props.name}</h4>
                                 </Col>
                                 <Col span={6} style={{textAlign: 'right'}}>
-                                    <span>截止日期：{ddl_str}</span>
+                                    <span style={{color: 'red'}}>截止日期：{ddl_str}</span>
                                 </Col>
+                            </Row>
+                        }
+                        footer={
+                            <Row type="flex" justify="space-around" align="middle">
+                                <Col span={2} style={{textAlign: 'left'}}>
+                                    <Button onClick={()=>{
+                                        const data = {
+                                            homework_id: this.props.homework_id,
+                                            score_openness: 1-this.props.score_openess
+                                        };
+                                        ajax_post(api_list['scoreOpenness_homework'], data, this, (that, res)=>{
+                                            if (res.data.code !== 0) {
+                                                if (this.props.score_openess === 0)
+                                                    message.error('发布成绩失败！');
+                                                else
+                                                    message.error('隐藏成绩失败！');
+                                                return;
+                                            }
+                                            if (this.props.score_openess === 0)
+                                                message.success('已发布成绩！');
+                                            else
+                                                message.success('已隐藏成绩！');
+                                            this.props.refreshCallback(this.props.course_id);
+                                        });
+                                    }}>
+                                        {score_openess_text[this.props.score_openess]}
+                                    </Button>
+                                </Col>
+                                <Col span={2}>
+                                    <Button onClick={()=>{
+                                        const data = {
+                                            homework_id: this.props.homework_id,
+                                            submitable: 1-this.props.submitable
+                                        };
+                                        ajax_post(api_list['submitable_homework'], data, this, (that, res)=>{
+                                            if (res.data.code !== 0) {
+                                                if (this.props.submitable === 0)
+                                                    message.error('打开补交失败！');
+                                                else
+                                                    message.error('关闭补交失败！');
+                                                return;
+                                            }
+                                            if (this.props.submitable === 0)
+                                                message.success('已打开补交！');
+                                            else
+                                                message.success('已关闭补交！');
+                                            this.props.refreshCallback(this.props.course_id);
+                                        });
+                                    }}>
+                                        {submitable_text[this.props.submitable]}
+                                    </Button>
+                                </Col>
+                                <Col span={20}/>
+
                             </Row>
                         }
                         bordered
                         dataSource={problems}
                         renderItem={item => {
                             let judger_button;
+                            if (item.judge_method === 2) {  // html judger
+                                judger_button = (
+                                    <Button onClick={()=> {
+                                        this.props.history.push("/judgehtml/" +
+                                                                this.props.course_id.toString() + "/" +
+                                                                this.props.homework_id.toString() + "/" +
+                                                                item.id.toString()
+                                        );
+                                    }}>
+                                        开始评测
+                                    </Button>
+                                );
+                            } else
                             if (item['judger_status'] == 0) {
                                 judger_button = (
                                     <Button onClick={()=>{
@@ -248,9 +320,12 @@ class mTAHomeworkCard extends Component {
                                 );
                             }
                             return (
-                                <List.Item key={item.id} actions={[<Button　onClick={() => {
-                                    this.props.history.push("/tajudge/"+this.props.course_id.toString()+"/"+
-                                        this.props.homework_id+"/"+item.id.toString());
+                                <List.Item key={item.id} actions={[<Button onClick={() => {
+                                    this.props.history.push("/tajudge/" +
+                                                            this.props.course_id.toString() + "/" +
+                                                            this.props.homework_id.toString() + "/" +
+                                                            item.id.toString()
+                                                            );
                                 }}>查看详情</Button>, (judger_button)]}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
                                     <List.Item.Meta title={item.title} />
@@ -281,6 +356,8 @@ class TAHomeworkPanel extends Component {
                                     homework_id={homework.id}
                                     course_id={this.props.course_id}
                                     deadline={homework.deadline === undefined ? 0 : homework.deadline}
+                                    score_openess={homework.score_openness}
+                                    submitable={homework.submitable}
                                     refreshCallback={this.props.refreshCallback}
                                     clickEditCallback={this.props.clickEditCallback}
                     />
@@ -314,6 +391,10 @@ class mHomeworkForm extends Component {
         event.stopPropagation();
         this.props.form.validateFields((err, fieldsValue) => {
             if (err) return;
+            if (this.state.problems.length === 0) {
+                message.error("请至少添加一道题目！");
+                return;
+            }
             if (this.state.isEditing) {
                 const data = {
                     id: this.props.homework_id,
@@ -498,26 +579,30 @@ class mHomeworkForm extends Component {
                                onChange={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   console.log(event.target.value);
-                                   const num = parseInt(event.target.value);
-                                   if (Number.isNaN(num) || num < 0) {
-                                       return {
-                                           validateStatus: 'error',
-                                           errorMsg: '请输入大于等于0的整数',
-                                       }
-                                   }
+                                   // console.log(event.target.value);
+                                   // const num = parseInt(event.target.value);
+                                   // if (Number.isNaN(num) || num < 0) {
+                                   //     return {
+                                   //         validateStatus: 'error',
+                                   //         errorMsg: '请输入大于等于0的整数',
+                                   //     }
+                                   // }
                                    this.setState({
                                        newProb: event.target.value
                                    });
-                                   return {
-                                       validateStatus: 'success',
-                                       errorMsg: null,
-                                   }
+                                   // return {
+                                   //     validateStatus: 'success',
+                                   //     errorMsg: null,
+                                   // }
                                }}
                                onPressEnter={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
                                    let newPronid = parseInt(this.state.newProb);
+                                   if (isNaN(newPronid) || newPronid < 0) {
+                                       message.error("请输入大于等于0的整数");
+                                       return;
+                                   }
                                    if (this.state.problems.filter(item=>item.id===newPronid).length > 0){
                                        message.error("题目已在列表中，请不要重复加题");
                                        return;

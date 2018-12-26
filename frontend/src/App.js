@@ -96,14 +96,16 @@ class App extends Component {
         this.setState({
             state: false,
             id: -1,
-            role: -1
+            role: -1,
+            username: '',
         });
     }
-    login_callback(id, role) {
+    login_callback(id, role, username) {
         this.setState({
             state: true,
             id: id,
             role: role,
+            username: username,
         });
     }
     changeDisplay_calback(use_hard) {

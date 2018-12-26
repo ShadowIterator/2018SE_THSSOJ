@@ -118,15 +118,15 @@ class mTAHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
-        console.log("this.state.uplesson: ", this.state.uplesson);
-        console.log("this.state.talesson: ", this.state.talesson);
+        // console.log("this.state.uplesson: ", this.state.uplesson);
+        // console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
         let running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
         running_talesson = running_talesson.sort((a, b) => {
             return a.id < b.id;
         });
-        console.log("now", now);
-        console.log("running_talesson", running_talesson);
+        // console.log("now", now);
+        // console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>
@@ -141,23 +141,37 @@ class mTAHomepageMiddle extends Component {
                                           // title={<Link to={"/talesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                           actions={[
                                               <Tooltip title="查看通知">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '1'}
+                                                  })}}>
                                                       <Icon type="notification" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看作业">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '2'}
+                                                  })}}>
                                                       <Icon type="edit" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看成绩">
-                                                  <div onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                      pathname: "/talesson/"+parseInt(lesson.id),
+                                                      state: {panel: '3'}
+                                                  })}}>
                                                       <Icon type="check-circle" theme="twoTone" />
                                                   </div>
                                               </Tooltip>,
                                               <Tooltip title="查看课程信息">
-                                                  <Icon type="info-circle" theme="twoTone"
-                                                        onClick={()=>{this.props.history.push("/talesson/"+parseInt(lesson.id))}}/>
+                                                  <div onClick={()=>{this.props.history.push({
+                                                          pathname: "/talesson/"+parseInt(lesson.id),
+                                                          state: {panel : '4'}
+                                                      })
+                                                  }} >
+                                                  <Icon type="info-circle" theme="twoTone"/>
+                                                  </div>
                                               </Tooltip>]}
                                           hoverable={true}
 
@@ -167,6 +181,7 @@ class mTAHomepageMiddle extends Component {
                                                   <div>
                                                       <p>{"开课时间："+moment.unix(lesson.start_time).format("YYYY年MM月DD日")}</p>
                                                       <p>{"结课时间："+moment.unix(lesson.end_time).format("YYYY年MM月DD日")}</p>
+                                                      <p>{"课程暗号："+lesson.course_spell}</p>
                                                       <p>{"课程简介："+lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}</p>
                                                   </div>
                                               }
@@ -228,7 +243,7 @@ class mTAHomepageMiddle extends Component {
                                                         }
                                                         }/>
                                               </Tooltip>]}>
-                                        <Meta title={<Link to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
+                                        <Meta title={<Link style={{fontSize: "200%"}} to={'/editlesson/' + lesson.id.toString()}>{lesson.name}</Link>}
                                               description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>
                                     </Card>
                                 </Col>

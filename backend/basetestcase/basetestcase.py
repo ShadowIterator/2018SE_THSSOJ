@@ -48,11 +48,36 @@ def async_aquire_db(func):
         await self.set_application_db()
         await self._app.async_init()
         await self.prepare()
-        return await func(self, *args, **kw)
+        res = await func(self, *args, **kw)
+        await self.done()
+        return res
     return wrapper
+
+class SIClient:
+    def __init__(self, client = None, *args, **kw):
+        # self.client = client
+        if(client == None):
+            self.client = AsyncHTTPClient()
+        else:
+            self.client = client
+        self.user_id_cookie = ''
+
+    async def get_response(self, url, *args, **kw):
+        header = tornado.httputil.HTTPHeaders({'content-type': 'application/json', 'Cookie': self.user_id_cookie})
+        print_debug('''si-client fetch {url} with header = {header}'''.format(url = url, header = header))
+        res = await self.client.fetch(url, headers = header, *args, **kw)
+        for cookie in res.headers.get_list('Set-Cookie'):
+            parsed_cookie = tornado.httputil.parse_cookie(cookie)
+            if 'user_id' in parsed_cookie.keys():
+                self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
+        return res
+
 
 class BaseTestCase(AsyncHTTPTestCase):
     async def prepare(self):
+        pass
+
+    async def done(self):
         pass
 
     async def set_application_db(self):
@@ -86,6 +111,7 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
+        self.root_dir = 'test_root/'
         options.parse_config_file('./settings/app_config.py')
         if (not os.getenv('USE_TRAVIS', None)):
             options.parse_config_file('./settings/env_config.py')
@@ -98,60 +124,62 @@ class BaseTestCase(AsyncHTTPTestCase):
     def get_app(self):
         print_test('call get_app')
         return Application(None,
+                           self.root_dir,
                           options.RoutineList,
-                          **options.AppConfig
+                          **options.AppConfig,
                            )
 
     def getbodyObject(self, response):
         return json.loads(response.body)
 
-    async def get_response(self, uri, *args, **kw):
-        header = tornado.httputil.HTTPHeaders({'content-type': 'application/json', 'Cookie': self.user_id_cookie})
-        # for key, value in self.cookies.items():
-        #     header.add('Cookie', '='.join((key, value)))
-        # print_test('post header: ', header)
-        res = await self.http_client.fetch(self.get_url(uri), headers = header, *args, **kw)
-        for cookie in res.headers.get_list('Set-Cookie'):
-            parsed_cookie = tornado.httputil.parse_cookie(cookie)
-            print_test('setcookie: ', parsed_cookie)
-            # for key, value in parsed_cookie.items():
-            #     if(key != 'Path'):
-            #         self.cookies[key] = '='.join((key, value))
-            if 'user_id' in parsed_cookie.keys():
-                self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
-        print_test('selfcookies: ', self.user_id_cookie)
-        return res
+    async def get_response(self, uri, client = None, *args, **kw):
+        if(client == None):
+            header = tornado.httputil.HTTPHeaders({'content-type': 'application/json', 'Cookie': self.user_id_cookie})
+            res = await self.http_client.fetch(self.get_url(uri), headers = header, *args, **kw)
+            for cookie in res.headers.get_list('Set-Cookie'):
+                parsed_cookie = tornado.httputil.parse_cookie(cookie)
+                if 'user_id' in parsed_cookie.keys():
+                    self.user_id_cookie = '''user_id=\"{secure_cookie}\"'''.format(secure_cookie = parsed_cookie['user_id'])
+            return res
+        else:
+            return await client.get_response(self.get_url(uri), *args, **kw)
 
-    async def post_request(self, uri, **kw):
-        return await self.get_response(uri, method = 'POST', body = json.dumps(kw).encode())
+    async def post_request(self, uri, client = None, **kw):
+        print_debug('post_request', kw)
+        return await self.get_response(uri, method = 'POST', body = json.dumps(kw).encode(), client = client)
 
-    async def get_request(self, uri, **kw):
-        return await self.get_response(uri, method = 'GET', body = None)
+    async def get_request(self, uri, client = None, **kw):
+        return await self.get_response(uri, method = 'GET', body = None, client = client)
 
-    async def login(self, username, password):
+    async def login(self, username, password, client = None):
         response = self.getbodyObject(await self.post_request('/api/user/login',
                                                               username=username,
-                                                              password=password))
+                                                              password=password,
+                                                              client = client))
+        self.assertIsInstance(response, dict)
+        self.assertEqual(response['code'], 0)
+    
+    async def login_object(self, obj, client = None):
+        print_debug('login_object: ', obj, client)
+
+    async def logout(self, user_id):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=user_id))
+        self.assertEqual(response['code'], 0)
+
+    async def login_object(self, obj, client = None):
+        response = self.getbodyObject(await self.post_request('/api/user/login',
+                                                              username=obj['username'],
+                                                              password=obj['password'],
+                                                              client = client))
         self.assertIsInstance(response, dict)
         self.assertEqual(response['code'], 0)
 
-    # an example
-    # @async_aquire_db
-    # async def test_hello(self):
-    #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
-    #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz"}')
-    #     self.assertIn(b'st', response.body)
-    #     print_test(response.body)
-    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
+    async def logout_object(self, obj):
+        response = self.getbodyObject(await self.post_request('/api/user/logout',
+                                                              id=obj['id']))
+        self.assertEqual(response['code'], 0)
 
+    async def post_request_return_object(self, url, client = None, *args, **kw):
+        return self.getbodyObject(await self.post_request(url, client = client, *args, **kw))
 
-    # @async_aquire_db
-    # async def test_2(self):
-    #     print_test('test_2')
-    #     await self.db.createObject('users', username = 'hfzzz', password = 'pwd', email = 'xx@xx.com')
-    #     await self.db.createObject('users', username = 'hfzzz1', password = 'pwd', email = 'xx@xx.com')
-    #     response = await self.http_client.fetch(self.get_url('/api/user/query'), method = 'POST', body = '{ "username" : "hfzzz1"}')
-    #     self.assertIn(b'st', response.body)
-    #     print_test(response.body)
-    #     print_test('getobj in db: ', await self.db.getObject('users', username = 'hfzzz'))
-    #

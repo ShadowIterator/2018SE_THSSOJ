@@ -72,8 +72,9 @@ async def maybe_create_tables(db, filename):
     #         await cur.fetchone()
     #     print_debug("in create")
     # except psycopg2.ProgrammingError:
-        print_debug('create tables')
-        with open(filename) as f:
+
+        print('create tables')
+        with open(filename, encoding = 'utf-8') as f:
             schema = f.read()
         with (await db.cursor()) as cur:
             # print_debug('maybe-create-tables: ', schema)
@@ -84,8 +85,9 @@ async def maybe_create_tables(db, filename):
     #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
-    def __init__(self, db, *args, **kw):
+    def __init__(self, db, root_dir, *args, **kw):
         self.db_instance = db
+        self.root_dir = root_dir
         super(Application, self).__init__(*args, **kw)
 
     def setDB(self, db):
@@ -113,7 +115,7 @@ class BaseHandler(tornado.web.RequestHandler):
         self.set_header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS')
         self.set_header("Access-Control-Allow-Credentials", 'true')
 
-        self.root_dir='root'
+        self.root_dir= self.application.root_dir
         self.user = None
 
     # async def get(self, type): #detail
@@ -133,8 +135,8 @@ class BaseHandler(tornado.web.RequestHandler):
 
     @catch_exception_write
     async def post(self, type):
-        print_debug('request = ', self.request.headers)
-        print_debug('post: ', type)
+        print_debug('''request-type = {type} request-header = {headers}'''.format(headers = self.request.headers, type = type))
+        # print_debug('post: ', type)
         res = await self._call_method('''_{action_name}_post'''.format(action_name=type))
         print_debug('return: ', res)
         self.write(json.dumps(res).encode())
@@ -217,19 +219,27 @@ class BaseHandler(tornado.web.RequestHandler):
         #     for each_property in object_selected.keys():
         #         if not each_property in allowed_properties:
         #             del object_selected[each_property]
+        # rtn = {}
+        # if (allowed_properties != None):
+        #     for key, value in object_selected.items():
+        #         if(key in allowed_properties):
+        #             rtn[key] = value
+        # else:
+        #     rtn = object_selected
+        # print_debug('filter-obj1: ', rtn)
+        # if (abandoned_properties != None):
+        #     object_selected = rtn
+        #     for key, value in object_selected.keys():
+        #         if(key not in abandoned_properties):
+        #             rtn[key] = value
+        #
         rtn = {}
-        if (allowed_properties != None):
-            for key, value in object_selected.items():
-                if(key in allowed_properties):
-                    rtn[key] = value
-        print_debug('filter-obj1: ', rtn)
-        if (abandoned_properties != None):
-            rtn = {}
-            object_selected = rtn
-            for key, value in object_selected.keys():
-                if(key not in abandoned_properties):
-                    rtn[key] = value
-        object_selected = rtn
-        print_debug('filter-obj2: ', rtn)
+        for key, value in object_selected.items():
+            # print_debug('filter object rules: ', key, allowed_properties, abandoned_properties,(allowed_properties == None) or (key in allowed_properties), ((abandoned_properties == None) or (key not in abandoned_properties)))
+            if (((allowed_properties == None) or (key in allowed_properties)) and ((abandoned_properties == None) or (key not in abandoned_properties))):
+                # print_debug('filter-object checkok: ', key)
+                rtn[key] = value
 
+        # object_selected = rtn
+        # print_debug('filter-obj: ', rtn, object_selected)
         return rtn

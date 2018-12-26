@@ -1,5 +1,21 @@
 version: '3'
 services:
+  https-portal:
+    image: steveltn/https-portal:1
+    ports:
+      - '80:80'
+      - '443:443'
+    links:
+      - frontend
+    restart: always
+    environment:
+      DOMAINS: '308469.iterator-traits.com -> http://frontend:80'
+      WORKER_PROCESSES: 2
+      WORKER_CONNECTIONS: 4096
+      CLIENT_MAX_BODY_SIZE: '500M'
+      # STAGE: 'production'
+      # FORCE_RENEW: 'true'
+
   tornado_web:
     restart: always
     build: ./backend
@@ -30,22 +46,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile-prod
-    # volumes:
-    #   - './frontend:/usr/src/app'
-    #   # - '/usr/src/app/node_modules'
-    # ports:
-    #   - '3000:3000'
-    # environment:
-    #   - NODE_ENV=development
     volumes:
       - './backend/root/judge_html_temp:/usr/src/app/root/judge_html_temp'
-    ports:
-      - '80:80'
+    # ports:
+      # - '80:80'
 
   judger:
     build: ./judger
     expose:
       - "12345"
+    cap_add:
+      - SYS_PTRACE
     volumes:
       - './backend/root:/usr/src/app/root'
       - './backend/test:/usr/src/app/test'

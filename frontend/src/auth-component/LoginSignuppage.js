@@ -46,8 +46,9 @@ class Login extends Component
         if(code===0) {
             const id = result.data.id;
             const role = result.data.role;
+            const username = result.data.username;
             Cookies.set('mid', id.toString());
-            that.props.callback(id, role);
+            that.props.callback(id, role, username);
             if (role === 1) {
                 that.context.router.history.push("/student");
             }
@@ -57,7 +58,6 @@ class Login extends Component
                 that.context.router.history.push("/admin")
             }
         } else{
-            // alert("Username or password incorrect.");
             message.error("用户名或密码错误！");
         }
     }
@@ -146,7 +146,11 @@ class Signup extends Component {
     static signup_callback(that, result) {
         const code = result.data.code;
         if(code===0) {
+            message.success("注册成功，请登录");
             that.context.router.history.push("/login");
+        } else
+        {
+            message.error("注册失败");
         }
     }
     render() {
@@ -341,10 +345,8 @@ class mLogoutPage extends Component {
         const code = result.data.code;
         if(code===0) {
             Cookies.remove('mid');
-            // alert("Logout succeed.");
             message.success("登出成功");
         } else {
-            // alert("Logout failed.");
             message.error("登出失败");
         }
         that.props.callback();

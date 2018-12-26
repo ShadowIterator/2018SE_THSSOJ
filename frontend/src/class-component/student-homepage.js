@@ -5,7 +5,7 @@ import {api_list} from "../ajax-utils/api-manager";
 
 import {withRouter, Link} from "react-router-dom";
 import moment from "moment"
-import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge } from 'antd';
+import { Layout, Breadcrumb, Card, Row, Col, Icon, Tooltip, Badge, Input, message } from 'antd';
 const {Content} = Layout;
 const {Meta} = Card;
 
@@ -20,15 +20,19 @@ class mStudentHomepageMiddle extends Component {
     componentDidMount() {
         if(!this.props.state || this.props.id===undefined || this.props.id === -1)
             return;
-        const id = this.props.id;
-        ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
+        // const id = this.props.id;
+        this.query_data(this.props.id);
+        // ajax_post(api_list['query_user'], {id:id}, this, StudentHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
         if(nextProps.id===-1)
             return;
         if(nextProps.id !== this.props.id) {
-            ajax_post(api_list['query_user'], {id:nextProps.id}, this, StudentHomepageMiddle.query_user_callback);
+            this.query_data(nextProps.id);
         }
+    }
+    query_data(id) {
+        ajax_post(api_list['query_user'], {id: id}, this, StudentHomepageMiddle.query_user_callback);
     }
     static query_user_callback(that, result) {
         if(result.data.length === 0) {
@@ -68,29 +72,61 @@ class mStudentHomepageMiddle extends Component {
                     <Breadcrumb.Item><Link to="/student">主页</Link></Breadcrumb.Item>
                 </Breadcrumb>
                 <div style={{background: '#fff', padding: 24, minHeight: 640}}>
-                    <h2>本学期课程</h2>
+                    <Row>
+                        <Col span={18}> <h2>本学期课程</h2> </Col>
+                        <Col span={6}>
+                            <Input.Search
+                                placeholder="输入课程暗号加入课程"
+                                enterButton="加入课程"
+                                size="large"
+                                onSearch={value => {
+                                    console.log(value);
+                                    const data = {
+                                        user_id: this.props.id,
+                                        course_spell: value
+                                    };
+                                    ajax_post(api_list['add_course'], data, this, (that, result) => {
+                                        if (result.data.code === 1) {
+                                            message.error('未找到课程');
+                                            return;
+                                        }
+                                        message.success('加入课程成功');
+                                        that.query_data(that.props.id);
+                                    });
+                                }}
+                            />
+                        </Col>
+                    </Row>
                     <Row gutter={16}>
                     {running_lesson.map((lesson)=>
                         <Col span={8}>
                             <Card style={{width: '100%', marginTop: 16}}
                                   actions={[
                                             <Tooltip title="查看通知">
-                                                <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                <div onClick={()=>{this.props.history.push({
+                                                    pathname: "/studentlesson/"+parseInt(lesson.id),
+                                                    state: {panel: '1'}
+                                                })}}>
                                                 <Icon type="notification" theme="twoTone" style={{padding: '0 5px'}} />
-                                                {/*<Badge count={lesson.notices.length}*/}
-                                                       {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                 </div>
                                             </Tooltip>,
                                             <Tooltip title="查看作业">
-                                                <div onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}>
+                                                <div onClick={()=>{this.props.history.push({
+                                                    pathname: "/studentlesson/"+parseInt(lesson.id),
+                                                    state: {panel: '2'}
+                                                })}}>
                                                 <Icon type="edit" theme="twoTone" style={{padding: '0 5px'}} />
-                                                {/*<Badge count={lesson.homeworks.length}*/}
-                                                       {/*style={{padding: '0 5px', backgroundColor: '#fff', color: '#999', boxShadow: '0 0 0 1px #d9d9d9 inset'}} />*/}
                                                 </div>
                                             </Tooltip>,
                                             <Tooltip title="查看课程信息">
-                                                <Icon type="info-circle" theme="twoTone"
-                                                      onClick={()=>{this.props.history.push("/studentlesson/"+parseInt(lesson.id))}}/>
+                                                <div onClick={()=>{
+                                                    this.props.history.push({
+                                                        pathname: "/studentlesson/"+parseInt(lesson.id),
+                                                        state: {panel: '3'},
+                                                    })
+                                                }} >
+                                                <Icon type="info-circle" theme="twoTone" style={{padding: '0 5px'}} />
+                                                </div>
                                             </Tooltip>]}>
                                 <Meta title={<Link style={{fontSize: '200%'}} to={"/studentlesson/"+parseInt(lesson.id)}>{lesson.name}</Link>}
                                       description={lesson.description.slice(0, 20)+(lesson.description.length <= 20 ? '' : '...')}/>

@@ -528,12 +528,16 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_epoll_create1  ] = -1;
 		syscall_limit[__NR_epoll_ctl      ] = -1;
 		syscall_limit[__NR_epoll_wait     ] = -1;
+		syscall_limit[__NR_epoll_pwait    ] = -1;
 		syscall_limit[__NR_eventfd2       ] = -1;
 
 		syscall_limit[__NR_clock_gettime  ] = -1;
 		syscall_limit[__NR_clock_getres   ] = -1;
 
 		syscall_limit[__NR_getpid         ] = -1;
+		syscall_limit[__NR_getppid        ] = -1;
+		syscall_limit[__NR_getpgrp        ] = -1;
+		syscall_limit[__NR_wait4          ] = -1;
 		syscall_limit[__NR_getuid         ] = -1;
 		syscall_limit[__NR_geteuid        ] = -1;
 		syscall_limit[__NR_getgid         ] = -1;
@@ -542,11 +546,22 @@ void init_config(const RunConfig& runConfig) {
 		syscall_limit[__NR_prctl          ] = -1;
 		syscall_limit[__NR_poll           ] = -1;
 
+		syscall_limit[__NR_uname          ] = -1;	// to run /bin/bash
+
+        syscall_limit[__NR_socket         ] = -1;	// docker need the following to run /bin/bash
+        syscall_limit[__NR_connect        ] = -1;
+        syscall_limit[__NR_accept         ] = -1;
+        syscall_limit[__NR_bind           ] = -1;
+        syscall_limit[__NR_listen         ] = -1;
+
+
 		readable.insert(runConfig.path);
 		writable.insert(runConfig.path + "/");
+		writable.insert("/dev/tty");				// to run /bin/bash
 
 		readable.insert("/usr/bin/nodejs");
 		readable.insert("/usr/lib/nodejs/");
+		readable.insert("/usr/share/locale/");
 
 		statable.insert("/usr");
 		statable.insert("/usr/bin");
@@ -555,6 +570,9 @@ void init_config(const RunConfig& runConfig) {
 		statable.insert("/usr/");
 		statable.insert("/usr/bin/");
 		statable.insert("/usr/lib/");
+
+		readable.insert("/etc/nsswitch.conf");
+		readable.insert("/etc/passwd");
 	}
 
 	if (runConfig.Lang == "compiler") {

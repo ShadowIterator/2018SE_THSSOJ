@@ -7,7 +7,7 @@ import {Container} from "react-bootstrap"
 
 import moment from "moment";
 
-import { Layout, Breadcrumb, DatePicker, Table} from 'antd';
+import { Layout, Breadcrumb, DatePicker, Table, Row, Col} from 'antd';
 import { Form, Input, Select, Button, message } from 'antd';
 const {Content} = Layout;
 const {RangePicker} = DatePicker;
@@ -28,14 +28,16 @@ class mLessonList extends Component {
             this.state = {
                 isCreating: true,
                 tas: [],
-                stus: []
+                stus: [],
+                course_spell: ""
             }
         } else  // edit
         {
             this.state = {
                 isCreating: false,
                 tas: [],
-                stus: []
+                stus: [],
+                course_spell: ""
             };
         }
     }
@@ -69,7 +71,10 @@ class mLessonList extends Component {
             message.error("未找到课程");
             return;
         }
-        console.log("editLesson_callback ", result);
+        // console.log("editLesson_callback ", result);
+        that.setState({
+            course_spell: result.data[0].course_spell
+        });
         that.props.form.setFieldsValue({
             title: result.data[0].name,
             description: result.data[0].description,
@@ -86,7 +91,7 @@ class mLessonList extends Component {
     handleSubmit(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('handleSubmit');
+        // console.log('handleSubmit');
         this.props.form.validateFields((err, fieldsValue) => {
             // console.log('error: ', err);
             // console.log('value: ', fieldsValue);
@@ -218,42 +223,6 @@ class mLessonList extends Component {
         // });
     }
     render() {
-        // const stutagElements = this.props.stu_tags.value.map(tag => {
-        //     const onRemove = () => {
-        //         this.props.form.setFieldsValue({
-        //             stu_tags: this.props.stu_tags.value.filter(t => t.username !== tag.username)
-        //         });
-        //         // this.setState({stu_tags: this.state.stu_tags.filter(t => t.username !== tag.username)});
-        //     };
-        //     return (
-        //         <Tag
-        //             key={tag.username}
-        //             large={true}
-        //             onRemove={onRemove}
-        //         >
-        //             {tag.username}
-        //         </Tag>
-        //     );
-        // });
-        //
-        // const tatagElements = this.props.ta_tags.value.map(tag => {
-        //     const onRemove = () => {
-        //         this.props.form.setFieldsValue({
-        //             ta_tags: this.props.ta_tags.value.filter(t => t.username !== tag.username)
-        //         });
-        //         // this.setState({ta_tags: this.state.ta_tags.filter(t => t.username !== tag.username)});
-        //     };
-        //     return (
-        //         <Tag
-        //             key={tag.username}
-        //             large={true}
-        //             onRemove={onRemove}
-        //         >
-        //             {tag.username}
-        //         </Tag>
-        //     );
-        // });
-
         const tas_table_columns = [
             {title: 'ID', dataIndex: 'id',width: 100, key: 'id'},
             {title: '用户名', dataIndex: 'username', key: 'username', width: 300},
@@ -302,12 +271,14 @@ class mLessonList extends Component {
 
         const formItemLayout = {
             labelCol: {
-                xs: { span: 24 },
-                sm: { span: 4 },
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 4 },
             },
             wrapperCol: {
-                xs: { span: 24 },
-                sm: { span: 20 },
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 20 },
             },
         };
         const tailFormItemLayout = {
@@ -350,10 +321,23 @@ class mLessonList extends Component {
                 <Container>
                     <Button style={{margin: '10px'}} type="primary" htmlType="submit">修改</Button>
                 </Container>
-            )
-
+            );
         }
 
+        let show_course_spell;
+        if (this.state.isCreating) {
+            show_course_spell = (<></>);
+        } else
+        {
+            show_course_spell = (
+                <FormItem
+                    {...formItemLayout}
+                    label="课程暗号"
+                >
+                    <span className="ant-form-text"><strong>{this.state.course_spell}</strong></span>
+                </FormItem>
+            );
+        }
         return (
             <div>
             <Form onSubmit={this.handleSubmit}>
@@ -370,7 +354,7 @@ class mLessonList extends Component {
                         <Input disabled={this.props.readOnly}/>
                     )}
                 </FormItem>
-
+                {show_course_spell}
                 <FormItem
                     {...formItemLayout}
                     label="课程简介"

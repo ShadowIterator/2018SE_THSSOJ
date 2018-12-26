@@ -26,29 +26,38 @@ class APIUserHandler(base.BaseHandler):
     async def _query_post(self):
         print_debug('query = ', self.args)
         res = await self.db.getObject('users', **self.args)
-        print_debug('query res = ', res)
         cur_user = await self.get_current_user_object()
         ret_list = []
+        print_debug('query res = ', res, cur_user)
+
         for user in res:
             if 'create_time' in user.keys() and user['create_time'] is not None:
                 user['create_time'] = int(time.mktime(user['create_time'].timetuple()))
             if 'validate_time' in user.keys() and user['validate_time'] is not None:
                 user['validate_time'] = int(time.mktime(user['validate_time'].timetuple()))
             # authority check
-            if cur_user['role'] == 1:
-                if user['role'] == 2 or cur_user['id'] == user['id']:
-                    self.property_filter(user,
+            user = self.property_filter(user, allowed_properties=None, abandoned_properties=['validate_time', 'validate_code', 'secret'])
+            print('query_user-aftr filter: ', user)
+            if cur_user['role'] <= 1:
+                if user['role'] == 2:
+                    tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
-                    ret_list.append(user)
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'student_courses', 'ta_courses', 'password'])
+                    print_debug('query_user: ', user, cur_user)
+                    ret_list.append(tusr)
+                elif cur_user['id'] == user['id']:
+                    tusr = self.property_filter(user,
+                                         allowed_properties=None,
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
+                    ret_list.append(tusr)
                 else:
                     pass
             elif cur_user['role'] == 2:
                 if user['role'] < 3:
-                    self.property_filter(user,
+                    tusr = self.property_filter(user,
                                          allowed_properties=None,
-                                         abandoned_properties=['validate_time', 'validate_code', 'secret'])
-                    ret_list.append(user)
+                                         abandoned_properties=['validate_time', 'validate_code', 'secret', 'password'])
+                    ret_list.append(tusr)
                 else:
                     pass
             elif cur_user['role'] == 3:
@@ -58,8 +67,8 @@ class APIUserHandler(base.BaseHandler):
             # ---------------------------------------------------------------------
 
         # self.write(json.dumps(res).encode())
-        print_debug('query_return: ', res)
-        return res
+        print_debug('query_return: ', ret_list)
+        return ret_list
 
     @tornado.web.authenticated
     # @check_password
@@ -72,7 +81,7 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
-        await self.deleteObject('users', **self.args)
+        await self.db.deleteObject('users', **self.args)
         return {'code': 0}
 
     @tornado.web.authenticated
@@ -86,10 +95,13 @@ class APIUserHandler(base.BaseHandler):
             self.set_res_dict(res_dict, code=1, msg='not authorized')
             return res_dict
         # ---------------------------------------------------------------------
-        for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
-            if key in self.args:
-                del self.args[key]
-        await self.db.saveObject('users', cur_user = self.get_current_user_object(), object = self.args)
+
+        if(cur_user['role'] < Roles.ADMIN):
+            for key in ['ta_courses', 'student_courses', 'password', 'status', 'validate_time', 'validate_code', 'role', 'create_time', 'secret']:
+                if key in self.args:
+                    del self.args[key]
+
+        await self.db.saveObject('users', object = self.args)
         # rtn['code'] = 0
         return {'code': 0}
         # rtn = {
@@ -139,6 +151,7 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 0
             res_dict['role'] = userObj.role
             res_dict['id'] = userObj.id
+            res_dict['username'] = userObj.username
 
         else:
             res_dict['code'] = 1
@@ -233,11 +246,15 @@ class APIUserHandler(base.BaseHandler):
     #     self.write(json.dumps(res).encode())
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('users', self.args['start'], self.args['end'], **self.args)
 
     async def _createTA_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] >= Roles.ADMIN)
+        # if(cur_user['role'] < Roles.ADMIN):
+        #     return
         print_debug('createTA-before: ', self.args)
 
         acquired_args = ['username', 'password', 'realname', 'email', 'student_id']
@@ -245,6 +262,7 @@ class APIUserHandler(base.BaseHandler):
         self.args = self.property_filter(self.args, allowed_properties = acquired_args, abandoned_properties= None)
         self.args['status'] = 1
         self.args['role'] = Roles.TA
+        self.args['secret'] = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         print_debug('createTA-after: ', self.args)
         await self.db.createObject('users', **self.args)
         return {'code': 0}
@@ -255,6 +273,25 @@ class APIUserHandler(base.BaseHandler):
         #     print_debug('post delete')
         # elif(type == 'modify'):
         #     print_debug('post modify')
+
+    @tornado.web.authenticated
+    async def _modifypwd_post(self):
+        res_dict = {}
+        modified_user = (await self.db.getObject('users', id=self.args['id']))[0]
+        cur_user = await self.get_current_user_object()
+        if modified_user['id'] != cur_user['id']:
+            self.set_res_dict(res_dict, code=1, msg='you can only change your own password')
+            return res_dict
+        if self.args['old_pwd'] != modified_user['password']:
+            self.set_res_dict(res_dict, code=1, msg='wrong old password')
+            return res_dict
+        modified_user['password'] = self.args['new_pwd']
+        await self.db.saveObject('users', object=modified_user)
+        self.set_res_dict(res_dict, code=0, msg='password modified')
+        return res_dict
+
+    async def _hello_post(self):
+        return {'msg': 'hello'}
 
 # class UserLoginHandler(base.BaseHandler):
 #     async def post(self):

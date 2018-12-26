@@ -12,6 +12,22 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 	JudgerResult judgerResult("Accept", 0, 0, "OK");
 
 	CompileResult cr(Accept);
+	if (!judgerConfig.builtinChecker) {
+		cr = runCompiler(judgerConfig.checkerDir.c_str(),
+						"/usr/bin/g++", "-O2", "-lm",
+						Pathjoin(judgerConfig.checkerDir, judgerConfig.checker+".cpp").c_str(),
+						"-o",
+						Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
+						NULL);
+		if (!cr.success) {
+			judgerResult.result = "Judgement Failed";
+			judgerResult.time = 0;
+			judgerResult.memory = 0;
+			judgerResult.info = "Checker compile error!";
+			return judgerResult;
+		}
+	}
+
 	if (judgerConfig.Lang == "C++")
 		cr = runCompiler(judgerConfig.sourceDir.c_str(),
 						"/usr/bin/g++", 
@@ -28,8 +44,6 @@ JudgerResult run_C_CPP(const JudgerConfig& judgerConfig){
 						"-o",
 						Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(),
 						NULL);
-
-	// chmod(Pathjoin(judgerConfig.sourceDir, judgerConfig.source).c_str(), 0x777);
 
 	if (cr.success){
 		for (int i = 0; i < judgerConfig.ntests; ++i) {
@@ -104,11 +118,28 @@ string PythonComplie(const JudgerConfig& judgerConfig){
 JudgerResult run_Python(const JudgerConfig& judgerConfig){
 	JudgerResult judgerResult("Accept", 0, 0, "OK");
 
-	CompileResult cr = runCompiler(judgerConfig.sourceDir.c_str(),
-									"/usr/bin/python3.6", 
-									"-E", "-O", "-B", "-c",
-									PythonComplie(judgerConfig).c_str(),
-									NULL);
+	CompileResult cr(Accept);
+	if (!judgerConfig.builtinChecker) {
+		cr = runCompiler(judgerConfig.checkerDir.c_str(),
+						"/usr/bin/g++", "-O2", "-lm",
+						Pathjoin(judgerConfig.checkerDir, judgerConfig.checker+".cpp").c_str(),
+						"-o",
+						Pathjoin(judgerConfig.checkerDir, judgerConfig.checker).c_str(),
+						NULL);
+		if (!cr.success) {
+			judgerResult.result = "Judgement Failed";
+			judgerResult.time = 0;
+			judgerResult.memory = 0;
+			judgerResult.info = "Checker compile error!";
+			return judgerResult;
+		}
+	}
+
+	cr = runCompiler(judgerConfig.sourceDir.c_str(),
+					"/usr/bin/python3.6", 
+					"-E", "-O", "-B", "-c",
+					PythonComplie(judgerConfig).c_str(),
+					NULL);
 	// cout << cr.success << endl;
 	// cout << cr.info << endl;
 	if (cr.success) {
@@ -209,6 +240,7 @@ JudgerResult main_test(const JudgerConfig& judgerConfig){
 	cout << "outputsuf=" << judgerConfig.outputSuf << endl;
 	cout << "datadir=" << judgerConfig.dataDir << endl;
 	cout << "checker=" << judgerConfig.checker << endl;
+	cout << "checkerDir=" << judgerConfig.checkerDir << endl;
 	cout << "ntests=" << judgerConfig.ntests << endl;
 	cout << "sourcename=" << judgerConfig.source << endl;
 	cout << "sourcedir=" << judgerConfig.sourceDir << endl;

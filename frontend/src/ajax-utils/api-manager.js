@@ -11,12 +11,15 @@ const api_list = {
     'activate_user': '/api/user/activate',
     'validate_user': '/api/user/validate',
     'update_user': '/api/user/update',
+    'modifypwd_user': '/api/user/modifypwd',
+    'create_ta': '/api/user/createTA',
 
     'list_course': '/api/course/list',
     'create_course': '/api/course/create',
     'delete_course': '/api/course/delete',
     'update_course': '/api/course/update',
     'query_course': '/api/course/query',
+    'add_course': '/api/course/addCourse',
     'addStudent_course': '/api/course/addStudent',
     'addTA_course': '/api/course/addTA',
     'deleteStudent_course': '/api/course/deleteStudent',
@@ -27,6 +30,8 @@ const api_list = {
     'delete_homework': '/api/homework/delete',
     'update_homework': '/api/homework/update',
     'query_homework': '/api/homework/query',
+    'submitable_homework': '/api/homework/submitable',
+    'scoreOpenness_homework': '/api/homework/scoreOpenness',
 
     'list_notice': '/api/notice/list',
     'create_notice': '/api/notice/create',
@@ -39,6 +44,7 @@ const api_list = {
     'delete_record': '/api/record/delete',
     'query_record': '/api/record/query',
     'srcCode_record': '/api/record/srcCode',
+    'judger_info': '/api/record/judgerInfo',
 
     'list_problem': '/api/problem/list',
     'create_problem': '/api/problem/create',
@@ -47,8 +53,10 @@ const api_list = {
     'query_problem': '/api/problem/query',
     'submit_problem': '/api/problem/submit',
     'judge_all': '/api/problem/judgeAll',
+    'judge_one': '/api/problem/judge',
     'judge_html': '/api/problem/judgeHTML',
     'create_html': '/api/problem/createHTML',
+    'search_problem': '/api/problem/search',
 
     'upload_code': '/api/upload/files',
     'upload_case': '/api/upload/files',
@@ -58,7 +66,12 @@ const api_list = {
     'download_code': '/api/download/code',
     'download_data': '/api/download/data',
     'download_script': '/api/download/script',
+    'download_html': '/api/download/html',
+    'download_score': '/api/download/score',
 
+    'list_ratio': '/api/ratio/list',
+    'query_ratio': '/api/ratio/query',
+    'list_judgestates': '/api/judgestate/list',
     'query_judgestates': '/api/judgestate/query',
 };
 

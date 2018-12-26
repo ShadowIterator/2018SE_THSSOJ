@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import {Icon as Blueicon} from '@blueprintjs/core';
+import {Icon as Blueicon, HTMLTable} from '@blueprintjs/core';
 
 import {api_list} from "../ajax-utils/api-manager";
 import {ajax_post} from "../ajax-utils/ajax-method";
 import {withRouter, Link} from "react-router-dom";
 
-import { Layout, Breadcrumb, Menu, List, Row, Col, Icon } from 'antd';
+import { Layout, Breadcrumb, Menu, List, Row, Col, Icon, Table, Form } from 'antd';
 import moment from 'moment'
 import {Info} from "./lesson-component";
 const {Content, Sider} = Layout;
@@ -22,6 +22,88 @@ const result_arr = ['Accepted',
     'Compile Error',
     'unknown',
 ];
+
+class CourseInfo extends Component {
+    render() {
+        const ta_columns = [
+            {title: 'ID', dataIndex: 'id',width: 150, key: 'id'},
+            {title: '助教姓名', dataIndex: 'username',width: 150, key: 'username'},
+            {title: '邮箱', dataIndex: 'email',width: 150, key: 'email'}
+        ];
+        const formItemLayout = {
+            labelCol: {
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 4 },
+            },
+            wrapperCol: {
+                xs: { span: 12 },
+                sm: { span: 12 },
+                md: { span: 20 },
+            },
+        };
+        return (
+            <div style={{textAlign: 'center'}}>
+                <h3>课程信息</h3>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="课程名："
+                    >
+                        <span className="ant-form-text"><strong style={{fontSize: '150%'}}>{this.props.name}</strong></span>
+                    </Form.Item>
+                </Form>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="课程简介："
+                    >
+                        <span className="ant-form-text" style={{fontSize: '125%'}}>{this.props.description}</span>
+                    </Form.Item>
+                </Form>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
+                        label="助教："
+                    >
+                        <Table dataSource={this.props.ta_list}
+                               columns={ta_columns}
+                               pagination={false}
+                        />
+                    </Form.Item>
+                </Form>
+                {/*<Row>*/}
+                    {/*<Col span={4} style={{fontSize: '150%'}}>课程名</Col>*/}
+                    {/*<Col span={20} style={{fontSize: '150%'}}>{this.props.name}</Col>*/}
+                {/*</Row>*/}
+                {/*<Row>*/}
+                    {/*<Col span={4} style={{fontSize: '150%'}}>课程简介</Col>*/}
+                    {/*<Col span={20} style={{fontSize: '150%'}}>{this.props.description}</Col>*/}
+                {/*</Row>*/}
+                {/*<HTMLTable striped={true} bordered={true}>*/}
+                    {/*<tr>*/}
+                        {/*<th>课程名</th>*/}
+                        {/*<td>{this.props.name}</td>*/}
+                    {/*</tr>*/}
+                    {/*<tr>*/}
+                        {/*<th>课程简介</th>*/}
+                        {/*<td>{this.props.description}</td>*/}
+                    {/*</tr>*/}
+                    {/*<tr>*/}
+                        {/*<th>助教</th>*/}
+                        {/*<td>*/}
+                            {/*<Table columns={ta_columns}*/}
+                                   {/*dataSource={this.props.ta_list}*/}
+                                   {/*pagination={false}*/}
+                            {/*/>*/}
+                        {/*</td>*/}
+                    {/*</tr>*/}
+                {/*</HTMLTable>*/}
+            </div>
+        )
+    }
+}
+
 /*
 将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
 未到截止日期：使用timestamp区分是否到达截止日期
@@ -81,7 +163,7 @@ class mStudentHomeworkCard extends Component {
                                 <h4>{this.props.name}</h4>
                             </Col>
                             <Col span={6} style={{textAlign: 'right'}}>
-                                <span>截止日期：{ddl_str}</span>
+                                <span style={{color: 'red'}}>截止日期：{ddl_str}</span>
                             </Col>
                         </Row>
                     }
@@ -247,18 +329,32 @@ class StudentHomework extends Component {
 class mStudentLessonMiddle extends Component {
     constructor(props) {
         super(props);
+        let current_selected = '1';
+        if(this.props.location.state !== undefined) {
+            if(this.props.location.state.panel === '1') {
+                current_selected = '5';
+            } else if(this.props.location.state.panel === '2') {
+                current_selected = '1';
+            } else if(this.props.location.state.panel === '3') {
+                current_selected = '6';
+            } else {
+                current_selected = '1';
+            }
+        }
         this.state = {
             infoitems: [],
             homeworkitems: [],
-            // problemitems: [],
             lesson_name: '',
-            current_selected: '1',
-            // homeworkstatus: {},
+            current_selected: current_selected,
+            course_info: {
+                name: "",
+                description: "",
+                ta_list: []
+            }
         };
         this.infoitems = [];
         this.homeworkitems = [];
         this.problemitems = [];
-        // this.homeworkstatus = {};
     }
     componentDidMount() {
         const course_id = parseInt(this.props.course_id);
@@ -285,7 +381,7 @@ class mStudentLessonMiddle extends Component {
     };
 
     update_pannel = (course_id) => {
-        console.log('update_pannel');
+        console.log('update_panel');
         ajax_post(api_list['query_course'], {id:course_id}, this, (that, result) =>{
             if(result.data.length===0)
                 return;
@@ -310,20 +406,33 @@ class mStudentLessonMiddle extends Component {
             }
             else if(that.state.current_selected === '6')
             {
-
+                let course_info = {
+                    name: result.data[0].name,
+                    description: result.data[0].description,
+                    ta_list: []
+                };
+                const tas = result.data[0].tas;
+                for (let ta of tas) {
+                    ajax_post(api_list['query_user'], {id: ta}, that, (that, result) => {
+                        if (result.data.length === 0)
+                            return;
+                        course_info.ta_list.push(result.data[0]);
+                        that.setState({course_info: course_info});
+                    })
+                }
             }
             else
             {
                 let homework_items = [];
                 for(let homework_id of homework_ids) {
                     ajax_post(api_list['query_homework'], {id:homework_id}, that, (that, result) => {
-                        console.log('query_homework: ', homework_id);
+                        // console.log('query_homework: ', homework_id);
                         let hw = result.data[0];
                         if(!this.check_homework(hw, that.state.current_selected)) {
                             console.log('query_homework: returned');
                             return ;
                         }
-                        console.log('query_homework: succeed');
+                        // console.log('query_homework: succeed');
 
                         hw['problem_list'] = [];
                         hw['type_key'] = that.state.current_selected;
@@ -387,7 +496,6 @@ class mStudentLessonMiddle extends Component {
                                             prob['result'] = data['result'];
                                             prob['score'] = data['score'];
                                         }
-                                        // else prob['result_type'] = -1;
                                         that.setState({homeworkitems: homework_items});
                                     });
                             });
@@ -406,7 +514,7 @@ class mStudentLessonMiddle extends Component {
         {
             breadcrumb=(<>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>未到截止日期作业</Breadcrumb.Item>
+                <Breadcrumb.Item>未截止作业</Breadcrumb.Item>
             </>);
             if(this.state.homeworkitems.length !== 0) {
                 panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
@@ -419,7 +527,7 @@ class mStudentLessonMiddle extends Component {
         {
             breadcrumb=(<>
                 <Breadcrumb.Item>作业</Breadcrumb.Item>
-                <Breadcrumb.Item>已到截止日期作业</Breadcrumb.Item>
+                <Breadcrumb.Item>已截止作业</Breadcrumb.Item>
             </>);
             if(this.state.homeworkitems.length !== 0) {
                 panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
@@ -455,13 +563,14 @@ class mStudentLessonMiddle extends Component {
         }
         else
         {
-            breadcrumb=(<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
-            if(this.state.homeworkitems.length !== 0) {
-                panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
-                                          course_id={this.props.course_id}/>);
-            } else {
-                panel = (<h3>您当前没有作业</h3>)
-            }
+            breadcrumb = (<Breadcrumb.Item>课程信息</Breadcrumb.Item>);
+            panel = (<CourseInfo {...this.state.course_info}/>)
+            // if(this.state.homeworkitems.length !== 0) {
+            //     panel = (<StudentHomework homeworkitems={this.state.homeworkitems}
+            //                               course_id={this.props.course_id}/>);
+            // } else {
+            //     panel = (<h3>您当前没有作业</h3>)
+            // }
         }
         return (
             <Content style={{ padding: '0 50px' }}>
@@ -482,20 +591,20 @@ class mStudentLessonMiddle extends Component {
                             onClick={
                                 (e)=>{
                                     const course_id = parseInt(this.props.course_id);
-                                    this.setState({current_selected: e.key})
+                                    this.setState({current_selected: e.key});
                                     this.setState({homeworkitems: []});
                                     this.update_pannel(course_id);
                                 }
                             }
                             mode="inline"
-                            defaultSelectedKeys={['1']}
+                            defaultSelectedKeys={this.state.current_selected}
                             defaultOpenKeys={['sub1']}
                             style={{ height: '100%' }}
                         >
               <SubMenu key="sub1" title={<span><Icon type="edit" theme="twoTone" />作业</span>}>
-                                <Menu.Item key="1">未到截止日期作业</Menu.Item>
-                                <Menu.Item key="2">已到截止日期作业</Menu.Item>
-                                <Menu.Item key="3">全部</Menu.Item>
+                                <Menu.Item key="1">未截止作业</Menu.Item>
+                                <Menu.Item key="2">已截止作业</Menu.Item>
+                                <Menu.Item key="3">全部作业</Menu.Item>
                             </SubMenu>
                             <Menu.Item key="5"><Icon type="notification" theme="twoTone" />通知</Menu.Item>
                             <Menu.Item key="6"><Icon type="info-circle" theme="twoTone" />课程信息</Menu.Item>

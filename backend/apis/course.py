@@ -2,6 +2,8 @@
 import datetime
 import time
 import uuid
+import random
+import string
 from . import base
 from .base import *
 
@@ -11,7 +13,7 @@ def sub_list(lista, listb):
 class APICourseHandler(base.BaseHandler):
     def __init__(self, *args, **kw):
         super().__init__(*args, **kw)
-        self.root_dir = self.root_dir+'/courses'
+        # self.root_dir = self.root_dir+'/courses'
 
     def getargs(self):
         self.args = json.loads(self.request.body.decode() or '{}')
@@ -22,6 +24,8 @@ class APICourseHandler(base.BaseHandler):
 
 
     async def _list_post(self):
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.ADMIN)
         return await self.db.querylr('courses', self.args['start'], self.args['end'], **self.args)
 
     # @tornado.web.authenticated
@@ -30,7 +34,7 @@ class APICourseHandler(base.BaseHandler):
         # authority check
         role = (await self.get_current_user_object())['role']
         if role < 2:
-            self.set_res_dict(res_dict, code=0, msg='you are not allowed')
+            self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
 
         await self.db.createObject('courses', **self.args)
@@ -44,9 +48,9 @@ class APICourseHandler(base.BaseHandler):
             TA = (await self.db.getObject('users', cur_user = self.get_current_user_object(), id=TA_id))[0]
             TA['ta_courses'].append(course_id)
             await self.db.saveObject('users', object=TA, cur_user = self.get_current_user_object())
-        spell = str(uuid.uuid1())
+        spell = str(course_id) + ''.join(random.choice(string.ascii_letters + string.digits) for x in range(4))
         course_created['course_spell'] = spell
-        self.db.saveObject('courses', object=course_created, cur_user=self.get_current_user_object())
+        await self.db.saveObject('courses', object=course_created)
         self.set_res_dict(res_dict, code=0, msg='courses creation succeed')
         return res_dict
         # try:
@@ -78,12 +82,25 @@ class APICourseHandler(base.BaseHandler):
     async def _delete_post(self):
         res_dict = {}
         # authority check
-        role = (await self.get_current_user_object())['role']
-        if role < 3:
+        cur_user = await self.get_current_user_object()
+        role = cur_user['role']
+        course = (await self.db.getObject('courses', id=self.args['id']))[0]
+        if role < 2:
             self.set_res_dict(res_dict, code=1, msg='you are not allowed')
             return res_dict
-
+        elif role == 2:
+            # course = (await self.db.getObject('courses', id=self.args['id']))[0]
+            print_debug('course_delete: ', cur_user, course)
+            if course['status'] != 0 or cur_user['id'] not in course['tas']:
+                self.set_res_dict(res_dict, code=1, msg='you are not allowed')
+                return res_dict
+        # ----------------------------------------------------------------
         await self.db.deleteObject('courses', id=self.args['id'])
+        course_id = course['id']
+        for student_id in course['students']:
+            await self.db.remove_element_in_array('users', 'student_courses', course_id, student_id)
+        for ta_id in course['tas']:
+            await self.db.remove_element_in_array('users', 'ta_courses', course_id, ta_id)
         self.set_res_dict(res_dict, code=0, msg='course deleted')
         return res_dict
         # try:
@@ -133,7 +150,9 @@ class APICourseHandler(base.BaseHandler):
             if key == 'id':
                 continue
             target_course[key] = self.args[key]
-        await self.db.saveObject('courses', cur_user = self.get_current_user_object(), object=target_course)
+
+        print_debug('courses_update: ', target_course)
+        await self.db.saveObject('courses', object=target_course)
         # for student_id in target_course['']
         self.set_res_dict(res_dict, code=0, msg='course updated')
         return res_dict
@@ -172,7 +191,7 @@ class APICourseHandler(base.BaseHandler):
                 pass
             elif cur_user['role'] == 1:
                 if course['status'] == 1 and cur_user['id'] in course['students']:
-                    self.property_filter(course, None, ['course_spell', 'students'])
+                    course = self.property_filter(course, None, ['course_spell', 'students'])
                     ret_list.append(course)
             elif cur_user['role'] == 2:
                 if cur_user['id'] in course['tas']:
@@ -316,15 +335,21 @@ class APICourseHandler(base.BaseHandler):
     # @tornado.web.authenticated
     async def _addCourse_post(self):
         res_dict = {}
-        if not self.check_input('user_id', 'course_code'):
+        if not self.check_input('user_id', 'course_spell'):
             self.set_res_dict(res_dict, code=1, msg='invalid input params')
             return res_dict
-        student = (await self.db.getObject('users', cur_user=self.get_current_user_object(), id=self.args['user_id']))[0]
-        course = (await self.db.getObject('courses', cur_user=self.get_current_user_object(), id=self.args['course_code']))[0]
-        student['student_courses'].append(self.args['course_code'])
-        course['students'].append(self.args['user_id'])
-        await self.db.saveObject('users', cur_user=self.get_current_user_object(),object=student)
-        await self.db.saveObject('courses', cur_user=self.get_current_user_object(), object=course)
+        cur_user = await self.get_current_user_object()
+        assert (cur_user['role'] == Roles.STUDENT)
+        assert (cur_user['id'] == self.args['user_id'])
+        student = (await self.db.getObject('users', id=self.args['user_id']))[0]
+        course = (await self.db.getObject('courses', course_spell=self.args['course_spell']))[0]
+        # student['student_courses'].append(course['id'])
+        #
+        # course['students'].append(self.args['user_id'])
+        # await self.db.saveObject('users', object=student)
+        # await self.db.saveObject('courses', object=course)
+        await self.db.insert_element_in_array_unique('users', column_name='student_courses', value=course['id'], id=student['id'])
+        await self.db.insert_element_in_array_unique('courses', column_name='students', value=student['id'], id=course['id'])
         self.set_res_dict(res_dict, code=0, msg='student added into courses')
         return res_dict
 
