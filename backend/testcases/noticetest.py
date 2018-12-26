@@ -2,9 +2,9 @@ import unittest
 import tornado.testing
 import datetime
 import time
-from ..basetestcase.basetestcase import BaseTestCase, async_aquire_db
-from ..apis.base import print_test, print_debug
-from ..apis.base import Roles
+from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from apis.base import print_test, print_debug
+from apis.base import Roles
 class NoticeTestCase(BaseTestCase):
     async def prepare(self):
         self.url = '/api/notice'
