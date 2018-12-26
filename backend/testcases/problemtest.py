@@ -31,7 +31,11 @@ class ProblemTestCase(BaseTestCase):
 
     def setUp(self):
         super().setUp()
-        self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
+        if (not os.getenv('USE_TRAVIS', None)):
+            self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
+        else:
+            self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
+
 
     def tearDown(self):
         super().tearDown()
