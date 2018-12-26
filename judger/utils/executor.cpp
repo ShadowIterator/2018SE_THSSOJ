@@ -250,6 +250,7 @@ RunResult parentMainWork(pid_t childpid){
 	apid = fork();
 
 	if (apid < 0){
+		kill_process();
 		printf("Error while forking in parentMainWork. errno = %d\n", errno);
 		// cout << "Error while forking in parentMainWork. errno = " << errno << endl;
 		return RunResult(JudgementFailed);
@@ -289,6 +290,7 @@ RunResult parentMainWork(pid_t childpid){
 				// cout << "new process! pid = " << p << endl;
 				printf("new process! pid = %d\n", p);
 				if (!add_process(p)){
+					kill_process(p);
 					kill_process();
 					printf("DSC detected by add_process failed!\n");
 					// cout << "DSC detected by add_process failed!" << endl;
