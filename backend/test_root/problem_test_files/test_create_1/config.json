@@ -1,0 +1,9 @@
+{
+    "INPRE": "DATA",
+    "INSUF": "in",
+    "OUTPRE": "DATA",
+    "OUTSUF": "ans",
+    "NTESTS": 10,
+    "BUILTIN_CHECKER": false,
+    "CHECKER": "ncmp"
+}
