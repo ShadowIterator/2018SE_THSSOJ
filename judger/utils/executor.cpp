@@ -474,7 +474,17 @@ RunResult parentMainWork(pid_t childpid){
 int main(int argc, char **argv){
 	exec_parse_args(argc, argv, runConfig);
 
-	pid_t pid = fork();
+	int cnt = 3;
+	pid_t pid;
+	do {
+		if (cnt < 3)
+			sleep(1);
+		cnt--;
+		pid = fork();
+		if (cnt <= 0)
+			break;
+	} while (pid < 0 && errno == EAGAIN);
+	// pid_t pid = fork();
 	if (pid < 0){
 		// cout << "Error while forking" << endl;
 		printf("Error while forking\n");
