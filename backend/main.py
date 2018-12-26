@@ -44,6 +44,8 @@ async def main():
     options.parse_config_file('settings/app_config.py')# % (options.settings))
     if(not os.getenv('USE_TRAVIS', None)):
         options.parse_config_file('settings/env_config.py')# % (options.settings))
+    else:
+        options.parse_command_line('settings/env_config_example.py')
 
     print(options.db_host, options.db_port, options.db_user ,options.db_password, options.db_database)
 

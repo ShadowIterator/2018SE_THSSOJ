@@ -115,6 +115,9 @@ class BaseTestCase(AsyncHTTPTestCase):
         options.parse_config_file('./settings/app_config.py')
         if (not os.getenv('USE_TRAVIS', None)):
             options.parse_config_file('./settings/env_config.py')
+        else:
+            options.parse_command_line('./settings/env_config_example.py')
+
         self.db = None
         self.cookies = dict()
         self.user_id_cookie = ''
