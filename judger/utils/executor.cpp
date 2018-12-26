@@ -228,19 +228,19 @@ void kill_process(pid_t p = -1){
 	if (p == -1){
 		err = kill(apid, SIGKILL);
 		if (err <  0){
-			printf("kill error! errno=%d\n", errno);
+			printf("kill error! errno=%d apid=%d\n", errno, apid);
 		}
 		for (int i = 0; i < cntProcess; ++i){
 			err = kill(mp[i].pid, SIGKILL);
 			if (err <  0){
-				printf("kill error! errno=%d\n", errno);
+				printf("kill error! errno=%d pids=%d\n", errno, mp[i].pid);
 			}
 		}
 	} else
 	{
 		err = kill(p, SIGKILL);
 		if (err <  0){
-			printf("kill error! errno=%d\n", errno);
+			printf("kill error! errno=%d p=%d\n", errno, p);
 		}
 	}
 }
