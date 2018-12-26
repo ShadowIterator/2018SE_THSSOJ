@@ -21,16 +21,7 @@ int execute(const char* cmd) {
 	int p = 0;
 	int cnt = 3;
 	cout << "to Execute : \"" << string(cmd) << "\"" << endl;
-	p = system(cmd);
-	if (WIFEXITED(p) && !WEXITSTATUS(p))
-	{
-	    printf("Completed successfully\n"); ///successful 
-	}
-	else
-	{
-	    printf("execution failed\n"); //error
-	}
-	return p;
+	return system(cmd);
 	// return system(cmd);
 	// do {
 	// 	if (cnt < 3)

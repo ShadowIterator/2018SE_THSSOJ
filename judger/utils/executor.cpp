@@ -224,14 +224,24 @@ int index_process(pid_t p){
 }
 
 void kill_process(pid_t p = -1){
+	int err;
 	if (p == -1){
-		kill(apid, SIGKILL);
+		err = kill(apid, SIGKILL);
+		if (err <  0){
+			printf("kill error! errno=%d\n", errno);
+		}
 		for (int i = 0; i < cntProcess; ++i){
-			kill(mp[i].pid, SIGKILL);
+			err = kill(mp[i].pid, SIGKILL);
+			if (err <  0){
+				printf("kill error! errno=%d\n", errno);
+			}
 		}
 	} else
 	{
-		kill(p, SIGKILL);
+		err = kill(p, SIGKILL);
+		if (err <  0){
+			printf("kill error! errno=%d\n", errno);
+		}
 	}
 }
 
