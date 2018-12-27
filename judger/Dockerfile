@@ -1,4 +1,6 @@
-FROM ubuntu:18.04
+FROM phusion/baseimage:master
+
+CMD ["/sbin/my_init"]
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
@@ -12,3 +14,5 @@ COPY . /usr/src/app
 RUN make
 
 CMD ["python3", "-u", "JudgerServer.py"]
+
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
