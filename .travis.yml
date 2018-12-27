@@ -26,4 +26,4 @@ script:
   - python -m unittest testcases.ratiotest
   - python -m unittest testcases.noticetest
   - python -m unittest testcases.homeworktest
- # - python -m unittest testcases.coursetest
+  - python -m unittest testcases.coursetest
