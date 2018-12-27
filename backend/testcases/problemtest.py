@@ -36,8 +36,8 @@ class ProblemTestCase(BaseTestCase):
             print_test('local-fake-judger')
             self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
         else:
-            print_test('travis-fake-judger')
-            self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
+            print_test('travis: do not need-fake-judger')
+            # self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
 
 
     def tearDown(self):

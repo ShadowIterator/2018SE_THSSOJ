@@ -19,9 +19,10 @@ install:
   - pip install -r backend/requirements.txt
 script:
   - cd backend/
+  - python fake_judger.py
   - python -m unittest testcases.usertest
   - python -m unittest testcases.dbtest
- # - python -m unittest testcases.problemtest
+  - python -m unittest testcases.problemtest
   - python -m unittest testcases.recordtest
   - python -m unittest testcases.ratiotest
   - python -m unittest testcases.noticetest
