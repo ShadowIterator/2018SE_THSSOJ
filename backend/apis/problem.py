@@ -530,16 +530,10 @@ class APIProblemHandler(base.BaseHandler):
             if cur_user['id'] not in course['students']:
                 self.set_res_dict(res_dict, code=1, msg='you are not allowed')
                 return res_dict
-        # -----------------------------------
-                # ****************update judgestates **********************
 
-
-        if('homework_id' in self.args.keys()):
-            hash_id = self.args['homework_id'] * 1234567891 + self.args['problem_id']
-        else:
-            hash_id = self.args['problem_id']
 
         if(self.args['record_type'] == 1):
+            print_debug('in record_type == 1')
             record_created = await self.db.createObject('records', **self.args)
 
             str_id = str(record_created['id'])
@@ -627,6 +621,15 @@ class APIProblemHandler(base.BaseHandler):
 
 
         else:
+        # -----------------------------------
+                # ****************update judgestates **********************
+
+
+            if('homework_id' in self.args.keys()):
+                hash_id = self.args['homework_id'] * 1234567891 + self.args['problem_id']
+            else:
+                hash_id = self.args['problem_id']
+                
             async with self.db.get_lock_object('global', hash_id):
                 if(self.args['record_type'] == 2 or self.args['record_type'] == 4):
                     old_record = await self.db.getObject('records',
