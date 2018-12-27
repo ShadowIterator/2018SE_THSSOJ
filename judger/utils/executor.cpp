@@ -230,7 +230,8 @@ void kill_process(pid_t p = -1){
 		if (err <  0){
 			printf("kill error! errno=%d apid=%d\n", errno, apid);
 		}
-		for (int i = 0; i < cntProcess; ++i){
+		for (int i = cntProcess-1; i >= 0; --i){
+		// for (int i = 0; i < cntProcess; ++i){
 			err = kill(mp[i].pid, SIGKILL);
 			if (err <  0){
 				printf("kill error! errno=%d pids=%d\n", errno, mp[i].pid);

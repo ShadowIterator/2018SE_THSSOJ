@@ -137,9 +137,6 @@ class mJudgeHTML extends Component {
             <div style={{height: '100%'}}>
                 <div style={{height: '95%'}}>
                     <iframe src={iframe_src} width={'100%'} height={'100%'} sandbox={'allow-scripts'}>
-                        <head>
-                            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-                        </head>
                     </iframe>
                 </div>
                 <div style={{height: '4%', marginTop: '1%'}}>
