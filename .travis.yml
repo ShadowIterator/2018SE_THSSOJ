@@ -6,8 +6,13 @@ sudo: true
 env:
   global:
     - USE_TRAVIS=true
+dist: xenial
 services:
-  - postgresql: "9.5.14"
+  - postgresql
+
+addons:
+  postgresql: "9.4"
+
 before_script:
   - psql -c 'create database test;' -U postgres
 install:
@@ -15,7 +20,7 @@ install:
 script:
   - cd backend/
   - python -m unittest testcases.usertest
- # - python -m unittest testcases.dbtest
+  - python -m unittest testcases.dbtest
  # - python -m unittest testcases.problemtest
   - python -m unittest testcases.recordtest
   - python -m unittest testcases.ratiotest
