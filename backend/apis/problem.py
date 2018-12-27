@@ -559,46 +559,47 @@ class APIProblemHandler(base.BaseHandler):
             elif self.args['src_language'] == 3:
                 record_created['result_type'] = 1
             await self.db.saveObject('records', object=record_created)
-                            if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
+                            
+            if self.args['src_language'] == 1 or self.args['src_language'] == 2 or self.args['src_language'] == 4:
                     # if not os.path.exists('test'):
                     #     os.makedirs('test')
                     # problem_testing = (await self.getObject('problems', id=self.args['problem_id']))[0]
-            case_path = os.getcwd()+'/'+self.root_dir+'/'+str(problem_of_code['id'])+'/case'
-            config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
-            config_info = json.load(config_file)
-            config_file.close()
-            judge_req = {}
-            judge_req['id'] = record_created['id']
-            judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
-            judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
-            judge_req['OUTPUT_LIMIT'] = 64
-            judge_req['INPRE'] = config_info['INPRE']
-            judge_req['INSUF'] = config_info['INSUF']
-            judge_req['OUTPRE'] = config_info['OUTPRE']
-            judge_req['OUTSUF'] = config_info['OUTSUF']
-            if self.args['src_language'] == 1:
-                judge_req['Language'] = 'C'
-            elif self.args['src_language'] == 2:
-                judge_req['Language'] = 'C++'
-            elif self.args['src_language'] == 4:
-                judge_req['Language'] = 'Python'
-            judge_req['DATA_DIR'] = case_path
-            if config_info['BUILTIN_CHECKER']:
-                judge_req['BUILTIN_CHECKER'] = True
+                case_path = os.getcwd()+'/'+self.root_dir+'/'+str(problem_of_code['id'])+'/case'
+                config_file = open(case_path + '/config.json', mode='r', encoding='utf8')
+                config_info = json.load(config_file)
+                config_file.close()
+                judge_req = {}
+                judge_req['id'] = record_created['id']
+                judge_req['TIME_LIMIT'] = problem_of_code['time_limit']
+                judge_req['MEMORY_LIMIT'] = problem_of_code['memory_limit']
+                judge_req['OUTPUT_LIMIT'] = 64
+                judge_req['INPRE'] = config_info['INPRE']
+                judge_req['INSUF'] = config_info['INSUF']
+                judge_req['OUTPRE'] = config_info['OUTPRE']
+                judge_req['OUTSUF'] = config_info['OUTSUF']
+                if self.args['src_language'] == 1:
+                    judge_req['Language'] = 'C'
+                elif self.args['src_language'] == 2:
+                    judge_req['Language'] = 'C++'
+                elif self.args['src_language'] == 4:
+                    judge_req['Language'] = 'Python'
+                judge_req['DATA_DIR'] = case_path
+                if config_info['BUILTIN_CHECKER']:
+                    judge_req['BUILTIN_CHECKER'] = True
 
-            else:
-                judge_req['BUILTIN_CHECKER'] = False
-                judge_req['CHECKER_DIR'] = case_path
-            # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
-            judge_req['CHECKER'] = config_info['CHECKER']
-            if self.args['record_type'] == 0:
-                judge_req['NTESTS'] = config_info['NTESTS']
-            elif self.args['record_type'] == 1:
-                judge_req['NTESTS'] = int(config_info['NTESTS']*ratio_percent/100)
-            judge_req['SOURCE_FILE'] = str_id
-            judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
+                else:
+                    judge_req['BUILTIN_CHECKER'] = False
+                    judge_req['CHECKER_DIR'] = case_path
+                # judge_req['CHECKER_DIR'] = os.getcwd().replace('backend', 'judger') + '/checkers'
+                judge_req['CHECKER'] = config_info['CHECKER']
+                if self.args['record_type'] == 0:
+                    judge_req['NTESTS'] = config_info['NTESTS']
+                elif self.args['record_type'] == 1:
+                    judge_req['NTESTS'] = int(config_info['NTESTS']*ratio_percent/100)
+                judge_req['SOURCE_FILE'] = str_id
+                judge_req['SOURCE_DIR'] = os.getcwd() + '/' + record_dir
 
-            requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
+                requests.post(options.traditionalJudgerAddr, data=json.dumps(judge_req))
             elif self.args['src_language'] == 3:
                 # if not os.path.exists('judge_script'):
                 #     os.makedirs('judge_script')
