@@ -15,7 +15,7 @@ install:
 script:
   - cd backend/
   - python -m unittest testcases.usertest
-  - python -m unittest testcases.dbtest
+ # - python -m unittest testcases.dbtest
  # - python -m unittest testcases.problemtest
   - python -m unittest testcases.recordtest
   - python -m unittest testcases.ratiotest
