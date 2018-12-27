@@ -33,8 +33,10 @@ class ProblemTestCase(BaseTestCase):
         super().setUp()
         print_test('try_to run fake judger')
         if (not os.getenv('USE_TRAVIS', None)):
+            print_test('local-fake-judger')
             self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
         else:
+            print_test('travis-fake-judger')
             self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
 
 
