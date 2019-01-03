@@ -231,20 +231,6 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 1
         return res_dict
 
-    # @catch_exception_write
-    # async def get(self, type): #detail
-    #     # self.getargs()
-    #     print_debug('get: ', type)
-    #     res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
-    #     self.write(json.dumps(res).encode())
-    #
-    # @catch_exception_write
-    # async def post(self, type):
-    #     print_debug('post: ', type)
-    #     res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
-    #     print_debug('return: ', res)
-    #     self.write(json.dumps(res).encode())
-
     async def _list_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] == Roles.ADMIN)
@@ -292,22 +278,3 @@ class APIUserHandler(base.BaseHandler):
 
     async def _hello_post(self):
         return {'msg': 'hello'}
-
-# class UserLoginHandler(base.BaseHandler):
-#     async def post(self):
-#         username = self.args['username']
-#         password = self.args['password']
-#         # md = hashlib.md5()
-#         # md.update(password.encode('utf8'))
-#         # encrypted = md.hexdigest()
-#         users_qualified = self.getObject('users', {'username':username, 'encodepass':password})
-#         if len(users_qualified)==1:
-#             self.set_secure_cookie('username', username)
-#         else:
-#             #raise error
-#             pass
-#
-# class UserLogoutHandler(base.BaseHandler):
-#     @tornado.web.authenticated
-#     def post(self):
-#         self.clear_cookie('username')
