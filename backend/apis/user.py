@@ -292,8 +292,8 @@ class APIUserHandler(base.BaseHandler):
         cur_user = await self.get_current_user_object()
         md5_for_old = hashlib.md5()
         md5_for_new = hashlib.md5()
-        md5_for_old.update(self.args['old_pwd'])
-        md5_for_new.update(self.args['new_pwd'])
+        md5_for_old.update(self.args['old_pwd'].encode('utf-8'))
+        md5_for_new.update(self.args['new_pwd'].encode('utf-8'))
         self.args['old_pwd'] = md5_for_old.hexdigest()
         self.args['new_pwd'] = md5_for_new.hexdigest()
         if modified_user['id'] != cur_user['id']:
