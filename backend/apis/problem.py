@@ -533,7 +533,15 @@ class APIProblemHandler(base.BaseHandler):
 
 
         if(self.args['record_type'] == 1):
+
             print_debug('in record_type == 1')
+            current_time = datetime.datetime.now()
+            cur_timestamp = int(time.mktime(current_time.timetuple()))
+            submit_time = datetime.datetime.fromtimestamp(cur_timestamp)
+            problem_of_code = \
+            (await self.db.getObject('problems', cur_user=self.get_current_user_object(), id=self.args['problem_id']))[
+                0]
+
             record_created = await self.db.createObject('records', **self.args)
 
             str_id = str(record_created['id'])
