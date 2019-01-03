@@ -562,9 +562,9 @@ class mHomeworkForm extends Component {
                                 placeholder="截止时间"
                                 size="large"
                                 style={{width: '100%', outline: 0}}
-                                // disabledDate={(current)=>{
-                                //     return current && current <= moment().startOf('day');
-                                // }}
+                                disabledDate={(current)=>{
+                                    return current && current <= moment().startOf('day');
+                                }}
                             />
                         )}
                     </FormItem>

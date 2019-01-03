@@ -135,7 +135,7 @@ class APIDownloadHandler(base.BaseHandler):
         # -----------------------------------------------------------------
         str_record_id=str(record['id'])
         src_path = self.root_dir+'records/'+str_record_id+'/'+str_record_id+'.zip'
-        if os.path.exists(self.root_dir+'serverfiles'):
+        if not os.path.exists(self.root_dir+'serverfiles'):
             os.makedirs(self.root_dir+'serverfiles')
         target_path = self.root_dir+'serverfiles/'+str_record_id+'.zip'
         shutil.copyfile(src_path, target_path)

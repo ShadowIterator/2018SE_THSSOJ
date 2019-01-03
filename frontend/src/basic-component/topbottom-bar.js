@@ -35,7 +35,7 @@ class mDropdown extends Component {
                     {this.props.role !== 3 &&
                         <Menu.Divider/>
                     }
-                    <Menu.Item text="Logout" onClick={()=>{
+                    <Menu.Item text="登出" onClick={()=>{
                         this.props.callback(false);
                         this.props.history.push("/logout");}} />
                 </div>
@@ -43,11 +43,11 @@ class mDropdown extends Component {
         } else {
             menuItem = (
                 <div>
-                    <Menu.Item text="Signup" onClick={()=>{
+                    <Menu.Item text="注册" onClick={()=>{
                         this.props.callback(false);
                         this.props.history.push("/signup");}} />
                     <Menu.Divider />
-                    <Menu.Item text="Login" onClick={()=>{
+                    <Menu.Item text="登录" onClick={()=>{
                         this.props.callback(false);
                         this.props.history.push("/login");}} />
                 </div>
@@ -120,9 +120,15 @@ class mTopbar extends Component {
                             this.props.history.push('/problemcreate');
                         }} style={{outline: 0}} />
                     }
+                    {this.props.role === 2 &&
+                        <Button className={Classes.MINIMAL} icon="help" text="帮助" onClick={() => {
+                            this.props.callback(false);
+                            this.props.history.push('/help');
+                        }} style={{outline: 0}} />
+                    }
                     {this.props.role === 3 &&
                         <Button className={Classes.MINIMAL} icon="new-object" text="新建助教" onClick={() => {
-                            this.setState({visible: true, username: '', password: '', email: ''});
+                            this.setState({visible: true, username: '', password: '', email: '', realname: '', student_id: ''});
                         }} style={{outline: 0}} />
                     }
                 </Navbar.Group>

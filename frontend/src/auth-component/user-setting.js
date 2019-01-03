@@ -305,6 +305,8 @@ class UserSettingsForm extends Component {
         let role = "学生";
         if(this.state.role === 2) {
             role = "助教";
+        } else if(this.state.role === 3) {
+            role = "管理员";
         }
 
         const gender = this.state.gender.toString();

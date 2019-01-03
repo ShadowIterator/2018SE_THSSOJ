@@ -224,14 +224,25 @@ int index_process(pid_t p){
 }
 
 void kill_process(pid_t p = -1){
+	int err;
 	if (p == -1){
-		kill(apid, SIGKILL);
-		for (int i = 0; i < cntProcess; ++i){
-			kill(mp[i].pid, SIGKILL);
+		err = kill(apid, SIGKILL);
+		if (err <  0){
+			printf("kill error! errno=%d apid=%d\n", errno, apid);
+		}
+		for (int i = cntProcess-1; i >= 0; --i){
+		// for (int i = 0; i < cntProcess; ++i){
+			err = kill(mp[i].pid, SIGKILL);
+			if (err <  0){
+				printf("kill error! errno=%d pids=%d\n", errno, mp[i].pid);
+			}
 		}
 	} else
 	{
-		kill(p, SIGKILL);
+		err = kill(p, SIGKILL);
+		if (err <  0){
+			printf("kill error! errno=%d p=%d\n", errno, p);
+		}
 	}
 }
 
@@ -250,6 +261,7 @@ RunResult parentMainWork(pid_t childpid){
 	apid = fork();
 
 	if (apid < 0){
+		kill_process();
 		printf("Error while forking in parentMainWork. errno = %d\n", errno);
 		// cout << "Error while forking in parentMainWork. errno = " << errno << endl;
 		return RunResult(JudgementFailed);
@@ -276,6 +288,7 @@ RunResult parentMainWork(pid_t childpid){
 			// printf("after wait %d\n", p);
 			if (p == apid) {
 				if (WIFEXITED(stat) || WIFSIGNALED(stat)) {
+					kill_process();
 					// cout << "TLE detected by assist process!" << endl;
 					printf("TLE detected by assist process!\n");
 					return RunResult(TimeLimitExceed);
@@ -288,6 +301,7 @@ RunResult parentMainWork(pid_t childpid){
 				// cout << "new process! pid = " << p << endl;
 				printf("new process! pid = %d\n", p);
 				if (!add_process(p)){
+					kill_process(p);
 					kill_process();
 					printf("DSC detected by add_process failed!\n");
 					// cout << "DSC detected by add_process failed!" << endl;
@@ -473,10 +487,22 @@ RunResult parentMainWork(pid_t childpid){
 int main(int argc, char **argv){
 	exec_parse_args(argc, argv, runConfig);
 
+	// int cnt = 3;
+	// pid_t pid;
+	// do {
+	// 	if (cnt < 3)
+	// 		sleep(1);
+	// 	cnt--;
+	// 	pid = fork();
+	// 	if (cnt <= 0)
+	// 		break;
+	// } while (pid < 0 && errno == EAGAIN);
 	pid_t pid = fork();
 	if (pid < 0){
 		// cout << "Error while forking" << endl;
-		printf("Error while forking\n");
+		printf("Error while forking; errno=%d\n", errno);
+		if (errno == EAGAIN)
+			return -1;
 	} else
 	if (pid == 0){ // this is child process
 		// cout << "This is child process!" << endl;

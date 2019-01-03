@@ -10,6 +10,9 @@ class APIRatioHandler(base.BaseHandler):
         for re in result:
             if re['user_id'] == cur_user['id']:
                 return_result.append(re)
+        if len(result) == 0:
+            new_ratio = await self.db.createObject('ratios', **self.args)
+            return_result.append(new_ratio)
         return return_result
 
     async def _list_post(self):
