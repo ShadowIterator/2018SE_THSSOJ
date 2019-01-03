@@ -16,7 +16,7 @@ class HomeworkTestCase(BaseTestCase):
         # await self.db.createObject('users', username='admin', password='1234', email='hfz@hfz.com', role=Roles.ADMIN)
 
         await self.db.createObject('courses', name='泽学', tas=[self.ta1_zjl['id']], students=[self.student1_hfz['id']], status=1)
-        await self.db.createObject('courses', name='母猪的产后护理', tas=[self.ta2_wzh['id']], students=[self.student1_hfz['id']], status=1)
+        await self.db.createObject('courses', name='母猪的产后护理', tas=[self.ta2_wzh['id']], students=[self.student2_nx['id']], status=1)
 
         await self.db.createObject('problems', title='hfz111', openness=1, user_id=self.ta1_zjl['id'])
         await self.db.createObject('problems', title='hfzHTML', openness=0, user_id=self.ta1_zjl['id'])
@@ -87,8 +87,10 @@ class HomeworkTestCase(BaseTestCase):
     @async_aquire_db
     async def test_update(self):
         uri = self.url + '/update'
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student = await self.db.getObjectOne('users', username='hfz')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student = await self.db.getObjectOne('users', username='hfz')
+        ta = self.ta1_zjl
+        student = self.student1_hfz
         course = await self.db.getObjectOne('courses', name='泽学')
         homework = await self.db.createObject('homeworks',
                                               name='hello world',
@@ -118,9 +120,12 @@ class HomeworkTestCase(BaseTestCase):
     @async_aquire_db
     async def test_query(self):
         uri = self.url + '/query'
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student_hfz = await self.db.getObjectOne('users', username='hfz')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student_hfz = await self.db.getObjectOne('users', username='hfz')
         # student_nx = await self.db.getObjectOne('users', username='nx')
+        ta = self.ta1_zjl
+        student_hfz = self.student1_hfz
+        student_nx = self.student2_nx
         course1 = await self.db.getObjectOne('courses', name='泽学')
         course2 = await self.db.getObjectOne('courses', name='母猪的产后护理')
         homework = await self.db.createObject('homeworks',
@@ -161,8 +166,10 @@ class HomeworkTestCase(BaseTestCase):
     @async_aquire_db
     async def test_submitable(self):
         uri = self.url + '/submitable'
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student_hfz = await self.db.getObjectOne('users', username='hfz')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student_hfz = await self.db.getObjectOne('users', username='hfz')
+        ta = self.ta1_zjl
+        student_hfz = self.student1_hfz
         course1 = await self.db.getObjectOne('courses', name='泽学')
         homework = await self.db.createObject('homeworks',
                                               name='hello world',
@@ -189,8 +196,10 @@ class HomeworkTestCase(BaseTestCase):
     @async_aquire_db
     async def test_openness(self):
         uri = self.url+'/scoreOpenness'
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student_hfz = await self.db.getObjectOne('users', username='hfz')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student_hfz = await self.db.getObjectOne('users', username='hfz')
+        ta = self.ta1_zjl
+        student_hfz = self.student1_hfz
         course1 = await self.db.getObjectOne('courses', name='泽学')
         homework = await self.db.createObject('homeworks',
                                               name='hello world',

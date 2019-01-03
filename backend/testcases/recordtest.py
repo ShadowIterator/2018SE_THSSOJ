@@ -12,25 +12,26 @@ from apis.base import Roles
 class RecordTestCase(BaseTestCase):
     async def prepare(self):
         self.url = '/api/record'
-        student1 = await self.db.createObject('users', username='hfz', password='4321', email='hfz@hfz.com', role=Roles.STUDENT)
-        student2 = await self.db.createObject('users', username='nx', password='myq', role=Roles.STUDENT)
-        ta1 = await self.db.createObject('users', username='zjl', password='ibtfy', email='sh@sina.com', role=Roles.TA, ta_courses=[1])
-        ta2 = await self.db.createObject('users', username='wzy', password='9897', role=Roles.TA)
+        self.student1 = await self.createUser('users', username='hfz', password='4321', email='hfz@hfz.com', role=Roles.STUDENT)
+        self.student2 = await self.createUser('users', username='nx', password='myq', role=Roles.STUDENT)
+        self.ta1 = await self.createUser('users', username='zjl', password='ibtfy', email='sh@sina.com', role=Roles.TA, ta_courses=[1])
+        self.ta2 = await self.createUser('users', username='wzy', password='9897', role=Roles.TA)
+        self.admin = await self.createUser('users', username='admin', password='1234', role=Roles.ADMIN)
         # await self.db.createObject('users', username='admin', password='1234', email='hfz@hfz.com', role=Roles.ADMIN)
 
-        await self.db.createObject('courses', name='泽学', tas=[ta1['id']], students=[student1['id'], student2['id']], status=1, homeworks=[1,2])
-        await self.db.createObject('courses', name='母猪的产后护理', tas=[ta2['id']], students=[student2['id']], status=1, homeworks=[3])
+        await self.db.createObject('courses', name='泽学', tas=[self.ta1['id']], students=[self.student1['id'], self.student2['id']], status=1, homeworks=[1,2])
+        await self.db.createObject('courses', name='母猪的产后护理', tas=[self.ta2['id']], students=[self.student2['id']], status=1, homeworks=[3])
 
         await self.db.createObject('problems',
                                    title='hfz111',
                                    openness=1,
-                                   user_id=ta1['id'],
+                                   user_id=self.ta1['id'],
                                    ratio_one=20,
                                    ratio_two=30,
                                    ratio_three=50)
-        await self.db.createObject('problems', title='hfzHTML', openness=0, user_id=ta1['id'])
-        await self.db.createObject('problems', title='zsdjt', openness=1, user_id=ta2['id'])
-        await self.db.createObject('problems', title='zsxjt', openness=0, user_id=ta2['id'])
+        await self.db.createObject('problems', title='hfzHTML', openness=0, user_id=self.ta1['id'])
+        await self.db.createObject('problems', title='zsdjt', openness=1, user_id=self.ta2['id'])
+        await self.db.createObject('problems', title='zsxjt', openness=0, user_id=self.ta2['id'])
 
         await self.db.createObject('homeworks',
                                    name='first',
@@ -54,8 +55,10 @@ class RecordTestCase(BaseTestCase):
     @async_aquire_db
     async def test_create(self):
         uri = self.url+'/create'
-        admin = await self.db.getObjectOne('users', username='admin')
-        ta = await self.db.getObjectOne('users', username='zjl')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        admin = self.admin
+        ta = self.ta1
         # fail
         await self.login_object(ta)
         response = self.getbodyObject(await self.post_request(uri,
@@ -76,8 +79,10 @@ class RecordTestCase(BaseTestCase):
     @async_aquire_db
     async def test_delete(self):
         uri = self.url + '/delete'
-        admin = await self.db.getObjectOne('users', username='admin')
-        ta = await self.db.getObjectOne('users', username='zjl')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        admin = self.admin
+        ta = self.ta1
         record = await self.db.createObject('records',
                                             record_type=0,
                                             user_id=ta['id'])
@@ -102,13 +107,19 @@ class RecordTestCase(BaseTestCase):
     @async_aquire_db
     async def test_query(self):
         uri = self.url+'/query'
-        admin = await self.db.getObjectOne('users', username='admin')
-        ta = await self.db.getObjectOne('users', username='zjl')
-        ta2 = await self.db.getObjectOne('users', username='wzy')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # ta2 = await self.db.getObjectOne('users', username='wzy')
+        # student = await self.db.getObjectOne('users', username='hfz')
+        # student2 = await self.db.getObjectOne('users', username='nx')
+        admin = self.admin
+        ta = self.ta1
+        ta2 = self.ta2
+        student = self.student1
+        student2 = self.student2
         problem1 = await self.db.getObjectOne('problems', title='hfz111')
         problem2 = await self.db.getObjectOne('problems', title='zsxjt')
-        student = await self.db.getObjectOne('users', username='hfz')
-        student2 = await self.db.getObjectOne('users', username='nx')
+
 
 
         record1 = await self.db.createObject('records',
@@ -252,10 +263,14 @@ class RecordTestCase(BaseTestCase):
     async def test_srccode(self):
         uri=self.url+'/srcCode'
         srccode='include<stdio.h>'
-        admin = await self.db.getObjectOne('users', username='admin')
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student = await self.db.getObjectOne('users', username='hfz')
-        student2 = await self.db.getObjectOne('users', username='nx')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student = await self.db.getObjectOne('users', username='hfz')
+        # student2 = await self.db.getObjectOne('users', username='nx')
+        admin = self.admin
+        ta = self.ta1
+        student = self.student1
+        student2 = self.student2
 
         record1 = await self.db.createObject('records',
                                              record_type=1,
@@ -323,11 +338,15 @@ class RecordTestCase(BaseTestCase):
     async def test_judgerinfo(self):
         info = {'Info': 'you are good'}
         uri = self.url+'/judgerInfo'
-        admin = await self.db.getObjectOne('users', username='admin')
-        ta = await self.db.getObjectOne('users', username='zjl')
-        student = await self.db.getObjectOne('users', username='hfz')
-        student2 = await self.db.getObjectOne('users', username='nx')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        # ta = await self.db.getObjectOne('users', username='zjl')
+        # student = await self.db.getObjectOne('users', username='hfz')
+        # student2 = await self.db.getObjectOne('users', username='nx')
 
+        admin = self.admin
+        ta = self.ta1
+        student = self.student1
+        student2 = self.student2
         record1 = await self.db.createObject('records',
                                              record_type=2,
                                              user_id=student['id'],
