@@ -132,7 +132,7 @@ class BaseTestCase(AsyncHTTPTestCase):
     def setUp(self):
         self.admin_pass = '1234'
         self.root_dir = 'test_root/'
-        options.parse_config_file('./settings/app_config.py')
+        options.parse_config_file('./settings/app_test_config.py')
         if (not os.getenv('USE_TRAVIS', None)):
             options.parse_config_file('./settings/env_config.py')
         else:
