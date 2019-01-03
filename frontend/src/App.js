@@ -26,6 +26,8 @@ import {JudgeHTML} from "./problem-component/problem-judge-html";
 import {AllLesson} from "./class-component/TA-allLesson";
 import {TAJudge} from "./class-component/TA-judge";
 
+import {Help} from "./basic-component/help";
+
 import { Layout } from 'antd';
 import 'antd/dist/antd.css';
 
@@ -162,6 +164,7 @@ class App extends Component {
                                                                                               course_id={props.match.params.cid}
                                                                                               homework_id={props.match.params.hid}
                                                                                               problem_id={props.match.params.pid} />} />
+                            <Route path="/help" render={() => <Help />} />
                         </Layout>
                     </div>
                 </Router>
