@@ -1,10 +1,9 @@
-FROM phusion/baseimage:master
-
-CMD ["/sbin/my_init"]
+FROM ubuntu:18.04
 
 RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
-RUN apt-get update && apt-get install -y python3 python3-dev python3-pip curl
+RUN wget https://github.com/Yelp/dumb-init/releases/download/v1.2.2/dumb-init_1.2.2_amd64.deb && RUN dpkg -i dumb-init_*.deb
+RUN apt-get update && apt-get install -y python3 python3-dev python3-pip curl dumb-init
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && apt-get update && apt-get install -y nodejs
 
 COPY requirements.txt /usr/src/app/
@@ -13,6 +12,5 @@ COPY . /usr/src/app
 
 RUN make
 
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["python3", "-u", "JudgerServer.py"]
-
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
