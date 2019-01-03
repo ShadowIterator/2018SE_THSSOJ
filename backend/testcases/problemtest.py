@@ -34,7 +34,7 @@ class ProblemTestCase(BaseTestCase):
         print_test('try_to run fake judger')
         if (not os.getenv('USE_TRAVIS', None)):
             print_test('local-fake-judger')
-            self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
+            self.fakejudge = subprocess.Popen(['venv/bin/python', 'fake_judger.py'])
         else:
             print_test('travis: do not need-fake-judger')
             # self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
@@ -212,28 +212,28 @@ class ProblemTestCase(BaseTestCase):
                                                             end_time = datetime.datetime.fromtimestamp(12232443))
 
         # create user
-        self.user_hfz = await self.db.createObject('users', username='hfz', password='4321', email='hfz@hfz.com',
+        self.user_hfz = await self.createUser('users', username='hfz', password='4321', email='hfz@hfz.com',
                                                    role=0, secret='1314')
-        self.user_st1 = await self.db.createObject('users', username='student1', password='student',
+        self.user_st1 = await self.createUser('users', username='student1', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343',
                                                    student_courses=[self.course_published['id']])
-        self.user_st2 = await self.db.createObject('users', username='student2', password='student',
+        self.user_st2 = await self.createUser('users', username='student2', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343',
                                                    student_courses=[self.course_published['id']])
-        self.user_st3 = await self.db.createObject('users', username='student3', password='student',
+        self.user_st3 = await self.createUser('users', username='student3', password='student',
                                                    email='hfz@hfz.com', role=Roles.STUDENT, secret='1343', )
-        self.user_ta1 = await self.db.createObject('users', username='ta1', password='ta', email='hfz@hfz.com',
+        self.user_ta1 = await self.createUser('users', username='ta1', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343',
                                                    ta_courses=[self.course_published['id']])
-        self.user_ta2 = await self.db.createObject('users', username='ta2', password='ta', email='hfz@hfz.com',
+        self.user_ta2 = await self.createUser('users', username='ta2', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343',
                                                    ta_courses=[self.course_published['id']])
-        self.user_ta3 = await self.db.createObject('users', username='ta3', password='ta', email='hfz@hfz.com',
+        self.user_ta3 = await self.createUser('users', username='ta3', password='ta', email='hfz@hfz.com',
                                                    role=Roles.TA, secret='1343')
         try:
             self.user_admin = await self.db.getObjectOne('users', username = 'admin', role = Roles.ADMIN)
         except:
-            self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+            self.user_admin = await self.createUser('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
 
         # create problem
         self.tmp_dir = '''{root_dir}tmp/'''.format(root_dir = self.root_dir)
