@@ -9,8 +9,12 @@ from apis.download import *
 from apis.judgestate import *
 from apis.ratio import *
 
-scriptJudgerAddr = 'http://localhost:12345/scriptjudger'
-traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
+scriptJudgerAddr = 'http://judger:12345/scriptjudger'
+traditionalJudgerAddr = 'http://judger:12345/traditionaljudger'
+port = 8000
+db_host = 'postgres'
+db_port = 5432
+
 RoutineList = [
                   (r'/api/user/(.*)', APIUserHandler),
                   (r'/api/record/(.*)', APIRecordHandler),
