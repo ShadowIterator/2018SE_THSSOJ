@@ -54,7 +54,7 @@ class APIRecordHandler(base.BaseHandler):
                 # config_info = json.load(config_file)
                 # config_file.close()
                 if record['test_ratio'] == 1:
-                    record['test_ratio'] == problem['ratio_one']
+                    record['test_ratio'] = problem['ratio_one']
                 elif record['test_ratio'] == 2:
                     record['test_ratio'] = problem['ratio_two']
                 elif record['test_ratio'] == 3:

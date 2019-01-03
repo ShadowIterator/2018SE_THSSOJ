@@ -1,4 +1,4 @@
-const URL = 'http://localhost:8080';
+import {URL} from './url';
 
 const api_list = {
     'login': '/api/user/login',

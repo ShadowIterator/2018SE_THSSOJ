@@ -64,6 +64,14 @@ class CourseInfo extends Component {
                 <Form>
                     <Form.Item
                         {...formItemLayout}
+                        label="起止时间"
+                    >
+                        <span className="ant-form-text" style={{fontSize: '125%'}}>{this.props.starttime} - {this.props.endtime}</span>
+                    </Form.Item>
+                </Form>
+                <Form>
+                    <Form.Item
+                        {...formItemLayout}
                         label="助教："
                     >
                         <Table dataSource={this.props.ta_list}
@@ -194,19 +202,19 @@ class mStudentHomeworkCard extends Component {
                         let problem_info = '未知的作业状态';
                         let icon_name = 'issue';
                         let icon_intent = 'Danger';
-                        if(item.status === undefined) {
-                            item.status = {};
-                        }
+                        // if(item.status === undefined) {
+                        //     item.status = {};
+                        // }
                         if(item.result_type === undefined)
                         {
                             item.status = 0;
                         }
                         else
                         {
-                            if(item.result_type === 0) {
+                            if(item.result_type === 0 && item.result !== null && item.result !== undefined) {
                                 problem_res = result_arr[item.result];
                             }
-                            else if(item.result_type === 1) {
+                            else if(item.result_type === 1 && item.score !== null && item.score !== undefined) {
                                 problem_res = item.score.toString();
                             }
                             if( (!submitted) && (!delayed)) // 未提交未到截止日期
@@ -349,7 +357,9 @@ class mStudentLessonMiddle extends Component {
             course_info: {
                 name: "",
                 description: "",
-                ta_list: []
+                ta_list: [],
+                starttime: "",
+                endtime: "",
             }
         };
         this.infoitems = [];
@@ -409,7 +419,9 @@ class mStudentLessonMiddle extends Component {
                 let course_info = {
                     name: result.data[0].name,
                     description: result.data[0].description,
-                    ta_list: []
+                    ta_list: [],
+                    starttime: moment.unix(result.data[0].start_time).format("YYYY年MM月DD日"),
+                    endtime: moment.unix(result.data[0].end_time).format("YYYY年MM月DD日"),
                 };
                 const tas = result.data[0].tas;
                 for (let ta of tas) {

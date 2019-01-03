@@ -9,6 +9,7 @@ import {api_list} from "../ajax-utils/api-manager";
 import {pwd_encrypt} from "./encrypt";
 import Cookies from "js-cookie";
 import {message} from 'antd';
+import pageimage from '../static/tsinghua1.jpeg';
 
 class Login extends Component
 {
@@ -65,31 +66,31 @@ class Login extends Component
         const { validated } = this.state;
         return (
             <Card>
-                <Card.Header> Login </Card.Header>
+                <Card.Header> 登录 </Card.Header>
                 <Card.Body>
                     <Form noValidate
                           validated={validated}
                           onSubmit={this.handleSubmit}>
                         <Form.Group controlId="username">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control required type="username" placeholder="Enter username" onChange={this.handleChange} />
+                            <Form.Label>用户名</Form.Label>
+                            <Form.Control required type="username" placeholder="请输入用户名" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
-                                Please enter a username.
+                                请输入您的用户名
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group controlId="password">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control required type="password" placeholder="Password" onChange={this.handleChange} />
+                            <Form.Label>密码</Form.Label>
+                            <Form.Control required type="password" placeholder="请输入密码" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
                                 Please enter your password.
                             </Form.Control.Feedback>
                         </Form.Group>
                         <Button variant="primary" type="submit">
-                            Login
+                            登录
                         </Button>
                         <Form.Text className="text-muted">
-                            Don't have an account? <Link to="/signup">Sign up</Link> first.
+                            没有账号？ 请去<Link to="/signup">注册</Link>页面。
                         </Form.Text>
                     </Form>
                 </Card.Body>
@@ -157,48 +158,48 @@ class Signup extends Component {
         const { validated } = this.state;
         return (
             <Card>
-                <Card.Header> Sign up </Card.Header>
+                <Card.Header> 注册 </Card.Header>
                 <Card.Body>
                     <Form noValidate
                           validated={validated}
                           onSubmit={this.handleSubmit}>
                         <Form.Group controlId="username">
-                            <Form.Label>Username</Form.Label>
-                            <Form.Control required type="username" placeholder="Enter username" onChange={this.handleChange} />
+                            <Form.Label>用户名</Form.Label>
+                            <Form.Control required type="username" placeholder="请选择一个用户名" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
-                                Please choose a username.
+                                请选择一个用户名
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group controlId="email">
                             <Form.Label>Email</Form.Label>
-                            <Form.Control required type="email" placeholder="Enter email" onChange={this.handleChange} />
+                            <Form.Control required type="email" placeholder="请输入你的email" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
-                                Please enter your email.
+                                请输入您的email
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group controlId="password">
-                            <Form.Label>Password</Form.Label>
-                            <Form.Control required type="password" placeholder="Password" onChange={this.handleChange} />
+                            <Form.Label>密码</Form.Label>
+                            <Form.Control required type="password" placeholder="请输入密码" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
                                 Please choose a password.
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Form.Group controlId="passwordAgain">
-                            <Form.Label>Password Again</Form.Label>
-                            <Form.Control required type="password" placeholder="Password Again" onChange={this.handleChange} />
+                            <Form.Label>确认密码</Form.Label>
+                            <Form.Control required type="password" placeholder="请再输入一遍" onChange={this.handleChange} />
                             <Form.Control.Feedback type="invalid">
                                 Please enter the password again.
                             </Form.Control.Feedback>
                         </Form.Group>
 
                         <Button variant="primary" type="submit">
-                            Sign up
+                            注册
                         </Button>
                         <Form.Text className="text-muted">
-                            Already owned an account? You can <Link to="/login">Login</Link>.
+                            已经拥有账号？ 您可以 <Link to="/login">登录</Link>。
                         </Form.Text>
                     </Form>
                 </Card.Body>
@@ -214,7 +215,7 @@ class LoginMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://www.fillmurray.com/1438/680" alt = "Card image" />
+                <Card.Img src={pageimage} alt = "Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">
@@ -233,7 +234,7 @@ class SignupMiddlebody extends Component {
     render() {
         return (
             <Card>
-                <Card.Img src="https://www.fillmurray.com/1438/680" alt="Card image" />
+                <Card.Img src={pageimage} alt="Card image" />
                 <Card.ImgOverlay>
                     <Container className="h-100">
                         <Row className="h-100 justify-content-center align-items-center">

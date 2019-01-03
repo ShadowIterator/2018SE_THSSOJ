@@ -16,8 +16,21 @@ using std::string;
 using std::ostringstream;
 
 int execute(const char* cmd){
+	// cout << "to Execute : \"" << string(cmd) << "\"" << endl;
+	// return system(cmd);
+	int p = 0;
+	int cnt = 3;
 	cout << "to Execute : \"" << string(cmd) << "\"" << endl;
 	return system(cmd);
+	// do {
+	// 	if (cnt < 3)
+	// 		sleep(1);
+	// 	p = system(cmd);
+	// 	cnt--;
+	// 	if (cnt <= 0)
+	// 		break;
+ //    } while (p == -1);
+	// return p;
 }
 
 string Pathjoin(const string& path, const string& file){

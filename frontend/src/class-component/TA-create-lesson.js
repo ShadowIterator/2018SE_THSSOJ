@@ -384,9 +384,9 @@ class mLessonList extends Component {
                                      style={{width: '100%', outline: 0}}
                                      placeholder={['开课时间','结课时间']}
                                      disabled={this.props.readOnly}
-                                     // disabledDate={(current)=>{
-                                     //     return current && current < moment().startOf('day');
-                                     // }}
+                                     disabledDate={(current)=>{
+                                         return current && current < moment().startOf('day');
+                                     }}
                         />
                     )}
 
