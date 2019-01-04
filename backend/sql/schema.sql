@@ -32,7 +32,7 @@
     -- 0 : avalibal for every one
     -- 1 : avalibal for oneself and admin
 
-DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,          --
     username VARCHAR(32) UNIQUE,    --
@@ -51,7 +51,7 @@ CREATE TABLE users (
     secret VARCHAR(64)
 );
 
-DROP TABLE IF EXISTS courses;
+-- DROP TABLE IF EXISTS courses;
 CREATE TABLE courses (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -66,7 +66,7 @@ CREATE TABLE courses (
     end_time TIMESTAMP
 );
 
-DROP TABLE IF EXISTS homeworks;
+-- DROP TABLE IF EXISTS homeworks;
 CREATE TABLE homeworks (
     id SERIAL PRIMARY KEY,
     name VARCHAR(128),
@@ -83,7 +83,7 @@ CREATE TABLE homeworks (
     -- TODO: 总最终提交数与评测完成数，没有开始评测为-1，开始评测置大于等于0
 );
 
-DROP TABLE IF EXISTS problems;
+-- DROP TABLE IF EXISTS problems;
 CREATE TABLE problems (
     id SERIAL PRIMARY KEY,
     title VARCHAR(128),
@@ -105,7 +105,7 @@ CREATE TABLE problems (
     ratio_three_limit INTEGER
 );
 
-DROP TABLE IF EXISTS records;
+-- DROP TABLE IF EXISTS records;
 CREATE TABLE records (
     id SERIAL PRIMARY KEY,
 --     description TEXT,
@@ -129,7 +129,7 @@ CREATE TABLE records (
 
 
 
-DROP TABLE IF EXISTS notices;
+-- DROP TABLE IF EXISTS notices;
 CREATE TABLE notices (
     id SERIAL PRIMARY KEY,
     user_id INTEGER,
@@ -139,7 +139,7 @@ CREATE TABLE notices (
     create_time TIMESTAMP DEFAULT current_timestamp
 );
 
-DROP TABLE IF EXISTS judgestates;
+-- DROP TABLE IF EXISTS judgestates;
 CREATE TABLE judgestates (
     id SERIAL PRIMARY KEY,
     homework_id INTEGER,
@@ -149,7 +149,7 @@ CREATE TABLE judgestates (
     total_waiting INTEGER DEFAULT 0
 );
 
-DROP TABLE IF EXISTS ratios;
+-- DROP TABLE IF EXISTS ratios;
 CREATE TABLE ratios (
     id SERIAL PRIMARY KEY,
     homework_id INTEGER,
