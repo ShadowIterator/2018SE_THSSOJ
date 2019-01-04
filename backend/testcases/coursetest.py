@@ -25,13 +25,13 @@ class CourseTestCase(BaseTestCase):
                                                             start_time=datetime.datetime.fromtimestamp(123242),
                                                             end_time=datetime.datetime.fromtimestamp(12232443))
 
-        self.user_hfz = await self.db.createObject('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1314')
-        self.user_st1 = await self.db.createObject('users', username = 'student1', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', student_courses = [self.course_non_published['id'], self.course_published['id']])
-        self.user_st2 = await self.db.createObject('users', username = 'student2', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', student_courses = [self.course_non_published['id'], self.course_published['id']])
-        self.user_st3 = await self.db.createObject('users', username = 'student3', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', )
-        self.user_ta1 = await self.db.createObject('users', username = 'ta1', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343', ta_courses = [self.course_non_published['id'], self.course_published['id']])
-        self.user_ta2 = await self.db.createObject('users', username = 'ta2', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343', ta_courses = [self.course_non_published['id'], self.course_published['id']])
-        self.user_ta3 = await self.db.createObject('users', username = 'ta3', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
+        self.user_hfz = await self.createUser('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1314')
+        self.user_st1 = await self.createUser('users', username = 'student1', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', student_courses = [self.course_non_published['id'], self.course_published['id']])
+        self.user_st2 = await self.createUser('users', username = 'student2', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', student_courses = [self.course_non_published['id'], self.course_published['id']])
+        self.user_st3 = await self.createUser('users', username = 'student3', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343', )
+        self.user_ta1 = await self.createUser('users', username = 'ta1', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343', ta_courses = [self.course_non_published['id'], self.course_published['id']])
+        self.user_ta2 = await self.createUser('users', username = 'ta2', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343', ta_courses = [self.course_non_published['id'], self.course_published['id']])
+        self.user_ta3 = await self.createUser('users', username = 'ta3', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
 
         self.courseTable = self.db.getTable('courses')
         self.userTable = self.db.getTable('users')
@@ -50,7 +50,7 @@ class CourseTestCase(BaseTestCase):
         try:
             self.user_admin = await self.db.getObjectOne('users', username = 'admin')
         except:
-            self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+            self.user_admin = await self.createUser('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
 
     @async_aquire_db
     async def test_create(self):
@@ -357,9 +357,9 @@ class CourseTestCase(BaseTestCase):
         # addcouse 2 multi access
         print_test('test_addCourse_2')
         uri = self.url + '/addCourse'
-        st4 = await self.userTable.createObject(username = 'st4', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
-        st5 = await self.userTable.createObject(username = 'st5', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
-        st6 = await self.userTable.createObject(username = 'st6', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        st4 = await self.createUser(username = 'st4', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        st5 = await self.createUser(username = 'st5', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
+        st6 = await self.createUser(username = 'st6', password = '1234', email = 'st4@st.com', role = Roles.STUDENT)
         await gen.multi([self.addcouse_worker(st4, self.course_published, SIClient()),
                          self.addcouse_worker(st5, self.course_non_published, SIClient()),
                          self.addcouse_worker(st4, self.course_published, SIClient()),

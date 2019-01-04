@@ -122,9 +122,12 @@ class APIUserHandler(base.BaseHandler):
         current_time = datetime.datetime.now()
         # cur_timestamp = int(time.mktime(current_time.timetuple()))
         ran_str = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
+        md5_tool = hashlib.md5()
+        md5_tool.update(self.args['password'].encode('utf8'))
+        hashed_password = md5_tool.hexdigest()
         await self.db.createObject('users',
                                 username=self.args['username'],
-                                password=self.args['password'],
+                                password=hashed_password,
                                 email=self.args['email'],
                                 create_time=current_time,
                                 secret = ran_str)
@@ -136,7 +139,11 @@ class APIUserHandler(base.BaseHandler):
     async def _login_post(self):
         res_dict = {}
         username = self.args['username']
-        password = self.args['password']
+        # password = self.args['password']
+        md5_tool = hashlib.md5()
+        md5_tool.update(self.args['password'].encode('utf8'))
+        password = md5_tool.hexdigest()
+
         # try:
         users_list = await self.db.getObject('users', **{'username': username, 'password': password})
         print_debug('login, userlist = ', users_list)
@@ -231,20 +238,6 @@ class APIUserHandler(base.BaseHandler):
             res_dict['code'] = 1
         return res_dict
 
-    # @catch_exception_write
-    # async def get(self, type): #detail
-    #     # self.getargs()
-    #     print_debug('get: ', type)
-    #     res = await self._call_method('''_{action_name}_get'''.format(action_name = type))
-    #     self.write(json.dumps(res).encode())
-    #
-    # @catch_exception_write
-    # async def post(self, type):
-    #     print_debug('post: ', type)
-    #     res = await self._call_method('''_{action_name}_post'''.format(action_name = type))
-    #     print_debug('return: ', res)
-    #     self.write(json.dumps(res).encode())
-
     async def _list_post(self):
         cur_user = await self.get_current_user_object()
         assert (cur_user['role'] == Roles.ADMIN)
@@ -264,6 +257,10 @@ class APIUserHandler(base.BaseHandler):
         self.args['role'] = Roles.TA
         self.args['secret'] = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64))
         print_debug('createTA-after: ', self.args)
+        md5_tool = hashlib.md5()
+        md5_tool.update(self.args['password'].encode('utf8'))
+        hashed_password = md5_tool.hexdigest()
+        self.args['password'] = hashed_password
         await self.db.createObject('users', **self.args)
         return {'code': 0}
         #
@@ -279,6 +276,12 @@ class APIUserHandler(base.BaseHandler):
         res_dict = {}
         modified_user = (await self.db.getObject('users', id=self.args['id']))[0]
         cur_user = await self.get_current_user_object()
+        md5_for_old = hashlib.md5()
+        md5_for_new = hashlib.md5()
+        md5_for_old.update(self.args['old_pwd'].encode('utf-8'))
+        md5_for_new.update(self.args['new_pwd'].encode('utf-8'))
+        self.args['old_pwd'] = md5_for_old.hexdigest()
+        self.args['new_pwd'] = md5_for_new.hexdigest()
         if modified_user['id'] != cur_user['id']:
             self.set_res_dict(res_dict, code=1, msg='you can only change your own password')
             return res_dict
@@ -292,22 +295,3 @@ class APIUserHandler(base.BaseHandler):
 
     async def _hello_post(self):
         return {'msg': 'hello'}
-
-# class UserLoginHandler(base.BaseHandler):
-#     async def post(self):
-#         username = self.args['username']
-#         password = self.args['password']
-#         # md = hashlib.md5()
-#         # md.update(password.encode('utf8'))
-#         # encrypted = md.hexdigest()
-#         users_qualified = self.getObject('users', {'username':username, 'encodepass':password})
-#         if len(users_qualified)==1:
-#             self.set_secure_cookie('username', username)
-#         else:
-#             #raise error
-#             pass
-#
-# class UserLogoutHandler(base.BaseHandler):
-#     @tornado.web.authenticated
-#     def post(self):
-#         self.clear_cookie('username')

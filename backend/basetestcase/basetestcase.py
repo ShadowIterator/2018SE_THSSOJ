@@ -42,6 +42,12 @@ define('AppConfig', default=None, help='tornado settings file', type=dict)
 define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
 
+
+def get_md5(str):
+    md5_tool = hashlib.md5()
+    md5_tool.update(str.encode('utf-8'))
+    return md5_tool.hexdigest()
+
 def async_aquire_db(func):
     @tornado.testing.gen_test
     async def wrapper(self, *args, **kw):
@@ -80,6 +86,18 @@ class BaseTestCase(AsyncHTTPTestCase):
     async def done(self):
         pass
 
+    async def createUser(self, *args, **kw):
+        create_param = {}
+        for key, value in kw.items():
+            if key == 'password':
+                create_param[key] = get_md5(value)
+            else:
+                create_param[key] = value
+        rtn = await  self.db.createObject('users', **create_param)
+        if('password' in kw.keys()):
+            rtn['password'] = kw['password']
+        return rtn
+
     async def set_application_db(self):
         print_test('in get_db', options.db_host,
                 options.db_port,
@@ -111,8 +129,9 @@ class BaseTestCase(AsyncHTTPTestCase):
         print_test('create: ', await self.db.getObject('users', username = 'ss'))
 
     def setUp(self):
+        self.admin_pass = '1234'
         self.root_dir = 'test_root/'
-        options.parse_config_file('./settings/app_config.py')
+        options.parse_config_file('./settings/app_test_config.py')
         if (not os.getenv('USE_TRAVIS', None)):
             options.parse_config_file('./settings/env_config.py')
         else:
