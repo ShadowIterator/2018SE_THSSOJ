@@ -38,7 +38,10 @@ define("db_user", default="postgres", help="blog database user")
 define("db_password", default="", help="blog database password")
 define('settings', default=None, help='tornado settings file', type=str)
 define('RoutineList', default=None, help='tornado settings file', type=list)
-define('AppConfig', default=None, help='tornado settings file', type=dict)
+define('AppConfig', default={
+              'debug': True,
+              'cookie_secret':'ahsdfhksadjfhksjahfkashdf',
+}, help='tornado settings file', type=dict)
 define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
 
