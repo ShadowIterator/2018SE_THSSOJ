@@ -96,11 +96,6 @@ class Application(tornado.web.Application):
     async def async_init(self):
         await self.db_instance.async_init()
 
-
-# class FormHandler(tornado.web.RequestHandler):
-#     def post(self):
-#         print_debug('form-post')
-
 class BaseHandler(tornado.web.RequestHandler):
     async def try_query(self):
         print_debug('try_query')
@@ -118,20 +113,12 @@ class BaseHandler(tornado.web.RequestHandler):
         self.root_dir= self.application.root_dir
         self.user = None
 
-    # async def get(self, type): #detail
-    #     print_debug('get: ', type)
-    #     await self._call_method('''_{action_name}_get'''.format(action_name = type))
-
     @catch_exception_write
     async def get(self, type):  # detail
         # self.getargs()
         print_debug('get: ', type)
         res = await self._call_method('''_{action_name}_get'''.format(action_name=type))
         self.write(json.dumps(res).encode())
-
-    # async def post(self, type):
-    #     print_debug('post: ', type)
-    #     await self._call_method('''_{action_name}_post'''.format(action_name = type))
 
     @catch_exception_write
     async def post(self, type):
@@ -163,9 +150,7 @@ class BaseHandler(tornado.web.RequestHandler):
         return None
 
     def getargs(self):
-        # print_debug('getargs: ', self.request.body.decode() or '{}')
         self.args = json.loads(self.request.body.decode() or '{}')
-        # self.argFilter()
         print_debug('getargs\n', self.request, '\n', self.args)
         print_debug(self.request.method)
 
@@ -178,9 +163,6 @@ class BaseHandler(tornado.web.RequestHandler):
             raise NoMethodError
         print_debug('await to call function')
         return await func(*args, **kw)
-        # res = await func(*args, **kw)
-        # print_debug('call method res = ', res)
-        # return res
 
     def options(self, *args, **kw):
         # no body
@@ -211,35 +193,8 @@ class BaseHandler(tornado.web.RequestHandler):
         return tgt
 
     def property_filter(self, object_selected, allowed_properties, abandoned_properties):
-        # if allowed_properties == None:
-        #     for each_property in object_selected.keys():
-        #         if each_property in abandoned_properties:
-        #             del object_selected[each_property]
-        # else:
-        #     for each_property in object_selected.keys():
-        #         if not each_property in allowed_properties:
-        #             del object_selected[each_property]
-        # rtn = {}
-        # if (allowed_properties != None):
-        #     for key, value in object_selected.items():
-        #         if(key in allowed_properties):
-        #             rtn[key] = value
-        # else:
-        #     rtn = object_selected
-        # print_debug('filter-obj1: ', rtn)
-        # if (abandoned_properties != None):
-        #     object_selected = rtn
-        #     for key, value in object_selected.keys():
-        #         if(key not in abandoned_properties):
-        #             rtn[key] = value
-        #
         rtn = {}
         for key, value in object_selected.items():
-            # print_debug('filter object rules: ', key, allowed_properties, abandoned_properties,(allowed_properties == None) or (key in allowed_properties), ((abandoned_properties == None) or (key not in abandoned_properties)))
             if (((allowed_properties == None) or (key in allowed_properties)) and ((abandoned_properties == None) or (key not in abandoned_properties))):
-                # print_debug('filter-object checkok: ', key)
                 rtn[key] = value
-
-        # object_selected = rtn
-        # print_debug('filter-obj: ', rtn, object_selected)
         return rtn

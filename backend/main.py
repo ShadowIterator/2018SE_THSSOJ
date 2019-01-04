@@ -85,6 +85,14 @@ async def main():
                       )
     await app.async_init()
 
+    # --INSERT
+    # INTO
+    # users(username, password, email, role, TA_courses, student_courses, create_time, secret)
+    # VALUES('admin', '1234', 'admin@admin.com', 3, '{}', '{}', TIMESTAMP
+    # '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
+    rdb.createObject('users', username = 'admin', password = '1234', email = 'admin@admin.com', role = 3, TA_courses = [], student_courses = [],
+                      secret = 'alifejaliejflifjilewgh23094eowfijf23ioeaida')
+
     # user_obj = await rdb.getObjectOne('users', id = 1)
     # print('main: ', user_obj)
     # user_obj['username'] = 'hz'

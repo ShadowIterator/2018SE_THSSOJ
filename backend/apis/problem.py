@@ -555,6 +555,7 @@ class APIProblemHandler(base.BaseHandler):
             current_time = datetime.datetime.now()
             cur_timestamp = int(time.mktime(current_time.timetuple()))
 
+
             # self.args['submit_time'] = datetime.datetime.fromtimestamp(cur_timestamp)
             submit_time = datetime.datetime.fromtimestamp(cur_timestamp)
             self.args['status'] = 0

@@ -30,14 +30,18 @@ class RecordTypes:
 class ProblemTestCase(BaseTestCase):
 
     def setUp(self):
+
         super().setUp()
         print_test('try_to run fake judger')
         if (not os.getenv('USE_TRAVIS', None)):
             print_test('local-fake-judger')
-            self.fakejudge = subprocess.Popen(['venv/bin/python', 'fake_judger.py'])
+            self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
         else:
             print_test('travis: do not need-fake-judger')
             # self.fakejudge = subprocess.Popen(['python', 'fake_judger.py'])
+
+        # super().setUp()
+        # self.fakejudge = subprocess.Popen(['./venv/bin/python', 'fake_judger.py'])
 
 
     def tearDown(self):
