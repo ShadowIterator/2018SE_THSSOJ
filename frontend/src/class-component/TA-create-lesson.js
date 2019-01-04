@@ -55,7 +55,7 @@ class mLessonList extends Component {
         if(nextProps.id !== this.props.id ||
             nextProps.course_id !== this.props.course_id ||
             nextProps.readOnly !== this.props.readOnly) {
-            console.log('componentWillUpdate: ', nextProps);
+            ////console.log('componentWillUpdate: ', nextProps);
             if (nextProps.course_id !== undefined) {
                 this.state = {
                     isCreating: false,
@@ -71,7 +71,7 @@ class mLessonList extends Component {
             message.error("未找到课程");
             return;
         }
-        // console.log("editLesson_callback ", result);
+        // //console.log("editLesson_callback ", result);
         that.setState({
             course_spell: result.data[0].course_spell
         });
@@ -91,10 +91,10 @@ class mLessonList extends Component {
     handleSubmit(e) {
         e.preventDefault();
         e.stopPropagation();
-        // console.log('handleSubmit');
+        // //console.log('handleSubmit');
         this.props.form.validateFields((err, fieldsValue) => {
-            // console.log('error: ', err);
-            // console.log('value: ', fieldsValue);
+            // //console.log('error: ', err);
+            // //console.log('value: ', fieldsValue);
             if (err) {
                 return;
             }
@@ -116,11 +116,11 @@ class mLessonList extends Component {
                     end_time: fieldsValue.date[1].unix(),
                 };
                 if (data.tas.indexOf(this.props.id) < 0) {
-                    // console.log("this.props.id: ",this.props.id);
-                    // console.log("data.tas: ",data.tas);
+                    // //console.log("this.props.id: ",this.props.id);
+                    // //console.log("data.tas: ",data.tas);
                     data.tas.push(this.props.id);
                 }
-                // console.log(data);
+                // //console.log(data);
                 ajax_post(api_list['create_course'], data, this, mLessonList.submit_callback);
             } else
             {
@@ -137,7 +137,7 @@ class mLessonList extends Component {
                     start_time: fieldsValue.date[0].unix(),
                     end_time: fieldsValue.date[1].unix(),
                 };
-                // console.log(data);
+                // //console.log(data);
                 if (data.tas.indexOf(this.props.id) < 0) {
                     data.tas.push(this.props.id);
                 }
@@ -470,7 +470,7 @@ const CreateLessonForm = Form.create({
         props.onChange(changedFields);
     },
     onValuesChange(_, values) {
-        console.log(values);
+        ////console.log(values);
     },
     mapPropsToFields(props) {
         return {

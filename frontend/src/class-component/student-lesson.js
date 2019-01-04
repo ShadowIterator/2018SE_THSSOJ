@@ -156,12 +156,12 @@ class mStudentHomeworkCard extends Component {
         }
     }
     render() {
-        // console.log("questions:", this.props.deadline);
+        // //console.log("questions:", this.props.deadline);
         const questions = this.props.questions.sort((a, b) => {
             return a.id - b.id;
         });
         const ddl_str = moment.unix(this.props.deadline).format('YYYY年MM月DD日');
-        // console.log('krender-homework: ', this.props);
+        // //console.log('krender-homework: ', this.props);
         return (
             <div style={{margin: '20px'}}>
                 <List
@@ -180,7 +180,7 @@ class mStudentHomeworkCard extends Component {
                     renderItem={item => {
                         if(item === undefined)
                             return (<> </>);
-                        // console.log("check homework item", item);
+                        // //console.log("check homework item", item);
                         /*
                         将作业状态一共分为三大类：未到截止日期，已过截止日期，全部
                         未到截止日期：使用timestamp区分是否到达截止日期
@@ -197,7 +197,7 @@ class mStudentHomeworkCard extends Component {
                         const submitable = (this.props['submitable'] === undefined ? false : this.props['submitable']);
                         const judged = (this.props['score_openness'] === undefined ? false : this.props['score_openness']);
                         const submitted = (item.result_type !== -1);
-                        console.log('render-problems: ', item, delayed, submitable, judged, submitted);
+                        ////console.log('render-problems: ', item, delayed, submitable, judged, submitted);
                         let problem_res = '没有结果';
                         let problem_info = '未知的作业状态';
                         let icon_name = 'issue';
@@ -391,7 +391,7 @@ class mStudentLessonMiddle extends Component {
     };
 
     update_pannel = (course_id) => {
-        console.log('update_panel');
+        ////console.log('update_panel');
         ajax_post(api_list['query_course'], {id:course_id}, this, (that, result) =>{
             if(result.data.length===0)
                 return;
@@ -403,7 +403,7 @@ class mStudentLessonMiddle extends Component {
                 let info_list = [];
                 for(let notice_id of notice_ids) {
                     ajax_post(api_list['query_notice'], {id:notice_id}, that, (that, result) => {
-                        console.log('query_notice: ', notice_id);
+                        ////console.log('query_notice: ', notice_id);
                         if(result.data.length===0)
                             return;
                         const title = result.data[0].title;
@@ -438,13 +438,13 @@ class mStudentLessonMiddle extends Component {
                 let homework_items = [];
                 for(let homework_id of homework_ids) {
                     ajax_post(api_list['query_homework'], {id:homework_id}, that, (that, result) => {
-                        // console.log('query_homework: ', homework_id);
+                        // //console.log('query_homework: ', homework_id);
                         let hw = result.data[0];
                         if(!this.check_homework(hw, that.state.current_selected)) {
-                            console.log('query_homework: returned');
+                            ////console.log('query_homework: returned');
                             return ;
                         }
-                        // console.log('query_homework: succeed');
+                        // //console.log('query_homework: succeed');
 
                         hw['problem_list'] = [];
                         hw['type_key'] = that.state.current_selected;
@@ -453,13 +453,13 @@ class mStudentLessonMiddle extends Component {
                         const problem_ids = hw['problems'];
                         for(let problem_id of problem_ids) {
                             ajax_post(api_list['query_problem'], {id: problem_id, homework_id: homework_id, course_id: course_id}, that, (that, result) => {
-                                console.log('query-problem-callback: ',problem_id , result.data);
+                                ////console.log('query-problem-callback: ',problem_id , result.data);
                                 let prob = result.data[0];
                                 prob['result_type'] = -1;
-                                console.log('query_problem: ', problem_id, result.data);
+                                ////console.log('query_problem: ', problem_id, result.data);
                                 hw['problem_list'].push(prob);
-                                console.log('query_problem: ', homework_items);
-                                console.log('query_problems_after_setstate: ', that.state.homeworkitems);
+                                ////console.log('query_problem: ', homework_items);
+                                ////console.log('query_problems_after_setstate: ', that.state.homeworkitems);
                                 ajax_post(api_list['query_record'],
                                     {
                                             user_id: this.props.id,
@@ -469,8 +469,8 @@ class mStudentLessonMiddle extends Component {
                                         },
                                     that,
                                     (that, result) => {
-                                        // console.log('student-record-query-data: ',result.data)
-                                        console.log('student-record-query-data: ', {
+                                        // //console.log('student-record-query-data: ',result.data)
+                                        ////console.log('student-record-query-data: ', {
                                             user_id: this.props.id,
                                             homework_id: homework_id,
                                             problem_id: problem_id,
@@ -496,7 +496,7 @@ class mStudentLessonMiddle extends Component {
                                     },
                                     that,
                                     (that, result) => {
-                                        console.log('student-record-query-data: ', {
+                                        ////console.log('student-record-query-data: ', {
                                             user_id: this.props.id,
                                             homework_id: homework_id,
                                             problem_id: problem_id,
@@ -520,7 +520,7 @@ class mStudentLessonMiddle extends Component {
     };
 
     render() {
-        console.log('render-homework: ', this.state.homeworkitems, this.state.infoitems);
+        ////console.log('render-homework: ', this.state.homeworkitems, this.state.infoitems);
         let breadcrumb, panel;
         if(this.state.current_selected === '1')
         {

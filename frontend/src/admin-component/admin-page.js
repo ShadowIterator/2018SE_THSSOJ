@@ -22,17 +22,17 @@ class AdminTable extends Component {
         this.updateTable = this.updateTable.bind(this);
     }
     updateTable = function(page) {
-        console.log(this.state);
+        //console.log(this.state);
         // const column_len = this.props.columns.length;
         let need_update = true;
         for(const cl of this.props.columns) {
             if(cl.title === '操作' || cl.title === '查看详情'){
                 need_update = false;
             }
-            console.log(cl.title);
+            //console.log(cl.title);
         }
-        console.log(need_update);
-        console.log(this.props.columns);
+        //console.log(need_update);
+        //console.log(this.props.columns);
         if(need_update) {
             this.props.columns.push(
                 {
@@ -40,7 +40,7 @@ class AdminTable extends Component {
                         <span>
                             <Button onClick={() => {
                                 this.setState({current_record: record, visible: true});
-                                console.log("点击查看详情");
+                                //console.log("点击查看详情");
                             }}>查看详情</Button>
                         </span>
                 },
@@ -99,7 +99,7 @@ class AdminTable extends Component {
         });
     };
     fetch = (params = {}) => {
-        console.log('params:', params);
+        //console.log('params:', params);
         this.setState({
             loading: true,
             page: params.page,
@@ -123,7 +123,7 @@ class AdminTable extends Component {
     render() {
         let info_table = [];
         if(this.state.visible) {
-            console.log(this.state.current_record);
+            //console.log(this.state.current_record);
             for(const re_name in this.state.current_record) {
                 info_table.push(
                     <tr>

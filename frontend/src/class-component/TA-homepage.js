@@ -35,18 +35,18 @@ class mTAHomepageMiddle extends Component {
         ajax_post(api_list['query_user'], {id:id}, this, mTAHomepageMiddle.query_user_callback);
     }
     componentWillUpdate(nextProps) {
-        console.log(nextProps);
+        //////console.log(nextProps);
         if(nextProps.id===undefined || nextProps.id === -1)
             return;
         if(nextProps.id !== this.props.id) {
-            console.log(nextProps.id);
+            ////console.log(nextProps.id);
             ajax_post(api_list['query_user'], {id:nextProps.id}, this, mTAHomepageMiddle.query_user_callback);
         }
     }
     static query_user_callback(that, result) {
-        // console.log("query_user_callback");
+        // //console.log("query_user_callback");
         if(result.data.length === 0) {
-            console.log("Query failed. No such user.");
+            //////console.log("Query failed. No such user.");
             return;
         }
         const user = result.data[0];
@@ -55,7 +55,7 @@ class mTAHomepageMiddle extends Component {
         for(let id of student_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, mTAHomepageMiddle.query_stu_course_callback);
         }
-        console.log(ta_courses);
+        //////console.log(ta_courses);
         for(let id of ta_courses) {
             ajax_post(api_list['query_course'], {id:id}, that, mTAHomepageMiddle.query_ta_course_callback);
         }
@@ -63,7 +63,7 @@ class mTAHomepageMiddle extends Component {
 
     static query_stu_course_callback(that, result) {
         if(result.data.length===0) {
-            console.log("Cannot find course.");
+            //////console.log("Cannot find course.");
             return;
         }
         const course = result.data[0];
@@ -81,10 +81,10 @@ class mTAHomepageMiddle extends Component {
     }
     static query_ta_course_callback(that, result) {
         if(result.data.length===0) {
-            console.log("Cannot find course.");
+            //////console.log("Cannot find course.");
             return;
         }
-        // console.log(result.data);
+        // ////console.log(result.data);
         const course = result.data[0];
         const name = course.name;
         const id = course.id;
@@ -118,15 +118,15 @@ class mTAHomepageMiddle extends Component {
         that.setState({infoitems:that.infoitems});
     }
     render() {
-        // console.log("this.state.uplesson: ", this.state.uplesson);
-        // console.log("this.state.talesson: ", this.state.talesson);
+        // ////console.log("this.state.uplesson: ", this.state.uplesson);
+        // ////console.log("this.state.talesson: ", this.state.talesson);
         const now = moment().format('X');
         let running_talesson = this.state.talesson.filter(item => now >= item.start_time && now <= item.end_time);
         running_talesson = running_talesson.sort((a, b) => {
             return a.id < b.id;
         });
-        // console.log("now", now);
-        // console.log("running_talesson", running_talesson);
+        // ////console.log("now", now);
+        // ////console.log("running_talesson", running_talesson);
         return (
                 <Content style={{padding: '0 50px'}}>
                     <Breadcrumb style={{margin: '16px 0'}}>

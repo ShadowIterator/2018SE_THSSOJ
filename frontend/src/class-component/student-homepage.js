@@ -36,7 +36,7 @@ class mStudentHomepageMiddle extends Component {
     }
     static query_user_callback(that, result) {
         if(result.data.length === 0) {
-            console.log("Query failed. No such user.");
+            ////console.log("Query failed. No such user.");
             return;
         }
         const user = result.data[0];
@@ -48,7 +48,7 @@ class mStudentHomepageMiddle extends Component {
     }
     static query_course_callback(that, result) {
         if(result.data.length === 0) {
-            console.log("Query failed. No such course.");
+            ////console.log("Query failed. No such course.");
             return;
         }
         const course = result.data[0];
@@ -80,7 +80,7 @@ class mStudentHomepageMiddle extends Component {
                                 enterButton="加入课程"
                                 size="large"
                                 onSearch={value => {
-                                    console.log(value);
+                                    ////console.log(value);
                                     const data = {
                                         user_id: this.props.id,
                                         course_spell: value

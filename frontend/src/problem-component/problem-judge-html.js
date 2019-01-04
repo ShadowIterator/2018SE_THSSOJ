@@ -22,7 +22,7 @@ class mJudgeHTML extends Component {
         this.homework_id = parseInt(this.props.homework_id);
         this.problem_id = parseInt(this.props.problem_id);
         this.changed = false;
-        console.log("constructor", this.state.current_selected);
+        ////console.log("constructor", this.state.current_selected);
     }
     componentDidMount() {
         if(this.props.id === -1) {
@@ -37,12 +37,12 @@ class mJudgeHTML extends Component {
         } else if(nextProps.id === this.props.id) {
             return;
         }
-        console.log("componentWillUpdate");
+        ////console.log("componentWillUpdate");
         this.props.callback(true);
         this.fetchData(nextProps.id);
     }
     fetchData = (id) => {
-        console.log("fetching data...");
+        ////console.log("fetching data...");
         ajax_post(api_list['query_course'], {id: this.course_id}, this, (that, result) => {
             if(result.data.code === 1 || result.data.length === 0) {
                 message.error("请求课程信息失败");
@@ -130,8 +130,8 @@ class mJudgeHTML extends Component {
             });
         }
         const selected_record = this.state.records[selected_key];
-        console.log("selected_key", selected_key);
-        console.log("selected_record", selected_record);
+        ////console.log("selected_key", selected_key);
+        ////console.log("selected_record", selected_record);
         const iframe_src = URL+this.state.uri+'/'+selected_record.user_info.id.toString()+'/index.html';
         const content = (
             <div style={{height: '100%'}}>
@@ -173,7 +173,7 @@ class mJudgeHTML extends Component {
                                         });
                                     },
                                     onCancel: () => {
-                                        console.log('Cancel');
+                                        ////console.log('Cancel');
                                 }});
                                 return;
                             }

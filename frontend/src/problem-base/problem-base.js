@@ -71,7 +71,7 @@ class ProblemBase extends Component {
         });
     };
     handleTableChange = (pagination) => {
-        console.log("handleTableChange", pagination);
+        //console.log("handleTableChange", pagination);
         const pager = { ...this.state.pagination };
         pager.current = pagination.current;
         this.setState({
@@ -82,7 +82,7 @@ class ProblemBase extends Component {
         });
     };
     fetch = (params = {}) => {
-        console.log('params:', params);
+        //console.log('params:', params);
         this.setState({
             loading: true,
             page: params.page,
@@ -130,7 +130,7 @@ class ProblemBase extends Component {
                             style={{width: '100%', marginBottom: '10px'}}
                             placeholder="输入搜索，使用空格隔开关键词"
                             onSearch={value => {
-                                console.log(value);
+                                //console.log(value);
                                 ajax_post(api_list['search_problem'], {keywords: value}, this, (that, result) => {
                                     if(result.data.code === 1) {
                                         message.error("搜索题目失败");

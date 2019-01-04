@@ -43,7 +43,7 @@ class RegistrationForm extends React.Component {
         if(nextProps.judge_method === this.props.judge_method) {
             return;
         }
-        console.log("judge_method", nextProps.judge_method);
+        ////console.log("judge_method", nextProps.judge_method);
         this.setState({
             language_radio: nextProps.isEditing ? nextProps.language.value.map((value) => {
                 return (<Radio value={value}>{mapper[value]}</Radio>);
@@ -109,7 +109,7 @@ class RegistrationForm extends React.Component {
                         // description: values.description,
                         description: this.state.mde_description,
                     };
-                    console.log("Create HTML problem", data);
+                    ////console.log("Create HTML problem", data);
                     ajax_post(api_list['create_html'], data, this, (that, result) => {
                         if(result.data.code === 0) {
                             message.success("成功创建题目");
@@ -120,7 +120,7 @@ class RegistrationForm extends React.Component {
                     });
                     return;
                 }
-                console.log("Create problem", data);
+                ////console.log("Create problem", data);
                 ajax_post(api_list['create_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
                         message.success("成功创建题目");
@@ -190,7 +190,7 @@ class RegistrationForm extends React.Component {
                         // description: values.description,
                         description: this.state.mde_description,
                     };
-                    console.log("Update HTML problem", data);
+                    ////console.log("Update HTML problem", data);
                     ajax_post(api_list['update_problem'], data, this, (that, result) => {
                         if(result.data.code === 0) {
                             message.success("成功编辑题目");
@@ -201,7 +201,7 @@ class RegistrationForm extends React.Component {
                     });
                     return;
                 }
-                console.log("Updating problem",data);
+                ////console.log("Updating problem",data);
                 ajax_post(api_list['update_problem'], data, this, (that, result) => {
                     if(result.data.code === 0) {
                         message.success("成功编辑该题目");
@@ -255,7 +255,7 @@ class RegistrationForm extends React.Component {
     };
 
     normFile = (e) => {
-        console.log('Upload event:', e);
+        ////console.log('Upload event:', e);
         if (Array.isArray(e)) {
             return e;
         }
@@ -263,7 +263,7 @@ class RegistrationForm extends React.Component {
     };
 
     render() {
-        console.log("this.state: ", this.state);
+        ////console.log("this.state: ", this.state);
         const { getFieldDecorator } = this.props.form;
 
         const formItemLayout = {
@@ -292,7 +292,7 @@ class RegistrationForm extends React.Component {
                 },
             },
         };
-        console.log("printout judge_method",this.state.judge_method);
+        ////console.log("printout judge_method",this.state.judge_method);
 
         return (
             <Form onSubmit={this.handleSubmit}>
@@ -307,7 +307,7 @@ class RegistrationForm extends React.Component {
                         ],
                     })(
                         <Select placeholder="请选择本题的评测方式" disabled={this.props.isEditing} onChange={(value) => {
-                            console.log('Select change', value);
+                            ////console.log('Select change', value);
                             this.setState({
                                 judge_method: parseInt(value),
                                 language_radio: [],
@@ -401,7 +401,7 @@ class RegistrationForm extends React.Component {
                         ],
                     })(
                         <Checkbox.Group onChange={(value) => {
-                            console.log("radio change:", value);
+                            ////console.log("radio change:", value);
                             const language_radio = value.map((id) => {
                                 return (<Radio value={id}>{mapper[id]}</Radio>);
                             });
@@ -551,7 +551,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_code']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_code:", fileList);
+                                ////console.log("upload_code:", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -594,7 +594,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_code']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_code:", fileList);
+                                ////console.log("upload_code:", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -648,7 +648,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_case']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_case", fileList);
+                                ////console.log("upload_case", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -691,7 +691,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_case']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_case", fileList);
+                                ////console.log("upload_case", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -745,7 +745,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_script']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_script", fileList);
+                                ////console.log("upload_script", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -785,7 +785,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_script']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_script", fileList);
+                                ////console.log("upload_script", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -826,7 +826,7 @@ class RegistrationForm extends React.Component {
                                             action={URL + api_list['upload_script']}
                                             multiple={false} onChange={(info) => {
                                 let fileList = info.fileList;
-                                console.log("upload_script", fileList);
+                                ////console.log("upload_script", fileList);
                                 fileList = fileList.slice(-1);
                                 fileList = fileList.map((file) => {
                                     if (file.response) {
@@ -946,7 +946,7 @@ const ProblemCreateForm = Form.create({
         };
     },
     onValuesChange(_, values) {
-        console.log(values);
+        ////console.log(values);
     },
 })(withRouter(RegistrationForm));
 
@@ -1017,7 +1017,7 @@ class ProblemCreate extends Component {
                 if(result.data.length === 0) {
                     return;
                 }
-                console.log("problem data", result.data);
+                ////console.log("problem data", result.data);
                 const prob = result.data[0];
                 that.setState({
                     problem_id: prob.id,

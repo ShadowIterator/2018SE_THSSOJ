@@ -28,7 +28,7 @@ class ModifyPwdForm extends Component {
                 old_pwd: fieldsValue.old_pwd,
                 new_pwd: fieldsValue.new_pwd
             };
-            // console.log(data);
+            // ////console.log(data);
             ajax_post(api_list['modifypwd_user'], data, this, (that, result)=>{
                 if (result.data.code === 0){
                     message.success("密码修改成功！");
@@ -109,7 +109,7 @@ const WrappedModifyPwdForm = Form.create({
         props.onChange(changedFields);
     },
     onValuesChange(_, values) {
-        // console.log(values);
+        // ////console.log(values);
     },
     mapPropsToFields(props) {
         return {
@@ -228,7 +228,7 @@ class UserSettingsForm extends Component {
         event.preventDefault();
         this.setState({isOpen:false});
         this.props.form.validateFieldsAndScroll((err, values) => {
-            console.log(values);
+            //////console.log(values);
             if(!err) {
                 const update_data = {
                     id: this.props.id,
@@ -239,7 +239,7 @@ class UserSettingsForm extends Component {
                     realname: this.state.realname,
                     student_id: this.state.student_id,
                 };
-                console.log(update_data);
+                //////console.log(update_data);
                 ajax_post(api_list['update_user'], update_data, this, UserSettingsForm.save_callback);
             }
         });
@@ -463,7 +463,7 @@ export class UserSettings extends Component {
     };
 
     render() {
-        console.log(this.props);
+        ////console.log(this.props);
         let homelink = '/';
         if (this.props.role === 1) {
             homelink = '/student';

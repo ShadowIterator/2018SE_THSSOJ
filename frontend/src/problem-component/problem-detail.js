@@ -41,13 +41,13 @@ class ProblemDetailBody extends Component {
         })
     }
     render() {
-        console.log("this.state", this.state);
-        console.log("this.props", this.props);
-        console.log("bool", this.props.submit_record !== null || this.props.html_record !== null);
+        ////console.log("this.state", this.state);
+        ////console.log("this.props", this.props);
+        ////console.log("bool", this.props.submit_record !== null || this.props.html_record !== null);
         return (
             <div>
                 <Tabs defaultActiveKey="1" onChange={(value)=>{
-                    console.log(value);
+                    ////console.log(value);
                     if(value==="3"){
                         this.props.update_record(this.props.id);
                     }}} className='problem_tab'>
@@ -69,7 +69,7 @@ class ProblemDetailBody extends Component {
                                         fileList={this.state.fileList} style={{outline: 0}}
                                         onChange={(info) => {
                                             let fileList = info.fileList;
-                                            console.log("upload_script", fileList);
+                                            ////console.log("upload_script", fileList);
                                             fileList = fileList.slice(-1);
                                             fileList = fileList.map((file) => {
                                                 if (file.response) {
@@ -123,7 +123,7 @@ class ProblemDetailBody extends Component {
                                             });
                                         },
                                         onCancel: () => {
-                                            console.log('Cancel');
+                                            ////console.log('Cancel');
                                         },
                                     });
                                     return;
@@ -149,7 +149,7 @@ class ProblemDetailBody extends Component {
                                         fileList={this.state.fileList} style={{outline: 0}}
                             onChange={(info) => {
                             let fileList = info.fileList;
-                            console.log("upload_script", fileList);
+                            ////console.log("upload_script", fileList);
                             fileList = fileList.slice(-1);
                             fileList = fileList.map((file) => {
                             if (file.response) {
@@ -203,7 +203,7 @@ class ProblemDetailBody extends Component {
                                             });
                                         },
                                         onCancel: () => {
-                                            console.log('Cancel');
+                                            ////console.log('Cancel');
                                         },
                                     });
                                     return;
@@ -342,7 +342,7 @@ class ProblemDetailRecord extends Component {
             )
         }
         if(this.props.records[0]!==undefined && this.props.records[0].consume_time!==undefined) {
-            console.log('inside table render', this.props.records);
+            ////console.log('inside table render', this.props.records);
             let counter = 1;
             const records = this.props.records.sort((a, b)=>{
                 return b.id-a.id;
@@ -350,7 +350,7 @@ class ProblemDetailRecord extends Component {
             for (const re of records) {
                 if(re.consume_time===undefined)
                     continue;
-                console.log("inside table render for loop", re);
+                ////console.log("inside table render for loop", re);
                 let result = '';
                 if(re.status === 0) {
                     result = '正在评测';

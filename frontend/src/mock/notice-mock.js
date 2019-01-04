@@ -36,7 +36,7 @@ Mock.mock(URL+api_list['create_notice'], function(options) {
             course.notices.push(notice.id);
         }
     }
-    console.log(courses);
+    ////console.log(courses);
 
     return {code:0};
 });
@@ -73,7 +73,7 @@ Mock.mock(URL+api_list['update_notice'], function(options){
 Mock.mock(URL+api_list['query_notice'], function(options){
     const data = JSON.parse(options.body);
     let res = [];
-    // console.log(data.course_id);
+    // ////console.log(data.course_id);
     if (data.id !== undefined) {
         const id = data.id;
         for (let index in notices) {

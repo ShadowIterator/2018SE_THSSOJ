@@ -30,7 +30,7 @@ class AddNewNotice extends Component {
     submitHandler(e){
         e.preventDefault();
         e.stopPropagation();
-        console.log("submitHandler");
+        ////console.log("submitHandler");
         this.props.form.validateFields((err, fieldsValue) => {
             if (err) {
                 return;
@@ -41,13 +41,13 @@ class AddNewNotice extends Component {
                 course_id: this.props.course_id,
                 user_id: this.props.stu_id
             };
-            console.log(data);
+            ////console.log(data);
             ajax_post(api_list['create_notice'], data, this, this.submitCallback);
         });
     }
 
     submitCallback(that, result){
-        console.log("submitCallback");
+        ////console.log("submitCallback");
         if (result.data.code !== 0) {
             // alert("Creating new notice failed!");
             message.error("创建通知失败");
@@ -138,7 +138,7 @@ class TANoticeList extends Component {
 
 class mTAHomeworkCard extends Component {
     render() {
-        console.log(this.props);
+        ////console.log(this.props);
         const problems = this.props.problems.sort((a, b) => {
             return a.id - b.id;
         });
@@ -170,7 +170,7 @@ class mTAHomeworkCard extends Component {
                         bordered
                         dataSource={problems}
                         renderItem={item => {
-                            // console.log("check homework item", item);
+                            // //console.log("check homework item", item);
                             return (
                                 <List.Item key={item.id}>
                                     {/*<List.Item.Meta title={<a onClick={this.handleClickId(item.id)}>{item.title}</a>} />*/}
@@ -280,7 +280,7 @@ class mTAHomeworkCard extends Component {
                                             problem_id: item.id,
                                             course_id: this.props.course_id,
                                         };
-                                        // console.log('judge_all data', data);
+                                        // //console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
                                             if (result.data.code !== 0) {
                                                 message.error("开始评测失败");
@@ -305,7 +305,7 @@ class mTAHomeworkCard extends Component {
                                             problem_id: item.id,
                                             course_id: this.props.course_id
                                         };
-                                        // console.log('judge_all data', data);
+                                        // //console.log('judge_all data', data);
                                         ajax_post(api_list['judge_all'], data, this, (that, result)=>{
                                             if (result.data.code !== 0) {
                                                 message.error("开始评测失败");
@@ -421,7 +421,7 @@ class mHomeworkForm extends Component {
                     problems: this.state.problems.map(item=>{return item.id}),
                     course_id: this.props.course_id
                 };
-                // console.log("create data", data);
+                // //console.log("create data", data);
                 ajax_post(api_list['create_homework'], data, this, (that, result) => {
                     if (result.data.code !== 0){
                         message.error("新建作业失败");
@@ -513,7 +513,7 @@ class mHomeworkForm extends Component {
                 }},
         ];
 
-        // console.log("current day", moment().endOf('day'));
+        // //console.log("current day", moment().endOf('day'));
 
         return (
             <div>
@@ -579,7 +579,7 @@ class mHomeworkForm extends Component {
                                onChange={(event)=>{
                                    event.preventDefault();
                                    event.stopPropagation();
-                                   // console.log(event.target.value);
+                                   // //console.log(event.target.value);
                                    // const num = parseInt(event.target.value);
                                    // if (Number.isNaN(num) || num < 0) {
                                    //     return {
@@ -648,7 +648,7 @@ const CreateHomeworkForm = Form.create({
         props.onChange(changedFields);
     },
     onValuesChange(_, values) {
-        console.log(values);
+        //console.log(values);
     },
     mapPropsToFields(props) {
         return {

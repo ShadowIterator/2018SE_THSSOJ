@@ -126,13 +126,13 @@ class CodeInput extends Component {
                         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
                     },
                     onCancel: () => {
-                        console.log('Cancel');
+                        //////console.log('Cancel');
                     },
                 });
                 return;
             }
         }
-        console.log("intime_submit_data",data);
+        //////console.log("intime_submit_data",data);
         ajax_post(api_list['submit_problem'], data, this, CodeInput.submit_callback);
     }
 
@@ -211,10 +211,10 @@ class CodeInput extends Component {
                                 (this.state.submit_type === '3' && ratio_three_left <= 0) ||
                                 (this.state.submit_type !== '1' && this.state.submit_type !== '2' &&
                                     this.state.submit_type !== '3' && this.state.submit_type !== '4'));
-        // console.log("one ", this.state.submit_type, ratio_one_left, (this.state.submit_type === '1' && ratio_one_left <= 0));
-        // console.log("two ", this.state.submit_type, ratio_two_left, (this.state.submit_type === '2' && ratio_two_left <= 0));
-        // console.log("three ", this.state.submit_type, ratio_three_left, (this.state.submit_type === '3' && ratio_three_left <= 0));
-        // console.log("disabled_flag", disabled_flag);
+        // ////console.log("one ", this.state.submit_type, ratio_one_left, (this.state.submit_type === '1' && ratio_one_left <= 0));
+        // ////console.log("two ", this.state.submit_type, ratio_two_left, (this.state.submit_type === '2' && ratio_two_left <= 0));
+        // //////console.log("three ", this.state.submit_type, ratio_three_left, (this.state.submit_type === '3' && ratio_three_left <= 0));
+        // ////console.log("disabled_flag", disabled_flag);
         return (
             <div>
                 <Form layout="inline" onSubmit={(e)=>{e.preventDefault();}}>

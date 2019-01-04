@@ -63,7 +63,7 @@ class App extends Component {
     }
     componentDidMount() {
         const id_cookie = Cookies.get('mid');
-        console.log('cookie: ', id_cookie);
+        ////console.log('cookie: ', id_cookie);
         if(!id_cookie) {
             this.setState({
                 jumpToLogin: true,

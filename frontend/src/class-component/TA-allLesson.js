@@ -16,7 +16,7 @@ class mAllLesson extends Component {
     }
 
     componentDidMount() {
-        console.log("id ", this.props.id);
+        //console.log("id ", this.props.id);
         if (this.props.id === -1 || this.props.id === undefined){
             return;
         }
@@ -24,7 +24,7 @@ class mAllLesson extends Component {
     }
 
     componentWillUpdate(nextProps) {
-        console.log("id", nextProps.id);
+        //console.log("id", nextProps.id);
         if (nextProps.id === -1 || nextProps.id === undefined){
             return;
         }
@@ -36,7 +36,7 @@ class mAllLesson extends Component {
         this.setState({
             lessons: []
         });
-        console.log("user_id ", user_id);
+        //console.log("user_id ", user_id);
         ajax_post(api_list['query_user'], {id: user_id}, this, (that, result)=>{
             if (result.data.length === 0){
                 message.error("查找用户失败");
@@ -45,7 +45,7 @@ class mAllLesson extends Component {
             // message.success("查找用户成功");
 
             const user = result.data[0];
-            console.log("user ", user);
+            //console.log("user ", user);
             if (user.role === 1) {
                 for (let index in user.student_courses) {
                     ajax_post(api_list['query_course'], {id: user.student_courses[index]}, that, (that, res) => {
@@ -80,8 +80,8 @@ class mAllLesson extends Component {
     }
 
     render() {
-        // console.log("this.state.lessons ", this.state.lessons);
-        // console.log("role", this.props.role);
+        // //console.log("this.state.lessons ", this.state.lessons);
+        // //console.log("role", this.props.role);
         let ret;
         const lesson_rank = this.state.lessons.sort((a, b) => {
             const ida = a.id;
@@ -172,7 +172,7 @@ class mAllLesson extends Component {
                                     enterButton="加入课程"
                                     size="large"
                                     onSearch={value => {
-                                        console.log(value);
+                                        //console.log(value);
                                         const data = {
                                             user_id: this.props.id,
                                             course_spell: value

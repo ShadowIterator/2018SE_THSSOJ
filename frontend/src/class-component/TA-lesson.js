@@ -67,7 +67,7 @@ class mTALesson extends Component {
     }
 
     query_data(course_id) {
-        console.log(course_id);
+        ////console.log(course_id);
 
         this.setState({
                         homeworkitems: [],
@@ -79,7 +79,7 @@ class mTALesson extends Component {
 
     static query_course_callback(that, result) {
         if (result.data.length === 0){
-            console.log("result.data.length === 0");
+            ////console.log("result.data.length === 0");
             return;
         }
         that.setState({
@@ -96,7 +96,7 @@ class mTALesson extends Component {
 
     static query_notice_callback(that, result) {
         if (result.data.length === 0){
-            console.log("result.data.length === 0");
+            ////console.log("result.data.length === 0");
             return;
         }
         let infolist = that.state.infoitems;
@@ -116,7 +116,7 @@ class mTALesson extends Component {
 
     static query_homework_callback(that, result) {
         if (result.data.length === 0){
-            console.log("result.data.length === 0");
+            ////console.log("result.data.length === 0");
             return;
         }
         let homeworklist = that.state.homeworkitems;
@@ -166,7 +166,7 @@ class mTALesson extends Component {
 
     static query_problem_callback(that, result) {
         if (result.data.length === 0){
-            console.log("result.data.length === 0");
+            ////console.log("result.data.length === 0");
             return;
         }
         let problemset = that.state.problemitems;
@@ -212,7 +212,7 @@ class mTALesson extends Component {
             clickNewnotice: false,
         });
         const course_id = parseInt(this.props.lesson_id);
-        // console.log("newnotice_callback course_id: ", course_id);
+        // //console.log("newnotice_callback course_id: ", course_id);
         this.query_data(course_id);
     }
 
@@ -234,7 +234,7 @@ class mTALesson extends Component {
     }
 
     render() {
-        console.log('problems ', this.state.problems);
+        ////console.log('problems ', this.state.problems);
         let breadcrumb;
         let content;
         const all_homework = this.state.homeworkitems;

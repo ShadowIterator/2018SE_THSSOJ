@@ -30,7 +30,7 @@ class mTAJudge extends Component {
             {title: '操作', dataIndex: 'action', key: 'action', render: (type, record) => {
                     switch (type) {
                         case 0: return <Button onClick={()=>{
-                            console.log("提交评测"+record.record_id);
+                            ////console.log("提交评测"+record.record_id);
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
@@ -54,7 +54,7 @@ class mTAJudge extends Component {
                             }
                         }}>提交评测</Button>;
                         case 1: return <Button onClick={()=>{
-                            console.log("提交重新评测"+record.record_id);
+                            //console.log("提交重新评测"+record.record_id);
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
@@ -93,7 +93,7 @@ class mTAJudge extends Component {
             {title: '操作', dataIndex: 'action', key: 'action', render: (type, record) => {
                     switch (type) {
                         case 0: return <Button onClick={()=>{
-                            console.log("提交评测"+record.record_id);
+                            //console.log("提交评测"+record.record_id);
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
@@ -117,7 +117,7 @@ class mTAJudge extends Component {
                             }
                         }}>提交评测</Button>;
                         case 1: return <Button onClick={()=>{
-                            console.log("提交重新评测"+record.record_id);
+                            //console.log("提交重新评测"+record.record_id);
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
@@ -165,7 +165,7 @@ class mTAJudge extends Component {
             {title: '操作', dataIndex: 'action', key: 'action', render: (type, record) => {
                     switch (type) {
                         case 0: return <Button onClick={()=>{
-                            console.log("提交评测"+record.record_id)
+                            //console.log("提交评测"+record.record_id)
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
@@ -189,7 +189,7 @@ class mTAJudge extends Component {
                             }
                         }}>提交评测</Button>;
                         case 1: return <Button onClick={()=>{
-                            console.log("提交重新评测"+record.record_id);
+                            //console.log("提交重新评测"+record.record_id);
                             if(this.state.problem_type === 2) {
                                 this.props.history.push({
                                     pathname: "/judgehtml/"+
