@@ -4,6 +4,9 @@ import aiopg
 import bcrypt
 # import markdown
 import os.path
+import random
+import string
+import datetime, time
 import psycopg2
 import re
 import tornado.escape
@@ -13,7 +16,7 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import unicodedata
-from apis.base import re_create_tables, maybe_create_tables, Application
+from apis.base import re_create_tables, maybe_create_tables, Application, Roles
 from apis.db import BaseDB
 from tornado.locks import Condition, Lock
 from tornado import gen
@@ -100,11 +103,34 @@ async def main():
     # users(username, password, email, role, TA_courses, student_courses, create_time, secret)
     # VALUES('admin', '1234', 'admin@admin.com', 3, '{}', '{}', TIMESTAMP
     # '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
-    if((not options.in_test) and (options.re_create_table)):
-        await rdb.createObject('users', username = options.superuser_username, password = get_md5(options.superuser_password), email = 'admin@admin.com', role = 3, TA_courses = [], student_courses = [],
-                          secret = 'alifejaliejflifjilewgh23094eowfijf23ioeaida')
+    if((not options.in_test)):
+        # try:
+        #     await rdb.deleteObject('users', role = Roles.ADMIN)
+        #     print('successfully remove superuser')
+        # except:
+        #     print('no admin user is in db')
+        #
+        # try:
+        #     await rdb.createObject('users', username = options.superuser_username, password = get_md5(options.superuser_password), email = 'admin@admin.com', role = Roles.ADMIN, TA_courses = [], student_courses = [],
+        #                       secret = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64)))
+        #     print('create superuser success')
+        # except:
+        #     print('failed to create super user')
+        try:
+            super_user = await rdb.getObjectOne('users', role = Roles.ADMIN)
+            super_user['username'] =  options.superuser_username
+            super_user['password'] =  get_md5(options.superuser_password)
+            super_user['email'] = options.superuser_email
+            await rdb.saveObject('users', super_user)
+            print('update superuser done')
+        except:
+            await rdb.createObject('users', username=options.superuser_username,
+                                   password=get_md5(options.superuser_password), email='admin@admin.com',
+                                   role=Roles.ADMIN, TA_courses=[], student_courses=[],
+                                                         secret = ''.join(random.choice(string.ascii_letters + string.digits) for x in range(64)))
+            print('successfully create superuser')
 
-    # user_obj = await rdb.getObjectOne('users', id = 1)
+                                   # user_obj = await rdb.getObjectOne('users', id = 1)
     # print('main: ', user_obj)
     # user_obj['username'] = 'hz'
     # await rdb.saveObject('users', user_obj)

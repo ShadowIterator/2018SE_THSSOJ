@@ -31,9 +31,3 @@ RoutineList = [
                   (r'/api/judgestate/(.*)', APIJudgestateHandler),
                   (r'/api/ratio/(.*)', APIRatioHandler),
               ]
-
-AppConfig = {
-              'debug': True,
-              'cookie_secret':'ahsdfhksadjfhksjahfkashdf',
-              # 'xsrf_cookies':True,
-            }
