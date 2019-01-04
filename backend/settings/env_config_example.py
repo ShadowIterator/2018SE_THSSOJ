@@ -2,7 +2,6 @@
 AppConfig = {
               'debug': True,
               'cookie_secret':'ahsdfhksadjfhksjahfkashdf',
-
             }
 
 db_database = 'test'
