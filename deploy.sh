@@ -8,12 +8,12 @@ printf "Please input database user name: "
 read db_user
 printf "Please input password: "
 read -s db_password
-printf "Please input superuser name: "
+printf "\nPlease input superuser name: "
 read super_name
 printf "Please input superuser email: "
 read super_email
 printf "Please input superuser password: "
-read super_password
+read -s super_password
 
 secret=$(LC_CTYPE=C tr -dc A-Za-z0-9 < /dev/urandom | fold -w ${1:-128} | head -n 1)
 
