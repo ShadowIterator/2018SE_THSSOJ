@@ -15,6 +15,7 @@ port = 8000
 db_host = 'postgres'
 db_port = 5432
 in_test = False
+re_create_table = True
 
 
 

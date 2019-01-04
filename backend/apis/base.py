@@ -65,24 +65,26 @@ def check_password(func):
     return wrapper
 
 
-async def maybe_create_tables(db, filename):
-    # try:
-    #     with (await db.cursor()) as cur:
-    #         await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
-    #         await cur.fetchone()
-    #     print_debug("in create")
-    # except psycopg2.ProgrammingError:
+async def re_create_tables(db, filename):
+    print_debug('re-create tables')
+    with open(filename, encoding = 'utf-8') as f:
+        schema = f.read()
+    with (await db.cursor()) as cur:
+        # print_debug('maybe-create-tables: ', schema)
+        await cur.execute(schema)
 
-        print('create tables')
-        with open(filename, encoding = 'utf-8') as f:
+async def maybe_create_tables(db, filename):
+    try:
+        with (await db.cursor()) as cur:
+            await cur.execute("SELECT COUNT(*) FROM entries LIMIT 1")
+            await cur.fetchone()
+        print_debug("table already exists")
+    except psycopg2.ProgrammingError:
+        print_debug('re-create tables')
+        with open(filename, encoding='utf-8') as f:
             schema = f.read()
         with (await db.cursor()) as cur:
-            # print_debug('maybe-create-tables: ', schema)
             await cur.execute(schema)
-    # with open('schema.sql') as f:
-    #     schema = f.read()
-    # with (await db.cursor()) as cur:
-    #     await cur.execute(schema)
 
 class Application(tornado.web.Application):
     def __init__(self, db, root_dir, *args, **kw):

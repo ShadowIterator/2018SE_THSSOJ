@@ -13,7 +13,7 @@ import tornado.options
 import tornado.web
 import unicodedata
 import asyncio
-from apis.base import maybe_create_tables, Application
+from apis.base import maybe_create_tables, Application, re_create_tables
 from apis.user import *
 from apis.record import *
 from apis.notice import *
@@ -112,7 +112,7 @@ class BaseTestCase(AsyncHTTPTestCase):
                         user=options.db_user,
                         password=options.db_password,
                         dbname=options.db_database)
-                await maybe_create_tables(db, './sql/schema.sql')
+                await re_create_tables(db, './sql/schema.sql')
                 print_test('create pool done')
                 break
             except:

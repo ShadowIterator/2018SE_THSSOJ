@@ -13,7 +13,7 @@ import tornado.locks
 import tornado.options
 import tornado.web
 import unicodedata
-from apis.base import maybe_create_tables, Application
+from apis.base import re_create_tables, maybe_create_tables, Application
 from apis.db import BaseDB
 from tornado.locks import Condition, Lock
 from tornado import gen
@@ -37,6 +37,7 @@ define('superuser_username', default='admin', help='superuser_username', type=st
 define('superuser_password', default='1234', help='superuser_password', type=str)
 define('superuser_email', default='1234', help='superuser_password', type=str)
 define('in_test', default=False, help='superuser_username', type=bool)
+define('re_create_table', default=False, help='superuser_username', type=bool)
 
 # superuser_username = 'admin'
 # superuser_password = '1234'
@@ -74,7 +75,10 @@ async def main():
         except:
             # print_test("retrying to connect test database")
             pass
-    await maybe_create_tables(db, './sql/schema.sql')
+    if(options.re_create_table):
+        await re_create_tables(db, './sql/schema.sql')
+    else:
+        await maybe_create_tables(db, './sql/schema.sql')
 
     # async with aiopg.create_pool(
     #         host=options.db_host,
@@ -96,7 +100,7 @@ async def main():
     # users(username, password, email, role, TA_courses, student_courses, create_time, secret)
     # VALUES('admin', '1234', 'admin@admin.com', 3, '{}', '{}', TIMESTAMP
     # '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
-    if(not options.in_test):
+    if((not options.in_test) and (options.re_create_table)):
         await rdb.createObject('users', username = options.superuser_username, password = get_md5(options.superuser_password), email = 'admin@admin.com', role = 3, TA_courses = [], student_courses = [],
                           secret = 'alifejaliejflifjilewgh23094eowfijf23ioeaida')
 
