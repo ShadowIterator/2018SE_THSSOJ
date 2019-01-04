@@ -14,6 +14,7 @@ traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
 port = 8000
 db_host = 'postgres'
 db_port = 5432
+create_superuser = False
 
 RoutineList = [
                   (r'/api/user/(.*)', APIUserHandler),

@@ -34,7 +34,11 @@ define('traditionalJudgerAddr', default=None, help='judger', type=str)
 define('scriptJudgerAddr', default=None, help='judger', type=str)
 define('judgerSecret', default='no_secret', help='secret', type=str)
 
+define('superuser_username', default='admin', help='superuser_username', type=str)
+define('superuser_password', default='1234', help='superuser_password', type=str)
 
+# superuser_username = 'admin'
+# superuser_password = '1234'
 
 
 
