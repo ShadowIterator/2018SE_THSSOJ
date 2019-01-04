@@ -88,7 +88,6 @@ class BaseTestCase(AsyncHTTPTestCase):
 
     async def createUser(self, *args, **kw):
         create_param = {}
-        rtn = {}
         for key, value in kw.items():
             if key == 'password':
                 create_param[key] = get_md5(value)

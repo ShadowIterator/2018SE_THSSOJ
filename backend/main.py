@@ -18,8 +18,7 @@ from apis.db import BaseDB
 from tornado.locks import Condition, Lock
 from tornado import gen
 from tornado.options import define, options
-
-
+import hashlib
 
 define("port", default=8000, help="run on the given port")
 define("db_host", default="127.0.0.1", help="blog database host")
@@ -36,10 +35,17 @@ define('judgerSecret', default='no_secret', help='secret', type=str)
 
 define('superuser_username', default='admin', help='superuser_username', type=str)
 define('superuser_password', default='1234', help='superuser_password', type=str)
+define('superuser_email', default='1234', help='superuser_password', type=str)
+define('in_test', default=False, help='superuser_username', type=bool)
 
 # superuser_username = 'admin'
 # superuser_password = '1234'
 
+
+def get_md5(str):
+    md5_tool = hashlib.md5()
+    md5_tool.update(str.encode('utf-8'))
+    return md5_tool.hexdigest()
 
 
 async def main():
@@ -90,8 +96,9 @@ async def main():
     # users(username, password, email, role, TA_courses, student_courses, create_time, secret)
     # VALUES('admin', '1234', 'admin@admin.com', 3, '{}', '{}', TIMESTAMP
     # '2011-05-16 15:36:38', 'fa3ijfa3ffsa9324953');
-    rdb.createObject('users', username = 'admin', password = '1234', email = 'admin@admin.com', role = 3, TA_courses = [], student_courses = [],
-                      secret = 'alifejaliejflifjilewgh23094eowfijf23ioeaida')
+    if(not options.in_test):
+        await rdb.createObject('users', username = options.superuser_username, password = get_md5(options.superuser_password), email = 'admin@admin.com', role = 3, TA_courses = [], student_courses = [],
+                          secret = 'alifejaliejflifjilewgh23094eowfijf23ioeaida')
 
     # user_obj = await rdb.getObjectOne('users', id = 1)
     # print('main: ', user_obj)
