@@ -8,19 +8,24 @@ from apis.base import Roles
 class NoticeTestCase(BaseTestCase):
     async def prepare(self):
         self.url = '/api/notice'
-        student1 = await self.db.createObject('users', username='hfz', password='4321', email='hfz@hfz.com', role=Roles.STUDENT, student_courses=[1])
-        student2 = await self.db.createObject('users', username='nx', password='myq', role=Roles.STUDENT, student_courses=[2])
-        ta1 = await self.db.createObject('users', username='zjl', password='ibtfy', email='sh@sina.com', role=Roles.TA, ta_courses=[1])
-        ta2 = await self.db.createObject('users', username='wzy', password='9897', role=Roles.TA)
-        await self.db.createObject('courses', name='泽学', tas=[ta1['id']], students=[student1['id']], status=1)
-        await self.db.createObject('courses', name='母猪的产后护理', tas=[ta2['id']], students=[student2['id']], status=1)
+        self.student1 = await self.createUser('users', username='hfz', password='4321', email='hfz@hfz.com', role=Roles.STUDENT, student_courses=[1])
+        self.student2 = await self.createUser('users', username='nx', password='myq', role=Roles.STUDENT, student_courses=[2])
+        self.ta1 = await self.createUser('users', username='zjl', password='ibtfy', email='sh@sina.com', role=Roles.TA, ta_courses=[1])
+        self.ta2 = await self.createUser('users', username='wzy', password='9897', role=Roles.TA)
+        self.admin = await self.createUser('users', username='admin', password='1234', role=Roles.ADMIN)
+
+        await self.db.createObject('courses', name='泽学', tas=[self.ta1['id']], students=[self.student1['id']], status=1)
+        await self.db.createObject('courses', name='母猪的产后护理', tas=[self.ta2['id']], students=[self.student2['id']], status=1)
 
     @async_aquire_db
     async def test_create(self):
         uri = self.url+'/create'
-        student1 = await self.db.getObjectOne('users', username='hfz')
-        ta1 = await self.db.getObjectOne('users', username='zjl')
-        ta2 = await self.db.getObjectOne('users', username='wzy')
+        # student1 = await self.db.getObjectOne('users', username='hfz')
+        # ta1 = await self.db.getObjectOne('users', username='zjl')
+        # ta2 = await self.db.getObjectOne('users', username='wzy')
+        student1 = self.student1
+        ta1 = self.ta1
+        ta2 = self.ta2
         course = await self.db.getObjectOne('courses', name='泽学')
         # fail student create notice using ta id
         await self.login_object(student1)
@@ -58,8 +63,10 @@ class NoticeTestCase(BaseTestCase):
     @async_aquire_db
     async def test_delete(self):
         uri = self.url+'/delete'
-        ta1 = await self.db.getObjectOne('users', username='zjl')
-        admin = await self.db.getObjectOne('users', username='admin')
+        # ta1 = await self.db.getObjectOne('users', username='zjl')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        ta1 = self.ta1
+        admin = self.admin
         course = await self.db.getObjectOne('courses', name='泽学')
         notice = await self.db.createObject('notices',
                                             title='welcome',
@@ -83,8 +90,10 @@ class NoticeTestCase(BaseTestCase):
     @async_aquire_db
     async def test_update(self):
         uri = self.url + '/update'
-        ta1 = await self.db.getObjectOne('users', username='zjl')
-        admin = await self.db.getObjectOne('users', username='admin')
+        # ta1 = await self.db.getObjectOne('users', username='zjl')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        ta1 = self.ta1
+        admin = self.admin
         course = await self.db.getObjectOne('courses', name='泽学')
         notice = await self.db.createObject('notices',
                                             title='welcome',
@@ -112,10 +121,14 @@ class NoticeTestCase(BaseTestCase):
     @async_aquire_db
     async def test_query(self):
         uri=self.url+'/query'
-        ta1 = await self.db.getObjectOne('users', username='zjl')
-        ta2 = await self.db.getObjectOne('users', username='wzy')
-        student1 = await self.db.getObjectOne('users', username='hfz')
-        admin = await self.db.getObjectOne('users', username='admin')
+        # ta1 = await self.db.getObjectOne('users', username='zjl')
+        # ta2 = await self.db.getObjectOne('users', username='wzy')
+        # student1 = await self.db.getObjectOne('users', username='hfz')
+        # admin = await self.db.getObjectOne('users', username='admin')
+        ta1 = self.ta1
+        ta2 = self.ta2
+        student1 = self.student1
+        admin = self.admin
         course1 = await self.db.getObjectOne('courses', name='泽学')
         course2 = await self.db.getObjectOne('courses', name='母猪的产后护理')
         notice1 = await self.db.createObject('notices',
