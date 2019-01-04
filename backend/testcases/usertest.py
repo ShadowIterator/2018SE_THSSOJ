@@ -1,20 +1,21 @@
 # from basetestcase.basetestcase import BaseTestCase, async_aquire_db
 import unittest
 import tornado.testing
-from basetestcase.basetestcase import BaseTestCase, async_aquire_db
+from basetestcase.basetestcase import BaseTestCase, async_aquire_db, get_md5
 from apis.base import print_test, print_debug, Roles
 
 class UserTest(BaseTestCase):
 
     async def prepare(self):
         self.url = '/api/user'
-        await self.db.createObject('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1343')
-        self.user_st = await self.db.createObject('users', username = 'student', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343')
-        self.user_ta = await self.db.createObject('users', username = 'ta', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
+        await self.createUser('users', username = 'hfz', password = '4321', email = 'hfz@hfz.com', role = 0, secret = '1343')
+        self.user_st = await self.createUser('users', username = 'student', password = 'student', email = 'hfz@hfz.com', role = Roles.STUDENT, secret = '1343')
+        self.user_ta = await self.createUser('users', username = 'ta', password = 'ta', email = 'hfz@hfz.com', role = Roles.TA, secret = '1343')
         try:
             self.user_admin = await self.db.getObjectOne('users', username = 'admin')
+            self.user_admin['password'] = self.admin_pass
         except:
-            self.user_admin = await self.db.createObject('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
+            self.user_admin = await self.createUser('users', username = 'admin', password = '1234', email = 'hfz@hfz.com', role = Roles.ADMIN, secret = '1343')
 
 
     @async_aquire_db
@@ -39,7 +40,7 @@ class UserTest(BaseTestCase):
         self.assertEqual(response['code'], 0)
         dbobj = (await self.db.getObject('users', username = 'hfzz'))[0]
         self.assertEqual(dbobj.username, 'hfzz')
-        self.assertEqual(dbobj.password, '123')
+        # self.assertEqual(dbobj.password, '123')
         self.assertEqual(dbobj.email, 'hfz@123.com')
 
 
@@ -60,7 +61,7 @@ class UserTest(BaseTestCase):
         self.assertEqual(response['code'], 0)
         dbobj = (await self.db.getObject('users', username = 'hfz22zz'))[0]
         self.assertEqual(dbobj.username, 'hfz22zz')
-        self.assertEqual(dbobj.password, '123')
+        # self.assertEqual(dbobj.password, '123')
         self.assertEqual(dbobj.email, 'hfz@123.com')
         self.assertEqual(dbobj.role, 1)
 
@@ -298,7 +299,7 @@ class UserTest(BaseTestCase):
         response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
         self.assertEqual(0, response['code'])
         modified = await self.db.getObjectOne('users', id = self.user_ta['id'])
-        self.assertEqual(modified['password'], modify_options['new_pwd'])
+        self.assertEqual(modified['password'], get_md5(modify_options['new_pwd']))
 
         # modify failed
         modify_options = {
@@ -308,7 +309,7 @@ class UserTest(BaseTestCase):
         response = await self.post_request_return_object(uri, id = self.user_ta['id'], **modify_options)
         self.assertEqual(1, response['code'])
         modified_2 = await self.db.getObjectOne('users', id=self.user_ta['id'])
-        self.assertEqual(modified['password'], modified_2['password'])
+        self.assertNotEqual(modified['password'], get_md5(modified_2['password']))
 
         #modify other
         modify_options = {
@@ -318,7 +319,7 @@ class UserTest(BaseTestCase):
         response = await self.post_request_return_object(uri, id = self.user_st['id'], **modify_options)
         modified_3 = await self.db.getObjectOne('users', id = self.user_st['id'])
         self.assertEqual(1, response['code'])
-        self.assertEqual(self.user_st['password'], modified_3['password'])
+        self.assertNotEqual(self.user_st['password'], get_md5(modified_3['password']))
 
     @async_aquire_db
     async def test_delete(self):
