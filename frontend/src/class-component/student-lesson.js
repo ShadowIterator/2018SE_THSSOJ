@@ -471,11 +471,11 @@ class mStudentLessonMiddle extends Component {
                                     (that, result) => {
                                         // //console.log('student-record-query-data: ',result.data)
                                         ////console.log('student-record-query-data: ', {
-                                            user_id: this.props.id,
-                                            homework_id: homework_id,
-                                            problem_id: problem_id,
-                                            record_type: 2,
-                                        }, result.data);
+                                        //     user_id: this.props.id,
+                                        //     homework_id: homework_id,
+                                        //     problem_id: problem_id,
+                                        //     record_type: 2,
+                                        // }, result.data);
 
                                         if(result.data.length > 0) {
                                             const data = result.data[0];
@@ -497,11 +497,11 @@ class mStudentLessonMiddle extends Component {
                                     that,
                                     (that, result) => {
                                         ////console.log('student-record-query-data: ', {
-                                            user_id: this.props.id,
-                                            homework_id: homework_id,
-                                            problem_id: problem_id,
-                                            record_type: 4,
-                                        }, result.data);
+                                        //     user_id: this.props.id,
+                                        //     homework_id: homework_id,
+                                        //     problem_id: problem_id,
+                                        //     record_type: 4,
+                                        // }, result.data);
                                         if(result.data.length > 0) {
                                             const data = result.data[0];
                                             prob['result_type'] = data['result_type'];
