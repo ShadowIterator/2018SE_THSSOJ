@@ -11,7 +11,7 @@ from apis.ratio import *
 
 scriptJudgerAddr = 'http://localhost:12345/scriptjudger'
 traditionalJudgerAddr = 'http://localhost:12345/traditionaljudger'
-port = 8000
+port = 8080
 db_host = 'postgres'
 db_port = 5432
 in_test = True
