@@ -1,6 +1,6 @@
 #!/bin/bash
 
-printf "Please input your domain: "
+printf "Please input your domain (Please do not add any protocol prefix e.g. 'https://'): "
 read domain
 printf "Please input database name: "
 read db_database
@@ -21,7 +21,7 @@ cookiesecret=$(LC_CTYPE=C tr -dc A-Za-z0-9 < /dev/urandom | fold -w ${1:-32} | h
 printf "POSTGRES_USER=$db_user
 POSTGRES_PASSWORD=$db_password
 POSTGRES_DB=$db_database
-DOMAINS='$domain -> http://frontend:80'\n" > .env
+DOMAINS=$domain->http://frontend:80\n" > .env
 
 printf "db_database = '$db_database'
 db_user = '$db_user'
@@ -47,7 +47,7 @@ mkdir -p backend/test
 printf "domain = 'http://tornado_web:8000/'
 secret = '$secret'\n" > judger/configs.py
 
-printf "const URL = '$domain';
+printf "const URL = 'https://$domain';
 export {URL};\n" > frontend/src/ajax-utils/url.js
 
 printf "Configuration files successfully generated.
