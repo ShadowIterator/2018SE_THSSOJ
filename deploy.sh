@@ -34,6 +34,15 @@ AppConfig = {
     'cookie_secret':'$cookiesecret',
 }\n"> backend/settings/env_config.py
 
+mkdir -p backend/judge_script 
+mkdir -p backend/root/homeworks 
+mkdir -p backend/root/judge_html_temp 
+mkdir -p backend/root/problems 
+mkdir -p backend/root/records 
+mkdir -p backend/root/servefiles 
+mkdir -p backend/root/tmp 
+mkdir -p backend/test
+
 printf "domain = 'http://tornado_web:8000'
 secret = '$secret'\n" > judger/configs.py
 
