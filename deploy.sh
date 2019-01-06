@@ -43,7 +43,7 @@ mkdir -p backend/root/servefiles
 mkdir -p backend/root/tmp 
 mkdir -p backend/test
 
-printf "domain = 'http://tornado_web:8000'
+printf "domain = 'http://tornado_web:8000/'
 secret = '$secret'\n" > judger/configs.py
 
 printf "const URL = '$domain';
