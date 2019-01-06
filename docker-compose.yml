@@ -9,11 +9,11 @@ services:
       - frontend
     restart: always
     environment:
-      DOMAINS: '308469.iterator-traits.com -> http://frontend:80'
+      DOMAINS: ${DOMAINS}
       WORKER_PROCESSES: 2
       WORKER_CONNECTIONS: 4096
       CLIENT_MAX_BODY_SIZE: '500M'
-      # STAGE: 'production'
+      STAGE: 'production'
       # FORCE_RENEW: 'true'
 
   tornado_web:

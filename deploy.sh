@@ -20,7 +20,8 @@ cookiesecret=$(LC_CTYPE=C tr -dc A-Za-z0-9 < /dev/urandom | fold -w ${1:-32} | h
 
 printf "POSTGRES_USER=$db_user
 POSTGRES_PASSWORD=$db_password
-POSTGRES_DB=$db_database\n" > .env
+POSTGRES_DB=$db_database
+DOMAINS='$domain -> http://frontend:80'\n" > .env
 
 printf "db_database = '$db_database'
 db_user = '$db_user'
@@ -34,13 +35,13 @@ AppConfig = {
     'cookie_secret':'$cookiesecret',
 }\n"> backend/settings/env_config.py
 
-mkdir -p backend/judge_script 
-mkdir -p backend/root/homeworks 
-mkdir -p backend/root/judge_html_temp 
-mkdir -p backend/root/problems 
-mkdir -p backend/root/records 
-mkdir -p backend/root/servefiles 
-mkdir -p backend/root/tmp 
+mkdir -p backend/judge_script
+mkdir -p backend/root/homeworks
+mkdir -p backend/root/judge_html_temp
+mkdir -p backend/root/problems
+mkdir -p backend/root/records
+mkdir -p backend/root/servefiles
+mkdir -p backend/root/tmp
 mkdir -p backend/test
 
 printf "domain = 'http://tornado_web:8000/'
